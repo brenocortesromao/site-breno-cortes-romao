@@ -126,10 +126,10 @@ Posicionamento e narrativa · Identidade visual · Apresentações comerciais ·
 
 Título: **Marcas com as quais trabalhei.**
 Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória — em agências, estúdios, empresas e projetos independentes.
-(Os logos representam a trajetória do Breno, não necessariamente trabalhos no modelo fractional. Nos cases, deixar claro o papel exato e o contexto: agência, equipe ou contratação direta.)
+(Os logos representam a trajetória do Breno, não necessariamente trabalhos no modelo fractional. Nas legendas do carrossel, deixar claro o papel exato e o contexto: agência, equipe ou contratação direta.)
 - Faixa de logos em prata monocromática [PENDENTE: logos].
 - Mural compacto, 6 a 9 peças, grid irregular, legenda de projeto e ano [PENDENTE: imagens].
-- Até 3 cases curtos em texto, com página própria: Desafio → Meu papel → Decisão → Aplicação → Resultado [PENDENTE: cases].
+- SEM lista de cases e SEM páginas de case (removidos por decisão do Breno). A seção fica só com logos + carrossel de imagens; cada imagem do carrossel tem legenda curta (projeto, ano e papel do Breno).
 
 ## 11. Sobre (GRADIENTE ESCURO)
 

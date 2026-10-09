@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
+import LiquidDrop from "@/components/graphics/LiquidDrop";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -18,12 +19,25 @@ export type ProcessCopy = {
 /**
  * "Como funciona" — seção CLARA com grade técnica. Linha do tempo vertical
  * desenhada pelo scroll (scaleY) e etapas que acendem quando a linha chega
- * nelas (marcador preenche, texto ganha contraste). Sem JS / reduced motion:
- * linha e etapas completas.
+ * nelas. Na coluna esquerda (sticky), uma gota de metal líquido (LiquidDrop)
+ * muda de forma a cada etapa: fusão → ondulação → calma → fluxo → anel.
+ * Etapas acendem (marcador preenche, texto ganha contraste). Sem JS / reduced
+ * motion: linha e etapas completas, e a gota mostra o anel estático.
  */
 export default function Process({ copy }: { copy: ProcessCopy }) {
   const root = useRef<HTMLElement>(null);
   const list = useRef<HTMLOListElement>(null);
+  /** Etapa atual (0–4) lida pela gota a cada quadro. */
+  const stage = useRef(0);
+  const [drop, setDrop] = useState<{ light: boolean; reduce: boolean } | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
+    setDrop({
+      light: window.matchMedia("(pointer: coarse)").matches,
+      reduce: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    });
+  }, []);
 
   useGSAP(
     () => {
@@ -34,6 +48,16 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
           { scaleY: 0 },
           { scaleY: 1, ease: "none", scrollTrigger: { trigger: list.current, start: "top 60%", end: "bottom 60%", scrub: 0.6 } },
         );
+        // etapa atual para a gota: a etapa cujo topo passou do meio da tela
+        gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step, i) => {
+          ScrollTrigger.create({
+            trigger: step,
+            start: "top 55%",
+            end: "bottom 55%",
+            onEnter: () => (stage.current = i),
+            onEnterBack: () => (stage.current = i),
+          });
+        });
         gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step) => {
           gsap
             .timeline({ scrollTrigger: { trigger: step, start: "top 62%", end: "top 48%", scrub: 0.5 } })
@@ -56,8 +80,8 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
       <GraphicLayer variant="grid" />
       <div className="relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
-          <div className="md:col-span-5">
-            <div className="md:sticky md:top-32">
+          <div className="md:col-span-5 md:flex md:flex-col">
+            <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
               <h2
                 id="como-funciona-title"
@@ -66,6 +90,18 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
                 {copy.title}
               </h2>
               <p className="mt-8 max-w-md text-sm leading-relaxed text-silver md:text-[15px]">{copy.note}</p>
+            </div>
+            {/* gota de metal líquido: fixa nesta coluna enquanto as etapas passam
+                (desktop); menor, acima da linha do tempo (mobile) */}
+            <div className="mt-8 md:sticky md:top-32 md:mt-12">
+              {drop && (
+                <LiquidDrop
+                  stageRef={stage}
+                  light={drop.light}
+                  reduceMotion={drop.reduce}
+                  className="mx-auto aspect-square w-40 md:mx-0 md:w-[min(100%,40svh,24rem)]"
+                />
+              )}
             </div>
           </div>
 
