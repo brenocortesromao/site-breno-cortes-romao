@@ -356,35 +356,51 @@
   },
   "faq": {
     "eyebrow": "Perguntas frequentes",
-    "title": "Perguntas frequentes",
+    "title": "Perguntas frequentes.",
     "items": [
       {
         "q": "O que é um Fractional Brand & Creative Director?",
-        "a": "Um diretor de marca e criação sênior que atua dentro da sua empresa de forma contínua, com uma dedicação mensal acordada."
+        "a": "É um diretor de marca e criação sênior que trabalha dentro da sua empresa de forma contínua, mas com uma dedicação mensal acordada, em vez de tempo integral. Na prática, você tem alguém pensando a marca, decidindo a direção criativa e acompanhando a execução todos os meses, sem o custo e o compromisso de uma contratação executiva. O modelo já é comum lá fora e está chegando com força ao Brasil."
       },
       {
-        "q": "Qual a diferença para uma agência?",
-        "a": "A agência entrega projetos. Eu participo das decisões ao longo do tempo e garanto que agência, designers e fornecedores trabalhem na mesma direção."
+        "q": "Qual a diferença para uma agência ou uma consultoria de branding?",
+        "a": "A agência e a consultoria entregam projetos: um rebranding, uma campanha, um site. Quando o projeto termina, a marca volta para as mãos de quem não tem tempo para cuidar dela. Eu fico. Participo das decisões ao longo do tempo, garanto que agência, designers e fornecedores trabalhem na mesma direção e que a estratégia não morra num PDF. Inclusive, posso trabalhar junto com a agência que você já tem."
       },
       {
         "q": "É o mesmo que um CMO?",
-        "a": "Não. Não cuido de mídia, canais ou aquisição. Cuido da marca e de tudo o que ela comunica."
+        "a": "Não. Um CMO responde por marketing como um todo: mídia, canais, aquisição de clientes e orçamento. Eu cuido da marca e de tudo o que ela comunica: posicionamento, narrativa, identidade e qualidade criativa. Se a sua empresa tem alguém de marketing, eu fortaleço o trabalho dessa pessoa em vez de substituir."
       },
       {
         "q": "Você produz ou só dirige?",
-        "a": "Os dois. A proposta deixa claro o que eu produzo, o que eu dirijo e o que exige contratação à parte."
+        "a": "Os dois. Desenvolvo pessoalmente as peças prioritárias e dirijo o restante com a sua equipe ou fornecedores. Na proposta, fica claro o que eu produzo, o que eu dirijo e o que exige contratação à parte, para não existir surpresa no meio do caminho."
+      },
+      {
+        "q": "Preciso ter uma equipe de design?",
+        "a": "Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção."
+      },
+      {
+        "q": "Como funciona o começo?",
+        "a": "Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca — o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio — e, a partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]"
       },
       {
         "q": "Quanto tempo dura uma parceria?",
-        "a": "[CONFIRMAR: período mínimo sugerido.]"
+        "a": "Marca é construção contínua, por isso o modelo funciona melhor em ciclos de alguns meses, com revisões mensais de prioridades. [CONFIRMAR: período mínimo sugerido, ex.: 3 ou 6 meses]"
       },
       {
-        "q": "Como a IA entra no trabalho?",
-        "a": "Como ferramenta de método — pesquisa, exploração, prototipagem e produção com revisão. Nunca como substituta de critério."
+        "q": "Quanto custa?",
+        "a": "O investimento é mensal e depende do escopo e da dedicação combinados. Em geral, fica bem abaixo do custo de um diretor de marca ou criação contratado em tempo integral, com a mesma senioridade. Os valores são apresentados na proposta, depois do diagnóstico."
       },
       {
-        "q": "Para quem é?",
-        "a": "Para empresas com produto, clientes e ambição — especialmente startups B2B e empresas de serviços — cuja marca ainda não acompanha o negócio."
+        "q": "Como a inteligência artificial entra no trabalho?",
+        "a": "Como ferramenta de método: pesquisa, exploração de caminhos, prototipagem e produção, sempre com revisão e critério humano. A IA acelera o processo; as decisões de marca continuam sendo minhas e suas."
+      },
+      {
+        "q": "Para que tipo de empresa é?",
+        "a": "Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio — especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você."
+      },
+      {
+        "q": "Você atende empresas de outras cidades ou de fora do Brasil?",
+        "a": "[CONFIRMAR] Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido."
       }
     ]
   },
