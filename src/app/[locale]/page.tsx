@@ -87,7 +87,10 @@ export default async function Home() {
           copy={{
             eyebrow: t("diagnostic.eyebrow"),
             title: t("diagnostic.title"),
-            hint: t("diagnostic.hint"),
+            hintTouch: t("diagnostic.hintTouch"),
+            hintClick: t("diagnostic.hintClick"),
+            cursorMark: t("diagnostic.cursorMark"),
+            cursorUnmark: t("diagnostic.cursorUnmark"),
             counters: Array.from({ length: diagnosticItems.length + 1 }, (_, count) =>
               t("diagnostic.counter", { count, total: diagnosticItems.length }),
             ),

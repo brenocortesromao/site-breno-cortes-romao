@@ -198,3 +198,16 @@ body::before {
 [data-chart] linearGradient[id$="-gapfill"] stop:last-child {
   stop-opacity: 0.22;
 }
+
+/* Diagnóstico: pulso sutil dos círculos até a primeira interação. */
+@keyframes ringPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.55;
+  }
+}

@@ -64,7 +64,10 @@
   "diagnostic": {
     "eyebrow": "Diagnóstico",
     "title": "Você já disse alguma dessas frases?",
-    "hint": "Toque nas que soam familiares.",
+    "hintTouch": "Toque nas que soam familiares.",
+    "hintClick": "Clique nas que soam familiares.",
+    "cursorMark": "Marcar",
+    "cursorUnmark": "Desmarcar",
     "counter": "{count} de {total}",
     "items": [
       "“A gente é maior do que parece.”",
