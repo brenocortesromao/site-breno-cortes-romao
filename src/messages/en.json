@@ -92,12 +92,14 @@
       "title": "Lá fora, esse modelo já está crescendo rápido.",
       "items": [
         {
+          "label": "01 — CRESCIMENTO",
           "prefix": "+",
           "value": 313,
           "suffix": "%",
           "caption": "profissionais fractional no mundo desde 2019"
         },
         {
+          "label": "02 — QUEM CONTRATA",
           "prefix": "",
           "value": 97,
           "suffix": "%",

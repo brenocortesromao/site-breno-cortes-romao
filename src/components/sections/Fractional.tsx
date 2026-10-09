@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
+import OdometerNumber from "./OdometerNumber";
 import { protectTerms } from "@/components/Term";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -22,7 +23,7 @@ export type FractionalCopy = {
   /** Únicos dados externos permitidos no site (verificados, com fonte). */
   stats: {
     title: string;
-    items: { prefix: string; value: number; suffix: string; caption: string }[];
+    items: { label: string; prefix: string; value: number; suffix: string; caption: string }[];
     support: string;
     source: string;
   };
@@ -44,30 +45,35 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // números contam de 0 até o valor ao entrar na tela (uma vez). O HTML do
-        // servidor já traz o valor final: sem JS / reduced motion, ficam estáticos.
-        gsap.utils.toArray<HTMLElement>("[data-count]").forEach((el, i) => {
-          const end = Number(el.dataset.count);
-          const n = { v: 0 };
-          gsap.to(n, {
-            v: end,
-            duration: 2,
-            delay: i * 0.25,
-            ease: "power3.out",
-            onUpdate: () => {
-              el.textContent = String(Math.round(n.v));
+        // números: odômetro (cada dígito rola do 0 até o valor, com stagger) e,
+        // ao terminar, um reflexo atravessa os dígitos uma vez. O HTML já traz
+        // o estado final: sem JS / reduced motion, números estáticos.
+        const strips = gsap.utils.toArray<HTMLElement>("[data-odo-strip]");
+        // faixa = 20 linhas de 1em → 1 dígito = altura/20 (em px, robusto a resize)
+        const line = (el: HTMLElement) => el.offsetHeight / 20;
+        gsap.set(strips, { y: 0 });
+        gsap
+          .timeline({ scrollTrigger: { trigger: "[data-stats]", start: "top 75%", once: true } })
+          .from("[data-stat]", { autoAlpha: 0, y: 24, duration: 0.8, ease: "power3.out", stagger: 0.2 }, 0)
+          .to(
+            strips,
+            {
+              y: (_: number, el: HTMLElement) => -Number(el.dataset.final) * line(el),
+              duration: 2.2,
+              ease: "power3.out",
+              stagger: 0.12,
             },
-            scrollTrigger: { trigger: "[data-stats]", start: "top 75%", once: true },
-          });
-        });
-        gsap.from("[data-stat]", {
-          autoAlpha: 0,
-          y: 30,
-          duration: 1,
-          ease: "power3.out",
-          stagger: 0.25,
-          scrollTrigger: { trigger: "[data-stats]", start: "top 75%", once: true },
-        });
+            0.2,
+          )
+          // devolve a posição final em "em" (continua certa se a fonte mudar de tamanho)
+          .call(() => strips.forEach((el) => (el.style.transform = `translateY(-${el.dataset.final}em)`)))
+          .set("[data-odo-shine]", { opacity: 1 })
+          .fromTo(
+            "[data-odo-shine]",
+            { backgroundPosition: "100% 0" },
+            { backgroundPosition: "0% 0", duration: 1.4, ease: "power2.inOut", stagger: 0.2 },
+          )
+          .to("[data-odo-shine]", { opacity: 0, duration: 0.3 });
 
         const tl = gsap.timeline({
           scrollTrigger: { trigger: board.current, start: "top 72%" },
@@ -113,20 +119,23 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           <h3 className="text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
             {protectTerms(copy.stats.title)}
           </h3>
-          <dl className="mt-8 grid gap-10 border-t border-line pt-8 md:grid-cols-2 md:gap-8">
+          <div className="mt-10 grid gap-14 md:grid-cols-2 md:gap-8">
             {copy.stats.items.map((stat) => (
-              <div key={stat.caption} data-stat className="flex flex-col-reverse">
-                <dt className="mt-3 max-w-sm text-sm leading-relaxed text-silver md:text-base">
+              <div key={stat.label} data-stat>
+                {/* rótulo mono + linha fina */}
+                <p className="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.24em] text-silver">
+                  <span className="shrink-0">{stat.label}</span>
+                  <span aria-hidden="true" className="h-px flex-1 bg-line" />
+                </p>
+                <div className="mt-6">
+                  <OdometerNumber prefix={stat.prefix} value={stat.value} suffix={stat.suffix} />
+                </div>
+                <p className="mt-4 max-w-sm text-sm leading-relaxed text-silver md:text-base">
                   {protectTerms(stat.caption)}
-                </dt>
-                <dd className="text-[clamp(4.5rem,11vw,10rem)] font-semibold leading-[0.9] tracking-[-0.06em] tabular-nums">
-                  {stat.prefix}
-                  <span data-count={stat.value}>{stat.value}</span>
-                  {stat.suffix}
-                </dd>
+                </p>
               </div>
             ))}
-          </dl>
+          </div>
           <figcaption className="mt-10 max-w-2xl">
             <span className="block text-base leading-relaxed md:text-lg">{protectTerms(copy.stats.support)}</span>
             <span className="mt-3 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">

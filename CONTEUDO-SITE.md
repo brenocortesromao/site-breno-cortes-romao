@@ -142,15 +142,43 @@ Título: **Marcas com as quais trabalhei.**
 - Texto: Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa — não por proposta enviada em massa.
 - Indicador discreto: "Agenda para novas parcerias: [CONFIRMAR]"
 
-## 13. Perguntas frequentes (preto)
+## 13. Perguntas frequentes (preto — acordeão, uma aberta por vez)
 
-- **O que é um Fractional Brand & Creative Director?** Um diretor de marca e criação sênior que atua dentro da sua empresa de forma contínua, com uma dedicação mensal acordada.
-- **Qual a diferença para uma agência?** A agência entrega projetos. Eu participo das decisões ao longo do tempo e garanto que agência, designers e fornecedores trabalhem na mesma direção.
-- **É o mesmo que um CMO?** Não. Não cuido de mídia, canais ou aquisição. Cuido da marca e de tudo o que ela comunica.
-- **Você produz ou só dirige?** Os dois. A proposta deixa claro o que eu produzo, o que eu dirijo e o que exige contratação à parte.
-- **Quanto tempo dura uma parceria?** [CONFIRMAR: período mínimo sugerido.]
-- **Como a IA entra no trabalho?** Como ferramenta de método — pesquisa, exploração, prototipagem e produção com revisão. Nunca como substituta de critério.
-- **Para quem é?** Para empresas com produto, clientes e ambição — especialmente startups B2B e empresas de serviços — cuja marca ainda não acompanha o negócio.
+Título: **Perguntas frequentes.**
+Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criação, branding, posicionamento de marca, consultoria de marca) sem forçar.
+
+- **O que é um Fractional Brand & Creative Director?**
+  É um diretor de marca e criação sênior que trabalha dentro da sua empresa de forma contínua, mas com uma dedicação mensal acordada, em vez de tempo integral. Na prática, você tem alguém pensando a marca, decidindo a direção criativa e acompanhando a execução todos os meses, sem o custo e o compromisso de uma contratação executiva. O modelo já é comum lá fora e está chegando com força ao Brasil.
+
+- **Qual a diferença para uma agência ou uma consultoria de branding?**
+  A agência e a consultoria entregam projetos: um rebranding, uma campanha, um site. Quando o projeto termina, a marca volta para as mãos de quem não tem tempo para cuidar dela. Eu fico. Participo das decisões ao longo do tempo, garanto que agência, designers e fornecedores trabalhem na mesma direção e que a estratégia não morra num PDF. Inclusive, posso trabalhar junto com a agência que você já tem.
+
+- **É o mesmo que um CMO?**
+  Não. Um CMO responde por marketing como um todo: mídia, canais, aquisição de clientes e orçamento. Eu cuido da marca e de tudo o que ela comunica: posicionamento, narrativa, identidade e qualidade criativa. Se a sua empresa tem alguém de marketing, eu fortaleço o trabalho dessa pessoa em vez de substituir.
+
+- **Você produz ou só dirige?**
+  Os dois. Desenvolvo pessoalmente as peças prioritárias e dirijo o restante com a sua equipe ou fornecedores. Na proposta, fica claro o que eu produzo, o que eu dirijo e o que exige contratação à parte, para não existir surpresa no meio do caminho.
+
+- **Preciso ter uma equipe de design?**
+  Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção.
+
+- **Como funciona o começo?**
+  Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca — o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio — e, a partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]
+
+- **Quanto tempo dura uma parceria?**
+  Marca é construção contínua, por isso o modelo funciona melhor em ciclos de alguns meses, com revisões mensais de prioridades. [CONFIRMAR: período mínimo sugerido, ex.: 3 ou 6 meses]
+
+- **Quanto custa?**
+  O investimento é mensal e depende do escopo e da dedicação combinados. Em geral, fica bem abaixo do custo de um diretor de marca ou criação contratado em tempo integral, com a mesma senioridade. Os valores são apresentados na proposta, depois do diagnóstico.
+
+- **Como a inteligência artificial entra no trabalho?**
+  Como ferramenta de método: pesquisa, exploração de caminhos, prototipagem e produção, sempre com revisão e critério humano. A IA acelera o processo; as decisões de marca continuam sendo minhas e suas.
+
+- **Para que tipo de empresa é?**
+  Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio — especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você.
+
+- **Você atende empresas de outras cidades ou de fora do Brasil?**
+  [CONFIRMAR] Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido.
 
 ## 14. Contato (GRADIENTE ESCURO)
 
