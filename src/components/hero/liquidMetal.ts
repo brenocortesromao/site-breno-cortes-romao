@@ -4,17 +4,25 @@ import { Color, MeshPhysicalMaterial, Vector3 } from "three";
  * Material de metal líquido: MeshPhysicalMaterial (PBR, reflexos do ambiente)
  * com uma deformação orgânica injetada no vertex shader.
  *
- * Funciona com QUALQUER geometria que tenha normais suaves — a esfera
- * provisória de hoje ou o GLB do urso amanhã. A deformação empurra cada vértice
- * ao longo da própria normal e recalcula a normal por diferenças finitas, então
- * os reflexos acompanham a superfície deformada.
- *
- * Etapa 3 (urso com morph target): a deformação usa `position`/`normal` base.
- * Ao adotar morph targets, mover a injeção para depois de <morphtarget_vertex>.
+ * A forma é uma bola (icosfera densa, centrada na origem) cuja superfície é
+ * deslocada ao longo da normal por três camadas, somadas em `lm_liquid`:
+ *  1. FORMA (SDF / metaballs) — base para o urso da Etapa 4: a bola é fundida
+ *     por união suave (smooth-min) com até FEATURE_SLOTS esferas extras
+ *     (orelhas, focinho). Para cada vértice, o raio da superfície na direção
+ *     dele é encontrado por sphere tracing de fora para dentro. Com
+ *     `uMorph = 0` a camada é pulada (custo zero) e a bola fica perfeita;
+ *     animar `uMorph` 0→1 faz as formas "brotarem" e 1→0 voltarem à bola.
+ *  2. LÍQUIDO — ruído simplex lento (a "respiração" contínua).
+ *  3. PONTEIRO — o lado voltado para o cursor estica levemente.
+ * A normal é recalculada por diferenças finitas sobre a soma, então os
+ * reflexos acompanham a superfície. Não há modelo GLB: o urso nasce da bola.
  */
 
-export const SILVER = new Color("#d3d6db");
+export const SILVER = new Color("#eef0f3");
 export const GRAPHITE = new Color("#24262a");
+
+/** Quantidade máxima de esferas extras fundidas à bola (orelhas, focinho...). */
+export const FEATURE_SLOTS = 4;
 
 export type LiquidUniforms = {
   uTime: { value: number };
@@ -22,6 +30,14 @@ export type LiquidUniforms = {
   uFreq: { value: number };
   uPointerDir: { value: Vector3 };
   uPointerStrength: { value: number };
+  /** 0 = bola perfeita; 1 = formas extras totalmente brotadas. */
+  uMorph: { value: number };
+  /** Raio da união suave (quanto maior, mais "derretida" a junção). */
+  uBlend: { value: number };
+  /** Centros das esferas extras, em unidades da cena (relativos ao centro da bola). */
+  uFeatureCenters: { value: Vector3[] };
+  /** Raios das esferas extras quando uMorph = 1 (0 = slot desligado). */
+  uFeatureRadii: { value: number[] };
 };
 
 // Simplex noise 3D (Ashima Arts / Stefan Gustavson, licença MIT).
@@ -77,7 +93,34 @@ uniform float uAmp;
 uniform float uFreq;
 uniform vec3 uPointerDir;
 uniform float uPointerStrength;
+uniform float uMorph;
+uniform float uBlend;
+uniform vec3 uFeatureCenters[${FEATURE_SLOTS}];
+uniform float uFeatureRadii[${FEATURE_SLOTS}];
 ${SIMPLEX}
+// união suave polinomial (Inigo Quilez)
+float lm_smin(float a, float b, float k){
+  float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+  return mix(b, a, h) - k * h * (1.0 - h);
+}
+// campo de distância: bola de raio R fundida às esferas extras
+float lm_field(vec3 q, float R){
+  float d = length(q) - R;
+  for (int i = 0; i < ${FEATURE_SLOTS}; i++) {
+    float r = uFeatureRadii[i] * uMorph;
+    if (r > 0.0) d = lm_smin(d, length(q - uFeatureCenters[i]) - r, uBlend);
+  }
+  return d;
+}
+// quanto a superfície da FORMA se afasta da bola na direção de p
+float lm_shape(vec3 p){
+  if (uMorph <= 0.0001) return 0.0;
+  float R = length(p);
+  vec3 dir = p / R;
+  float t = R * 1.9; // começa fora e caminha para dentro até a superfície
+  for (int i = 0; i < 10; i++) t -= lm_field(dir * t, R);
+  return t - R;
+}
 float lm_liquid(vec3 p){
   // ondulação lenta e larga: lê como líquido denso, não como "gelatina"
   float n = lm_snoise(p * uFreq + vec3(0.0, uTime * 0.22, uTime * 0.12));
@@ -86,7 +129,7 @@ float lm_liquid(vec3 p){
   #endif
   // o lado voltado para o cursor "estica" levemente em direção a ele
   float pull = pow(max(dot(normalize(p), uPointerDir), 0.0), 5.0) * uPointerStrength;
-  return n * uAmp + pull;
+  return lm_shape(p) + n * uAmp + pull;
 }
 `;
 
@@ -95,18 +138,24 @@ export function createLiquidMetalMaterial({ light }: { light: boolean }) {
     uTime: { value: 0 },
     // amplitude/frequência baixas = superfície contínua de líquido denso (valores
     // altos viram "rocha amassada")
-    uAmp: { value: light ? 0.075 : 0.085 },
-    uFreq: { value: 0.55 },
+    // ondulação contida: continua lendo como BOLA que respira, não como gota amassada
+    uAmp: { value: light ? 0.045 : 0.05 },
+    uFreq: { value: 0.5 },
     uPointerDir: { value: new Vector3(0, 0, 1) },
     uPointerStrength: { value: 0 },
+    uMorph: { value: 0 },
+    uBlend: { value: 0.35 },
+    uFeatureCenters: { value: Array.from({ length: FEATURE_SLOTS }, () => new Vector3()) },
+    uFeatureRadii: { value: new Array(FEATURE_SLOTS).fill(0) },
   };
 
+  // Cromo brilhante: rugosidade baixa + verniz; a "cara" vem dos reflexos do estúdio.
   const material = new MeshPhysicalMaterial({
     color: SILVER.clone(),
     metalness: 1,
-    roughness: 0.14,
-    clearcoat: 0.35,
-    clearcoatRoughness: 0.12,
+    roughness: 0.035,
+    clearcoat: 1,
+    clearcoatRoughness: 0.03,
   });
 
   material.defines = light ? { LIQUID_LIGHT: "" } : {};

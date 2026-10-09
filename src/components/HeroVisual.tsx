@@ -1,11 +1,12 @@
 /**
- * Poster estático da hero: uma forma orgânica de prata fosca, no mesmo
- * enquadramento da cena 3D (viewBox 800 = largura do canvas; raio ~160).
+ * Poster estático da hero: uma forma orgânica de prata fosca. O viewBox é
+ * recortado rente à forma, para que o tamanho do SVG = tamanho aparente da
+ * forma 3D (o Hero posiciona os dois no mesmo lugar).
  * Aparece antes do WebGL carregar e é a alternativa quando ele não existe.
  */
 export default function HeroVisual({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 800 800" fill="none" aria-hidden="true" className={className}>
+    <svg viewBox="180 205 400 400" fill="none" aria-hidden="true" className={className}>
       <defs>
         <radialGradient id="lm-body" cx="36%" cy="30%" r="78%">
           <stop offset="0" stopColor="#f4f5f7" />

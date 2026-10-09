@@ -4,14 +4,15 @@ import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from "reac
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   BackSide,
-  BoxGeometry,
   Color,
+  Float32BufferAttribute,
   Group,
   Mesh,
   MeshBasicMaterial,
   PMREMGenerator,
   PlaneGeometry,
   Scene,
+  SphereGeometry,
   Vector3,
   type MeshPhysicalMaterial,
   type WebGLRenderer,
@@ -22,26 +23,80 @@ import {
   SILVER,
   type LiquidUniforms,
 } from "./hero/liquidMetal";
-import { createPlaceholderGeometry } from "./hero/shape";
+import { createPlaceholderGeometry, SHAPE_RADIUS } from "./hero/shape";
 
-/** Escala da cena: metade da largura do quadro = 4 unidades (igual ao viewBox 800 do poster SVG). */
 const CAMERA_FOV = 20;
-const CAMERA_Z = 4 / Math.tan((CAMERA_FOV / 2) * (Math.PI / 180));
+/** Diâmetro aparente da bola (raio + margem da ondulação). */
+const SHAPE_DIAMETER = 2 * (SHAPE_RADIUS + 0.05);
 
 /**
- * Estúdio grafite gerado por código (sem HDRI externo): softbox principal,
- * difusor no teto, recortes laterais e um fill frontal baixo. É o fill que faz
- * o cromo ler como prata em vez de "vidro preto".
+ * Enquadramento guiado pelo layout: a bola ocupa exatamente o elemento-âncora
+ * do DOM (`anchorRef`, um quadrado posicionado pelo CSS da hero). A câmera é
+ * afastada para o diâmetro da bola = altura da âncora e deslocada para o
+ * centro dela. Assim tipografia e 3D compõem juntos em qualquer tela, e o
+ * poster SVG (renderizado dentro da âncora) fica no mesmo lugar.
+ */
+function Framing({ anchorRef }: { anchorRef: RefObject<HTMLElement | null> }) {
+  const width = useThree((s) => s.size.width);
+  const height = useThree((s) => s.size.height);
+  const get = useThree((s) => s.get);
+  const invalidate = useThree((s) => s.invalidate);
+
+  useEffect(() => {
+    const anchor = anchorRef.current;
+    if (!anchor) return;
+    const { gl } = get();
+
+    const fit = () => {
+      const { camera } = get();
+      const c = gl.domElement.getBoundingClientRect();
+      const a = anchor.getBoundingClientRect();
+      if (!c.height || !a.height) return;
+      const tanHalf = Math.tan((CAMERA_FOV / 2) * (Math.PI / 180));
+      const halfH = (SHAPE_DIAMETER / 2) * (c.height / a.height);
+      const pxPerUnit = c.height / (2 * halfH);
+      const dx = (a.left + a.width / 2 - (c.left + c.width / 2)) / pxPerUnit;
+      const dy = (a.top + a.height / 2 - (c.top + c.height / 2)) / pxPerUnit;
+      camera.position.set(-dx, dy, halfH / tanHalf);
+      camera.updateProjectionMatrix();
+      invalidate();
+    };
+
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(anchor);
+    ro.observe(gl.domElement);
+    return () => ro.disconnect();
+  }, [anchorRef, width, height, get, invalidate]);
+
+  return null;
+}
+
+/**
+ * Estúdio gerado por código (sem HDRI externo), pensado para cromo espelhado:
+ * "céu" claro em cima, horizonte escuro, chão cinza médio e faixas finas e
+ * muito intensas de luz. O contraste entre áreas claras e escuras, com bordas
+ * nítidas (desfoque mínimo no PMREM), é o que faz ler como prata brilhante —
+ * áreas médias grandes deixariam o metal cinza e fosco.
  */
 function buildStudioEnvironment(renderer: WebGLRenderer) {
   const room = new Scene();
 
-  room.add(
-    new Mesh(
-      new BoxGeometry(40, 40, 40),
-      new MeshBasicMaterial({ color: new Color(0.045, 0.046, 0.05), side: BackSide }),
-    ),
-  );
+  // Cúpula em degradê (cores por vértice): céu claro em cima, horizonte cinza,
+  // chão escuro. Gradientes contínuos = reflexos naturais, sem "recortes".
+  const dome = new SphereGeometry(30, 64, 32);
+  const pos = dome.getAttribute("position");
+  const colors = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const t = pos.getY(i) / 30; // -1 (chão) … 1 (topo)
+    const v =
+      t > 0
+        ? 0.14 + (2.4 - 0.14) * Math.pow(Math.min(t / 0.85, 1), 1.6)
+        : 0.14 - 0.1 * Math.min(-t / 0.5, 1);
+    colors.set([v, v, v * 1.03], i * 3);
+  }
+  dome.setAttribute("color", new Float32BufferAttribute(colors, 3));
+  room.add(new Mesh(dome, new MeshBasicMaterial({ vertexColors: true, side: BackSide })));
 
   const panel = (w: number, h: number, position: [number, number, number], intensity: number) => {
     const mesh = new Mesh(
@@ -53,15 +108,12 @@ function buildStudioEnvironment(renderer: WebGLRenderer) {
     room.add(mesh);
   };
 
-  panel(10, 6, [-8, 9, 6], 4); // softbox principal (alto, esquerda)
-  panel(16, 16, [0, 14, 0], 1.3); // difusor de teto
-  panel(1.5, 16, [10, 0, 2], 3); // recorte à direita
-  panel(1, 14, [-11, -1, -3], 1.1); // recorte discreto à esquerda
-  panel(14, 8, [0, 1, 14], 0.45); // fill frontal (atrás da câmera)
-  panel(20, 20, [0, -12, 0], 0.16); // rebatimento do chão
+  panel(0.9, 22, [12, 1, 5], 7); // faixa vertical à direita (brilho nítido)
+  panel(0.6, 22, [-12, 1, 4], 4.5); // faixa vertical à esquerda
+  panel(7, 1.6, [-6, 11, 6], 9); // softbox alto à esquerda: brilho perto do topo da bola
 
   const pmrem = new PMREMGenerator(renderer);
-  const target = pmrem.fromScene(room, 0.035);
+  const target = pmrem.fromScene(room, 0.02);
   pmrem.dispose();
 
   room.traverse((obj) => {
@@ -159,8 +211,10 @@ function Rig({
 }
 
 /**
- * Protagonista da hero. Independe da geometria: hoje recebe a forma provisória,
- * na Etapa 3 receberá a malha do urso (ver hero/shape.ts).
+ * Protagonista da hero: a bola de metal líquido. Respira o tempo todo (escala e
+ * amplitude da ondulação oscilam devagar), reage ao mouse via `pointerRef` e
+ * aplica a transição de scroll. O urso da Etapa 4 nasce desta mesma malha
+ * animando os uniforms de forma (uMorph/uFeature*) — ver hero/liquidMetal.ts.
  */
 function LiquidShape({
   light,
@@ -178,7 +232,9 @@ function LiquidShape({
   const geometry = useMemo(() => createPlaceholderGeometry({ light }), [light]);
   const material = useMemo(() => createLiquidMetalMaterial({ light }), [light]);
   const recede = useRef<Group>(null);
+  const breath = useRef<Group>(null);
   const mesh = useRef<Mesh>(null);
+  const baseAmp = useRef<number | null>(null);
 
   useEffect(
     () => () => {
@@ -191,11 +247,19 @@ function LiquidShape({
   useFrame(({ scene }, dt) => {
     const m = mesh.current;
     const g = recede.current;
-    if (!m || !g) return;
+    const b = breath.current;
+    if (!m || !g || !b) return;
     const mat = m.material as MeshPhysicalMaterial;
     const u = mat.userData.uniforms as LiquidUniforms;
+    baseAmp.current ??= u.uAmp.value;
 
-    if (animate) u.uTime.value += dt;
+    if (animate) {
+      u.uTime.value += dt;
+      // respiração: ciclo lento (~11 s) de volume e de intensidade da ondulação
+      const t = u.uTime.value;
+      b.scale.setScalar(1 + Math.sin(t * 0.55) * 0.018);
+      u.uAmp.value = baseAmp.current * (0.8 + 0.2 * Math.sin(t * 0.3 + 1.2));
+    }
 
     const p = pointerRef.current;
     u.uPointerDir.value.set(p.x, -p.y, 0.9).normalize();
@@ -212,7 +276,9 @@ function LiquidShape({
 
   return (
     <group ref={recede}>
-      <mesh ref={mesh} geometry={geometry} material={material} />
+      <group ref={breath}>
+        <mesh ref={mesh} geometry={geometry} material={material} />
+      </group>
     </group>
   );
 }
@@ -226,6 +292,8 @@ export type HeroSceneProps = {
   coarse: boolean;
   /** Progresso 0→1 da transição hero → manifesto (escrito pelo ScrollTrigger). */
   progress: RefObject<number>;
+  /** Elemento do DOM que define posição e tamanho da bola (ver Framing). */
+  anchorRef: RefObject<HTMLElement | null>;
   onReady: () => void;
 };
 
@@ -234,6 +302,7 @@ export default function HeroScene({
   reducedMotion,
   coarse,
   progress,
+  anchorRef,
   onReady,
 }: HeroSceneProps) {
   const animate = !reducedMotion;
@@ -246,9 +315,10 @@ export default function HeroScene({
       className="!pointer-events-none"
       frameloop={reducedMotion ? "demand" : active ? "always" : "never"}
       dpr={[1, coarse ? 1.5 : 2]}
-      camera={{ position: [0, 0, CAMERA_Z], fov: CAMERA_FOV }}
+      camera={{ position: [0, 0, 20], fov: CAMERA_FOV }}
       gl={{ antialias: true, alpha: true, powerPreference: "default" }}
     >
+      <Framing anchorRef={anchorRef} />
       <Environment onReady={onReady} />
       <Rig interactive={interactive} animate={animate} pointerRef={pointer}>
         <LiquidShape

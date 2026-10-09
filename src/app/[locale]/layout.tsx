@@ -9,6 +9,7 @@ import "../globals.css";
 import InlineScript from "@/components/InlineScript";
 import SmoothScroll from "@/components/SmoothScroll";
 import Header from "@/components/layout/Header";
+import ThemeScroll from "@/components/theme/ThemeScroll";
 import { htmlLang, routing } from "@/i18n/routing";
 
 const geistSans = Geist({
@@ -66,6 +67,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
         {/* Só o idioma vai para o cliente; os textos chegam como props, não o arquivo inteiro. */}
         <NextIntlClientProvider messages={null}>
           <SmoothScroll />
+          <ThemeScroll />
           <Header />
           {children}
         </NextIntlClientProvider>

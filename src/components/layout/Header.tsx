@@ -9,20 +9,30 @@ const nav = [
   { key: "contact", href: "#contato" },
 ] as const;
 
-/** Cabeçalho: nome completo + função, navegação e seletor PT/EN. */
+/**
+ * Cabeçalho fixo: nome completo + função, navegação e seletor PT/EN.
+ * Usa as variáveis de tema, então acompanha a troca claro/escuro do scroll;
+ * o degradê do fundo garante leitura sobre qualquer conteúdo.
+ */
 export default async function Header() {
   const t = await getTranslations();
 
   return (
-    <header className="absolute inset-x-0 top-0 z-20">
-      <div className="mx-auto flex max-w-[1600px] items-start justify-between gap-6 px-6 py-7 md:px-12">
-        <Link href="/" aria-label={t("nav.home")} className="leading-tight">
-          <span className="block text-sm font-semibold tracking-[-0.01em]">{t("site.name")}</span>
-          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-silver">
+    <header className="fixed inset-x-0 top-0 z-40">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/90 via-background/50 to-transparent"
+      />
+      <div className="relative mx-auto flex max-w-[1600px] items-start justify-between gap-4 px-6 py-5 md:px-12 md:py-7">
+        <Link href="/" aria-label={t("nav.home")} className="min-w-0 leading-tight">
+          <span className="block text-[13px] font-semibold tracking-[-0.01em] md:text-sm">
+            {t("site.name")}
+          </span>
+          <span className="mt-1 block font-mono text-[9px] uppercase tracking-[0.12em] text-silver md:text-[10px] md:tracking-[0.22em]">
             {t("site.role")}
           </span>
         </Link>
-        <div className="flex items-center gap-10">
+        <div className="flex shrink-0 items-center gap-10">
           <nav aria-label={t("nav.label")} className="hidden lg:block">
             <ul className="flex gap-10">
               {nav.map((item) => (

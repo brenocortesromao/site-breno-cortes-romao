@@ -1,17 +1,60 @@
 @import "tailwindcss";
 
+/*
+ * TEMAS
+ * 1) Paletas fixas, uma por tema (--{tema}-{papel}).
+ * 2) Variáveis "vivas" (--bg, --fg, ...) no <html>: todo o site usa só estas.
+ *    O ThemeScroll interpola as vivas entre paletas conforme o scroll.
+ * Para criar/ajustar um tema, edite só as paletas. Cores em rgba(r,g,b,a) com
+ * vírgulas: é a sintaxe que o GSAP interpola com segurança.
+ */
 :root {
-  --background: #050505;
-  --foreground: #f2f2f0;
-  --silver: #a8abb0;
-  --line: rgb(255 255 255 / 0.12);
+  --dark-bg: #050505;
+  --dark-fg: #f2f2f0;
+  --dark-muted: #a8abb0;
+  --dark-line: rgba(255, 255, 255, 0.12);
+  --dark-graphic: rgba(255, 255, 255, 0.06);
+  --dark-surface: #0b0b0c;
+  --dark-grad-from: #ffffff;
+  --dark-grad-to: #a8abb0;
+
+  --light-bg: #eceae5;
+  --light-fg: #141518;
+  --light-muted: #5e6064;
+  --light-line: rgba(20, 21, 24, 0.14);
+  --light-graphic: rgba(20, 21, 24, 0.11);
+  --light-surface: #e2e0da;
+  --light-grad-from: #141518;
+  --light-grad-to: #55585d;
+
+  /* Candidato mais quente ao off-white — só para comparação (ver /preview/temas). */
+  --light-warm-bg: #ede6da;
+  --light-warm-fg: #16140f;
+  --light-warm-muted: #625d55;
+  --light-warm-line: rgba(22, 20, 15, 0.14);
+  --light-warm-graphic: rgba(22, 20, 15, 0.11);
+  --light-warm-surface: #e3dbcd;
+  --light-warm-grad-from: #16140f;
+  --light-warm-grad-to: #5a554c;
+
+  /* Vivas: começam no tema escuro (a hero é escura). */
+  --bg: var(--dark-bg);
+  --fg: var(--dark-fg);
+  --muted: var(--dark-muted);
+  --line: var(--dark-line);
+  --graphic: var(--dark-graphic);
+  --surface: var(--dark-surface);
+  --grad-from: var(--dark-grad-from);
+  --grad-to: var(--dark-grad-to);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-silver: var(--silver);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-silver: var(--muted);
   --color-line: var(--line);
+  --color-graphic: var(--graphic);
+  --color-surface: var(--surface);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-geist-sans), system-ui, sans-serif;
@@ -20,20 +63,53 @@
 /* Sem `scroll-behavior: smooth`: o Lenis cuida da suavização (e os dois brigam). */
 html {
   color-scheme: dark;
+  background: var(--bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-::selection {
-  background: var(--foreground);
-  color: var(--background);
+/*
+ * Seções com tema próprio. Sem JS (ou antes do ThemeScroll montar), cada uma
+ * pinta o próprio fundo e redefine as vivas localmente. Com o controlador
+ * ativo (html.theme-js), elas ficam transparentes e a cor vem da interpolação
+ * global — sem corte seco entre seções.
+ */
+html:not(.theme-js) [data-theme="light"] {
+  --bg: var(--light-bg);
+  --fg: var(--light-fg);
+  --muted: var(--light-muted);
+  --line: var(--light-line);
+  --graphic: var(--light-graphic);
+  --surface: var(--light-surface);
+  --grad-from: var(--light-grad-from);
+  --grad-to: var(--light-grad-to);
+  background: var(--bg);
+  color: var(--fg);
 }
 
-/* Textura de grão sutil sobre o fundo, para dar profundidade ao preto */
+html:not(.theme-js) [data-theme="light-warm"] {
+  --bg: var(--light-warm-bg);
+  --fg: var(--light-warm-fg);
+  --muted: var(--light-warm-muted);
+  --line: var(--light-warm-line);
+  --graphic: var(--light-warm-graphic);
+  --surface: var(--light-warm-surface);
+  --grad-from: var(--light-warm-grad-from);
+  --grad-to: var(--light-warm-grad-to);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* Textura de grão sutil sobre o fundo, para dar profundidade às cores chapadas */
 body::before {
   content: "";
   position: fixed;
@@ -59,9 +135,15 @@ body::before {
   }
 }
 
+/* Gradiente dos títulos: branco→prata no escuro, grafite→chumbo no claro. */
 .text-silver-gradient {
-  background: linear-gradient(180deg, #ffffff 0%, #a8abb0 100%);
+  background: linear-gradient(180deg, var(--grad-from) 0%, var(--grad-to) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Retrato monocromático grafite/prata (aplicado pelo MediaSlot tone="mono"). */
+.media-mono {
+  filter: grayscale(1) contrast(1.08) brightness(0.92);
 }
