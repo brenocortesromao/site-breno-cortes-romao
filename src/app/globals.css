@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050505;
+  --foreground: #f2f2f0;
+  --silver: #a8abb0;
+  --line: rgb(255 255 255 / 0.12);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-silver: var(--silver);
+  --color-line: var(--line);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+/* Textura de grão sutil sobre o fundo, para dar profundidade ao preto */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/*
+ * Estado inicial da animação de entrada da Hero. A classe .js-motion é
+ * adicionada por um script no <head> (antes da primeira pintura), então não há
+ * "piscada" do texto; sem JS ou com prefers-reduced-motion, tudo fica visível.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .js-motion [data-reveal] {
+    transform: translateY(120%);
+  }
+  .js-motion [data-fade] {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.text-silver-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #a8abb0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
