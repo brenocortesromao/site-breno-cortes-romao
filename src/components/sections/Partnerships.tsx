@@ -1,0 +1,33 @@
+import { getTranslations } from "next-intl/server";
+
+/**
+ * Poucas parcerias por vez (§12) — seção curta, de impacto. Texto
+ * [CONFIRMAR]: fica exatamente como está no CONTEUDO-SITE.md até o dono
+ * confirmar (decisão de negócio). Indicador discreto com ponto pulsante
+ * (pulso desligado com prefers-reduced-motion).
+ */
+export default async function Partnerships() {
+  const t = await getTranslations("partnerships");
+
+  return (
+    <section id="parcerias" data-theme="dark" aria-labelledby="parcerias-title" className="relative z-10">
+      <div className="mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("eyebrow")}</p>
+        <h2
+          id="parcerias-title"
+          className="mt-8 max-w-5xl text-[clamp(2.6rem,7vw,7.5rem)] font-semibold leading-[0.95] tracking-[-0.06em] text-silver-gradient"
+        >
+          {t("title")}
+        </h2>
+        <p className="mt-10 max-w-xl text-base leading-relaxed text-silver md:ml-[33%] md:text-lg">{t("text")}</p>
+        <p className="mt-10 inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] md:ml-[33%]">
+          <span aria-hidden="true" className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground opacity-40 motion-reduce:animate-none" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-foreground" />
+          </span>
+          {t("indicator")}
+        </p>
+      </div>
+    </section>
+  );
+}

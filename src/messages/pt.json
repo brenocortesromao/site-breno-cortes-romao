@@ -19,7 +19,8 @@
     "projects": "Trabalhos",
     "contact": "Contato",
     "language": "Idioma",
-    "switchTo": "Ver o site em {language}"
+    "switchTo": "Ver o site em {language}",
+    "about": "Sobre"
   },
   "languages": {
     "pt": "Português",
@@ -240,6 +241,19 @@
     ],
     "note": "Escopo, dedicação, entregas e responsabilidades ficam claros na proposta — inclusive o que eu produzo, o que eu dirijo e o que exige contratação à parte."
   },
+  "touchpoints": {
+    "eyebrow": "Onde o trabalho aparece",
+    "title": "Onde você vai ver a diferença.",
+    "items": [
+      "Posicionamento e narrativa",
+      "Identidade visual",
+      "Apresentações comerciais",
+      "Sites e landing pages",
+      "Campanhas",
+      "Lançamentos",
+      "Direção de designers e fornecedores"
+    ]
+  },
   "works": {
     "eyebrow": "Trabalhos",
     "title": "Marcas com as quais trabalhei.",
@@ -305,12 +319,87 @@
       "next": "Próximo case: {title}"
     }
   },
+  "about": {
+    "eyebrow": "Sobre",
+    "title": "Quem vai cuidar da sua marca.",
+    "bio": "[PENDENTE: bio — anos de experiência, agências, marcas, formação.]",
+    "portrait": "Retrato",
+    "timelineTitle": "Trajetória",
+    "timeline": [
+      {
+        "period": "[PENDENTE]",
+        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
+      },
+      {
+        "period": "[PENDENTE]",
+        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
+      },
+      {
+        "period": "[PENDENTE]",
+        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
+      },
+      {
+        "period": "[PENDENTE]",
+        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
+      }
+    ],
+    "methodTitle": "Método",
+    "method": "Uso inteligência artificial como ferramenta de pesquisa, exploração e produção — sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.",
+    "more": "Conhecer a trajetória completa",
+    "back": "Voltar ao início",
+    "metaTitle": "Sobre",
+    "metaDescription": "Quem vai cuidar da sua marca: trajetória, experiência e método de Breno Côrtes Romão, Fractional Brand & Creative Director."
+  },
+  "partnerships": {
+    "eyebrow": "Poucas parcerias por vez",
+    "title": "Trabalho com poucas empresas por vez.",
+    "text": "Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa — não por proposta enviada em massa.",
+    "indicator": "Agenda para novas parcerias: [CONFIRMAR]"
+  },
+  "faq": {
+    "eyebrow": "Perguntas frequentes",
+    "title": "Perguntas frequentes",
+    "items": [
+      {
+        "q": "O que é um Fractional Brand & Creative Director?",
+        "a": "Um diretor de marca e criação sênior que atua dentro da sua empresa de forma contínua, com uma dedicação mensal acordada."
+      },
+      {
+        "q": "Qual a diferença para uma agência?",
+        "a": "A agência entrega projetos. Eu participo das decisões ao longo do tempo e garanto que agência, designers e fornecedores trabalhem na mesma direção."
+      },
+      {
+        "q": "É o mesmo que um CMO?",
+        "a": "Não. Não cuido de mídia, canais ou aquisição. Cuido da marca e de tudo o que ela comunica."
+      },
+      {
+        "q": "Você produz ou só dirige?",
+        "a": "Os dois. A proposta deixa claro o que eu produzo, o que eu dirijo e o que exige contratação à parte."
+      },
+      {
+        "q": "Quanto tempo dura uma parceria?",
+        "a": "[CONFIRMAR: período mínimo sugerido.]"
+      },
+      {
+        "q": "Como a IA entra no trabalho?",
+        "a": "Como ferramenta de método — pesquisa, exploração, prototipagem e produção com revisão. Nunca como substituta de critério."
+      },
+      {
+        "q": "Para quem é?",
+        "a": "Para empresas com produto, clientes e ambição — especialmente startups B2B e empresas de serviços — cuja marca ainda não acompanha o negócio."
+      }
+    ]
+  },
   "contact": {
     "eyebrow": "Contato",
     "titleLight": "Vamos fechar",
     "titleStrong": "essa distância?",
-    "email": "ola@seudominio.com",
-    "text": "Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você — e, se não fizer, te digo o que faria."
+    "text": "Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você — e, se não fizer, te digo o que faria.",
+    "schedule": "Agendar conversa",
+    "scheduleNote": "Link provisório",
+    "email": "E-mail",
+    "mediaKit": "Baixar mídia kit (PDF)",
+    "pending": "[PENDENTE]"
   },
   "footer": {
     "rights": "© {year} {name}. Todos os direitos reservados.",

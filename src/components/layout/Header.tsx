@@ -1,13 +1,15 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import LocaleSwitcher from "./LocaleSwitcher";
+import NavLinks from "./NavLinks";
 
 const nav = [
-  { key: "manifesto", href: "#manifesto" },
-  { key: "fractional", href: "#fractional" },
-  { key: "services", href: "#o-que-faco" },
-  { key: "projects", href: "#trabalhos" },
-  { key: "contact", href: "#contato" },
+  { key: "manifesto", hash: "manifesto" },
+  { key: "fractional", hash: "fractional" },
+  { key: "services", hash: "o-que-faco" },
+  { key: "projects", hash: "trabalhos" },
+  { key: "about", hash: "sobre" },
+  { key: "contact", hash: "contato" },
 ] as const;
 
 /**
@@ -35,18 +37,7 @@ export default async function Header() {
         </Link>
         <div className="flex shrink-0 items-center gap-10">
           <nav aria-label={t("nav.label")} className="hidden lg:block">
-            <ul className="flex gap-10">
-              {nav.map((item) => (
-                <li key={item.href}>
-                  <a
-                    href={item.href}
-                    className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver transition-colors hover:text-foreground"
-                  >
-                    {t(`nav.${item.key}`)}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <NavLinks items={nav.map((item) => ({ hash: item.hash, label: t(`nav.${item.key}`) }))} />
           </nav>
           <LocaleSwitcher
             label={t("nav.language")}
