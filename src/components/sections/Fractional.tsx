@@ -19,11 +19,11 @@ export type FractionalCopy = {
     rows: { label: string; values: string[] }[];
   };
   note: string;
-  /** Único dado externo permitido no site (verificado, com fonte). */
-  chart: {
+  /** Únicos dados externos permitidos no site (verificados, com fonte). */
+  stats: {
     title: string;
-    bars: { label: string; display: string; value: number }[];
-    caption: string;
+    items: { prefix: string; value: number; suffix: string; caption: string }[];
+    support: string;
     source: string;
   };
 };
@@ -44,20 +44,29 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // barras crescem da esquerda ao entrar na tela
-        gsap.from("[data-bar]", {
-          scaleX: 0,
-          duration: 1.4,
+        // números contam de 0 até o valor ao entrar na tela (uma vez). O HTML do
+        // servidor já traz o valor final: sem JS / reduced motion, ficam estáticos.
+        gsap.utils.toArray<HTMLElement>("[data-count]").forEach((el, i) => {
+          const end = Number(el.dataset.count);
+          const n = { v: 0 };
+          gsap.to(n, {
+            v: end,
+            duration: 2,
+            delay: i * 0.25,
+            ease: "power3.out",
+            onUpdate: () => {
+              el.textContent = String(Math.round(n.v));
+            },
+            scrollTrigger: { trigger: "[data-stats]", start: "top 75%", once: true },
+          });
+        });
+        gsap.from("[data-stat]", {
+          autoAlpha: 0,
+          y: 30,
+          duration: 1,
           ease: "power3.out",
           stagger: 0.25,
-          scrollTrigger: { trigger: "[data-bar-chart]", start: "top 75%" },
-        });
-        gsap.from("[data-bar-value]", {
-          autoAlpha: 0,
-          duration: 0.8,
-          stagger: 0.25,
-          delay: 0.6,
-          scrollTrigger: { trigger: "[data-bar-chart]", start: "top 75%" },
+          scrollTrigger: { trigger: "[data-stats]", start: "top 75%", once: true },
         });
 
         const tl = gsap.timeline({
@@ -99,36 +108,29 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           </p>
         </div>
 
-        {/* Dado verificado: gráfico de barras (sem JS, as barras já aparecem cheias) */}
-        <figure data-bar-chart className="mt-16 max-w-4xl md:mt-24">
+        {/* Dados verificados: dois números gigantes (empilhados no mobile) */}
+        <figure data-stats className="mt-16 md:mt-24">
           <h3 className="text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
-            {copy.chart.title}
+            {protectTerms(copy.stats.title)}
           </h3>
-          <dl className="mt-8 grid gap-5">
-            {copy.chart.bars.map((bar) => {
-              const max = Math.max(...copy.chart.bars.map((b) => b.value));
-              return (
-                <div key={bar.label} className="grid grid-cols-[6.5rem_1fr] items-center gap-4 md:grid-cols-[9rem_1fr]">
-                  <dt className="font-mono text-[11px] uppercase tracking-[0.2em] text-silver">{bar.label}</dt>
-                  <dd className="flex items-center gap-4">
-                    <span
-                      data-bar
-                      aria-hidden="true"
-                      className="block h-3 origin-left bg-foreground md:h-4"
-                      style={{ width: `${(bar.value / max) * 72}%` }}
-                    />
-                    <span data-bar-value className="whitespace-nowrap text-sm font-medium md:text-base">
-                      {bar.display}
-                    </span>
-                  </dd>
-                </div>
-              );
-            })}
+          <dl className="mt-8 grid gap-10 border-t border-line pt-8 md:grid-cols-2 md:gap-8">
+            {copy.stats.items.map((stat) => (
+              <div key={stat.caption} data-stat className="flex flex-col-reverse">
+                <dt className="mt-3 max-w-sm text-sm leading-relaxed text-silver md:text-base">
+                  {protectTerms(stat.caption)}
+                </dt>
+                <dd className="text-[clamp(4.5rem,11vw,10rem)] font-semibold leading-[0.9] tracking-[-0.06em] tabular-nums">
+                  {stat.prefix}
+                  <span data-count={stat.value}>{stat.value}</span>
+                  {stat.suffix}
+                </dd>
+              </div>
+            ))}
           </dl>
-          <figcaption className="mt-6 max-w-xl">
-            <span className="block text-sm leading-relaxed text-silver md:text-[15px]">{protectTerms(copy.chart.caption)}</span>
-            <span className="mt-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
-              {copy.chart.source}
+          <figcaption className="mt-10 max-w-2xl">
+            <span className="block text-base leading-relaxed md:text-lg">{protectTerms(copy.stats.support)}</span>
+            <span className="mt-3 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
+              {protectTerms(copy.stats.source)}
             </span>
           </figcaption>
         </figure>

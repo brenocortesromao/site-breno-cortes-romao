@@ -43,7 +43,7 @@
         "soft": true
       }
     ],
-    "body": "Eu cuido do que sobra. Trabalho com empresas que cresceram mais rápido do que a própria marca — e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, decidir o que ele precisa dizer e garantir que tudo o que a empresa mostra diga a mesma coisa.",
+    "body": "É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca — e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.",
     "portrait": "Retrato",
     "signatureLabel": "Assinatura de {name}"
   },
@@ -96,22 +96,24 @@
     "eyebrow": "O que é fractional",
     "title": "Liderança de marca sênior, na medida do seu momento.",
     "text": "Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada — e sem o custo de uma contratação executiva fixa.",
-    "chart": {
+    "stats": {
       "title": "Lá fora, esse modelo já está crescendo rápido.",
-      "bars": [
+      "items": [
         {
-          "label": "5 anos atrás",
-          "display": "9 a cada 1.000",
-          "value": 9
+          "prefix": "+",
+          "value": 313,
+          "suffix": "%",
+          "caption": "profissionais fractional no mundo desde 2019"
         },
         {
-          "label": "2026",
-          "display": "24 a cada 1.000",
-          "value": 24
+          "prefix": "",
+          "value": 97,
+          "suffix": "%",
+          "caption": "das vagas fractional nos EUA vêm de empresas pequenas e médias"
         }
       ],
-      "caption": "Vagas executivas anunciadas que já são fractional: quase o triplo em cinco anos. Empresas ganham liderança sênior sem precisar aumentar a equipe.",
-      "source": "Fonte: Revelio Labs, dados publicados no Financial Times."
+      "support": "E não é coisa de multinacional. É o modelo de quem cresce e precisa de liderança sênior sem aumentar a equipe.",
+      "source": "Fonte: Lightcast, The Rise of Fractional Leadership (2026)."
     },
     "compare": {
       "caption": "Comparativo entre agência, contratação executiva e fractional",

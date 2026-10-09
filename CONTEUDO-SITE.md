@@ -67,13 +67,13 @@ Funciona sem interação (texto padrão) e com teclado; em prefers-reduced-motio
 - Título: **Liderança de marca sênior, na medida do seu momento.**
 - Texto: Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada — e sem o custo de uma contratação executiva fixa.
 
-**Dado verificado (gráfico de barras animado, duas barras):**
-- Título do gráfico: **Lá fora, esse modelo já está crescendo rápido.**
-- Barra 1: "5 anos atrás — 9 a cada 1.000"
-- Barra 2: "2026 — 24 a cada 1.000"
-- Legenda: Vagas executivas anunciadas que já são fractional: quase o triplo em cinco anos. Empresas ganham liderança sênior sem precisar aumentar a equipe.
-- Fonte (letra pequena): Revelio Labs, dados publicados no Financial Times.
-- NÃO citar país específico nem afirmar "mais resultado" como dado: a fonte só mede o crescimento das vagas.
+**Dados verificados (SEM gráfico de barras — dois números gigantes com contagem animada, lado a lado):**
+- Título: **Lá fora, esse modelo já está crescendo rápido.**
+- Número 1: **+313%** — "profissionais fractional no mundo desde 2019"
+- Número 2: **97%** — "das vagas fractional nos EUA vêm de empresas pequenas e médias"
+- Frase abaixo: E não é coisa de multinacional. É o modelo de quem cresce e precisa de liderança sênior sem aumentar a equipe.
+- Fonte (letra pequena): Lightcast, The Rise of Fractional Leadership (2026).
+- Não usar mais o dado "9 → 24 a cada 1.000".
 
 **Comparativo (já aprovado visualmente — manter):**
 | | Agência | Contratação executiva | Fractional |

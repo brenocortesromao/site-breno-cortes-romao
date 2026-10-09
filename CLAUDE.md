@@ -36,7 +36,7 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 
 **Fonte do conteúdo:** `CONTEUDO-SITE.md` (raiz) é o texto oficial do site, mantido pelo dono. Releia antes de implementar qualquer seção; itens `[PENDENTE]` ficam como placeholder visível e discreto.
 
-**Sem dados externos (regra fixa):** o site é sobre o dono. **Única exceção:** o dado verificado do gráfico de barras em "O que é fractional" (Revelio Labs / Financial Times), sempre com a fonte em letra pequena e sem dizer país. Fora isso, **nunca** usar dados de mercado, estatísticas externas, pesquisas de terceiros (Gartner, McKinsey etc.) nem números de vagas, em nenhuma seção nem idioma. Gráficos são **conceituais**: SVG animado pelo scroll, sem escalas nem valores numéricos, com a nota discreta "ilustrativo". A seção "Por que agora" usa três gráficos conceituais de crescimento: a distância entre negócio e marca, fechando a distância, e consistência.
+**Sem dados externos (regra fixa):** o site é sobre o dono. **Única exceção:** os dois números verificados de "O que é fractional" (+313% e 97%, fonte Lightcast, *The Rise of Fractional Leadership*, 2026), exatamente como no `CONTEUDO-SITE.md` e sempre com a fonte em letra pequena. O dado antigo "9 → 24 a cada 1.000" (Revelio Labs) **não deve mais ser usado**. Fora isso, **nunca** usar dados de mercado, estatísticas externas, pesquisas de terceiros (Gartner, McKinsey etc.) nem números de vagas, em nenhuma seção nem idioma. Gráficos são **conceituais**: SVG animado pelo scroll, sem escalas nem valores numéricos, com a nota discreta "ilustrativo". A seção "Por que agora" usa três gráficos conceituais de crescimento: a distância entre negócio e marca, fechando a distância, e consistência.
 
 **SEO e buscas por IA (regra fixa — vale para todo código novo):**
 - HTML semântico: **um único `<h1>` por página**, hierarquia `h2`/`h3` correta, cada seção um `<section aria-labelledby="<id do h2>">` (landmark nomeado). Na home, o `h1` é o título da hero (`#hero-title`, `sr-only` com a frase completa; as frases visuais são decorativas).
@@ -165,7 +165,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - Carousel: desktop uses a pinned ScrollTrigger with snap. The arrows call `scrollToY()` (from `SmoothScroll`, Lenis-aware) to the slide's scroll position. Mobile uses drag + arrows. Neighbors are scaled 0.7 and dimmed 0.45.
 - Case pages `src/app/[locale]/cases/[slug]/page.tsx`: `generateStaticParams` over `caseSlugs` (`src/content/cases.ts`), with texts in `works.cases.items`. **With cacheComponents, read `params` inside a `<Suspense>`** (`CaseContent`); otherwise dev throws "encountered URL data during prerendering". Known slugs still prerender fully.
 - Signature: `src/content/signature.ts` reads `public/assinatura.svg` at build (49 stroke paths, `viewBox`); replace the file to change it.
-  - `Signature` draws a chrome gradient stroke plus a "shine" layer.
+  - `Signature` draws a polished-chrome stroke: a repeating, slanted gradient (`spreadMethod="reflect"`) from light graphite to white to greys, with **no glow/blur filter**, plus a "shine" layer.
   - `Manifesto` writes the paths in sequence (duration ∝ `getTotalLength`), then sweeps a light band (gradient `x1/x2`) on completion and every ~5 s while visible. No sweep under reduced motion.
 
 **Remaining sections:**
@@ -175,7 +175,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - `variant="page"` (`/sobre`): the h1, the timeline and the method;
   - the portrait goes in `aboutPortraitSrc`.
 - `Partnerships`: [CONFIRMAR] text exactly as in the content file.
-- `Faq`: native `<details>`/`<summary>`, so it works without JS and answers stay in the HTML. The smooth open uses `::details-content` + `interpolate-size` in `globals.css`.
+- `Faq`: native `<details name="faq">`/`<summary>`, an exclusive accordion (one open at a time) that works without JS; answers stay in the HTML. It also emits a `FAQPage` JSON-LD (`faqJsonLd`), skipping [CONFIRMAR]/[PENDENTE] items. The smooth open uses `::details-content` + `interpolate-size` in `globals.css`.
 - `Contact`: channels are configured in `src/content/contact.ts` (`calUrl` is provisional; `email`/`mediaKit` empty means a disabled [PENDENTE] button).
 - `layout/NavLinks` (client): on the home, links are `#section` (Lenis glides); on other pages they are `/#section` in the current locale.
 

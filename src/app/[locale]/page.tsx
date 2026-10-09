@@ -110,11 +110,11 @@ export default async function Home() {
             eyebrow: t("fractional.eyebrow"),
             title: t("fractional.title"),
             text: t("fractional.text"),
-            chart: {
-              title: t("fractional.chart.title"),
-              bars: t.raw("fractional.chart.bars") as FractionalCopy["chart"]["bars"],
-              caption: t("fractional.chart.caption"),
-              source: t("fractional.chart.source"),
+            stats: {
+              title: t("fractional.stats.title"),
+              items: t.raw("fractional.stats.items") as FractionalCopy["stats"]["items"],
+              support: t("fractional.stats.support"),
+              source: t("fractional.stats.source"),
             },
             compare: {
               caption: t("fractional.compare.caption"),

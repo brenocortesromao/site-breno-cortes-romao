@@ -26,3 +26,22 @@ export function professionalServiceJsonLd(_input: { locale: string; name: string
   //   founder: { "@type": "Person", name }, areaServed, serviceType: [...pilares], email }
   return null;
 }
+
+/**
+ * FAQPage com as perguntas frequentes (mesmo texto visível na página).
+ * Respostas ainda não definidas ([CONFIRMAR]/[PENDENTE]) ficam de fora, para
+ * não publicar placeholders nos dados estruturados.
+ */
+export function faqJsonLd(items: { q: string; a: string }[]): JsonLd | null {
+  const ready = items.filter((it) => !/\[(CONFIRMAR|PENDENTE)/.test(it.q + it.a));
+  if (!ready.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: ready.map((it) => ({
+      "@type": "Question",
+      name: it.q,
+      acceptedAnswer: { "@type": "Answer", text: it.a },
+    })),
+  };
+}
