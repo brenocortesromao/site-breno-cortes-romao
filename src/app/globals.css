@@ -185,3 +185,16 @@ body::before {
     transition: none;
   }
 }
+
+/*
+ * Gráficos de "A distância" (SVGs do dono, inline): a textura entre as curvas
+ * (#*-hatch) e o brilho (#*-gapfill) foram desenhados para tamanho real; na
+ * tela o SVG aparece reduzido e eles sumiam. Reforço só a intensidade.
+ */
+[data-chart] pattern[id$="-hatch"] line {
+  stroke-opacity: 0.32;
+  stroke-width: 1.6;
+}
+[data-chart] linearGradient[id$="-gapfill"] stop:last-child {
+  stop-opacity: 0.22;
+}

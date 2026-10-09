@@ -49,19 +49,6 @@
   },
   "distance": {
     "eyebrow": "A distância",
-    "note": "ilustrativo",
-    "labels": {
-      "business": "Negócio",
-      "brand": "Marca",
-      "gap": "a distância",
-      "direction": "direção de marca",
-      "touchpoints": [
-        "Site",
-        "Apresentação",
-        "Campanhas",
-        "Redes"
-      ]
-    },
     "charts": [
       {
         "text": "Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece."
@@ -80,12 +67,14 @@
     "hint": "Toque nas que soam familiares.",
     "counter": "{count} de {total}",
     "items": [
-      "“A gente é melhor do que parece.”",
+      "“A gente é maior do que parece.”",
+      "“Não sei que história a minha marca conta.”",
+      "“O cliente não entende de primeira o que a gente faz.”",
+      "“A concorrência parece mais profissional do que a gente. E não é.”",
       "“Cada material nosso parece de uma empresa diferente.”",
-      "“Tenho designer, agência e fornecedor. Ninguém decidindo.”",
+      "“Tenho designer e agência. Falta alguém decidindo.”",
       "“Tudo passa por mim. Até o post.”",
-      "“Vamos lançar algo grande, e a marca não está pronta.”",
-      "“Já refizemos o logo. O problema continuou.”"
+      "“Vamos lançar algo grande, e a marca não está pronta.”"
     ],
     "closing": "Se alguma dessas frases já passou pela sua cabeça, não falta designer. Falta direção.",
     "closingOne": "Já é um sinal. Vale uma conversa.",

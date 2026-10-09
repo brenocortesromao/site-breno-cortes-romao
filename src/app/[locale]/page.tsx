@@ -19,6 +19,7 @@ import Partnerships from "@/components/sections/Partnerships";
 import Contact from "@/components/sections/Contact";
 import Faq from "@/components/sections/Faq";
 import { loadSignature } from "@/content/signature";
+import { loadDistanceCharts } from "@/content/charts";
 
 /* ------------------------------------------------------------------ *
  * Home. Ordem narrativa (CONTEUDO-SITE.md, com "A distância" logo depois
@@ -74,16 +75,9 @@ export default async function Home() {
         />
 
         <Distance
+          charts={loadDistanceCharts()}
           copy={{
             eyebrow: t("distance.eyebrow"),
-            note: t("distance.note"),
-            labels: {
-              business: t("distance.labels.business"),
-              brand: t("distance.labels.brand"),
-              gap: t("distance.labels.gap"),
-              direction: t("distance.labels.direction"),
-              touchpoints: t.raw("distance.labels.touchpoints") as string[],
-            },
             charts: t.raw("distance.charts") as DistanceCopy["charts"],
           }}
         />
