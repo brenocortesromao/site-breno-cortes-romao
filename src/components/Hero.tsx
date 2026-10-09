@@ -44,7 +44,15 @@ function hasWebGL() {
 
 type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
 
-export default function Hero() {
+export type HeroCopy = {
+  eyebrow: string;
+  titleLight: string;
+  titleStrong: string;
+  intro: string;
+  cta: string;
+};
+
+export default function Hero({ copy }: { copy: HeroCopy }) {
   const section = useRef<HTMLElement>(null);
   const visual = useRef<HTMLDivElement>(null);
   const text = useRef<HTMLDivElement>(null);
@@ -182,12 +190,12 @@ export default function Hero() {
           data-fade
           className="mb-8 font-mono text-[11px] uppercase tracking-[0.28em] text-silver md:mb-10"
         >
-          Diretor criativo — Branding / Estratégia / Digital
+          {copy.eyebrow}
         </p>
         <h1 className="font-display text-[clamp(2.4rem,13vw,4rem)] leading-[0.92] tracking-[-0.055em] md:text-[min(9.6vw,10.5rem)]">
           <span className="block overflow-hidden pb-[0.16em] -mb-[0.16em]">
             <span data-reveal className="block font-light">
-              Marcas com
+              {copy.titleLight}
             </span>
           </span>
           <span className="block overflow-hidden pb-[0.16em] pr-[0.1em] -mb-[0.16em] md:pl-[14vw]">
@@ -195,7 +203,7 @@ export default function Hero() {
               data-reveal
               className="block pb-[0.1em] -mb-[0.1em] font-semibold text-silver-gradient"
             >
-              ponto de vista.
+              {copy.titleStrong}
             </span>
           </span>
         </h1>
@@ -205,14 +213,13 @@ export default function Hero() {
           className="mt-14 flex flex-col gap-8 border-t border-line pt-6 md:mt-20 md:flex-row md:items-end md:justify-between"
         >
           <p className="max-w-sm text-sm leading-relaxed text-silver">
-            Construo identidades, estratégias e experiências digitais para
-            empresas que preferem ser lembradas a ser comuns.
+            {copy.intro}
           </p>
           <a
             href="#projetos"
             className="font-mono text-[11px] uppercase tracking-[0.28em]"
           >
-            Ver projetos <span aria-hidden="true">↓</span>
+            {copy.cta} <span aria-hidden="true">↓</span>
           </a>
         </div>
       </div>

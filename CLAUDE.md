@@ -2,11 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Personal site for a creative director (branding / strategy / digital experiences). Single static landing page, copy in pt-BR. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
+Bilingual (PT default / EN) personal business site for a Fractional Brand & Creative Director, statically generated per locale. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
 
 ## Direção do projeto
 
 Site do negócio do dono como **Fractional Brand & Creative Director**: proposta de valor, portfólio, currículo, serviços, clientes e cases.
+
+- **Nome (regra fixa):** sempre **"Breno Côrtes Romão"**, completo e com acento, em todo lugar: cabeçalho, manifesto, assinatura, Sobre, rodapé, `<title>`, metadados de SEO e textos nos dois idiomas. Nunca abreviar ("Breno", "Breno Côrtes"). O nome vive numa única chave das mensagens (`site.name`) e é reutilizado a partir dela.
 
 - **Visual:** fundo preto, grafite e prata líquida; estética startup tech premium e corporativa; tipografia exclusivamente sans-serif.
 - **Elemento central:** um urso 3D escultórico de metal líquido (cromado), sem aparência infantil ou cartoon. **Sem órbitas nem partículas decorativas.** Hoje a hero usa uma gota de metal líquido provisória no lugar do urso.
@@ -16,8 +18,18 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 **Etapas** (uma por vez; informar o que foi concluído ao final de cada uma):
 1. Hero e responsividade — **concluída**.
 2. Metal líquido + scroll cinematográfico — **concluída** (Lenis, gota de metal líquido provisória, hero fixa com transição para o manifesto).
-3. Urso 3D (modelo GLB definitivo com morph target + shader sutil).
-4. Conteúdo real (fotos, logos, cases, textos).
+3. Estrutura bilíngue — **em andamento**, em 6 partes; commit ao fim de cada parte validada; **parar após a parte 2 para revisão do dono**:
+   1. Base de idiomas (next-intl, /pt e /en, seletor, mensagens) — **concluída**.
+   2. Escala (seções ≥ 1 tela), cabeçalho fixo, hero com 3D em tela cheia, sistema de temas claro/escuro, manifesto "mensagem de Breno Côrtes Romão" (retrato monocromático + assinatura desenhada pelo scroll).
+   3. O que é fractional (claro, curvas de nível), O que faço (pilares em pin), O que muda (antes/depois).
+   4. Números, Como funciona (claro, grade técnica), FAQ.
+   5. Bastidores e Cases (galerias horizontais) + páginas `/[locale]/cases/[slug]`.
+   6. Marcas (faixa de logos), Sobre (claro; resumo na home + `/sobre`), Contato (Cal.com provisório, mídia kit PDF), rodapé.
+4. Urso 3D (modelo GLB definitivo com morph target + shader sutil).
+5. Conteúdo real PT/EN (fotos, logos, cases, textos, tradução).
+6. Lançamento.
+
+**Conteúdo provisório:** nunca inventar clientes, números, dados de mercado ou cases que pareçam reais ("Case 01", "Marca 01", "XX", "[dado + fonte a confirmar]"). Textos provisórios ficam claramente marcados. `en.json` é, por enquanto, cópia do português.
 
 **Validação ao final de cada etapa:** desktop, tablet/mobile e `npm run build` (além de lint e `tsc`), testando no navegador, inclusive após recarregar a página.
 
@@ -28,7 +40,8 @@ On Windows PowerShell use `npm.cmd` / `npx.cmd` (script-execution policy blocks 
 - `npm run dev` — dev server on http://localhost:3000
 - `npm run build` — production build (also type-checks)
 - `npm run lint` — ESLint (flat config, `eslint-config-next` core-web-vitals + typescript)
-- `npx tsc --noEmit` — type check only
+- `npx tsc --noEmit` — type check only. After adding/moving routes, run `npx next typegen` first (stale `.next/types` otherwise fail with "Cannot find module ../../src/app/page.js").
+- Changes to `next.config.ts` (e.g. the next-intl plugin) need a **dev-server restart**; a running `next dev` keeps the old config and fails with "Couldn't find next-intl config file".
 - There is no test suite. Verify UI changes in a real browser (the 3D/GSAP behaviour cannot be validated from lint/build alone).
 
 ## Read this first
@@ -37,9 +50,21 @@ On Windows PowerShell use `npm.cmd` / `npx.cmd` (script-execution policy blocks 
 
 ## Architecture
 
-Everything lives in `src/app`. `page.tsx` is a server component holding the content arrays (`nav`, `clients`, `services`, `projects`) and the static sections. The client components are `SmoothScroll`, `Hero` (+ its scene) and `Manifesto`.
+Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.tsx` the home, `not-found.tsx`); `src/app/globals.css` and `favicon.ico` stay at `src/app/`. Components live in `src/components/` (import with `@/components/...`). The client components are `SmoothScroll`, `Hero` (+ its scene), `Manifesto` and `layout/LocaleSwitcher`.
 
-**Smooth scroll** (`components/SmoothScroll.tsx`, mounted in `layout.tsx`): Lenis driven by `gsap.ticker` (`autoRaf: false`), with `lenis.on("scroll", ScrollTrigger.update)`, so Lenis and ScrollTrigger read the same position each frame. `anchors: true` makes `#section` links glide. It does not start under reduced motion. On touch it keeps native scroll (Lenis default `syncTouch: false`). Do not reintroduce CSS `scroll-behavior: smooth`, which fights Lenis.
+**i18n (next-intl 4)** — chosen because it supports Next 16 `proxy.ts` and `next/root-params` with `cacheComponents` (both `/pt` and `/en` prerender as static):
+- `src/i18n/routing.ts`: locales `pt` (default) / `en`, `localePrefix: "always"`, `htmlLang` map (`pt-BR`, `en`).
+- `src/proxy.ts` (Next 16's renamed middleware): on `/` it detects the browser language — English → `/en`, everything else → `/pt`. A manual switch sets the `NEXT_LOCALE` cookie, which then wins over detection.
+- `src/i18n/request.ts`: reads the locale with `next/root-params` (no `setRequestLocale` needed) and loads `src/messages/{locale}.json`.
+- `src/i18n/navigation.ts`: locale-aware `Link`/`usePathname`/`useRouter`. Use these for internal pages instead of `next/link`.
+- `src/global.d.ts` types the message keys from `pt.json`; `en.json` must keep the identical structure.
+- **All visible text** comes from the messages. Server components use `getTranslations()`. Client components (`Hero`, `Manifesto`, `LocaleSwitcher`) receive their strings as props from the server parent. `NextIntlClientProvider` is mounted with `messages={null}`, so the message files never ship to the browser.
+- Metadata (`generateMetadata` in the locale layout): title/description from `meta.*`, canonical, `hreflang` alternates (`pt-BR`, `en`, `x-default`). `metadataBase` comes from `NEXT_PUBLIC_SITE_URL`, which must be set at launch.
+- Non-translatable data (layout, aspect ratios, image/logo paths) stays in code (arrays in `page.tsx`, later `src/content/`).
+
+**Pre-hydration scripts:** use `components/InlineScript.tsx` (pattern from the Next 16 guide `preventing-flash-before-hydration`). It avoids React 19's "script tag while rendering" warning.
+
+**Smooth scroll** (`components/SmoothScroll.tsx`, mounted in `[locale]/layout.tsx`): Lenis driven by `gsap.ticker` (`autoRaf: false`), with `lenis.on("scroll", ScrollTrigger.update)`, so Lenis and ScrollTrigger read the same position each frame. `anchors: true` makes `#section` links glide. It does not start under reduced motion. On touch it keeps native scroll (Lenis default `syncTouch: false`). Do not reintroduce CSS `scroll-behavior: smooth`, which fights Lenis.
 
 **Hero pipeline** (`components/Hero.tsx` → `HeroScene.tsx`, `HeroVisual.tsx`, `hero/*`):
 - `Hero.tsx` (`"use client"`) owns:
@@ -78,7 +103,7 @@ Everything lives in `src/app`. `page.tsx` is a server component holding the cont
 - GSAP reads the CSS `translateY(120%)` as **pixels**. Any tween on `[data-reveal]` must set `y: 0` alongside `yPercent`, otherwise a pixel offset remains and the headline stays hidden behind its mask.
 - The hero text and visual have separate wrapper elements for the intro and the scroll transition, so GSAP transforms don't collide with Tailwind's `-translate-*` positioning.
 
-**Images / logos / cases**: `components/MediaSlot.tsx` is the single frame for photos and case images. Without `src` it renders a labelled placeholder with the same aspect ratio; fill `image` / `src` in the arrays in `page.tsx` (paths under `public/`) to swap in real assets. Placeholder content (email, social `#` links, project names, studio name) is still to be replaced.
+**Images / logos / cases**: `components/MediaSlot.tsx` is the single frame for photos and case images. Without `src` it renders a labelled placeholder with the same aspect ratio; fill `image` / `src` in the arrays in `page.tsx` (paths under `public/`) to swap in real assets. Placeholder content (email, social `#` links, "Case 01…", logo slots) is still to be replaced.
 
 ## Conventions and lint traps
 
@@ -87,4 +112,4 @@ Everything lives in `src/app`. `page.tsx` is a server component holding the cont
 - The React Compiler lint rules reject mutating values returned from hooks. In R3F code, get the scene via `useFrame(({ scene }) => …)` or `useThree((s) => s.get)()` instead of `const scene = useThree(...)`, and keep `onReady`-style callbacks stable (`useCallback`) since they sit in effect dependency arrays. Ref objects passed as props are only treated as mutable if the prop name ends in `Ref` (e.g. `pointerRef`). Mutate materials through a mesh ref (`mesh.current.material`), not through a `useMemo` result.
 - Windows PowerShell 5.1 `Get-Content`/`Set-Content` re-encode files (ANSI read, BOM on write) and corrupt the Portuguese accents. Edit files with the editor tools, not PowerShell text pipelines.
 - The `THREE.Clock deprecated` console warning comes from inside R3F 9.8.1. It is harmless.
-- Git: branch `main`. Commit at the end of each validated stage (see "Etapas"), only after lint, `tsc`, build and the desktop/mobile check pass.
+- Git: branch `main`. Commit at the end of each validated stage, and during stage 3 at the end of each validated part, only after lint, `tsc`, build and the desktop/mobile check pass.

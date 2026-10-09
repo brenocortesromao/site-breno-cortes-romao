@@ -1,0 +1,92 @@
+{
+  "site": {
+    "name": "Breno Côrtes Romão",
+    "role": "Fractional Brand & Creative Director"
+  },
+  "meta": {
+    "title": "Breno Côrtes Romão — Fractional Brand & Creative Director",
+    "description": "Breno Côrtes Romão, Fractional Brand & Creative Director. Para empresas que cresceram, mas cuja marca e comunicação não acompanharam: estratégia de marca, direção criativa, execução e acompanhamento."
+  },
+  "nav": {
+    "label": "Principal",
+    "home": "Início",
+    "manifesto": "Manifesto",
+    "services": "Serviços",
+    "projects": "Projetos",
+    "contact": "Contato",
+    "language": "Idioma",
+    "switchTo": "Ver o site em {language}"
+  },
+  "languages": {
+    "pt": "Português",
+    "en": "English"
+  },
+  "hero": {
+    "eyebrow": "Fractional Brand & Creative Director",
+    "titleLight": "Marcas com",
+    "titleStrong": "ponto de vista.",
+    "intro": "Construo identidades, estratégias e experiências digitais para empresas que preferem ser lembradas a ser comuns.",
+    "cta": "Ver projetos"
+  },
+  "clients": {
+    "label": "Marcas com as quais trabalhei",
+    "placeholder": "Logo"
+  },
+  "manifesto": {
+    "eyebrow": "(01) Manifesto",
+    "statement": [
+      { "text": "Design não é decoração." },
+      { "text": "É a forma mais precisa de dizer quem você é", "soft": true },
+      { "text": "— e de decidir o que fica de fora." }
+    ],
+    "body": "Acredito em menos ruído e mais intenção. Cada linha, silêncio e espaço em branco é uma decisão. O resultado: marcas calmas, confiantes e impossíveis de confundir.",
+    "portrait": "Retrato"
+  },
+  "services": {
+    "eyebrow": "(02) Serviços",
+    "title": "O que faço",
+    "items": [
+      {
+        "title": "Branding",
+        "text": "Identidade, verbal e visual, construída a partir de um ponto de vista claro. Marcas que se reconhecem sem precisar de logotipo.",
+        "deliverables": ["Plataforma de marca", "Identidade visual", "Voz e linguagem"]
+      },
+      {
+        "title": "Estratégia",
+        "text": "Posicionamento, narrativa e direção criativa. Decidimos o que dizer antes de decidir como mostrar.",
+        "deliverables": ["Posicionamento", "Arquitetura de marca", "Direção criativa"]
+      },
+      {
+        "title": "Experiências digitais",
+        "text": "Sites, produtos e sistemas desenhados com o mesmo rigor de uma peça editorial, do primeiro pixel à última interação.",
+        "deliverables": ["Design de sites", "Design systems", "Campanhas digitais"]
+      }
+    ]
+  },
+  "projects": {
+    "eyebrow": "(03) Projetos selecionados",
+    "period": "Provisório",
+    "imageAlt": "Imagem do projeto {name}",
+    "label": "Case · {name}",
+    "items": [
+      { "name": "Case 01", "kind": "Branding · provisório" },
+      { "name": "Case 02", "kind": "Estratégia · provisório" },
+      { "name": "Case 03", "kind": "Experiência digital · provisório" },
+      { "name": "Case 04", "kind": "Branding · provisório" }
+    ]
+  },
+  "contact": {
+    "eyebrow": "(04) Contato",
+    "titleLight": "Vamos criar",
+    "titleStrong": "algo raro?",
+    "email": "ola@seudominio.com"
+  },
+  "footer": {
+    "rights": "© {year} {name}. Todos os direitos reservados.",
+    "tagline": "Estratégia de marca · Direção criativa · Execução"
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "back": "Voltar ao início"
+  }
+}

@@ -8,19 +8,20 @@ import MediaSlot from "./MediaSlot";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-/** Frase do manifesto em trechos; `soft` = peso leve em prata (contraste editorial). */
-const statement: { text: string; soft?: boolean }[] = [
-  { text: "Design não é decoração." },
-  { text: "É a forma mais precisa de dizer quem você é", soft: true },
-  { text: "— e de decidir o que fica de fora." },
-];
+export type ManifestoCopy = {
+  eyebrow: string;
+  /** Frase em trechos; `soft` = peso leve em prata (contraste editorial). */
+  statement: { text: string; soft?: boolean }[];
+  body: string;
+  portrait: string;
+};
 
 /**
  * Manifesto. Entra enquanto a hero (fixa) recua: as palavras da frase grande
  * acendem uma a uma conforme o scroll; texto de apoio e retrato aparecem em
  * seguida. Fundo transparente para a forma escurecida continuar visível atrás.
  */
-export default function Manifesto() {
+export default function Manifesto({ copy }: { copy: ManifestoCopy }) {
   const root = useRef<HTMLElement>(null);
   const phrase = useRef<HTMLParagraphElement>(null);
 
@@ -68,11 +69,11 @@ export default function Manifesto() {
       <div className="grid gap-12 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-3">
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
-            (01) Manifesto
+            {copy.eyebrow}
           </p>
           {/* Retrato do diretor: proporção vertical, alinhado à coluna esquerda */}
           <div data-follow className="mt-10 hidden max-w-[18rem] md:block">
-            <MediaSlot label="Retrato" ratio="aspect-[3/4]" sizes="22vw" />
+            <MediaSlot label={copy.portrait} ratio="aspect-[3/4]" sizes="22vw" />
           </div>
         </div>
         <div className="md:col-span-9 md:col-start-4">
@@ -80,7 +81,7 @@ export default function Manifesto() {
             ref={phrase}
             className="text-[clamp(2.1rem,5.4vw,5.75rem)] font-medium leading-[1.04] tracking-[-0.05em]"
           >
-            {statement.map((part, i) => (
+            {copy.statement.map((part, i) => (
               <span key={i} className={part.soft ? "font-light text-silver" : undefined}>
                 {part.text.split(" ").map((word, j) => (
                   <span key={j}>
@@ -97,12 +98,10 @@ export default function Manifesto() {
               data-follow
               className="max-w-md text-sm leading-relaxed text-silver md:col-span-4 md:col-start-6"
             >
-              Acredito em menos ruído e mais intenção. Cada linha, silêncio e
-              espaço em branco é uma decisão. O resultado: marcas calmas,
-              confiantes e impossíveis de confundir.
+              {copy.body}
             </p>
             <div data-follow className="w-3/5 md:hidden">
-              <MediaSlot label="Retrato" ratio="aspect-[4/5]" sizes="60vw" />
+              <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" sizes="60vw" />
             </div>
           </div>
         </div>
