@@ -20,13 +20,14 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 **Etapas** (uma por vez; informar o que foi concluído ao final de cada uma):
 1. Hero e responsividade — **concluída**.
 2. Metal líquido + scroll cinematográfico — **concluída** (Lenis, gota de metal líquido provisória, hero fixa com transição para o manifesto).
-3. Estrutura bilíngue — **em andamento**, em 6 partes; commit ao fim de cada parte validada; **parar após a parte 2 para revisão do dono**:
+3. Estrutura bilíngue — **concluída (6 partes), aguardando revisão do dono**:
    1. Base de idiomas (next-intl, /pt e /en, seletor, mensagens) — **concluída**.
    2. Escala (seções ≥ 1 tela), cabeçalho fixo, hero com a bola cromada no centro, sistema de temas claro/escuro, "Mensagem de Breno Côrtes Romão" (retrato monocromático + assinatura desenhada pelo scroll) — **concluída**. Off-white escolhido: **A, #ECEAE5**.
    3. Diagnóstico (ex-"Sinais"), O que é fractional (curvas líquidas, gráfico de barras com o dado verificado, comparativo), O que eu faço (pilares em pin); ajustes de cromo e assinatura definitiva — **concluída**.
-   4. A distância (3 gráficos conceituais), O que muda (antes/depois), Como funciona (claro, grade); Trabalhos (faixa de logos, carrossel, 3 cases com página própria); textos v2; base de SEO — **concluída, aguardando revisão do dono**.
-   5. Onde o trabalho aparece; Sobre (claro; resumo na home + `/sobre`); Poucas parcerias por vez ([CONFIRMAR]).
-   6. Perguntas frequentes; Contato completo (Cal.com provisório, e-mail e mídia kit [PENDENTE]); rodapé no layout.
+   4. A distância (3 gráficos conceituais), O que muda (antes/depois), Como funciona (claro, grade); Trabalhos (faixa de logos, carrossel, 3 cases com página própria); textos v2; base de SEO — **concluída**.
+   5. Onde o trabalho aparece; Sobre (claro; resumo na home + `/sobre`); Poucas parcerias por vez ([CONFIRMAR]); Contato completo — **concluída**.
+   6. Perguntas frequentes (`<details>` nativo); rodapé no layout — **concluída**.
+   Pendências de conteúdo do dono: retrato, logos, imagens de trabalhos, cases, bio/trajetória, e-mail, mídia kit, link do Cal.com, itens [CONFIRMAR], 6 frases da "3b Diagnóstico" (o arquivo ainda tem as 5 de "Sinais") e tradução EN.
 4. Urso 3D: orelhas e focinho brotando da bola (SDF/metaballs) com o mouse.
 5. Conteúdo real PT/EN (fotos, logos, cases, textos, tradução).
 6. Lançamento.
@@ -145,7 +146,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - On mobile, under reduced motion or without JS, the pillars are stacked with no pin.
   - The title size is bounded by the longest word ("Acompanhamento") in a 6/12 column.
 
-**Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Trabalhos → Contato. `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
+**Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Onde o trabalho aparece → Trabalhos → Sobre (resumo) → Poucas parcerias → Perguntas frequentes → Contato. Other pages: `/sobre` (About `variant="page"` + Contact) and `/cases/[slug]`. Header and Footer live in the locale layout. `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
 
 **More sections** (`components/sections/*`):
 - `Distance`: three conceptual SVG charts with no numbers and the "ilustrativo" note, drawn by scroll per figure.
@@ -165,6 +166,17 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - Signature: `src/content/signature.ts` reads `public/assinatura.svg` at build (49 stroke paths, `viewBox`); replace the file to change it.
   - `Signature` draws a chrome gradient stroke plus a "shine" layer.
   - `Manifesto` writes the paths in sequence (duration ∝ `getTotalLength`), then sweeps a light band (gradient `x1/x2`) on completion and every ~5 s while visible. No sweep under reduced motion.
+
+**Remaining sections:**
+- `Touchpoints`: a large list. Each line rises from a mask on scroll; the hover shift sits on the parent, because GSAP owns the line's transform.
+- `About` (server, light, `contours-b`):
+  - `variant="summary"` (home): the h2, with a link to `/sobre`;
+  - `variant="page"` (`/sobre`): the h1, the timeline and the method;
+  - the portrait goes in `aboutPortraitSrc`.
+- `Partnerships`: [CONFIRMAR] text exactly as in the content file.
+- `Faq`: native `<details>`/`<summary>`, so it works without JS and answers stay in the HTML. The smooth open uses `::details-content` + `interpolate-size` in `globals.css`.
+- `Contact`: channels are configured in `src/content/contact.ts` (`calUrl` is provisional; `email`/`mediaKit` empty means a disabled [PENDENTE] button).
+- `layout/NavLinks` (client): on the home, links are `#section` (Lenis glides); on other pages they are `/#section` in the current locale.
 
 **Background graphics** (`components/graphics/GraphicLayer.tsx`), used by every light section:
 - **Live mode** (WebGL2, no reduced motion): `LiquidContours` renders isolines of animated 3D simplex noise with domain warping in a fragment shader (`fwidth` antialiasing), plus cursor ripples that fade out.

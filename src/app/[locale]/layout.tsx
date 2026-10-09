@@ -9,6 +9,7 @@ import "../globals.css";
 import InlineScript from "@/components/InlineScript";
 import SmoothScroll from "@/components/SmoothScroll";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import JsonLdScript from "@/components/seo/JsonLdScript";
 import { personJsonLd, professionalServiceJsonLd } from "@/lib/seo/structured-data";
 import ThemeScroll from "@/components/theme/ThemeScroll";
@@ -70,6 +71,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <ThemeScroll />
           <Header />
           {children}
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -17,6 +17,7 @@ import Touchpoints from "@/components/sections/Touchpoints";
 import About from "@/components/sections/About";
 import Partnerships from "@/components/sections/Partnerships";
 import Contact from "@/components/sections/Contact";
+import Faq from "@/components/sections/Faq";
 import { loadSignature } from "@/content/signature";
 
 /* ------------------------------------------------------------------ *
@@ -166,15 +167,11 @@ export default async function Home() {
 
         <Partnerships />
 
+        <Faq />
+
         <Contact />
       </main>
 
-      <footer className="relative z-10 border-t border-line">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-6 py-6 font-mono text-[10px] uppercase tracking-[0.25em] text-silver md:flex-row md:justify-between md:px-12">
-          <span>{t("footer.rights", { year: 2026, name })}</span>
-          <span>{t("footer.tagline")}</span>
-        </div>
-      </footer>
     </>
   );
 }
