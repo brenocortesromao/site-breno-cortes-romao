@@ -1,64 +1,43 @@
 /**
- * Elemento visual abstrato da hero: uma esfera de prata fosca cercada por
- * órbitas finas e uma elipse deslocada. Totalmente estático (SVG puro).
+ * Poster estático da hero: uma forma orgânica de prata fosca, no mesmo
+ * enquadramento da cena 3D (viewBox 800 = largura do canvas; raio ~160).
+ * Aparece antes do WebGL carregar e é a alternativa quando ele não existe.
  */
 export default function HeroVisual({ className = "" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 800 800"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
+    <svg viewBox="0 0 800 800" fill="none" aria-hidden="true" className={className}>
       <defs>
-        <radialGradient id="orb" cx="35%" cy="30%" r="75%">
-          <stop offset="0" stopColor="#ffffff" />
-          <stop offset="0.35" stopColor="#b9bcc1" />
-          <stop offset="0.75" stopColor="#2a2b2e" />
-          <stop offset="1" stopColor="#050505" />
+        <radialGradient id="lm-body" cx="36%" cy="30%" r="78%">
+          <stop offset="0" stopColor="#f4f5f7" />
+          <stop offset="0.28" stopColor="#bfc2c7" />
+          <stop offset="0.62" stopColor="#4a4c51" />
+          <stop offset="1" stopColor="#111214" />
         </radialGradient>
-        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.14" />
-          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.7" />
-          <stop offset="1" stopColor="#ffffff" stopOpacity="0.03" />
+        <linearGradient id="lm-rim" x1="1" y1="0.2" x2="0.2" y2="1">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="0.45" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      <circle cx="400" cy="400" r="390" fill="url(#glow)" />
-
-      {/* órbitas */}
-      <circle cx="400" cy="400" r="330" stroke="url(#ring)" strokeWidth="1" />
-      <circle cx="400" cy="400" r="270" stroke="#fff" strokeOpacity="0.08" />
-      <ellipse
-        cx="400"
-        cy="400"
-        rx="370"
-        ry="120"
-        transform="rotate(-24 400 400)"
-        stroke="url(#ring)"
-        strokeWidth="1"
+      <path
+        d="M402 236c78-3 150 44 163 122 12 74-20 150-92 179-70 28-160 22-210-36-46-53-50-139-4-197 34-43 87-66 143-68Z"
+        fill="url(#lm-body)"
       />
-      <ellipse
-        cx="400"
-        cy="400"
-        rx="370"
-        ry="120"
-        transform="rotate(38 400 400)"
-        stroke="#fff"
-        strokeOpacity="0.1"
+      <path
+        d="M402 236c78-3 150 44 163 122 12 74-20 150-92 179-70 28-160 22-210-36-46-53-50-139-4-197 34-43 87-66 143-68Z"
+        stroke="url(#lm-rim)"
+        strokeWidth="2"
       />
-
-      {/* esfera */}
-      <circle cx="400" cy="400" r="190" fill="url(#orb)" />
-      <circle cx="400" cy="400" r="190" stroke="#fff" strokeOpacity="0.18" />
-
-      {/* pontos de referência */}
-      <circle cx="700" cy="296" r="4" fill="#fff" />
-      <circle cx="118" cy="520" r="2.5" fill="#fff" fillOpacity="0.6" />
-      <circle cx="400" cy="70" r="2" fill="#fff" fillOpacity="0.5" />
+      {/* reflexo do softbox */}
+      <ellipse
+        cx="352"
+        cy="318"
+        rx="46"
+        ry="26"
+        transform="rotate(-28 352 318)"
+        fill="#ffffff"
+        fillOpacity="0.55"
+      />
     </svg>
   );
 }

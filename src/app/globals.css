@@ -17,9 +17,9 @@
   --font-display: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* Sem `scroll-behavior: smooth`: o Lenis cuida da suavização (e os dois brigam). */
 html {
   color-scheme: dark;
-  scroll-behavior: smooth;
 }
 
 body {

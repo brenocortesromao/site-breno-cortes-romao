@@ -48,6 +48,8 @@ export default function Hero() {
   const section = useRef<HTMLElement>(null);
   const visual = useRef<HTMLDivElement>(null);
   const text = useRef<HTMLDivElement>(null);
+  /** Progresso 0→1 da transição para o manifesto; lido pela cena 3D a cada quadro. */
+  const progress = useRef(0);
 
   const [env, setEnv] = useState<Env | null>(null);
   const [inView, setInView] = useState(true);
@@ -80,7 +82,7 @@ export default function Hero() {
     [],
   );
 
-  // Entrada da tipografia + parallax no scroll (somente sem prefers-reduced-motion).
+  // Entrada da tipografia + transição para o manifesto (somente sem prefers-reduced-motion).
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
@@ -103,16 +105,37 @@ export default function Hero() {
             0.7,
           );
 
-        const scrub = {
-          trigger: section.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 0.8,
-        };
-
-        // A esfera "fica para trás" e o texto sobe um pouco mais rápido: profundidade sutil.
-        gsap.to(visual.current, { yPercent: 12, ease: "none", scrollTrigger: scrub });
-        gsap.to(text.current, { yPercent: -9, ease: "none", scrollTrigger: scrub });
+        // A hero fica fixa por 1 tela (pinSpacing: false) enquanto o manifesto sobe
+        // por cima. Nesse trecho o título sai, a forma recua e escurece (na cena 3D,
+        // via `progress`) e some no fim — quando o pin solta, nada "pula".
+        const proxy = { v: 0 };
+        gsap
+          .timeline({
+            defaults: { ease: "none" },
+            scrollTrigger: {
+              trigger: section.current,
+              start: "top top",
+              end: "+=100%",
+              pin: true,
+              pinSpacing: false,
+              scrub: 1,
+              anticipatePin: 1,
+            },
+          })
+          .to(
+            proxy,
+            {
+              v: 1,
+              duration: 1,
+              onUpdate: () => {
+                progress.current = proxy.v;
+              },
+            },
+            0,
+          )
+          // o título sai cedo (30% do trecho), antes da faixa de clientes e do manifesto passarem por cima
+          .to(text.current, { yPercent: -14, autoAlpha: 0, duration: 0.3, ease: "power1.in" }, 0)
+          .to(visual.current, { autoAlpha: 0, duration: 0.2 }, 0.8);
       });
     },
     { scope: section },
@@ -145,6 +168,7 @@ export default function Hero() {
                   active={inView}
                   reducedMotion={env.reduced}
                   coarse={env.coarse}
+                  progress={progress}
                   onReady={handleReady}
                 />
               </SceneBoundary>

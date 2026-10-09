@@ -1,4 +1,5 @@
 import Hero from "./components/Hero";
+import Manifesto from "./components/Manifesto";
 import MediaSlot from "./components/MediaSlot";
 
 /* ------------------------------------------------------------------ *
@@ -135,7 +136,7 @@ export default function Home() {
         {/* Clientes */}
         <section
           aria-label="Clientes"
-          className="mx-auto max-w-[1600px] px-6 md:px-12"
+          className="relative z-10 mx-auto max-w-[1600px] px-6 md:px-12"
         >
           <div className="grid items-center gap-8 border-y border-line py-10 md:grid-cols-12 md:py-12">
             <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver md:col-span-3">
@@ -155,46 +156,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Manifesto */}
-        <section
-          id="manifesto"
-          className="mx-auto max-w-[1600px] px-6 py-28 md:px-12 md:py-48"
-        >
-          <div className="grid gap-12 md:grid-cols-12 md:gap-8">
-            <div className="md:col-span-3">
-              <Eyebrow>(01) Manifesto</Eyebrow>
-              {/* Retrato do diretor: proporção vertical, alinhado à coluna esquerda */}
-              <MediaSlot
-                label="Retrato"
-                ratio="aspect-[3/4]"
-                sizes="(min-width: 768px) 22vw, 60vw"
-                className="mt-10 hidden w-full max-w-[18rem] md:block"
-              />
-            </div>
-            <div className="md:col-span-8 md:col-start-5">
-              <p className="text-[clamp(1.9rem,4.4vw,4.4rem)] font-medium leading-[1.06] tracking-[-0.045em]">
-                Design não é decoração.{" "}
-                <span className="font-light text-silver">
-                  É a forma mais precisa de dizer quem você é
-                </span>{" "}
-                — e de decidir o que fica de fora.
-              </p>
-              <div className="mt-12 grid gap-10 md:mt-20 md:grid-cols-8">
-                <p className="max-w-md text-sm leading-relaxed text-silver md:col-span-4 md:col-start-5">
-                  Acredito em menos ruído e mais intenção. Cada linha, silêncio
-                  e espaço em branco é uma decisão. O resultado: marcas calmas,
-                  confiantes e impossíveis de confundir.
-                </p>
-                <MediaSlot
-                  label="Retrato"
-                  ratio="aspect-[4/5]"
-                  sizes="60vw"
-                  className="w-3/5 md:hidden"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Manifesto (entra por cima da hero fixa; ver Hero.tsx) */}
+        <Manifesto />
 
         {/* Serviços */}
         <section
