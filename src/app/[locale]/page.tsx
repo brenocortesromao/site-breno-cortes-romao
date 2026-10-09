@@ -52,7 +52,7 @@ export default async function Home() {
             left: t("hero.left"),
             right: t("hero.right"),
             support: t("hero.support"),
-            label: `${name} — ${t("site.role")}`,
+            label: `${name}, ${t("site.role")}`,
             scrollHint: t("hero.scrollHint"),
             draft: "",
           }}

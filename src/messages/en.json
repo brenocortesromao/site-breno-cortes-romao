@@ -4,7 +4,7 @@
     "role": "Fractional Brand & Creative Director"
   },
   "meta": {
-    "title": "Breno Côrtes Romão — Fractional Brand & Creative Director",
+    "title": "Breno Côrtes Romão | Fractional Brand & Creative Director",
     "description": "Breno Côrtes Romão, Fractional Brand & Creative Director. Direção de marca e criação sênior, dentro da sua empresa, sem o peso de uma contratação executiva."
   },
   "common": {
@@ -43,7 +43,7 @@
         "soft": true
       }
     ],
-    "body": "É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca — e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.",
+    "body": "É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca, e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.",
     "portrait": "Retrato",
     "signatureLabel": "Assinatura de {name}"
   },
@@ -87,19 +87,17 @@
   "fractional": {
     "eyebrow": "O que é fractional",
     "title": "Liderança de marca sênior, na medida do seu momento.",
-    "text": "Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada — e sem o custo de uma contratação executiva fixa.",
+    "text": "Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada, sem o custo de uma contratação executiva fixa.",
     "stats": {
       "title": "Lá fora, esse modelo já está crescendo rápido.",
       "items": [
         {
-          "label": "01 — CRESCIMENTO",
           "prefix": "+",
           "value": 313,
           "suffix": "%",
           "caption": "profissionais fractional no mundo desde 2019"
         },
         {
-          "label": "02 — QUEM CONTRATA",
           "prefix": "",
           "value": 97,
           "suffix": "%",
@@ -163,8 +161,8 @@
   },
   "pillars": {
     "eyebrow": "O que eu faço",
-    "title": "Da estratégia à última peça.",
-    "subtitle": "A maioria dos profissionais pensa ou executa. Eu faço os dois — e é isso que impede a estratégia de morrer num PDF.",
+    "title": "Vejo a marca de cima. E desço até o último detalhe.",
+    "subtitle": "A maioria dos profissionais pensa ou executa. Eu faço os dois, e é isso que impede a estratégia de morrer num PDF.",
     "items": [
       {
         "title": "Estratégia de marca",
@@ -237,7 +235,7 @@
         "text": "Todo mês olhamos o que avançou e o que muda."
       }
     ],
-    "note": "Escopo, dedicação, entregas e responsabilidades ficam claros na proposta — inclusive o que eu produzo, o que eu dirijo e o que exige contratação à parte."
+    "note": "Escopo, dedicação, entregas e responsabilidades ficam claros na proposta, inclusive o que eu produzo, o que eu dirijo e o que exige contratação à parte."
   },
   "touchpoints": {
     "eyebrow": "Onde o trabalho aparece",
@@ -315,12 +313,13 @@
       },
       "back": "Voltar aos trabalhos",
       "next": "Próximo case: {title}"
-    }
+    },
+    "subtitle": "Ao longo da minha trajetória, em agências, estúdios, empresas e projetos independentes."
   },
   "about": {
     "eyebrow": "Sobre",
     "title": "Quem vai cuidar da sua marca.",
-    "bio": "[PENDENTE: bio — anos de experiência, agências, marcas, formação.]",
+    "bio": "[PENDENTE: bio, anos de experiência, agências, marcas, formação.]",
     "portrait": "Retrato",
     "timelineTitle": "Trajetória",
     "timeline": [
@@ -342,7 +341,7 @@
       }
     ],
     "methodTitle": "Método",
-    "method": "Uso inteligência artificial como ferramenta de pesquisa, exploração e produção — sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.",
+    "method": "Uso inteligência artificial como ferramenta de pesquisa, exploração e produção, sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.",
     "more": "Conhecer a trajetória completa",
     "back": "Voltar ao início",
     "metaTitle": "Sobre",
@@ -351,7 +350,7 @@
   "partnerships": {
     "eyebrow": "Poucas parcerias por vez",
     "title": "Trabalho com poucas empresas por vez.",
-    "text": "Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa — não por proposta enviada em massa.",
+    "text": "Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa, não por proposta enviada em massa.",
     "indicator": "Agenda para novas parcerias: [CONFIRMAR]"
   },
   "faq": {
@@ -380,7 +379,7 @@
       },
       {
         "q": "Como funciona o começo?",
-        "a": "Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca — o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio — e, a partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]"
+        "a": "Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca: o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio. A partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]"
       },
       {
         "q": "Quanto tempo dura uma parceria?",
@@ -396,7 +395,7 @@
       },
       {
         "q": "Para que tipo de empresa é?",
-        "a": "Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio — especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você."
+        "a": "Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio, especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você."
       },
       {
         "q": "Você atende empresas de outras cidades ou de fora do Brasil?",
@@ -408,7 +407,7 @@
     "eyebrow": "Contato",
     "titleLight": "Vamos fechar",
     "titleStrong": "essa distância?",
-    "text": "Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você — e, se não fizer, te digo o que faria.",
+    "text": "Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você. E, se não fizer, te digo o que faria.",
     "schedule": "Agendar conversa",
     "scheduleNote": "Link provisório",
     "email": "E-mail",

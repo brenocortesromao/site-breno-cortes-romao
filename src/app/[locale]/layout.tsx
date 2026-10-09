@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // página (via pageMetadata), senão subpáginas herdariam o canonical da home.
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-    title: { default: t("title"), template: `%s — ${name("name")}` },
+    title: { default: t("title"), template: `%s | ${name("name")}` },
     description: t("description"),
   };
 }

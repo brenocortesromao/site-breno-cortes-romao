@@ -4,6 +4,7 @@ Este arquivo é a fonte dos textos e do mapa do site. Use estes textos em `messa
 
 Regras:
 - Nome sempre "Breno Côrtes Romão".
+- SEM travessões (— ou –) em nenhum texto visível do site, em pt e en: use vírgula, dois-pontos ou ponto. Nos títulos com descrição (pilares, etapas), título e descrição são elementos separados, sem traço entre eles.
 - O título "Fractional Brand & Creative Director" NUNCA é traduzido: fica em inglês também no site em português (cabeçalho, assinatura, rodapé, Sobre, metadados). Vale também para o termo "fractional" no texto corrido (não usar "fracionário/fracionada").
 - O site é sobre o Breno: nada de estatísticas externas, EXCETO o único dado verificado da seção 4 (com fonte).
 - Não inventar clientes, números de carreira, depoimentos ou resultados. [PENDENTE] = placeholder discreto. [CONFIRMAR] = decisão do Breno, deixar o texto como está até ele confirmar.
@@ -22,14 +23,14 @@ Regras:
 - Frase esquerda: **Sua marca à altura**
 - Frase direita: **do seu crescimento.**
 - Apoio (inferior esquerdo): Direção de marca e criação sênior, dentro da sua empresa, sem o peso de uma contratação executiva.
-- Rótulo pequeno: Breno Côrtes Romão — Fractional Brand & Creative Director
+- Rótulo pequeno: Breno Côrtes Romão, Fractional Brand & Creative Director
 - Indicador de scroll: "Role para entender"
 
 ## 2. Mensagem do Breno (preto, retrato + assinatura desenhada)
 
 - Frase de abertura, em tipografia gigante, palavra por palavra:
   **Uma marca não é o que a empresa diz sobre si. É o que sobra na cabeça das pessoas quando você sai da sala.**
-- Texto: É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca — e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.
+- Texto: É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca, e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.
 - Assinatura: Breno Côrtes Romão
 
 ## 3. A distância (GRADIENTE ESCURO — gráficos conceituais, sem números, nota "ilustrativo")
@@ -65,7 +66,7 @@ Funciona sem interação (texto padrão) e com teclado; em prefers-reduced-motio
 ## 4. O que é fractional (OFF-WHITE, curvas de nível em movimento)
 
 - Título: **Liderança de marca sênior, na medida do seu momento.**
-- Texto: Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada — e sem o custo de uma contratação executiva fixa.
+- Texto: Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada, sem o custo de uma contratação executiva fixa.
 
 **Dados verificados (SEM gráfico de barras — dois números gigantes com contagem animada, lado a lado):**
 - Título: **Lá fora, esse modelo já está crescendo rápido.**
@@ -89,11 +90,11 @@ Nota: Não sou um CMO. Não assumo mídia, canais ou aquisição. Cuido do que f
 ## 5. O que eu faço (preto, seção fixa trocando de pilar)
 
 Título: **Da estratégia à última peça.**
-Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois — e é isso que impede a estratégia de morrer num PDF.
-1. **Estratégia de marca** — O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso.
-2. **Direção criativa** — Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram.
-3. **Execução** — Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação.
-4. **Acompanhamento** — Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca não para de evoluir no mês dois.
+Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois, e é isso que impede a estratégia de morrer num PDF.
+1. **Estratégia de marca.** O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso.
+2. **Direção criativa.** Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram.
+3. **Execução.** Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação.
+4. **Acompanhamento.** Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca não para de evoluir no mês dois.
 
 ## 6. O que muda (GRADIENTE ESCURO — antes/depois animado, cada linha vira de "antes" para "depois")
 
@@ -109,13 +110,13 @@ Título: **O que muda quando alguém assume a marca.**
 ## 8. Como funciona (OFF-WHITE, grade técnica — linha do tempo desenhada)
 
 Título: **Simples de começar. Contínuo por natureza.**
-1. **Conversa** — Entendo o momento da empresa e vemos se faz sentido trabalharmos juntos.
-2. **Diagnóstico** — Analiso o negócio, a concorrência e tudo o que a marca já comunica.
-3. **Plano** — Definimos prioridades, entregas e a dedicação mensal.
-4. **Direção contínua** — Participo das decisões, produzo e dirijo as peças combinadas.
-5. **Revisão** — Todo mês olhamos o que avançou e o que muda.
+1. **Conversa.** Entendo o momento da empresa e vemos se faz sentido trabalharmos juntos.
+2. **Diagnóstico.** Analiso o negócio, a concorrência e tudo o que a marca já comunica.
+3. **Plano.** Definimos prioridades, entregas e a dedicação mensal.
+4. **Direção contínua.** Participo das decisões, produzo e dirijo as peças combinadas.
+5. **Revisão.** Todo mês olhamos o que avançou e o que muda.
 
-Nota: Escopo, dedicação, entregas e responsabilidades ficam claros na proposta — inclusive o que eu produzo, o que eu dirijo e o que exige contratação à parte.
+Nota: Escopo, dedicação, entregas e responsabilidades ficam claros na proposta, inclusive o que eu produzo, o que eu dirijo e o que exige contratação à parte.
 
 ## 9. Onde o trabalho aparece (preto — lista grande com reveal)
 
@@ -125,7 +126,7 @@ Posicionamento e narrativa · Identidade visual · Apresentações comerciais ·
 ## 10. Trabalhos (preto — pouco visual)
 
 Título: **Marcas com as quais trabalhei.**
-Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória — em agências, estúdios, empresas e projetos independentes.
+Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória, em agências, estúdios, empresas e projetos independentes.
 (Os logos representam a trajetória do Breno, não necessariamente trabalhos no modelo fractional. Nas legendas do carrossel, deixar claro o papel exato e o contexto: agência, equipe ou contratação direta.)
 - Faixa de logos em prata monocromática [PENDENTE: logos].
 - Mural compacto, 6 a 9 peças, grid irregular, legenda de projeto e ano [PENDENTE: imagens].
@@ -135,13 +136,13 @@ Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória — em ag
 
 - Título: **Quem vai cuidar da sua marca.**
 - [PENDENTE: bio — anos de experiência, agências, marcas, formação.] Retrato + trajetória em linha do tempo.
-- Frase de método: Uso inteligência artificial como ferramenta de pesquisa, exploração e produção — sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.
+- Frase de método: Uso inteligência artificial como ferramenta de pesquisa, exploração e produção, sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.
 
 ## 12. Poucas parcerias por vez (OFF-WHITE — seção curta, impacto)
 
 [CONFIRMAR com o Breno antes de publicar — é decisão de negócio]
 - Título (exatamente assim, sem inverter palavras): **Trabalho com poucas empresas por vez.**
-- Texto: Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa — não por proposta enviada em massa.
+- Texto: Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa, não por proposta enviada em massa.
 - Indicador discreto: "Agenda para novas parcerias: [CONFIRMAR]"
 
 ## 13. Perguntas frequentes (preto — acordeão, uma aberta por vez)
@@ -165,7 +166,7 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
   Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção.
 
 - **Como funciona o começo?**
-  Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca — o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio — e, a partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]
+  Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca: o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio. A partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]
 
 - **Quanto tempo dura uma parceria?**
   Marca é construção contínua, por isso o modelo funciona melhor em ciclos de alguns meses, com revisões mensais de prioridades. [CONFIRMAR: período mínimo sugerido, ex.: 3 ou 6 meses]
@@ -177,7 +178,7 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
   Como ferramenta de método: pesquisa, exploração de caminhos, prototipagem e produção, sempre com revisão e critério humano. A IA acelera o processo; as decisões de marca continuam sendo minhas e suas.
 
 - **Para que tipo de empresa é?**
-  Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio — especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você.
+  Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio, especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você.
 
 - **Você atende empresas de outras cidades ou de fora do Brasil?**
   [CONFIRMAR] Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido.
@@ -185,5 +186,5 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
 ## 14. Contato (GRADIENTE ESCURO)
 
 - Título: **Vamos fechar essa distância?**
-- Texto: Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você — e, se não fizer, te digo o que faria.
+- Texto: Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você. E, se não fizer, te digo o que faria.
 - Botões: **Agendar conversa** (Cal.com, link provisório) · E-mail [PENDENTE] · Baixar mídia kit (PDF) [PENDENTE]

@@ -213,20 +213,32 @@ body::before {
 }
 
 /*
- * Números do "O que é fractional": grafite polido nos dígitos (o gradiente
- * se repete a cada linha de 1em, então acompanha cada dígito da faixa do
- * odômetro) e faixa de luz do reflexo.
+ * Números do "O que é fractional": preto "envelopado" (black chrome). Gradiente
+ * vertical de preto profundo com faixas de reflexo prata e um fio quase branco
+ * perto do topo, como luz de estúdio numa superfície preta polida.
  */
-.odo-metal {
-  background: linear-gradient(180deg, #2a2b2e 0%, #6b6e73 52%, #1b1c1e 100%);
-  background-size: 100% 1em;
-  background-repeat: repeat-y;
+.black-chrome {
+  background: linear-gradient(
+    180deg,
+    #050506 0%,
+    #2b2c2f 9%,
+    #9a9da2 15%,
+    #e6e7e9 18.5%,
+    #9a9da2 22%,
+    #1a1b1d 30%,
+    #050506 46%,
+    #050506 62%,
+    #3b3d41 72%,
+    #9a9da2 78%,
+    #2a2b2e 84%,
+    #050506 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-.odo-shine {
-  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.85) 50%, transparent 62%);
+.num-shine {
+  background: linear-gradient(105deg, transparent 40%, rgba(230, 231, 233, 0.95) 50%, transparent 60%);
   background-size: 300% 100%;
   background-position: 100% 0;
   -webkit-background-clip: text;
