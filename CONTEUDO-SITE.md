@@ -45,15 +45,17 @@ Regras:
 Título: **Você já disse alguma dessas frases?**
 Subtítulo pequeno: Toque nas que soam familiares.
 
-Frases em tipografia grande, entre aspas, na voz do fundador. Cada uma pode ser marcada com clique/toque (fica prata e acesa); as não marcadas ficam em grafite. Entram uma a uma com o scroll.
-1. "A gente é melhor do que parece."
-2. "Cada material nosso parece de uma empresa diferente."
-3. "Tenho designer, agência e fornecedor. Ninguém decidindo."
-4. "Tudo passa por mim. Até o post."
-5. "Vamos lançar algo grande, e a marca não está pronta."
-6. "Já refizemos o logo. O problema continuou."
+Frases em tipografia grande, na voz do fundador: as dúvidas e frases que as empresas mais dizem quando a marca ficou para trás. Aspas tipográficas curvas em TODAS (“ ”), nunca aspas retas ("). Cada uma pode ser marcada com clique/toque (fica prata e acesa); as não marcadas ficam em grafite. Entram uma a uma com o scroll.
+1. “A gente é maior do que parece.”
+2. “Não sei que história a minha marca conta.”
+3. “O cliente não entende de primeira o que a gente faz.”
+4. “A concorrência parece mais profissional do que a gente. E não é.”
+5. “Cada material nosso parece de uma empresa diferente.”
+6. “Tenho designer e agência. Falta alguém decidindo.”
+7. “Tudo passa por mim. Até o post.”
+8. “Vamos lançar algo grande, e a marca não está pronta.”
 
-Contador discreto: "2 de 6".
+Contador discreto: "2 de 8".
 Fecho que muda conforme a interação:
 - 0 marcadas (ou sem interação): **Se alguma dessas frases já passou pela sua cabeça, não falta designer. Falta direção.**
 - 1 marcada: **Já é um sinal. Vale uma conversa.**
