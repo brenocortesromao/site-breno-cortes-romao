@@ -13,6 +13,7 @@ import Footer from "@/components/layout/Footer";
 import JsonLdScript from "@/components/seo/JsonLdScript";
 import { personJsonLd, professionalServiceJsonLd } from "@/lib/seo/structured-data";
 import ThemeScroll from "@/components/theme/ThemeScroll";
+import AmbientGlow from "@/components/theme/AmbientGlow";
 import { htmlLang, routing } from "@/i18n/routing";
 
 const geistSans = Geist({
@@ -69,6 +70,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
         <NextIntlClientProvider messages={null}>
           <SmoothScroll />
           <ThemeScroll />
+          <AmbientGlow />
           <Header />
           {children}
           <Footer />

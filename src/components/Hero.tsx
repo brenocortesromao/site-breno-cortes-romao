@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import HeroVisual from "./HeroVisual";
 import DraftBadge from "./theme/DraftBadge";
+import { protectTerms } from "@/components/Term";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -222,7 +223,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
         <div data-fade className="max-w-sm">
           {copy.draft && <DraftBadge label={copy.draft} className="mb-4" />}
           <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-silver">
-            {copy.label}
+            {protectTerms(copy.label)}
           </p>
           <p className="text-sm leading-relaxed text-silver md:text-[15px]">{copy.support}</p>
         </div>

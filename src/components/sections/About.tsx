@@ -1,13 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import GraphicLayer from "@/components/graphics/GraphicLayer";
 import MediaSlot from "@/components/MediaSlot";
 
 /** Retrato do Sobre (monocromático pelo MediaSlot). Ex.: "/media/retrato-sobre.jpg". */
 export const aboutPortraitSrc: string | undefined = undefined;
 
 /**
- * Sobre (§11) — seção CLARA com curvas de nível líquidas (contours-b).
+ * Sobre (§11) — tema GRADIENTE ESCURO (ritmo de cores do CONTEUDO-SITE.md).
  * - variant "summary" (home): retrato, título (h2), bio, método e link para /sobre.
  * - variant "page" (/sobre): título como h1, bio, trajetória em linha do tempo e
  *   método. Bio e trajetória são [PENDENTE] até o dono enviar.
@@ -22,11 +21,10 @@ export default async function About({ variant }: { variant: "summary" | "page" }
   return (
     <section
       id="sobre"
-      data-theme="light"
+      data-theme="gradient"
       aria-labelledby="sobre-title"
       className="relative z-10 min-h-svh overflow-hidden"
     >
-      <GraphicLayer variant="contours-b" />
       <div
         className={`relative mx-auto grid w-full max-w-[1600px] gap-12 px-6 md:grid-cols-12 md:gap-8 md:px-12 ${
           isPage ? "pb-[clamp(6rem,16vh,12rem)] pt-40" : "py-[clamp(6rem,16vh,12rem)]"

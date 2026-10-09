@@ -1,7 +1,9 @@
 import { getTranslations } from "next-intl/server";
+import GraphicLayer from "@/components/graphics/GraphicLayer";
 
 /**
- * Poucas parcerias por vez (§12) — seção curta, de impacto. Texto
+ * Poucas parcerias por vez (§12) — seção curta, de impacto, em OFF-WHITE com
+ * curvas de nível líquidas (ritmo de cores do CONTEUDO-SITE.md). Texto
  * [CONFIRMAR]: fica exatamente como está no CONTEUDO-SITE.md até o dono
  * confirmar (decisão de negócio). Indicador discreto com ponto pulsante
  * (pulso desligado com prefers-reduced-motion).
@@ -10,8 +12,14 @@ export default async function Partnerships() {
   const t = await getTranslations("partnerships");
 
   return (
-    <section id="parcerias" data-theme="dark" aria-labelledby="parcerias-title" className="relative z-10">
-      <div className="mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+    <section
+      id="parcerias"
+      data-theme="light"
+      aria-labelledby="parcerias-title"
+      className="relative z-10 overflow-hidden"
+    >
+      <GraphicLayer variant="contours-b" />
+      <div className="relative mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("eyebrow")}</p>
         <h2
           id="parcerias-title"

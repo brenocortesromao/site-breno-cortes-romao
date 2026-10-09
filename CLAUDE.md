@@ -10,6 +10,8 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 
 - **Nome (regra fixa):** sempre **"Breno Côrtes Romão"**, completo e com acento, em todo lugar: cabeçalho, manifesto, assinatura, Sobre, rodapé, `<title>`, metadados de SEO e textos nos dois idiomas. Nunca abreviar ("Breno", "Breno Côrtes"). O nome vive numa única chave das mensagens (`site.name`) e é reutilizado a partir dela.
 
+- **Termos que nunca se traduzem (regra fixa):** o título **"Fractional Brand & Creative Director"** fica em inglês em todos os idiomas, inclusive no /pt: cabeçalho, assinatura, rodapé, Sobre, metadados e textos. A palavra "fractional" no texto corrido também fica assim (nunca "fracionário/fracionária/fracionada"). No código, renderize textos que possam contê-los com `protectTerms()` (`src/components/Term.tsx`). Ele envolve os termos em `<span translate="no" lang="en">`, para o tradutor automático do navegador não transformá-los em "Marca fracionária e diretor criativo".
+- **Ritmo de cores (regra fixa, mapa do `CONTEUDO-SITE.md`):** o site é majoritariamente preto. Off-white aparece em **só 3** seções: O que é fractional, Como funciona e Poucas parcerias. O gradiente escuro fica em A distância, O que muda, Sobre e Contato. O resto é preto.
 - **Visual:** fundo preto, grafite e prata líquida; estética startup tech premium e corporativa; tipografia exclusivamente sans-serif.
 - **Elemento central:** uma bola de metal líquido cromado e brilhante, centralizada, com cerca de 60% da altura da tela. Ela "respira" o tempo todo e reage ao mouse com atraso suave. Futuramente vira um urso escultórico, sem aparência infantil ou cartoon. **Sem órbitas nem partículas decorativas.**
 - **Decisão — urso (Etapa 4):** **sem modelo GLB.** Orelhas e focinho **brotam da própria bola** com o mouse e voltam a ser bola quando ele sai. São esferas extras fundidas por união suave (SDF/metaballs) no vertex shader. A arquitetura já existe e está desligada (`uMorph = 0`): ver `hero/liquidMetal.ts`.
@@ -86,10 +88,10 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - Don't use `next/script` with `beforeInteractive` for it: that strategy doesn't block hydration and may run after the first paint, which would flash the title.
 
 **Themes** (`globals.css` + `components/theme/*`):
-- Fixed palettes per theme (`--dark-*`, `--light-*`; off-white chosen: `#ECEAE5`) and "live" variables on `<html>` (`--bg`, `--fg`, `--muted`, `--line`, `--graphic`, `--surface`, `--grad-from`, `--grad-to`).
+- Fixed palettes per theme (`--dark-*`, `--light-*` = off-white `#ECEAE5`, `--gradient-*` = "gradiente escuro") and "live" variables on `<html>` (`--bg`, `--fg`, `--muted`, `--line`, `--graphic`, `--surface`, `--grad-from`, `--grad-to`, `--glow`). `--glow` (0–1) is the intensity of `theme/AmbientGlow` (a fixed layer with two very soft graphite/silver radial lights that drift with page scroll). It is 1 only in the `gradient` theme, so ThemeScroll fades the glow in and out with the color transition. The gradient theme is never light.
 - Tailwind maps `background`/`foreground`/`silver`/`line`/`graphic`/`surface` to the live variables. **Never hardcode colors** (`white/…`, `#0b0b0c`): use the tokens so components work in light sections.
 - Palette colors are written as `rgba(r,g,b,a)` with commas, which is the syntax GSAP interpolates.
-- `<Section theme="dark|light">` (`theme/Section.tsx`): `min-h-svh`, viewport-proportional padding, `data-theme`.
+- `<Section theme="dark|light|gradient">` (`theme/Section.tsx`): `min-h-svh`, viewport-proportional padding, `data-theme`.
   - **Every section needs a `data-theme`** (Hero and Manifesto set it themselves). The controller only transitions where the theme changes from the previous section.
 - `ThemeScroll` (mounted in the locale layout, re-run on `pathname` change):
   - For each theme change it scrubs the live variables from the previous palette to the new one (`top 70%` → `top 20%`).
@@ -153,9 +155,8 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - The curves are generated from functions (`business`, `brand`, `brandClosing`) and use `pathLength=1` with a dashoffset draw.
   - Chart C rotates/offsets the touchpoint groups into a common axis.
   - The final SVG state is the HTML; GSAP only sets initial states.
-- `Diagnostic`: each phrase is a `<button aria-pressed>` (click/touch/keyboard). The counter "x de N" uses `aria-live`.
-  - With 2+ marked, the closing switches to `closingMatched` and a CTA to `#contato` appears.
-  - With no interaction, the default closing is in the HTML.
+- `Diagnostic` (§3b): 6 quoted founder phrases, each a `<button aria-pressed>` (click/touch/keyboard). Marked phrases turn silver; the rest stay graphite. The counter "x de N" uses `aria-live`.
+  - The closing has 3 states: `closing` (0 marked or no interaction, which is what the HTML holds), `closingOne` (1 marked) and `closingMatched` (2+, plus the "Vamos conversar" CTA to `#contato`).
 - `Changes`: before/after. With `data-mode="flip"` each row flips via scroll inside a grid overlay (`[grid-area:1/1]`). The static mode shows two columns. Both texts are always in the DOM.
 - `Process`: a light section with `GraphicLayer variant="grid"`. The vertical line scrubs `scaleY`, and the steps light up.
 - `Works` (server) + `LogoMarquee` + `WorkCarousel`. Data lives in `public/trabalhos/trabalhos.json` and `public/logos/logos.json` (read via `src/content/media.ts`; to add one, drop the file in the folder and fill `"arquivo"`).

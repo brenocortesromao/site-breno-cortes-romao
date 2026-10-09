@@ -17,6 +17,7 @@
   --dark-surface: #0b0b0c;
   --dark-grad-from: #ffffff;
   --dark-grad-to: #a8abb0;
+  --dark-glow: 0;
 
   --light-bg: #eceae5;
   --light-fg: #141518;
@@ -26,6 +27,18 @@
   --light-surface: #e2e0da;
   --light-grad-from: #141518;
   --light-grad-to: #55585d;
+  --light-glow: 0;
+
+  /* Gradiente escuro: tokens do preto + brilho ambiente ligado (AmbientGlow). */
+  --gradient-bg: #050505;
+  --gradient-fg: #f2f2f0;
+  --gradient-muted: #a8abb0;
+  --gradient-line: rgba(255, 255, 255, 0.12);
+  --gradient-graphic: rgba(255, 255, 255, 0.06);
+  --gradient-surface: #0b0b0c;
+  --gradient-grad-from: #ffffff;
+  --gradient-grad-to: #a8abb0;
+  --gradient-glow: 1;
 
   /* Vivas: começam no tema escuro (a hero é escura). */
   --bg: var(--dark-bg);
@@ -36,6 +49,7 @@
   --surface: var(--dark-surface);
   --grad-from: var(--dark-grad-from);
   --grad-to: var(--dark-grad-to);
+  --glow: var(--dark-glow);
 }
 
 @theme inline {
@@ -68,6 +82,13 @@ body {
  * ativo (html.theme-js), elas ficam transparentes e a cor vem da interpolação
  * global — sem corte seco entre seções.
  */
+/* Sem JS: a seção de gradiente escuro pinta o próprio brilho (estático). */
+html:not(.theme-js) [data-theme="gradient"] {
+  background:
+    radial-gradient(60% 50% at 30% 30%, rgba(200, 204, 210, 0.09), transparent 70%),
+    var(--dark-bg);
+}
+
 html:not(.theme-js) [data-theme="light"] {
   --bg: var(--light-bg);
   --fg: var(--light-fg);

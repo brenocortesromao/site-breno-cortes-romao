@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { contactConfig } from "@/content/contact";
 import DraftBadge from "@/components/theme/DraftBadge";
+import { protectTerms } from "@/components/Term";
 
 const button =
   "inline-flex h-full min-h-[4.5rem] items-center justify-between gap-6 border px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors";
@@ -15,14 +16,14 @@ export default async function Contact() {
   const { calUrl, calProvisional, email, mediaKit } = contactConfig;
 
   return (
-    <section id="contato" data-theme="dark" aria-labelledby="contato-title" className="relative z-10 border-t border-line">
+    <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 border-t border-line">
       <div className="mx-auto flex min-h-svh w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("eyebrow")}</p>
         <h2 id="contato-title" className="mt-10 text-[clamp(2.75rem,10vw,10.5rem)] leading-[0.9] tracking-[-0.06em]">
           <span className="block font-light">{t("titleLight")}</span>
           <span className="block font-semibold text-silver-gradient md:pl-[12vw]">{t("titleStrong")}</span>
         </h2>
-        <p className="mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{t("text")}</p>
+        <p className="mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
 
         <ul className="mt-14 grid gap-4 md:max-w-4xl md:grid-cols-3">
           <li>

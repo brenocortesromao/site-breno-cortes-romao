@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { protectTerms } from "@/components/Term";
 
 /**
  * Perguntas frequentes (§13). Acordeão com <details>/<summary> NATIVOS:
@@ -27,7 +28,7 @@ export default async function Faq() {
           {items.map((item) => (
             <details key={item.q} className="faq-item group border-b border-line">
               <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-7 text-[clamp(1.15rem,1.8vw,1.7rem)] font-medium leading-snug tracking-[-0.025em] outline-none focus-visible:ring-1 focus-visible:ring-foreground md:py-9 [&::-webkit-details-marker]:hidden">
-                <span>{item.q}</span>
+                <span>{protectTerms(item.q)}</span>
                 {/* + que vira × ao abrir */}
                 <span
                   aria-hidden="true"
@@ -38,7 +39,7 @@ export default async function Faq() {
                   </svg>
                 </span>
               </summary>
-              <p className="max-w-2xl pb-8 text-base leading-relaxed text-silver md:pb-10 md:text-lg">{item.a}</p>
+              <p className="max-w-2xl pb-8 text-base leading-relaxed text-silver md:pb-10 md:text-lg">{protectTerms(item.a)}</p>
             </details>
           ))}
         </div>

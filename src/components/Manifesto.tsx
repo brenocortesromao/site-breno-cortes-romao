@@ -8,6 +8,7 @@ import MediaSlot from "./MediaSlot";
 import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
+import { protectTerms } from "@/components/Term";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -193,12 +194,12 @@ export default function Manifesto({
               data-follow
               className="max-w-md text-sm leading-relaxed text-silver md:col-span-4 md:col-start-3 md:text-[15px]"
             >
-              {copy.body}
+              {protectTerms(copy.body)}
             </p>
             <p data-follow className="md:col-span-4 md:col-start-3">
               <span className="block text-sm font-semibold tracking-[-0.01em]">{copy.name}</span>
               <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-silver">
-                {copy.role}
+                {protectTerms(copy.role)}
               </span>
             </p>
           </div>

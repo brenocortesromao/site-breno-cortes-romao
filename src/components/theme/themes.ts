@@ -1,9 +1,14 @@
 /**
  * Temas de seção. Os valores ficam em globals.css (--{tema}-{papel}); aqui só
  * os nomes e os papéis que o ThemeScroll interpola.
- * Para escolher o tema de uma seção: <Section theme="light"> (ou "dark").
+ * Para escolher o tema de uma seção: data-theme="dark" | "light" | "gradient"
+ * (ou <Section theme="...">).
+ * - dark: preto (padrão do site);
+ * - light: off-white #ECEAE5 (só 3 seções: Fractional, Como funciona, Parcerias);
+ * - gradient: "gradiente escuro" — preto com brilho grafite/prata muito suave
+ *   que se move com o scroll (AmbientGlow); nunca claro.
  */
-export const THEMES = ["dark", "light"] as const;
+export const THEMES = ["dark", "light", "gradient"] as const;
 export type ThemeName = (typeof THEMES)[number];
 
 export const THEME_ROLES = [
@@ -15,6 +20,8 @@ export const THEME_ROLES = [
   "surface",
   "grad-from",
   "grad-to",
+  // intensidade (0–1) do brilho ambiente do tema "gradient"
+  "glow",
 ] as const;
 
 /** Papéis de texto: trocam numa janela curta no meio da transição (contraste). */

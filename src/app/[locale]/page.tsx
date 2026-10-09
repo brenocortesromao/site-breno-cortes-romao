@@ -99,6 +99,7 @@ export default async function Home() {
             ),
             items: diagnosticItems,
             closing: t("diagnostic.closing"),
+            closingOne: t("diagnostic.closingOne"),
             closingMatched: t("diagnostic.closingMatched"),
             cta: t("diagnostic.cta"),
           }}

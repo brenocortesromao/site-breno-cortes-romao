@@ -47,7 +47,7 @@ export default function Changes({ copy }: { copy: ChangesCopy }) {
   );
 
   return (
-    <section ref={root} id="o-que-muda" data-theme="dark" aria-labelledby="o-que-muda-title" className="group relative z-10 min-h-svh">
+    <section ref={root} id="o-que-muda" data-theme="gradient" aria-labelledby="o-que-muda-title" className="group relative z-10 min-h-svh">
       <div className="mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
         <h2

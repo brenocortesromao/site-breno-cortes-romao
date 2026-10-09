@@ -126,7 +126,7 @@ export default function Distance({ copy }: { copy: DistanceCopy }) {
   );
 
   return (
-    <section ref={root} id="distancia" data-theme="dark" aria-labelledby="distancia-title" className="relative z-10">
+    <section ref={root} id="distancia" data-theme="gradient" aria-labelledby="distancia-title" className="relative z-10">
       <div className="mx-auto w-full max-w-[1600px] px-6 pt-[clamp(6rem,16vh,12rem)] md:px-12">
         <h2 id="distancia-title" className="font-mono text-[11px] font-normal uppercase tracking-[0.28em] text-silver">
           {copy.eyebrow}

@@ -76,26 +76,28 @@
   },
   "diagnostic": {
     "eyebrow": "Diagnóstico",
-    "title": "Você provavelmente já sentiu isso.",
-    "hint": "Marque as frases que você reconhece.",
+    "title": "Você já disse alguma dessas frases?",
+    "hint": "Toque nas que soam familiares.",
     "counter": "{count} de {total}",
     "items": [
-      "A empresa é melhor do que a forma como ela se apresenta.",
-      "O site, a apresentação comercial e as campanhas parecem de empresas diferentes.",
-      "Tem gente produzindo, mas ninguém decidindo.",
-      "Toda decisão criativa volta para a mesa do fundador.",
-      "Um lançamento ou um novo mercado está chegando, e a marca não está pronta."
+      "“A gente é melhor do que parece.”",
+      "“Cada material nosso parece de uma empresa diferente.”",
+      "“Tenho designer, agência e fornecedor. Ninguém decidindo.”",
+      "“Tudo passa por mim. Até o post.”",
+      "“Vamos lançar algo grande, e a marca não está pronta.”",
+      "“Já refizemos o logo. O problema continuou.”"
     ],
-    "closing": "Se você marcou dois ou mais, não falta designer. Falta direção.",
+    "closing": "Se alguma dessas frases já passou pela sua cabeça, não falta designer. Falta direção.",
+    "closingOne": "Já é um sinal. Vale uma conversa.",
     "closingMatched": "Não falta designer. Falta direção.",
-    "cta": "Agendar conversa"
+    "cta": "Vamos conversar"
   },
   "fractional": {
     "eyebrow": "O que é fractional",
     "title": "Liderança de marca sênior, na medida do seu momento.",
     "text": "Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada — e sem o custo de uma contratação executiva fixa.",
     "chart": {
-      "title": "Um modelo novo, crescendo rápido.",
+      "title": "Lá fora, esse modelo já está crescendo rápido.",
       "bars": [
         {
           "label": "5 anos atrás",

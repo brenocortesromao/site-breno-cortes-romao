@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
+import { protectTerms } from "@/components/Term";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -87,14 +88,14 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
       <GraphicLayer variant="contours-a" />
       <div className="relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
-          {copy.eyebrow}
+          {protectTerms(copy.eyebrow)}
         </p>
         <div className="mt-6 grid gap-10 md:grid-cols-12 md:gap-8">
           <h2 id="fractional-title" className="text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8">
-            {copy.title}
+            {protectTerms(copy.title)}
           </h2>
           <p className="max-w-md self-end text-base leading-relaxed text-silver md:col-span-4 md:text-[17px]">
-            {copy.text}
+            {protectTerms(copy.text)}
           </p>
         </div>
 
@@ -125,7 +126,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             })}
           </dl>
           <figcaption className="mt-6 max-w-xl">
-            <span className="block text-sm leading-relaxed text-silver md:text-[15px]">{copy.chart.caption}</span>
+            <span className="block text-sm leading-relaxed text-silver md:text-[15px]">{protectTerms(copy.chart.caption)}</span>
             <span className="mt-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
               {copy.chart.source}
             </span>
@@ -148,7 +149,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
                       c === HIGHLIGHT ? "border-foreground bg-surface/70 pt-5" : "border-line"
                     }`}
                   >
-                    {col}
+                    {protectTerms(col)}
                   </th>
                 ))}
               </tr>
@@ -188,7 +189,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
                 data-col={c}
                 className={`border p-5 ${c === HIGHLIGHT ? "border-foreground bg-surface/70" : "border-line"}`}
               >
-                <h3 className="text-xl font-semibold tracking-[-0.03em]">{col}</h3>
+                <h3 className="text-xl font-semibold tracking-[-0.03em]">{protectTerms(col)}</h3>
                 <dl className="mt-4 grid gap-3">
                   {rows.map((row) => (
                     <div key={row.label} className="grid grid-cols-[7.5rem_1fr] gap-3">
@@ -205,7 +206,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             ))}
           </div>
 
-          <p className="mt-10 max-w-xl text-sm leading-relaxed text-silver">{copy.note}</p>
+          <p className="mt-10 max-w-xl text-sm leading-relaxed text-silver">{protectTerms(copy.note)}</p>
         </div>
       </div>
     </section>

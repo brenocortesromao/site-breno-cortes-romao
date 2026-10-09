@@ -4,10 +4,16 @@ Este arquivo é a fonte dos textos e do mapa do site. Use estes textos em `messa
 
 Regras:
 - Nome sempre "Breno Côrtes Romão".
+- O título "Fractional Brand & Creative Director" NUNCA é traduzido: fica em inglês também no site em português (cabeçalho, assinatura, rodapé, Sobre, metadados). Vale também para o termo "fractional" no texto corrido (não usar "fracionário/fracionada").
 - O site é sobre o Breno: nada de estatísticas externas, EXCETO o único dado verificado da seção 4 (com fonte).
 - Não inventar clientes, números de carreira, depoimentos ou resultados. [PENDENTE] = placeholder discreto. [CONFIRMAR] = decisão do Breno, deixar o texto como está até ele confirmar.
 - Tom: confiante, direto, frases curtas. Sensação de algo raro e seletivo, nunca arrogante. Nada de jargão de agência.
-- Gráficos da seção 7 são conceituais, sem números.
+- Gráficos da seção 3 ("A distância") são conceituais, sem números.
+- Ordem narrativa: Hero → Mensagem → A distância (problema) → Diagnóstico interativo (identificação) → O que é fractional (modelo) → O que eu faço → O que muda → Como funciona → Onde aparece → Trabalhos → Sobre → Poucas parcerias → FAQ → Contato.
+- Curvas de nível do off-white: movimento líquido LENTO e calmo.
+- RITMO DE CORES (o site é majoritariamente preto; off-white só para variar, 3 vezes, espalhadas):
+  1 Hero: PRETO · 2 Mensagem: PRETO · 3 A distância: GRADIENTE ESCURO · 3b Diagnóstico: PRETO · 4 O que é fractional: OFF-WHITE · 5 O que eu faço: PRETO · 6 O que muda: GRADIENTE ESCURO · 8 Como funciona: OFF-WHITE · 9 Onde aparece: PRETO · 10 Trabalhos: PRETO · 11 Sobre: GRADIENTE ESCURO · 12 Poucas parcerias: OFF-WHITE · 13 FAQ: PRETO · 14 Contato: GRADIENTE ESCURO (fechamento).
+  GRADIENTE ESCURO = terceiro tema: preto com um brilho grafite/prata muito suave (radial ou linear), que se move devagar com o scroll; nunca claro.
 
 ---
 
@@ -23,19 +29,36 @@ Regras:
 
 - Frase de abertura, em tipografia gigante, palavra por palavra:
   **Uma marca não é o que a empresa diz sobre si. É o que sobra na cabeça das pessoas quando você sai da sala.**
-- Texto: Eu cuido do que sobra. Trabalho com empresas que cresceram mais rápido do que a própria marca — e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, decidir o que ele precisa dizer e garantir que tudo o que a empresa mostra diga a mesma coisa.
+- Texto: É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca — e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.
 - Assinatura: Breno Côrtes Romão
 
-## 3. Sinais (preto — lista que acende item a item)
+## 3. A distância (GRADIENTE ESCURO — gráficos conceituais, sem números, nota "ilustrativo")
 
-Título: **Você provavelmente já sentiu isso.**
-1. A empresa é melhor do que a forma como ela se apresenta.
-2. O site, a apresentação comercial e as campanhas parecem de empresas diferentes.
-3. Tem gente produzindo, mas ninguém decidindo.
-4. Toda decisão criativa volta para a mesa do fundador.
-5. Um lançamento ou um novo mercado está chegando, e a marca não está pronta.
+(Movida para cá: mostra o problema visualmente logo depois da mensagem do Breno.)
 
-Fecho (aparece depois do último item): **Se você marcou dois ou mais, não falta designer. Falta direção.**
+- **Gráfico A:** duas curvas desenhadas com o scroll. "Negócio" sobe forte; "Marca" fica para trás; a área entre elas acende com o rótulo "a distância". Texto: **Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece.**
+- **Gráfico B:** no ponto "direção de marca", a curva da marca acelera e alcança a do negócio. Texto: **Essa distância custa vendas, talentos e preço. Meu trabalho é fechá-la.**
+- **Gráfico C:** pontos de contato (site, apresentação, campanhas, redes) dispersos se alinham num eixo. Texto: **Consistência não é estética. É o que faz o mercado confiar em você.**
+
+## 3b. Diagnóstico (preto — INTERATIVO, substitui a antiga lista "Sinais")
+
+Título: **Você já disse alguma dessas frases?**
+Subtítulo pequeno: Toque nas que soam familiares.
+
+Frases em tipografia grande, entre aspas, na voz do fundador. Cada uma pode ser marcada com clique/toque (fica prata e acesa); as não marcadas ficam em grafite. Entram uma a uma com o scroll.
+1. "A gente é melhor do que parece."
+2. "Cada material nosso parece de uma empresa diferente."
+3. "Tenho designer, agência e fornecedor. Ninguém decidindo."
+4. "Tudo passa por mim. Até o post."
+5. "Vamos lançar algo grande, e a marca não está pronta."
+6. "Já refizemos o logo. O problema continuou."
+
+Contador discreto: "2 de 6".
+Fecho que muda conforme a interação:
+- 0 marcadas (ou sem interação): **Se alguma dessas frases já passou pela sua cabeça, não falta designer. Falta direção.**
+- 1 marcada: **Já é um sinal. Vale uma conversa.**
+- 2 ou mais: **Não falta designer. Falta direção.** + botão "Vamos conversar" (leva ao contato).
+Funciona sem interação (texto padrão) e com teclado; em prefers-reduced-motion, sem animação de entrada.
 
 ## 4. O que é fractional (OFF-WHITE, curvas de nível em movimento)
 
@@ -43,12 +66,12 @@ Fecho (aparece depois do último item): **Se você marcou dois ou mais, não fal
 - Texto: Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada — e sem o custo de uma contratação executiva fixa.
 
 **Dado verificado (gráfico de barras animado, duas barras):**
-- Título do gráfico: **Um modelo novo, crescendo rápido.**
+- Título do gráfico: **Lá fora, esse modelo já está crescendo rápido.**
 - Barra 1: "5 anos atrás — 9 a cada 1.000"
 - Barra 2: "2026 — 24 a cada 1.000"
-- Legenda: Vagas executivas anunciadas que já são fractional. Quase o triplo em cinco anos.
+- Legenda: Vagas executivas anunciadas que já são fractional: quase o triplo em cinco anos. Empresas ganham liderança sênior sem precisar aumentar a equipe.
 - Fonte (letra pequena): Revelio Labs, dados publicados no Financial Times.
-- NÃO escrever "nos Estados Unidos": a fonte não especifica o país.
+- NÃO citar país específico nem afirmar "mais resultado" como dado: a fonte só mede o crescimento das vagas.
 
 **Comparativo (já aprovado visualmente — manter):**
 | | Agência | Contratação executiva | Fractional |
@@ -70,7 +93,7 @@ Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois — e
 3. **Execução** — Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação.
 4. **Acompanhamento** — Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca não para de evoluir no mês dois.
 
-## 6. O que muda (preto — antes/depois animado, cada linha vira de "antes" para "depois")
+## 6. O que muda (GRADIENTE ESCURO — antes/depois animado, cada linha vira de "antes" para "depois")
 
 Título: **O que muda quando alguém assume a marca.**
 | Antes | Depois |
@@ -80,12 +103,6 @@ Título: **O que muda quando alguém assume a marca.**
 | Refação sem fim. | Briefings claros, critérios de aprovação, menos retrabalho. |
 | O fundador aprova até o post. | O fundador volta a cuidar do negócio. |
 | Fornecedores sem rumo. | Fornecedores entregando na direção certa. |
-
-## 7. A distância (preto — gráficos conceituais, sem números, nota "ilustrativo")
-
-- **Gráfico A:** duas curvas desenhadas com o scroll. "Negócio" sobe forte; "Marca" fica para trás; a área entre elas acende com o rótulo "a distância". Texto: **Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece.**
-- **Gráfico B:** no ponto "direção de marca", a curva da marca acelera e alcança a do negócio. Texto: **Essa distância custa vendas, talentos e preço. Meu trabalho é fechá-la.**
-- **Gráfico C:** pontos de contato (site, apresentação, campanhas, redes) dispersos se alinham num eixo. Texto: **Consistência não é estética. É o que faz o mercado confiar em você.**
 
 ## 8. Como funciona (OFF-WHITE, grade técnica — linha do tempo desenhada)
 
@@ -110,16 +127,16 @@ Título: **Marcas com as quais trabalhei.**
 - Mural compacto, 6 a 9 peças, grid irregular, legenda de projeto e ano [PENDENTE: imagens].
 - Até 3 cases curtos em texto, com página própria: Desafio → Meu papel → Decisão → Aplicação → Resultado [PENDENTE: cases].
 
-## 11. Sobre (OFF-WHITE, curvas de nível)
+## 11. Sobre (GRADIENTE ESCURO)
 
 - Título: **Quem vai cuidar da sua marca.**
 - [PENDENTE: bio — anos de experiência, agências, marcas, formação.] Retrato + trajetória em linha do tempo.
 - Frase de método: Uso inteligência artificial como ferramenta de pesquisa, exploração e produção — sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.
 
-## 12. Poucas parcerias por vez (preto — seção curta, impacto)
+## 12. Poucas parcerias por vez (OFF-WHITE — seção curta, impacto)
 
 [CONFIRMAR com o Breno antes de publicar — é decisão de negócio]
-- Título: **Trabalho com poucas empresas por vez.**
+- Título (exatamente assim, sem inverter palavras): **Trabalho com poucas empresas por vez.**
 - Texto: Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa — não por proposta enviada em massa.
 - Indicador discreto: "Agenda para novas parcerias: [CONFIRMAR]"
 
@@ -133,7 +150,7 @@ Título: **Marcas com as quais trabalhei.**
 - **Como a IA entra no trabalho?** Como ferramenta de método — pesquisa, exploração, prototipagem e produção com revisão. Nunca como substituta de critério.
 - **Para quem é?** Para empresas com produto, clientes e ambição — especialmente startups B2B e empresas de serviços — cuja marca ainda não acompanha o negócio.
 
-## 14. Contato (preto)
+## 14. Contato (GRADIENTE ESCURO)
 
 - Título: **Vamos fechar essa distância?**
 - Texto: Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você — e, se não fizer, te digo o que faria.

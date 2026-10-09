@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import LocaleSwitcher from "./LocaleSwitcher";
 import NavLinks from "./NavLinks";
+import { protectTerms } from "@/components/Term";
 
 const nav = [
   { key: "manifesto", hash: "manifesto" },
@@ -32,7 +33,7 @@ export default async function Header() {
             {t("site.name")}
           </span>
           <span className="mt-1 block font-mono text-[9px] uppercase tracking-[0.12em] text-silver md:text-[10px] md:tracking-[0.22em]">
-            {t("site.role")}
+            {protectTerms(t("site.role"))}
           </span>
         </Link>
         <div className="flex shrink-0 items-center gap-10">

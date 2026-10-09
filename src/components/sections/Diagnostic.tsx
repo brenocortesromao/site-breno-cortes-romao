@@ -14,18 +14,21 @@ export type DiagnosticCopy = {
   /** Já formatado para cada contagem possível: índice = número de marcadas. */
   counters: string[];
   items: string[];
-  /** Fecho padrão (sem interação ou com menos de 2 marcadas). */
+  /** Fecho padrão (sem interação / nenhuma marcada). */
   closing: string;
+  /** Fecho com exatamente 1 marcada. */
+  closingOne: string;
   /** Fecho com 2 ou mais marcadas. */
   closingMatched: string;
   cta: string;
 };
 
 /**
- * Diagnóstico: frases na voz do fundador, marcáveis (clique, toque ou teclado:
- * são <button aria-pressed>). Contador "x de N" e fecho que muda com 2+
- * marcadas, revelando o botão para o contato. Sem JS/sem interação, o texto
- * padrão completo já está no HTML.
+ * Diagnóstico (§3b): frases entre aspas na voz do fundador, marcáveis (clique,
+ * toque ou teclado: são <button aria-pressed>). Marcadas ficam prata e acesas;
+ * as demais, em grafite. Contador "x de N" e fecho em 3 estados (0 / 1 / 2+);
+ * com 2+ aparece o botão para o contato. Sem JS/sem interação, o texto padrão
+ * completo já está no HTML.
  * Movimento: as frases acendem ao cruzar o meio da tela (sem reduced motion).
  */
 export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ctaHref: string }) {
@@ -33,6 +36,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
   const [marked, setMarked] = useState<boolean[]>(() => copy.items.map(() => false));
   const count = marked.filter(Boolean).length;
   const matched = count >= 2;
+  const closing = matched ? copy.closingMatched : count === 1 ? copy.closingOne : copy.closing;
 
   useGSAP(
     () => {
@@ -106,8 +110,10 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
                     </svg>
                   </span>
                   <span
-                    className={`text-[clamp(1.35rem,2.5vw,2.5rem)] leading-[1.15] tracking-[-0.035em] transition-colors duration-500 ${
-                      marked[i] ? "font-normal text-foreground" : "font-light text-silver group-hover:text-foreground"
+                    className={`text-[clamp(1.45rem,2.8vw,2.9rem)] leading-[1.12] tracking-[-0.04em] transition-[color,opacity] duration-500 ${
+                      marked[i]
+                        ? "font-medium text-silver-gradient"
+                        : "font-light text-silver opacity-55 group-hover:opacity-90"
                     }`}
                   >
                     {item}
@@ -120,10 +126,10 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
 
         <div aria-live="polite" className="mt-16 md:ml-[calc(41.666%+1rem)] md:mt-24">
           <p
-            key={matched ? "m" : "d"}
+            key={count >= 2 ? "m" : count === 1 ? "o" : "d"}
             className="max-w-2xl animate-[fadeIn_0.6s_ease] text-[clamp(1.5rem,2.6vw,2.6rem)] font-semibold leading-[1.1] tracking-[-0.04em]"
           >
-            {matched ? copy.closingMatched : copy.closing}
+            {closing}
           </p>
           {matched && (
             <a
