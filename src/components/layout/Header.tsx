@@ -4,8 +4,9 @@ import LocaleSwitcher from "./LocaleSwitcher";
 
 const nav = [
   { key: "manifesto", href: "#manifesto" },
-  { key: "services", href: "#servicos" },
-  { key: "projects", href: "#projetos" },
+  { key: "fractional", href: "#fractional" },
+  { key: "services", href: "#o-que-faco" },
+  { key: "projects", href: "#trabalhos" },
   { key: "contact", href: "#contato" },
 ] as const;
 

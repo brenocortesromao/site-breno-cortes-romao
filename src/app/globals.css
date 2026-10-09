@@ -27,16 +27,6 @@
   --light-grad-from: #141518;
   --light-grad-to: #55585d;
 
-  /* Candidato mais quente ao off-white — só para comparação (ver /preview/temas). */
-  --light-warm-bg: #ede6da;
-  --light-warm-fg: #16140f;
-  --light-warm-muted: #625d55;
-  --light-warm-line: rgba(22, 20, 15, 0.14);
-  --light-warm-graphic: rgba(22, 20, 15, 0.11);
-  --light-warm-surface: #e3dbcd;
-  --light-warm-grad-from: #16140f;
-  --light-warm-grad-to: #5a554c;
-
   /* Vivas: começam no tema escuro (a hero é escura). */
   --bg: var(--dark-bg);
   --fg: var(--dark-fg);
@@ -87,19 +77,6 @@ html:not(.theme-js) [data-theme="light"] {
   --surface: var(--light-surface);
   --grad-from: var(--light-grad-from);
   --grad-to: var(--light-grad-to);
-  background: var(--bg);
-  color: var(--fg);
-}
-
-html:not(.theme-js) [data-theme="light-warm"] {
-  --bg: var(--light-warm-bg);
-  --fg: var(--light-warm-fg);
-  --muted: var(--light-warm-muted);
-  --line: var(--light-warm-line);
-  --graphic: var(--light-warm-graphic);
-  --surface: var(--light-warm-surface);
-  --grad-from: var(--light-warm-grad-from);
-  --grad-to: var(--light-warm-grad-to);
   background: var(--bg);
   color: var(--fg);
 }

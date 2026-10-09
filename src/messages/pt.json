@@ -13,76 +13,124 @@
   "nav": {
     "label": "Principal",
     "home": "Início",
-    "manifesto": "Manifesto",
-    "services": "Serviços",
-    "projects": "Projetos",
+    "manifesto": "Mensagem",
+    "services": "O que faço",
+    "projects": "Trabalhos",
     "contact": "Contato",
     "language": "Idioma",
-    "switchTo": "Ver o site em {language}"
+    "switchTo": "Ver o site em {language}",
+    "fractional": "Fractional"
   },
   "languages": {
     "pt": "Português",
     "en": "English"
   },
   "hero": {
-    "left": "Marcas à altura",
+    "left": "Sua marca à altura",
     "right": "do seu crescimento.",
-    "support": "Para empresas que cresceram, mas cuja marca e comunicação não acompanharam. Estratégia de marca, direção criativa, execução e acompanhamento."
-  },
-  "clients": {
-    "label": "Marcas com as quais trabalhei",
-    "placeholder": "Logo"
+    "support": "Estratégia de marca, direção criativa e execução para empresas que precisam comunicar melhor seu valor e dar consistência à sua presença no mercado."
   },
   "manifesto": {
     "eyebrow": "(01) Mensagem de {name}",
     "statement": [
       {
-        "text": "Sua empresa cresceu."
+        "text": "O negócio evoluiu."
       },
       {
-        "text": "A marca e a comunicação nem sempre acompanham esse ritmo.",
+        "text": "A comunicação precisa acompanhar.",
         "soft": true
-      },
-      {
-        "text": "Meu trabalho é fechar essa distância."
       }
     ],
-    "body": "Atuo como diretor de marca e criativo fractional: um executivo sênior dedicado à sua marca por alguns dias por mês, da estratégia à execução, sem o custo de uma contratação fixa.",
+    "body": "Eu ajudo empresas que cresceram, mas cuja marca e comunicação ainda não acompanham esse crescimento. Entendo o negócio, organizo seu posicionamento e transformo essa estratégia em identidade, campanhas e materiais que mostram com clareza o valor da empresa.",
     "portrait": "Retrato",
-    "signatureLabel": "Assinatura de {name} (provisória)"
+    "signatureLabel": "Assinatura de {name}",
+    "signatureDraft": "Assinatura provisória"
   },
-  "services": {
-    "eyebrow": "(02) Serviços",
-    "title": "O que faço",
+  "signals": {
+    "eyebrow": "(02) Quando você precisa de mim",
+    "title": "Sinais de que a marca ficou para trás.",
+    "items": [
+      "Seu produto tem valor, mas esse valor nem sempre fica claro para quem chega.",
+      "O site, a apresentação comercial e as campanhas parecem falar de empresas diferentes.",
+      "A equipe produz, mas falta uma direção comum.",
+      "As decisões criativas dependem sempre do fundador, e os projetos acabam travando.",
+      "A empresa vai lançar um produto ou entrar em outro mercado."
+    ],
+    "closing": "Minha atuação conecta estratégia e criação para organizar essas decisões e transformar o valor do negócio em uma comunicação clara e consistente."
+  },
+  "fractional": {
+    "eyebrow": "(03) O que é fractional",
+    "title": "Liderança de marca sênior, na medida do seu momento.",
+    "text": "No modelo fractional, atuo como uma liderança externa integrada à sua empresa, com participação contínua nas prioridades e decisões de marca e criação — com uma dedicação mensal acordada, sem o custo de uma contratação executiva fixa.",
+    "compare": {
+      "caption": "Comparativo entre agência, contratação executiva e fractional",
+      "columns": [
+        "Agência",
+        "Contratação executiva",
+        "Fractional"
+      ],
+      "rows": [
+        {
+          "label": "Visão do negócio",
+          "values": [
+            "Por projeto",
+            "Contínua",
+            "Contínua"
+          ]
+        },
+        {
+          "label": "Decisão de marca",
+          "values": [
+            "Do cliente",
+            "Interna",
+            "Compartilhada, com responsável"
+          ]
+        },
+        {
+          "label": "Custo",
+          "values": [
+            "Variável por job",
+            "Salário + encargos fixos",
+            "Dedicação mensal acordada"
+          ]
+        },
+        {
+          "label": "Continuidade",
+          "values": [
+            "Termina com o job",
+            "Total",
+            "Ao longo da parceria"
+          ]
+        }
+      ]
+    },
+    "note": "Fractional Brand & Creative Director não é um CMO — não assume aquisição, canais nem orçamento de mídia."
+  },
+  "pillars": {
+    "eyebrow": "(04) O que eu faço",
+    "title": "Da estratégia à presença da marca.",
     "items": [
       {
-        "title": "Branding",
-        "text": "Identidade, verbal e visual, construída a partir de um ponto de vista claro. Marcas que se reconhecem sem precisar de logotipo.",
-        "deliverables": [
-          "Plataforma de marca",
-          "Identidade visual",
-          "Voz e linguagem"
-        ]
+        "title": "Estratégia de marca",
+        "text": "Defino com você o que a empresa representa, para quem ela existe, quais diferenciais destacar e como apresentar sua oferta."
       },
       {
-        "title": "Estratégia",
-        "text": "Posicionamento, narrativa e direção criativa. Decidimos o que dizer antes de decidir como mostrar.",
-        "deliverables": [
-          "Posicionamento",
-          "Arquitetura de marca",
-          "Direção criativa"
-        ]
+        "title": "Direção criativa",
+        "text": "Transformo esse direcionamento em conceitos, linguagem visual e campanhas, para que os materiais expressem a mesma marca."
       },
       {
-        "title": "Experiências digitais",
-        "text": "Sites, produtos e sistemas desenhados com o mesmo rigor de uma peça editorial, do primeiro pixel à última interação.",
-        "deliverables": [
-          "Design de sites",
-          "Design systems",
-          "Campanhas digitais"
-        ]
+        "title": "Execução",
+        "text": "Desenvolvo materiais prioritários e acompanho a produção com equipes e fornecedores, do briefing à aprovação."
+      },
+      {
+        "title": "Acompanhamento",
+        "text": "Reviso o trabalho, identifico ajustes e organizo os próximos passos conforme o negócio."
       }
     ]
+  },
+  "clients": {
+    "label": "Marcas com as quais trabalhei",
+    "placeholder": "Logo"
   },
   "projects": {
     "eyebrow": "(03) Projetos selecionados",

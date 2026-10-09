@@ -52,13 +52,15 @@ export type HeroCopy = {
   right: string;
   /** Texto de apoio curto, canto inferior esquerdo. */
   support: string;
+  /** Rótulo pequeno acima do texto de apoio (função). */
+  label: string;
   /** Rótulo do selo de conteúdo provisório (vazio = sem selo). */
   draft: string;
 };
 
 /**
- * Hero: bola de metal líquido grande no centro, uma frase de cada lado (a bola
- * passa levemente por cima das palavras) e texto de apoio no canto inferior
+ * Hero: bola de metal líquido grande no centro, uma frase de cada lado (com
+ * respiro: a bola nunca cobre as palavras) e texto de apoio no canto inferior
  * esquerdo. No mobile: frase, bola, frase, apoio. O quadrado `anchor` define
  * onde e de que tamanho a bola aparece; a cena 3D se enquadra nele.
  */
@@ -162,7 +164,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
 
   const showScene = env?.webgl === true;
   const phrase =
-    "relative z-0 font-display text-[clamp(2.4rem,11vw,4rem)] leading-[0.95] tracking-[-0.055em] md:text-[min(4.7vw,6rem)]";
+    "font-display text-[clamp(2.4rem,11vw,4rem)] leading-[0.95] tracking-[-0.055em] md:text-[min(3.9vw,5rem)]";
 
   return (
     <section
@@ -173,9 +175,9 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
       {/* Título semântico completo (leitores de tela/SEO); as frases visuais ao redor da bola são decorativas. */}
       <h1 className="sr-only">{`${copy.left} ${copy.right}`}</h1>
 
-      <div className="relative mx-auto flex w-full max-w-[1600px] flex-col items-center gap-6 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-0">
+      <div className="relative z-30 mx-auto flex w-full max-w-[1600px] flex-col items-center gap-6 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-[3.5vw]">
         {/* Frase à esquerda (acima no mobile) */}
-        <div aria-hidden="true" data-hero-text className={`${phrase} w-full md:-mr-[2.5vw] md:text-right`}>
+        <div aria-hidden="true" data-hero-text className={`${phrase} w-full md:text-right`}>
           <span className="block overflow-hidden pb-[0.16em] -mb-[0.16em]">
             <span data-reveal className="block font-light">
               {copy.left}
@@ -197,7 +199,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
         </div>
 
         {/* Frase à direita (abaixo no mobile) */}
-        <div aria-hidden="true" data-hero-text className={`${phrase} w-full md:-ml-[2.5vw]`}>
+        <div aria-hidden="true" data-hero-text className={`${phrase} w-full`}>
           <span className="block overflow-hidden pb-[0.16em] pr-[0.1em] -mb-[0.16em]">
             <span
               data-reveal
@@ -212,15 +214,19 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
       {/* Texto de apoio: canto inferior esquerdo (no fim do fluxo no mobile) */}
       <div
         data-hero-text
-        className="relative z-0 mx-auto mt-10 w-full max-w-[1600px] md:absolute md:inset-x-12 md:bottom-14 md:mt-0"
+        className="relative z-30 mx-auto mt-10 w-full max-w-[1600px] md:absolute md:inset-x-12 md:bottom-14 md:mt-0"
       >
         <div data-fade className="max-w-sm">
           {copy.draft && <DraftBadge label={copy.draft} className="mb-4" />}
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-silver">
+            {copy.label}
+          </p>
           <p className="text-sm leading-relaxed text-silver md:text-[15px]">{copy.support}</p>
         </div>
       </div>
 
-      {/* Camada 3D em tela cheia, por cima do texto (a bola sobrepõe as palavras). */}
+      {/* Camada 3D em tela cheia, ABAIXO dos textos (z-20 < z-30): o espaço entre as
+          colunas mantém a bola afastada, e se ela se aproximar passa por trás das palavras. */}
       {showScene && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20">
           <div

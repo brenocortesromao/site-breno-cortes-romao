@@ -22,16 +22,20 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 2. Metal líquido + scroll cinematográfico — **concluída** (Lenis, gota de metal líquido provisória, hero fixa com transição para o manifesto).
 3. Estrutura bilíngue — **em andamento**, em 6 partes; commit ao fim de cada parte validada; **parar após a parte 2 para revisão do dono**:
    1. Base de idiomas (next-intl, /pt e /en, seletor, mensagens) — **concluída**.
-   2. Escala (seções ≥ 1 tela), cabeçalho fixo, hero com a bola cromada no centro, sistema de temas claro/escuro, manifesto "mensagem de Breno Côrtes Romão" (retrato monocromático + assinatura desenhada pelo scroll) — **concluída, aguardando revisão do dono** (inclui a escolha do off-white em `/pt/preview/temas`).
-   3. O que é fractional (claro, curvas de nível), O que faço (pilares em pin), O que muda (antes/depois).
-   4. Números, Como funciona (claro, grade técnica), FAQ.
-   5. Bastidores e Cases (galerias horizontais) + páginas `/[locale]/cases/[slug]`.
-   6. Marcas (faixa de logos), Sobre (claro; resumo na home + `/sobre`), Contato (Cal.com provisório, mídia kit PDF), rodapé.
+   2. Escala (seções ≥ 1 tela), cabeçalho fixo, hero com a bola cromada no centro, sistema de temas claro/escuro, "Mensagem de Breno Côrtes Romão" (retrato monocromático + assinatura desenhada pelo scroll) — **concluída**. Off-white escolhido: **A, #ECEAE5**.
+   3. Seções 3–5 do `CONTEUDO-SITE.md`: Quando você precisa de mim (lista que acende), O que é fractional (claro, curvas de nível com deriva, comparativo), O que eu faço (4 pilares em pin) — **concluída, aguardando revisão do dono**.
+   4. Seções 6–8: O que muda, A distância (3 gráficos conceituais), Como funciona (claro, grade técnica).
+   5. Seções 9–10: Onde o trabalho aparece, Trabalhos (faixa de logos, mural compacto, até 3 cases em texto com página `/[locale]/cases/[slug]`).
+   6. Seções 11–13: Sobre (claro; resumo na home + `/sobre`), Perguntas frequentes, Contato (Cal.com provisório, e-mail e mídia kit [PENDENTE]), rodapé.
 4. Urso 3D: orelhas e focinho brotando da bola (SDF/metaballs) com o mouse.
 5. Conteúdo real PT/EN (fotos, logos, cases, textos, tradução).
 6. Lançamento.
 
-**Conteúdo provisório:** nunca inventar clientes, números, dados de mercado ou cases que pareçam reais ("Case 01", "Marca 01", "XX", "[dado + fonte a confirmar]"). Textos provisórios ficam claramente marcados. `en.json` é, por enquanto, cópia do português.
+**Fonte do conteúdo:** `CONTEUDO-SITE.md` (raiz) é o texto oficial do site, mantido pelo dono. Releia antes de implementar qualquer seção; itens `[PENDENTE]` ficam como placeholder visível e discreto.
+
+**Sem dados externos (regra fixa):** o site é sobre o dono. **Nunca** usar dados de mercado, estatísticas externas, pesquisas de terceiros (Gartner, McKinsey etc.) nem números de vagas, em nenhuma seção nem idioma. Gráficos são **conceituais**: SVG animado pelo scroll, sem escalas nem valores numéricos, com a nota discreta "ilustrativo". A seção "Por que agora" usa três gráficos conceituais de crescimento: a distância entre negócio e marca, fechando a distância, e consistência.
+
+**Conteúdo provisório:** nunca inventar clientes, números de carreira, depoimentos, resultados ou cases que pareçam reais ("Case 01", "Marca 01"). Textos provisórios ficam claramente marcados. `en.json` é, por enquanto, cópia do português.
 
 **Validação ao final de cada etapa:** desktop, tablet/mobile e `npm run build` (além de lint e `tsc`), testando no navegador, inclusive após recarregar a página.
 
@@ -71,7 +75,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - Don't use `next/script` with `beforeInteractive` for it: that strategy doesn't block hydration and may run after the first paint, which would flash the title.
 
 **Themes** (`globals.css` + `components/theme/*`):
-- Fixed palettes per theme (`--dark-*`, `--light-*`, plus the temporary `--light-warm-*` candidate) and "live" variables on `<html>` (`--bg`, `--fg`, `--muted`, `--line`, `--graphic`, `--surface`, `--grad-from`, `--grad-to`).
+- Fixed palettes per theme (`--dark-*`, `--light-*`; off-white chosen: `#ECEAE5`) and "live" variables on `<html>` (`--bg`, `--fg`, `--muted`, `--line`, `--graphic`, `--surface`, `--grad-from`, `--grad-to`).
 - Tailwind maps `background`/`foreground`/`silver`/`line`/`graphic`/`surface` to the live variables. **Never hardcode colors** (`white/…`, `#0b0b0c`): use the tokens so components work in light sections.
 - Palette colors are written as `rgba(r,g,b,a)` with commas, which is the syntax GSAP interpolates.
 - `<Section theme="dark|light">` (`theme/Section.tsx`): `min-h-svh`, viewport-proportional padding, `data-theme`.
@@ -83,7 +87,6 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - It works under reduced motion, since a color change is not movement.
   - It adds `html.theme-js`. Without it (no JS), light sections paint their own background via CSS.
 - `theme/DraftBadge.tsx`: the "Provisório" badge (`common.draft`).
-- `/[locale]/preview/temas` is a **temporary dev-only page** (404 in production) comparing `#ECEAE5` with the warmer `#EDE6DA`. Delete it, and the `light-warm` palette, once the owner chooses.
 
 **Smooth scroll** (`components/SmoothScroll.tsx`, mounted in `[locale]/layout.tsx`): Lenis driven by `gsap.ticker` (`autoRaf: false`), with `lenis.on("scroll", ScrollTrigger.update)`, so Lenis and ScrollTrigger read the same position each frame. `anchors: true` makes `#section` links glide. It does not start under reduced motion. On touch it keeps native scroll (Lenis default `syncTouch: false`). Do not reintroduce CSS `scroll-behavior: smooth`, which fights Lenis.
 
@@ -124,6 +127,20 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - The stroke is drawn by a scrubbed `stroke-dashoffset` timeline, path by path, as the portrait crosses the screen.
   - Under reduced motion it is shown complete.
 - The statement's words (`[data-word]`) are revealed by scroll; then the body and the full name + role (`[data-follow]`, triggered by the phrase).
+
+**Content sections** (`components/sections/*`, client; texts from `signals.*`, `fractional.*`, `pillars.*`):
+- `Signals`: a sticky title (desktop) plus a numbered list. Each `[data-signal]` lights up (opacity 0.14→1) as it crosses the middle of the screen, then the closing line fades in.
+- `Fractional`: a **light** section with `GraphicLayer variant="contours-a"`. The comparison is a semantic `<table>` on desktop and three cards on mobile. Columns (`[data-col]`) enter one by one, and the Fractional column (`HIGHLIGHT = 2`) is emphasized.
+- `Pillars`: on desktop without reduced motion, `data-mode="pin"` is set on the section. The stage is pinned for `(n-1)` screens, and pillars swap: the title rises through a mask, the text crossfades, the index/progress bar follows. Layout switches through `group-data-[mode=pin]:*` classes.
+  - On mobile, under reduced motion or without JS, the pillars are stacked with no pin.
+  - The title size is bounded by the longest word ("Acompanhamento") in a 6/12 column.
+
+**Background graphics** (`components/graphics/GraphicLayer.tsx`), used by every light section:
+- `contours-a`/`contours-b` are SVGs generated by `scripts/generate-contours.mjs` (simplex noise + marching squares, no deps; regenerate with `node scripts/generate-contours.mjs`, about 14–17 KB gzip each) and applied as a CSS **mask** over `bg-graphic`, so the color follows the theme. `grid` is pure CSS.
+- Motion uses two layers, so transforms don't conflict:
+  - an outer **scroll parallax** (yPercent ±4);
+  - an inner **continuous organic drift**: x/y, rotation and scale yoyo tweens with non-matching periods (23/31/41/29 s). They start paused and only play while the section is on screen.
+  - Both are disabled under reduced motion.
 
 **Intro-animation gotchas**
 - Initial hidden state is pure CSS (`.js-motion [data-reveal|data-fade]` in `globals.css`, only under `prefers-reduced-motion: no-preference`). The `js-motion` class is added by an inline script in `layout.tsx` before first paint, and removed after 6s as a safety net so text can never stay hidden.

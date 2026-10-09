@@ -196,8 +196,9 @@ function Rig({
     p.x += (target.current.x - p.x) * k;
     p.y += (target.current.y - p.y) * k;
 
-    g.position.x = p.x * 0.18;
-    g.position.y = -p.y * 0.12;
+    // deslocamento curto: cabe no respiro entre a bola e as frases da hero
+    g.position.x = p.x * 0.1;
+    g.position.y = -p.y * 0.08;
     g.rotation.y = p.x * 0.14;
     g.rotation.x = p.y * 0.09;
 

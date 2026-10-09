@@ -3,6 +3,10 @@ import Hero from "@/components/Hero";
 import Manifesto from "@/components/Manifesto";
 import MediaSlot from "@/components/MediaSlot";
 import Section from "@/components/theme/Section";
+import Signals from "@/components/sections/Signals";
+import Fractional, { type FractionalCopy } from "@/components/sections/Fractional";
+import Pillars, { type PillarsCopy } from "@/components/sections/Pillars";
+import { signature } from "@/content/signature";
 
 /* ------------------------------------------------------------------ *
  * Textos: src/messages/{pt,en}.json. Aqui fica só o que não se traduz:
@@ -36,12 +40,6 @@ const pad = (n: number) => String(n + 1).padStart(2, "0");
 export default async function Home() {
   const t = await getTranslations();
   const name = t("site.name");
-  const draft = t("common.draft");
-  const services = t.raw("services.items") as {
-    title: string;
-    text: string;
-    deliverables: string[];
-  }[];
   const projects = t.raw("projects.items") as { name: string; kind: string }[];
   const statement = t.raw("manifesto.statement") as { text: string; soft?: boolean }[];
 
@@ -53,7 +51,8 @@ export default async function Home() {
             left: t("hero.left"),
             right: t("hero.right"),
             support: t("hero.support"),
-            draft,
+            label: t("site.role"),
+            draft: "",
           }}
         />
 
@@ -68,44 +67,44 @@ export default async function Home() {
             name,
             role: t("site.role"),
             signatureLabel: t("manifesto.signatureLabel", { name }),
-            draft,
+            // só a assinatura ainda é provisória (ver src/content/signature.ts)
+            draft: signature.provisional ? t("manifesto.signatureDraft") : "",
           }}
         />
 
-        {/* Serviços (será substituída pelos pilares na Parte 3) */}
-        <Section id="servicos">
-          <div className="mb-14 flex items-end justify-between md:mb-24">
-            <Eyebrow>{t("services.eyebrow")}</Eyebrow>
-            <h2 className="hidden text-[clamp(3rem,7vw,7rem)] font-semibold leading-none tracking-[-0.06em] text-silver md:block">
-              {t("services.title")}
-            </h2>
-          </div>
+        <Signals
+          copy={{
+            eyebrow: t("signals.eyebrow"),
+            title: t("signals.title"),
+            items: t.raw("signals.items") as string[],
+            closing: t("signals.closing"),
+          }}
+        />
 
-          <ul className="border-t border-line">
-            {services.map((s, i) => (
-              <li
-                key={s.title}
-                className="group grid gap-6 border-b border-line py-10 transition-colors duration-500 hover:bg-foreground/[0.02] md:grid-cols-12 md:gap-8 md:py-16"
-              >
-                <span className="font-mono text-xs text-silver md:col-span-1">{pad(i)}</span>
-                <h3 className="text-[clamp(2.25rem,5.6vw,5.5rem)] font-semibold leading-[0.95] tracking-[-0.055em] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-2 md:col-span-7">
-                  {s.title}
-                </h3>
-                <div className="md:col-span-4">
-                  <p className="text-sm leading-relaxed text-silver">{s.text}</p>
-                  <ul className="mt-6 space-y-2 font-mono text-[11px] uppercase tracking-[0.2em]">
-                    {s.deliverables.map((d) => (
-                      <li key={d}>— {d}</li>
-                    ))}
-                  </ul>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Section>
+        <Fractional
+          copy={{
+            eyebrow: t("fractional.eyebrow"),
+            title: t("fractional.title"),
+            text: t("fractional.text"),
+            compare: {
+              caption: t("fractional.compare.caption"),
+              columns: t.raw("fractional.compare.columns") as string[],
+              rows: t.raw("fractional.compare.rows") as FractionalCopy["compare"]["rows"],
+            },
+            note: t("fractional.note"),
+          }}
+        />
 
-        {/* Projetos (virará a galeria de cases na Parte 5) */}
-        <Section id="projetos">
+        <Pillars
+          copy={{
+            eyebrow: t("pillars.eyebrow"),
+            title: t("pillars.title"),
+            items: t.raw("pillars.items") as PillarsCopy["items"],
+          }}
+        />
+
+        {/* Trabalhos (vira faixa de logos + mural + cases em texto na Parte 5) */}
+        <Section id="trabalhos">
           <div className="mb-14 flex items-end justify-between md:mb-24">
             <Eyebrow>{t("projects.eyebrow")}</Eyebrow>
             <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">

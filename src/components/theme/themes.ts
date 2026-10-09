@@ -3,7 +3,7 @@
  * os nomes e os papéis que o ThemeScroll interpola.
  * Para escolher o tema de uma seção: <Section theme="light"> (ou "dark").
  */
-export const THEMES = ["dark", "light", "light-warm"] as const;
+export const THEMES = ["dark", "light"] as const;
 export type ThemeName = (typeof THEMES)[number];
 
 export const THEME_ROLES = [
