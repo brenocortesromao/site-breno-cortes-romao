@@ -124,3 +124,20 @@ body::before {
 .media-mono {
   filter: grayscale(1) contrast(1.08) brightness(0.92);
 }
+
+/* Entrada suave de textos que trocam (legenda do carrossel, fecho do diagnóstico). */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[fadeIn"] {
+    animation: none !important;
+  }
+}

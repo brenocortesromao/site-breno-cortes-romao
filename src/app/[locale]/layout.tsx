@@ -9,6 +9,8 @@ import "../globals.css";
 import InlineScript from "@/components/InlineScript";
 import SmoothScroll from "@/components/SmoothScroll";
 import Header from "@/components/layout/Header";
+import JsonLdScript from "@/components/seo/JsonLdScript";
+import { personJsonLd, professionalServiceJsonLd } from "@/lib/seo/structured-data";
 import ThemeScroll from "@/components/theme/ThemeScroll";
 import { htmlLang, routing } from "@/i18n/routing";
 
@@ -31,26 +33,21 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await rootParams.locale();
   if (!hasLocale(routing.locales, locale)) return {};
   const t = await getTranslations({ locale, namespace: "meta" });
+  const name = await getTranslations({ locale, namespace: "site" });
 
+  // Só padrões herdáveis. Canonical/hreflang ficam no generateMetadata de CADA
+  // página (via pageMetadata), senão subpáginas herdariam o canonical da home.
   return {
-    // Definir NEXT_PUBLIC_SITE_URL no lançamento (domínio final).
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-    title: t("title"),
+    title: { default: t("title"), template: `%s — ${name("name")}` },
     description: t("description"),
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        [htmlLang.pt]: "/pt",
-        [htmlLang.en]: "/en",
-        "x-default": "/pt",
-      },
-    },
   };
 }
 
 export default async function LocaleLayout({ children }: LayoutProps<"/[locale]">) {
   const locale = await rootParams.locale();
   if (!hasLocale(routing.locales, locale)) notFound();
+  const site = await getTranslations({ locale, namespace: "site" });
 
   return (
     <html
@@ -65,6 +62,9 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
       </head>
       <body className="min-h-full flex flex-col">
         {/* Só o idioma vai para o cliente; os textos chegam como props, não o arquivo inteiro. */}
+        {/* Dados estruturados: preparados, vazios até o lançamento (ver lib/seo/structured-data.ts) */}
+        <JsonLdScript data={personJsonLd({ locale, name: site("name"), role: site("role") })} />
+        <JsonLdScript data={professionalServiceJsonLd({ locale, name: site("name") })} />
         <NextIntlClientProvider messages={null}>
           <SmoothScroll />
           <ThemeScroll />

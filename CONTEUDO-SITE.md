@@ -1,123 +1,140 @@
-# Conteúdo do site — Breno Côrtes Romão
+# Conteúdo do site — Breno Côrtes Romão (v2, texto persuasivo)
 
-Fonte: mídia kit do Breno. O site é sobre ele: NÃO usar dados de mercado, estatísticas externas ou números de vagas. Use estes textos no lugar dos provisórios, em `messages/pt`. O inglês segue repetindo o português até a etapa de tradução.
+Este arquivo é a fonte dos textos e do mapa do site. Use estes textos em `messages/pt`. O inglês repete o português até a etapa de tradução.
 
 Regras:
 - Nome sempre "Breno Côrtes Romão".
-- Não inventar clientes, números de carreira, depoimentos ou resultados. O que estiver marcado [PENDENTE] fica como placeholder visível e discreto.
-- Gráficos são conceituais (crescimento da empresa × marca), sem números inventados.
-- Site focado em texto, explicação, gráficos e animação. Fotos e artes aparecem pouco, em momentos escolhidos.
+- O site é sobre o Breno: nada de estatísticas externas, EXCETO o único dado verificado da seção 4 (com fonte).
+- Não inventar clientes, números de carreira, depoimentos ou resultados. [PENDENTE] = placeholder discreto. [CONFIRMAR] = decisão do Breno, deixar o texto como está até ele confirmar.
+- Tom: confiante, direto, frases curtas. Sensação de algo raro e seletivo, nunca arrogante. Nada de jargão de agência.
+- Gráficos da seção 7 são conceituais, sem números.
 
 ---
 
-## 1. Hero (preto)
+## 1. Hero (preto) — bola de metal líquido no centro
 
 - Frase esquerda: **Sua marca à altura**
 - Frase direita: **do seu crescimento.**
-- Texto de apoio (inferior esquerdo): Estratégia de marca, direção criativa e execução para empresas que precisam comunicar melhor seu valor e dar consistência à sua presença no mercado.
-- Rótulo pequeno: Fractional Brand & Creative Director
+- Apoio (inferior esquerdo): Direção de marca e criação sênior, dentro da sua empresa, sem o peso de uma contratação executiva.
+- Rótulo pequeno: Breno Côrtes Romão — Fractional Brand & Creative Director
+- Indicador de scroll: "Role para entender"
 
-## 2. Mensagem do Breno (preto, retrato + assinatura)
+## 2. Mensagem do Breno (preto, retrato + assinatura desenhada)
 
-- Título: **O negócio evoluiu. A comunicação precisa acompanhar.**
-- Texto: Eu ajudo empresas que cresceram, mas cuja marca e comunicação ainda não acompanham esse crescimento. Entendo o negócio, organizo seu posicionamento e transformo essa estratégia em identidade, campanhas e materiais que mostram com clareza o valor da empresa.
+- Frase de abertura, em tipografia gigante, palavra por palavra:
+  **Uma marca não é o que a empresa diz sobre si. É o que sobra na cabeça das pessoas quando você sai da sala.**
+- Texto: Eu cuido do que sobra. Trabalho com empresas que cresceram mais rápido do que a própria marca — e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, decidir o que ele precisa dizer e garantir que tudo o que a empresa mostra diga a mesma coisa.
 - Assinatura: Breno Côrtes Romão
 
-## 3. Quando você precisa de mim (preto — lista que acende item a item no scroll)
+## 3. Sinais (preto — lista que acende item a item)
 
-Título: **Sinais de que a marca ficou para trás.**
-1. Seu produto tem valor, mas esse valor nem sempre fica claro para quem chega.
-2. O site, a apresentação comercial e as campanhas parecem falar de empresas diferentes.
-3. A equipe produz, mas falta uma direção comum.
-4. As decisões criativas dependem sempre do fundador, e os projetos acabam travando.
-5. A empresa vai lançar um produto ou entrar em outro mercado.
+Título: **Você provavelmente já sentiu isso.**
+1. A empresa é melhor do que a forma como ela se apresenta.
+2. O site, a apresentação comercial e as campanhas parecem de empresas diferentes.
+3. Tem gente produzindo, mas ninguém decidindo.
+4. Toda decisão criativa volta para a mesa do fundador.
+5. Um lançamento ou um novo mercado está chegando, e a marca não está pronta.
 
-Fecho: Minha atuação conecta estratégia e criação para organizar essas decisões e transformar o valor do negócio em uma comunicação clara e consistente.
+Fecho (aparece depois do último item): **Se você marcou dois ou mais, não falta designer. Falta direção.**
 
-## 4. O que é fractional (OFF-WHITE, curvas de nível)
+## 4. O que é fractional (OFF-WHITE, curvas de nível em movimento)
 
 - Título: **Liderança de marca sênior, na medida do seu momento.**
-- Texto: No modelo fractional, atuo como uma liderança externa integrada à sua empresa, com participação contínua nas prioridades e decisões de marca e criação — com uma dedicação mensal acordada, sem o custo de uma contratação executiva fixa.
+- Texto: Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada — e sem o custo de uma contratação executiva fixa.
 
-**Comparativo animado (3 colunas que entram uma a uma):**
+**Dado verificado (gráfico de barras animado, duas barras):**
+- Título do gráfico: **Um modelo novo, crescendo rápido.**
+- Barra 1: "5 anos atrás — 9 a cada 1.000"
+- Barra 2: "2026 — 24 a cada 1.000"
+- Legenda: Vagas executivas anunciadas que já são fractional. Quase o triplo em cinco anos.
+- Fonte (letra pequena): Revelio Labs, dados publicados no Financial Times.
+- NÃO escrever "nos Estados Unidos": a fonte não especifica o país.
+
+**Comparativo (já aprovado visualmente — manter):**
 | | Agência | Contratação executiva | Fractional |
 |---|---|---|---|
 | Visão do negócio | Por projeto | Contínua | Contínua |
-| Decisão de marca | Do cliente | Interna | Compartilhada, com responsável |
-| Custo | Variável por job | Salário + encargos fixos | Dedicação mensal acordada |
+| Decisão de marca | Fica com você | Interna | Compartilhada, com responsável |
+| Custo | Variável a cada job | Salário + encargos fixos | Dedicação mensal acordada |
 | Continuidade | Termina com o job | Total | Ao longo da parceria |
+| Senioridade | Varia por equipe | Depende de quem você consegue contratar | Sênior desde o primeiro dia |
 
-Observação: Fractional Brand & Creative Director não é um CMO — não assume aquisição, canais nem orçamento de mídia.
+Nota: Não sou um CMO. Não assumo mídia, canais ou aquisição. Cuido do que faz tudo isso funcionar: a marca.
 
 ## 5. O que eu faço (preto, seção fixa trocando de pilar)
 
-Título: **Da estratégia à presença da marca.**
-1. **Estratégia de marca** — Defino com você o que a empresa representa, para quem ela existe, quais diferenciais destacar e como apresentar sua oferta.
-2. **Direção criativa** — Transformo esse direcionamento em conceitos, linguagem visual e campanhas, para que os materiais expressem a mesma marca.
-3. **Execução** — Desenvolvo materiais prioritários e acompanho a produção com equipes e fornecedores, do briefing à aprovação.
-4. **Acompanhamento** — Reviso o trabalho, identifico ajustes e organizo os próximos passos conforme o negócio.
+Título: **Da estratégia à última peça.**
+Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois — e é isso que impede a estratégia de morrer num PDF.
+1. **Estratégia de marca** — O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso.
+2. **Direção criativa** — Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram.
+3. **Execução** — Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação.
+4. **Acompanhamento** — Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca não para de evoluir no mês dois.
 
-## 6. O que muda (preto — antes/depois animado)
+## 6. O que muda (preto — antes/depois animado, cada linha vira de "antes" para "depois")
 
-Título: **Mais clareza para comunicar. Mais direção para executar.**
-- Uma oferta mais fácil de entender — seu público identifica o que a empresa faz, para quem e por que escolhê-la.
-- Uma marca mais consistente — site, campanhas e materiais comerciais reforçam o mesmo posicionamento.
-- Decisões mais organizadas — a equipe trabalha com prioridades, referências e critérios de aprovação definidos.
-- Menos retrabalho — briefings claros e direção contínua reduzem mudanças sem propósito.
-- Mais autonomia para o fundador — alguém responsável conduz as decisões de marca e criação dentro do escopo acordado.
+Título: **O que muda quando alguém assume a marca.**
+| Antes | Depois |
+|---|---|
+| Ninguém entende de primeira o que vocês fazem. | Sua oferta é entendida em uma frase. |
+| Cada material conta uma história. | Site, vendas e campanhas falam a mesma língua. |
+| Refação sem fim. | Briefings claros, critérios de aprovação, menos retrabalho. |
+| O fundador aprova até o post. | O fundador volta a cuidar do negócio. |
+| Fornecedores sem rumo. | Fornecedores entregando na direção certa. |
 
-(Não prometer aumento de vendas.)
+## 7. A distância (preto — gráficos conceituais, sem números, nota "ilustrativo")
 
-## 7. A distância (preto — gráficos conceituais de crescimento)
-
-Título: **Quando o negócio cresce mais rápido que a marca.**
-
-SEM dados de mercado e SEM números inventados. São gráficos conceituais, ilustrativos, sem eixos numéricos, que explicam a proposta do Breno:
-
-- **Gráfico A — A distância:** duas curvas desenhadas com o scroll. "Crescimento do negócio" sobe forte; "Maturidade da marca" sobe devagar e fica para trás. A área entre elas aparece destacada com o rótulo "a distância". Texto: Sua empresa cresceu. A marca e a comunicação nem sempre acompanham esse ritmo.
-- **Gráfico B — Fechando a distância:** a mesma cena continua; a partir de um ponto marcado "direção de marca", a curva da marca acelera e passa a acompanhar a do negócio. Texto: Meu trabalho é fechar essa distância.
-- **Gráfico C — Consistência:** pontos de contato (site, apresentação, campanhas, redes) começam dispersos, em direções diferentes, e se alinham num mesmo eixo conforme o scroll. Texto: Site, apresentação comercial e campanhas contando a mesma história.
-
-Regras: linhas finas em prata/grafite, rótulos em fonte mono pequena, nenhuma escala numérica, uma nota discreta "ilustrativo".
-IA aparece só como parte do método (pesquisa, exploração, prototipagem, produção com revisão), nunca como promessa central.
+- **Gráfico A:** duas curvas desenhadas com o scroll. "Negócio" sobe forte; "Marca" fica para trás; a área entre elas acende com o rótulo "a distância". Texto: **Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece.**
+- **Gráfico B:** no ponto "direção de marca", a curva da marca acelera e alcança a do negócio. Texto: **Essa distância custa vendas, talentos e preço. Meu trabalho é fechá-la.**
+- **Gráfico C:** pontos de contato (site, apresentação, campanhas, redes) dispersos se alinham num eixo. Texto: **Consistência não é estética. É o que faz o mercado confiar em você.**
 
 ## 8. Como funciona (OFF-WHITE, grade técnica — linha do tempo desenhada)
 
-Título: **Direção de marca e criação com dedicação mensal acordada.**
-1. **Diagnóstico** — Entendemos o momento do negócio, os desafios e os materiais existentes.
-2. **Plano** — Definimos prioridades, plano de trabalho e as primeiras entregas.
-3. **Direção contínua** — Reuniões de direcionamento, desenvolvimento ou supervisão dos materiais previstos.
-4. **Revisão mensal** — Acompanho a evolução dos projetos e ajustamos as prioridades.
+Título: **Simples de começar. Contínuo por natureza.**
+1. **Conversa** — Entendo o momento da empresa e vemos se faz sentido trabalharmos juntos.
+2. **Diagnóstico** — Analiso o negócio, a concorrência e tudo o que a marca já comunica.
+3. **Plano** — Definimos prioridades, entregas e a dedicação mensal.
+4. **Direção contínua** — Participo das decisões, produzo e dirijo as peças combinadas.
+5. **Revisão** — Todo mês olhamos o que avançou e o que muda.
 
-Nota: dedicação, entregas, canais de contato e responsabilidades são definidos na proposta; produções adicionais e especialistas são previstos conforme a necessidade.
+Nota: Escopo, dedicação, entregas e responsabilidades ficam claros na proposta — inclusive o que eu produzo, o que eu dirijo e o que exige contratação à parte.
 
-## 9. Onde o trabalho aparece (preto — lista grande com marquee ou reveal)
+## 9. Onde o trabalho aparece (preto — lista grande com reveal)
 
-Título: **A estratégia ganha forma nos pontos de contato da marca.**
-Posicionamento e narrativa · Identidade visual e diretrizes · Apresentações comerciais e institucionais · Direção de marca para sites e landing pages · Conceitos e materiais de campanha · Comunicação de lançamentos · Orientação de designers, equipes e fornecedores
+Título: **Onde você vai ver a diferença.**
+Posicionamento e narrativa · Identidade visual · Apresentações comerciais · Sites e landing pages · Campanhas · Lançamentos · Direção de designers e fornecedores
 
-## 10. Trabalhos (preto — POUCO visual)
+## 10. Trabalhos (preto — pouco visual)
 
-NÃO é galeria de cases grandes. Estrutura:
-- Faixa de **logos das empresas** (prata monocromática) [PENDENTE: logos].
-- **Mural compacto** de artes e fotos de projetos (grid irregular, 6–9 peças, com legenda de projeto e ano) [PENDENTE: imagens].
-- Até 3 cases em texto, curtos, abrindo página própria: Desafio → Meu papel → Decisão → Aplicação → Resultado [PENDENTE: cases].
+Título: **Marcas com as quais trabalhei.**
+- Faixa de logos em prata monocromática [PENDENTE: logos].
+- Mural compacto, 6 a 9 peças, grid irregular, legenda de projeto e ano [PENDENTE: imagens].
+- Até 3 cases curtos em texto, com página própria: Desafio → Meu papel → Decisão → Aplicação → Resultado [PENDENTE: cases].
 
 ## 11. Sobre (OFF-WHITE, curvas de nível)
 
-[PENDENTE: bio, anos de experiência, agências e marcas.] Retrato + trajetória em linha do tempo.
+- Título: **Quem vai cuidar da sua marca.**
+- [PENDENTE: bio — anos de experiência, agências, marcas, formação.] Retrato + trajetória em linha do tempo.
+- Frase de método: Uso inteligência artificial como ferramenta de pesquisa, exploração e produção — sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.
 
-## 12. Perguntas frequentes (preto)
+## 12. Poucas parcerias por vez (preto — seção curta, impacto)
 
-- **O que é um Fractional Brand & Creative Director?** Uma liderança de marca e criação que atua de forma contínua na sua empresa, com dedicação mensal acordada.
-- **Qual a diferença para uma agência?** A agência entrega projetos; eu participo das decisões de marca ao longo do tempo e conecto o trabalho de equipes, designers e fornecedores.
-- **É o mesmo que um CMO?** Não. Não assumo aquisição, canais ou orçamento de mídia; cuido de marca, criação e consistência.
-- **O que você produz pessoalmente?** Isso fica claro na proposta: o que eu produzo, o que eu dirijo e o que exige contratação adicional.
-- **Como a IA entra?** Como parte do método — pesquisa, exploração, prototipagem e produção com revisão.
-- **Para quem é?** Empresas com produto, clientes e ambição de crescimento cuja marca ainda não acompanha o negócio — especialmente startups B2B e empresas de serviços.
+[CONFIRMAR com o Breno antes de publicar — é decisão de negócio]
+- Título: **Trabalho com poucas empresas por vez.**
+- Texto: Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa — não por proposta enviada em massa.
+- Indicador discreto: "Agenda para novas parcerias: [CONFIRMAR]"
 
-## 13. Contato (preto)
+## 13. Perguntas frequentes (preto)
 
-- Título: **Vamos entender o próximo passo da sua marca.**
-- Texto: Se sua empresa precisa alinhar posicionamento, elevar a qualidade da comunicação ou organizar sua operação criativa, podemos conversar sobre o momento do negócio e definir onde minha atuação pode contribuir.
-- Botões: Agendar conversa (Cal.com, link provisório) · E-mail [PENDENTE] · Baixar mídia kit (PDF) [PENDENTE]
+- **O que é um Fractional Brand & Creative Director?** Um diretor de marca e criação sênior que atua dentro da sua empresa de forma contínua, com uma dedicação mensal acordada.
+- **Qual a diferença para uma agência?** A agência entrega projetos. Eu participo das decisões ao longo do tempo e garanto que agência, designers e fornecedores trabalhem na mesma direção.
+- **É o mesmo que um CMO?** Não. Não cuido de mídia, canais ou aquisição. Cuido da marca e de tudo o que ela comunica.
+- **Você produz ou só dirige?** Os dois. A proposta deixa claro o que eu produzo, o que eu dirijo e o que exige contratação à parte.
+- **Quanto tempo dura uma parceria?** [CONFIRMAR: período mínimo sugerido.]
+- **Como a IA entra no trabalho?** Como ferramenta de método — pesquisa, exploração, prototipagem e produção com revisão. Nunca como substituta de critério.
+- **Para quem é?** Para empresas com produto, clientes e ambição — especialmente startups B2B e empresas de serviços — cuja marca ainda não acompanha o negócio.
+
+## 14. Contato (preto)
+
+- Título: **Vamos fechar essa distância?**
+- Texto: Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você — e, se não fizer, te digo o que faria.
+- Botões: **Agendar conversa** (Cal.com, link provisório) · E-mail [PENDENTE] · Baixar mídia kit (PDF) [PENDENTE]

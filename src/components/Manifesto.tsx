@@ -44,7 +44,7 @@ export default function Manifesto({
   portraitSrc?: string;
 }) {
   const root = useRef<HTMLElement>(null);
-  const phrase = useRef<HTMLParagraphElement>(null);
+  const phrase = useRef<HTMLHeadingElement>(null);
   const portrait = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -142,7 +142,7 @@ export default function Manifesto({
   );
 
   return (
-    <section ref={root} id="manifesto" data-theme="dark" className="relative z-10 min-h-svh">
+    <section ref={root} id="manifesto" data-theme="dark" aria-labelledby="manifesto-title" className="relative z-10 min-h-svh">
       <div className="mx-auto grid w-full max-w-[1600px] gap-14 px-6 py-[clamp(6rem,16vh,12rem)] md:grid-cols-12 md:gap-8 md:px-12">
         {/* Retrato + assinatura */}
         <div className="md:col-span-5">
@@ -171,8 +171,9 @@ export default function Manifesto({
 
         {/* Frase do problema + apoio */}
         <div className="flex flex-col justify-center md:col-span-6 md:col-start-7">
-          <p
+          <h2
             ref={phrase}
+            id="manifesto-title"
             className="text-[clamp(2rem,4.6vw,5rem)] font-medium leading-[1.05] tracking-[-0.05em]"
           >
             {copy.statement.map((part, i) => (
@@ -186,7 +187,7 @@ export default function Manifesto({
                 ))}
               </span>
             ))}
-          </p>
+          </h2>
           <div className="mt-12 grid gap-8 md:mt-16 md:grid-cols-6">
             <p
               data-follow

@@ -1,47 +1,42 @@
+import type { Metadata } from "next";
+import * as rootParams from "next/root-params";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/seo/metadata";
 import Hero from "@/components/Hero";
 import Manifesto from "@/components/Manifesto";
-import MediaSlot from "@/components/MediaSlot";
 import Section from "@/components/theme/Section";
-import Signals from "@/components/sections/Signals";
+import Distance, { type DistanceCopy } from "@/components/sections/Distance";
+import Diagnostic from "@/components/sections/Diagnostic";
 import Fractional, { type FractionalCopy } from "@/components/sections/Fractional";
 import Pillars, { type PillarsCopy } from "@/components/sections/Pillars";
+import Changes, { type ChangesCopy } from "@/components/sections/Changes";
+import Process, { type ProcessCopy } from "@/components/sections/Process";
+import Works from "@/components/sections/Works";
 import { loadSignature } from "@/content/signature";
 
 /* ------------------------------------------------------------------ *
- * Textos: src/messages/{pt,en}.json. Aqui fica só o que não se traduz:
- * layout dos cards, proporções e caminhos de imagem/logo. Para integrar
- * material real, preencha `image` / `src` com um caminho em /public.
- * Seções: <Section theme="dark|light"> — ocupam ≥ 1 tela; o tema controla a
- * transição de cor feita pelo ThemeScroll.
+ * Home. Ordem narrativa (CONTEUDO-SITE.md, com "A distância" logo depois
+ * da Mensagem): Hero → Mensagem → A distância → Diagnóstico → Fractional →
+ * O que eu faço → O que muda → Como funciona → Trabalhos → Contato.
+ * Textos: src/messages/{pt,en}.json. Imagens/logos: public/ (content/media.ts).
  * ------------------------------------------------------------------ */
 
-/** Retrato do manifesto (monocromático pelo MediaSlot). Ex.: "/media/retrato.jpg". */
+/** Retrato da Mensagem (monocromático pelo MediaSlot). Ex.: "/media/retrato.jpg". */
 const portraitSrc: string | undefined = undefined;
 
-/** Logos de clientes: use `src` (SVG/PNG branco ou transparente) quando tiver. */
-const clientLogos: { src?: string }[] = [{}, {}, {}, {}, {}, {}];
-
-const projectLayout: { image?: string; span: string; ratio: string }[] = [
-  { span: "md:col-span-7", ratio: "aspect-[4/5]" },
-  { span: "md:col-span-4 md:col-start-9 md:mt-40", ratio: "aspect-[3/4]" },
-  { span: "md:col-span-5 md:col-start-2", ratio: "aspect-square" },
-  { span: "md:col-span-6 md:col-start-7 md:mt-28", ratio: "aspect-[16/11]" },
-];
-
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{children}</p>
-  );
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await rootParams.locale();
+  if (!hasLocale(routing.locales, locale)) return {};
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return pageMetadata({ locale, path: "", title: t("title"), description: t("description") });
 }
-
-const pad = (n: number) => String(n + 1).padStart(2, "0");
 
 export default async function Home() {
   const t = await getTranslations();
   const name = t("site.name");
-  const projects = t.raw("projects.items") as { name: string; kind: string }[];
-  const statement = t.raw("manifesto.statement") as { text: string; soft?: boolean }[];
+  const diagnosticItems = t.raw("diagnostic.items") as string[];
 
   return (
     <>
@@ -51,7 +46,8 @@ export default async function Home() {
             left: t("hero.left"),
             right: t("hero.right"),
             support: t("hero.support"),
-            label: t("site.role"),
+            label: `${name} — ${t("site.role")}`,
+            scrollHint: t("hero.scrollHint"),
             draft: "",
           }}
         />
@@ -62,7 +58,7 @@ export default async function Home() {
           signature={loadSignature()}
           copy={{
             eyebrow: t("manifesto.eyebrow", { name }),
-            statement,
+            statement: t.raw("manifesto.statement") as { text: string; soft?: boolean }[],
             body: t("manifesto.body"),
             portrait: t("manifesto.portrait"),
             name,
@@ -72,12 +68,34 @@ export default async function Home() {
           }}
         />
 
-        <Signals
+        <Distance
           copy={{
-            eyebrow: t("signals.eyebrow"),
-            title: t("signals.title"),
-            items: t.raw("signals.items") as string[],
-            closing: t("signals.closing"),
+            eyebrow: t("distance.eyebrow"),
+            note: t("distance.note"),
+            labels: {
+              business: t("distance.labels.business"),
+              brand: t("distance.labels.brand"),
+              gap: t("distance.labels.gap"),
+              direction: t("distance.labels.direction"),
+              touchpoints: t.raw("distance.labels.touchpoints") as string[],
+            },
+            charts: t.raw("distance.charts") as DistanceCopy["charts"],
+          }}
+        />
+
+        <Diagnostic
+          ctaHref="#contato"
+          copy={{
+            eyebrow: t("diagnostic.eyebrow"),
+            title: t("diagnostic.title"),
+            hint: t("diagnostic.hint"),
+            counters: Array.from({ length: diagnosticItems.length + 1 }, (_, count) =>
+              t("diagnostic.counter", { count, total: diagnosticItems.length }),
+            ),
+            items: diagnosticItems,
+            closing: t("diagnostic.closing"),
+            closingMatched: t("diagnostic.closingMatched"),
+            cta: t("diagnostic.cta"),
           }}
         />
 
@@ -86,6 +104,12 @@ export default async function Home() {
             eyebrow: t("fractional.eyebrow"),
             title: t("fractional.title"),
             text: t("fractional.text"),
+            chart: {
+              title: t("fractional.chart.title"),
+              bars: t.raw("fractional.chart.bars") as FractionalCopy["chart"]["bars"],
+              caption: t("fractional.chart.caption"),
+              source: t("fractional.chart.source"),
+            },
             compare: {
               caption: t("fractional.compare.caption"),
               columns: t.raw("fractional.compare.columns") as string[],
@@ -99,102 +123,51 @@ export default async function Home() {
           copy={{
             eyebrow: t("pillars.eyebrow"),
             title: t("pillars.title"),
+            subtitle: t("pillars.subtitle"),
             items: t.raw("pillars.items") as PillarsCopy["items"],
           }}
         />
 
-        {/* Trabalhos (vira faixa de logos + mural + cases em texto na Parte 5) */}
-        <Section id="trabalhos">
-          <div className="mb-14 flex items-end justify-between md:mb-24">
-            <Eyebrow>{t("projects.eyebrow")}</Eyebrow>
-            <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
-              {t("projects.period")}
-            </span>
-          </div>
+        <Changes
+          copy={{
+            eyebrow: t("changes.eyebrow"),
+            title: t("changes.title"),
+            before: t("changes.before"),
+            after: t("changes.after"),
+            rows: t.raw("changes.rows") as ChangesCopy["rows"],
+          }}
+        />
 
-          <div className="grid gap-x-8 gap-y-16 md:grid-cols-12">
-            {projects.map((p, i) => {
-              const layout = projectLayout[i % projectLayout.length];
-              return (
-                <article key={p.name} className={`group ${layout.span}`}>
-                  <MediaSlot
-                    src={layout.image}
-                    alt={t("projects.imageAlt", { name: p.name })}
-                    label={t("projects.label", { name: p.name })}
-                    ratio={layout.ratio}
-                    sizes="(min-width: 768px) 55vw, 100vw"
-                  />
-                  <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                    <h3 className="text-3xl font-semibold tracking-[-0.045em] md:text-4xl lg:text-5xl">
-                      <span className="mr-3 font-mono text-[11px] font-normal tracking-[0.2em] text-silver align-middle">
-                        {pad(i)}
-                      </span>
-                      {p.name}
-                    </h3>
-                    <p className="text-right font-mono text-[11px] uppercase tracking-[0.2em] text-silver">
-                      {p.kind}
-                    </p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </Section>
+        <Process
+          copy={{
+            eyebrow: t("process.eyebrow"),
+            title: t("process.title"),
+            steps: t.raw("process.steps") as ProcessCopy["steps"],
+            note: t("process.note"),
+          }}
+        />
 
-        {/* Clientes (virará a faixa contínua "Marcas" na Parte 6) */}
-        <Section label={t("clients.label")} fullScreen={false}>
-          <div className="grid items-center gap-8 border-y border-line py-10 md:grid-cols-12 md:py-12">
-            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver md:col-span-3">
-              {t("clients.label")}
-            </p>
-            <ul className="grid grid-cols-3 gap-x-6 gap-y-8 md:col-span-9 md:grid-cols-6">
-              {clientLogos.map((c, i) => (
-                <li
-                  key={i}
-                  className="flex h-10 items-center justify-center border border-dashed border-line font-mono text-[9px] uppercase tracking-[0.2em] text-silver"
-                >
-                  {/* Quando houver logo: <Image src={c.src} alt="…" width={120} height={40} className="h-8 w-auto opacity-70" /> */}
-                  {c.src ? null : t("clients.placeholder")}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Section>
+        <Works />
 
-        {/* Contato */}
-        <Section id="contato" className="border-t border-line" innerClassName="flex min-h-svh flex-col justify-center">
-          <Eyebrow>{t("contact.eyebrow")}</Eyebrow>
-          <h2 className="mt-10 text-[clamp(2.75rem,11vw,11.5rem)] leading-[0.9] tracking-[-0.06em]">
+        {/* Contato (versão completa com Cal.com e mídia kit na Parte 6) */}
+        <Section
+          id="contato"
+          labelledBy="contato-title"
+          className="border-t border-line"
+          innerClassName="flex min-h-svh flex-col justify-center"
+        >
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("contact.eyebrow")}</p>
+          <h2 id="contato-title" className="mt-10 text-[clamp(2.75rem,10vw,10.5rem)] leading-[0.9] tracking-[-0.06em]">
             <span className="block font-light">{t("contact.titleLight")}</span>
-            <span className="block font-semibold text-silver-gradient md:pl-[12vw]">
-              {t("contact.titleStrong")}
-            </span>
+            <span className="block font-semibold text-silver-gradient md:pl-[12vw]">{t("contact.titleStrong")}</span>
           </h2>
-          <div className="mt-16 flex flex-col gap-10 md:mt-24 md:flex-row md:items-end md:justify-between">
-            <a
-              href={`mailto:${t("contact.email")}`}
-              className="w-fit border-b border-foreground/60 pb-2 text-xl tracking-[-0.02em] transition-colors hover:border-foreground md:text-3xl"
-            >
-              {t("contact.email")}
-            </a>
-            <ul className="flex gap-8 font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
-              <li>
-                <a href="#" className="hover:text-foreground">
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground">
-                  LinkedIn
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground">
-                  Behance
-                </a>
-              </li>
-            </ul>
-          </div>
+          <p className="mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{t("contact.text")}</p>
+          <a
+            href={`mailto:${t("contact.email")}`}
+            className="mt-12 w-fit border-b border-foreground/60 pb-2 text-xl tracking-[-0.02em] transition-colors hover:border-foreground md:text-3xl"
+          >
+            {t("contact.email")}
+          </a>
         </Section>
       </main>
 

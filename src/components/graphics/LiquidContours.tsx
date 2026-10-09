@@ -184,7 +184,7 @@ export default function LiquidContours({
     const ro = new ResizeObserver(resize);
     ro.observe(el);
 
-    gl.uniform1f(uLevels, light ? 7 : 11);
+    gl.uniform1f(uLevels, light ? 5 : 7.5); // poucas linhas, bem espaçadas
     gl.uniform1f(uScale, (light ? 300 : 460) * dpr);
     gl.uniform1f(uSeed, seed * 13.7);
     gl.uniform1f(uLineW, 0.55 * dpr);
@@ -222,7 +222,7 @@ export default function LiquidContours({
       last = now;
       acc += dt;
       if (acc < 1 / 30) return; // ~30 fps: movimento lento não precisa de 60
-      time += acc;
+      time += acc / 3; // ~3x mais lento que o tempo real: calmo, quase hipnótico
       for (let i = 0; i < MAX_RIPPLES; i++) {
         if (ripples[i * 3 + 2] >= 0) {
           ripples[i * 3 + 2] += acc;
@@ -234,7 +234,7 @@ export default function LiquidContours({
 
       gl.uniform2f(uRes, el.width, el.height);
       gl.uniform1f(uTime, time);
-      gl.uniform4f(uColor, color[0], color[1], color[2], Math.min(color[3] * 1.15, 1));
+      gl.uniform4f(uColor, color[0], color[1], color[2], color[3] * 0.8); // mais suave que o token
       gl.uniform3fv(uRipples, ripples);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);

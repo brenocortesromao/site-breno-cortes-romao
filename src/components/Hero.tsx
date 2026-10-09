@@ -52,8 +52,10 @@ export type HeroCopy = {
   right: string;
   /** Texto de apoio curto, canto inferior esquerdo. */
   support: string;
-  /** Rótulo pequeno acima do texto de apoio (função). */
+  /** Rótulo pequeno acima do texto de apoio ("Nome — Função"). */
   label: string;
+  /** Indicador de scroll, canto inferior direito. */
+  scrollHint: string;
   /** Rótulo do selo de conteúdo provisório (vazio = sem selo). */
   draft: string;
 };
@@ -170,10 +172,11 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
     <section
       ref={section}
       data-theme="dark"
+      aria-labelledby="hero-title"
       className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 pb-10 pt-24 md:px-12 md:pb-14 md:pt-28"
     >
       {/* Título semântico completo (leitores de tela/SEO); as frases visuais ao redor da bola são decorativas. */}
-      <h1 className="sr-only">{`${copy.left} ${copy.right}`}</h1>
+      <h1 id="hero-title" className="sr-only">{`${copy.left} ${copy.right}`}</h1>
 
       <div className="relative z-30 mx-auto flex w-full max-w-[1600px] flex-col items-center gap-6 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-[3.5vw]">
         {/* Frase à esquerda (acima no mobile) */}
@@ -224,6 +227,16 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
           <p className="text-sm leading-relaxed text-silver md:text-[15px]">{copy.support}</p>
         </div>
       </div>
+
+      {/* Indicador de scroll */}
+      <a
+        href="#manifesto"
+        data-hero-text
+        className="absolute bottom-10 right-6 z-30 hidden items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-silver transition-colors hover:text-foreground md:bottom-14 md:right-12 md:flex"
+      >
+        <span data-fade>{copy.scrollHint}</span>
+        <span aria-hidden="true" data-fade className="block h-8 w-px origin-top animate-pulse bg-silver" />
+      </a>
 
       {/* Camada 3D em tela cheia, ABAIXO dos textos (z-20 < z-30): o espaço entre as
           colunas mantém a bola afastada, e se ela se aproximar passa por trás das palavras. */}

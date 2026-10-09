@@ -10,6 +10,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 export type PillarsCopy = {
   eyebrow: string;
   title: string;
+  subtitle: string;
   items: { title: string; text: string }[];
 };
 
@@ -68,7 +69,7 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
   );
 
   return (
-    <section ref={root} id="o-que-faco" data-theme="dark" className="group relative z-10">
+    <section ref={root} id="o-que-faco" data-theme="dark" aria-labelledby="o-que-faco-title" className="group relative z-10">
       <div
         ref={stage}
         className="mx-auto flex w-full max-w-[1600px] flex-col px-6 py-[clamp(6rem,16vh,12rem)] md:px-12 group-data-[mode=pin]:h-svh group-data-[mode=pin]:py-[clamp(5rem,12vh,9rem)]"
@@ -78,9 +79,10 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
             <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
               {copy.eyebrow}
             </p>
-            <h2 className="mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]">
+            <h2 id="o-que-faco-title" className="mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]">
               {copy.title}
             </h2>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-silver md:text-lg">{copy.subtitle}</p>
           </div>
           {/* Progresso (só no modo fixo) */}
           <div aria-hidden="true" className="hidden w-48 group-data-[mode=pin]:block">

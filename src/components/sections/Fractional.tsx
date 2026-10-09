@@ -18,6 +18,13 @@ export type FractionalCopy = {
     rows: { label: string; values: string[] }[];
   };
   note: string;
+  /** Único dado externo permitido no site (verificado, com fonte). */
+  chart: {
+    title: string;
+    bars: { label: string; display: string; value: number }[];
+    caption: string;
+    source: string;
+  };
 };
 
 /** Índice da coluna em destaque (Fractional). */
@@ -36,6 +43,22 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // barras crescem da esquerda ao entrar na tela
+        gsap.from("[data-bar]", {
+          scaleX: 0,
+          duration: 1.4,
+          ease: "power3.out",
+          stagger: 0.25,
+          scrollTrigger: { trigger: "[data-bar-chart]", start: "top 75%" },
+        });
+        gsap.from("[data-bar-value]", {
+          autoAlpha: 0,
+          duration: 0.8,
+          stagger: 0.25,
+          delay: 0.6,
+          scrollTrigger: { trigger: "[data-bar-chart]", start: "top 75%" },
+        });
+
         const tl = gsap.timeline({
           scrollTrigger: { trigger: board.current, start: "top 72%" },
         });
@@ -58,6 +81,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
       ref={root}
       id="fractional"
       data-theme="light"
+      aria-labelledby="fractional-title"
       className="relative z-10 min-h-svh overflow-hidden"
     >
       <GraphicLayer variant="contours-a" />
@@ -66,13 +90,47 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           {copy.eyebrow}
         </p>
         <div className="mt-6 grid gap-10 md:grid-cols-12 md:gap-8">
-          <h2 className="text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8">
+          <h2 id="fractional-title" className="text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8">
             {copy.title}
           </h2>
           <p className="max-w-md self-end text-base leading-relaxed text-silver md:col-span-4 md:text-[17px]">
             {copy.text}
           </p>
         </div>
+
+        {/* Dado verificado: gráfico de barras (sem JS, as barras já aparecem cheias) */}
+        <figure data-bar-chart className="mt-16 max-w-4xl md:mt-24">
+          <h3 className="text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
+            {copy.chart.title}
+          </h3>
+          <dl className="mt-8 grid gap-5">
+            {copy.chart.bars.map((bar) => {
+              const max = Math.max(...copy.chart.bars.map((b) => b.value));
+              return (
+                <div key={bar.label} className="grid grid-cols-[6.5rem_1fr] items-center gap-4 md:grid-cols-[9rem_1fr]">
+                  <dt className="font-mono text-[11px] uppercase tracking-[0.2em] text-silver">{bar.label}</dt>
+                  <dd className="flex items-center gap-4">
+                    <span
+                      data-bar
+                      aria-hidden="true"
+                      className="block h-3 origin-left bg-foreground md:h-4"
+                      style={{ width: `${(bar.value / max) * 72}%` }}
+                    />
+                    <span data-bar-value className="whitespace-nowrap text-sm font-medium md:text-base">
+                      {bar.display}
+                    </span>
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+          <figcaption className="mt-6 max-w-xl">
+            <span className="block text-sm leading-relaxed text-silver md:text-[15px]">{copy.chart.caption}</span>
+            <span className="mt-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
+              {copy.chart.source}
+            </span>
+          </figcaption>
+        </figure>
 
         <div ref={board} className="mt-16 md:mt-24">
           {/* Desktop: tabela semântica */}

@@ -9,6 +9,7 @@ export default function Section({
   id,
   theme = "dark",
   label,
+  labelledBy,
   fullScreen = true,
   className = "",
   innerClassName = "",
@@ -18,6 +19,8 @@ export default function Section({
   theme?: ThemeName;
   /** aria-label quando a seção não tem um título visível. */
   label?: string;
+  /** id do título (h2) da seção — landmark nomeado para leitores de tela e buscadores. */
+  labelledBy?: string;
   /** false para faixas que não precisam ocupar uma tela inteira. */
   fullScreen?: boolean;
   className?: string;
@@ -28,7 +31,8 @@ export default function Section({
     <section
       id={id}
       data-theme={theme}
-      aria-label={label}
+      aria-label={labelledBy ? undefined : label}
+      aria-labelledby={labelledBy}
       className={`relative z-10 ${fullScreen ? "min-h-svh" : ""} ${className}`}
     >
       <div

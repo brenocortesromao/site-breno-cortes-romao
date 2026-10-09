@@ -23,17 +23,27 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 3. Estrutura bilíngue — **em andamento**, em 6 partes; commit ao fim de cada parte validada; **parar após a parte 2 para revisão do dono**:
    1. Base de idiomas (next-intl, /pt e /en, seletor, mensagens) — **concluída**.
    2. Escala (seções ≥ 1 tela), cabeçalho fixo, hero com a bola cromada no centro, sistema de temas claro/escuro, "Mensagem de Breno Côrtes Romão" (retrato monocromático + assinatura desenhada pelo scroll) — **concluída**. Off-white escolhido: **A, #ECEAE5**.
-   3. Seções 3–5 do `CONTEUDO-SITE.md`: Quando você precisa de mim (lista que acende), O que é fractional (claro, curvas de nível com deriva, comparativo), O que eu faço (4 pilares em pin) — **concluída, aguardando revisão do dono**.
-   4. Seções 6–8: O que muda, A distância (3 gráficos conceituais), Como funciona (claro, grade técnica).
-   5. Seções 9–10: Onde o trabalho aparece, Trabalhos (faixa de logos, mural compacto, até 3 cases em texto com página `/[locale]/cases/[slug]`).
-   6. Seções 11–13: Sobre (claro; resumo na home + `/sobre`), Perguntas frequentes, Contato (Cal.com provisório, e-mail e mídia kit [PENDENTE]), rodapé.
+   3. Diagnóstico (ex-"Sinais"), O que é fractional (curvas líquidas, gráfico de barras com o dado verificado, comparativo), O que eu faço (pilares em pin); ajustes de cromo e assinatura definitiva — **concluída**.
+   4. A distância (3 gráficos conceituais), O que muda (antes/depois), Como funciona (claro, grade); Trabalhos (faixa de logos, carrossel, 3 cases com página própria); textos v2; base de SEO — **concluída, aguardando revisão do dono**.
+   5. Onde o trabalho aparece; Sobre (claro; resumo na home + `/sobre`); Poucas parcerias por vez ([CONFIRMAR]).
+   6. Perguntas frequentes; Contato completo (Cal.com provisório, e-mail e mídia kit [PENDENTE]); rodapé no layout.
 4. Urso 3D: orelhas e focinho brotando da bola (SDF/metaballs) com o mouse.
 5. Conteúdo real PT/EN (fotos, logos, cases, textos, tradução).
 6. Lançamento.
 
 **Fonte do conteúdo:** `CONTEUDO-SITE.md` (raiz) é o texto oficial do site, mantido pelo dono. Releia antes de implementar qualquer seção; itens `[PENDENTE]` ficam como placeholder visível e discreto.
 
-**Sem dados externos (regra fixa):** o site é sobre o dono. **Nunca** usar dados de mercado, estatísticas externas, pesquisas de terceiros (Gartner, McKinsey etc.) nem números de vagas, em nenhuma seção nem idioma. Gráficos são **conceituais**: SVG animado pelo scroll, sem escalas nem valores numéricos, com a nota discreta "ilustrativo". A seção "Por que agora" usa três gráficos conceituais de crescimento: a distância entre negócio e marca, fechando a distância, e consistência.
+**Sem dados externos (regra fixa):** o site é sobre o dono. **Única exceção:** o dado verificado do gráfico de barras em "O que é fractional" (Revelio Labs / Financial Times), sempre com a fonte em letra pequena e sem dizer país. Fora isso, **nunca** usar dados de mercado, estatísticas externas, pesquisas de terceiros (Gartner, McKinsey etc.) nem números de vagas, em nenhuma seção nem idioma. Gráficos são **conceituais**: SVG animado pelo scroll, sem escalas nem valores numéricos, com a nota discreta "ilustrativo". A seção "Por que agora" usa três gráficos conceituais de crescimento: a distância entre negócio e marca, fechando a distância, e consistência.
+
+**SEO e buscas por IA (regra fixa — vale para todo código novo):**
+- HTML semântico: **um único `<h1>` por página**, hierarquia `h2`/`h3` correta, cada seção um `<section aria-labelledby="<id do h2>">` (landmark nomeado). Na home, o `h1` é o título da hero (`#hero-title`, `sr-only` com a frase completa; as frases visuais são decorativas).
+- Todo texto é HTML real, renderizado no servidor e indexável. Animações **nunca** removem texto do DOM nem dependem de JS para ele existir. O estado inicial animado pode ser invisível (opacity/transform), mas o conteúdo está no HTML.
+- Metadados **por página e por idioma** em `generateMetadata`, sempre via `pageMetadata()` (`src/lib/seo/metadata.ts`): título, descrição, canonical, alternates/hreflang (`pt-BR`, `en`, `x-default`). O layout só define padrões (título com template `"%s — {nome}"`); se uma página não definir canonical, ela herda o errado.
+- Imagens com `alt` descritivo (nunca vazio em imagem de conteúdo); textos de botão e link descritivos (nada de "clique aqui"; use `aria-label` quando o texto visível for só um ícone/seta).
+- **Preparado, ainda não preenchido (etapa de lançamento):**
+  - JSON-LD `Person` e `ProfessionalService` (`src/lib/seo/structured-data.ts`, renderizados pelo `JsonLdScript` no layout, que hoje retornam `null`);
+  - sitemap.xml/robots.txt: criar `src/app/sitemap.ts` e `src/app/robots.ts` usando `sitemapEntries()` de `src/lib/seo/routes.ts` (lista única de rotas indexáveis);
+  - `NEXT_PUBLIC_SITE_URL` com o domínio final.
 
 **Conteúdo provisório:** nunca inventar clientes, números de carreira, depoimentos, resultados ou cases que pareçam reais ("Case 01", "Marca 01"). Textos provisórios ficam claramente marcados. `en.json` é, por enquanto, cópia do português.
 
@@ -135,12 +145,34 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - On mobile, under reduced motion or without JS, the pillars are stacked with no pin.
   - The title size is bounded by the longest word ("Acompanhamento") in a 6/12 column.
 
+**Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Trabalhos → Contato. `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
+
+**More sections** (`components/sections/*`):
+- `Distance`: three conceptual SVG charts with no numbers and the "ilustrativo" note, drawn by scroll per figure.
+  - The curves are generated from functions (`business`, `brand`, `brandClosing`) and use `pathLength=1` with a dashoffset draw.
+  - Chart C rotates/offsets the touchpoint groups into a common axis.
+  - The final SVG state is the HTML; GSAP only sets initial states.
+- `Diagnostic`: each phrase is a `<button aria-pressed>` (click/touch/keyboard). The counter "x de N" uses `aria-live`.
+  - With 2+ marked, the closing switches to `closingMatched` and a CTA to `#contato` appears.
+  - With no interaction, the default closing is in the HTML.
+- `Changes`: before/after. With `data-mode="flip"` each row flips via scroll inside a grid overlay (`[grid-area:1/1]`). The static mode shows two columns. Both texts are always in the DOM.
+- `Process`: a light section with `GraphicLayer variant="grid"`. The vertical line scrubs `scaleY`, and the steps light up.
+- `Works` (server) + `LogoMarquee` + `WorkCarousel`. Data lives in `public/trabalhos/trabalhos.json` and `public/logos/logos.json` (read via `src/content/media.ts`; to add one, drop the file in the folder and fill `"arquivo"`).
+  - Logos are rendered as a CSS **mask** over `bg-silver`, so they become monochrome silver whatever their colors.
+  - Marquee: two rows in opposite directions; each track holds the list twice and moves xPercent 50; it slows on hover (timeScale) and pauses off-screen. Loop mode is `data-mode="loop"`; otherwise it is a static grid.
+  - Carousel: desktop uses a pinned ScrollTrigger with snap. The arrows call `scrollToY()` (from `SmoothScroll`, Lenis-aware) to the slide's scroll position. Mobile uses drag + arrows. Neighbors are scaled 0.7 and dimmed 0.45.
+- Case pages `src/app/[locale]/cases/[slug]/page.tsx`: `generateStaticParams` over `caseSlugs` (`src/content/cases.ts`), with texts in `works.cases.items`. **With cacheComponents, read `params` inside a `<Suspense>`** (`CaseContent`); otherwise dev throws "encountered URL data during prerendering". Known slugs still prerender fully.
+- Signature: `src/content/signature.ts` reads `public/assinatura.svg` at build (49 stroke paths, `viewBox`); replace the file to change it.
+  - `Signature` draws a chrome gradient stroke plus a "shine" layer.
+  - `Manifesto` writes the paths in sequence (duration ∝ `getTotalLength`), then sweeps a light band (gradient `x1/x2`) on completion and every ~5 s while visible. No sweep under reduced motion.
+
 **Background graphics** (`components/graphics/GraphicLayer.tsx`), used by every light section:
-- `contours-a`/`contours-b` are SVGs generated by `scripts/generate-contours.mjs` (simplex noise + marching squares, no deps; regenerate with `node scripts/generate-contours.mjs`, about 14–17 KB gzip each) and applied as a CSS **mask** over `bg-graphic`, so the color follows the theme. `grid` is pure CSS.
-- Motion uses two layers, so transforms don't conflict:
-  - an outer **scroll parallax** (yPercent ±4);
-  - an inner **continuous organic drift**: x/y, rotation and scale yoyo tweens with non-matching periods (23/31/41/29 s). They start paused and only play while the section is on screen.
-  - Both are disabled under reduced motion.
+- **Live mode** (WebGL2, no reduced motion): `LiquidContours` renders isolines of animated 3D simplex noise with domain warping in a fragment shader (`fwidth` antialiasing), plus cursor ripples that fade out.
+  - Time runs at 1/3 of real time, with 7.5 levels (5 on mobile) at about 30 fps, only while visible.
+  - The line color comes from `--graphic`. **GSAP writes interpolated colors as 8-digit hex (`#RRGGBBAA`)**, so the parser must read the alpha byte.
+  - The canvas is created per mount, because in React Strict Mode (dev) a reused canvas returns the already-lost context and the shader "fails" with an empty log.
+- `contours-a`/`contours-b` are the static fallback/poster: SVGs generated by `scripts/generate-contours.mjs` (simplex noise + marching squares, no deps; regenerate with `node scripts/generate-contours.mjs`, about 14–17 KB gzip each) and applied as a CSS **mask** over `bg-graphic`, so the color follows the theme. `grid` is pure CSS.
+- The outer layer keeps a subtle **scroll parallax** (yPercent ±4). It is disabled under reduced motion, and then only the static SVG shows.
 
 **Intro-animation gotchas**
 - Initial hidden state is pure CSS (`.js-motion [data-reveal|data-fade]` in `globals.css`, only under `prefers-reduced-motion: no-preference`). The `js-motion` class is added by an inline script in `layout.tsx` before first paint, and removed after 6s as a safety net so text can never stay hidden.
