@@ -153,9 +153,9 @@ export function createLiquidMetalMaterial({ light }: { light: boolean }) {
   const material = new MeshPhysicalMaterial({
     color: SILVER.clone(),
     metalness: 1,
-    roughness: 0.035,
-    clearcoat: 1,
-    clearcoatRoughness: 0.03,
+    roughness: 0.02,
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.02,
   });
 
   material.defines = light ? { LIQUID_LIGHT: "" } : {};

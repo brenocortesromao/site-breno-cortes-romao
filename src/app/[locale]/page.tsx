@@ -6,7 +6,7 @@ import Section from "@/components/theme/Section";
 import Signals from "@/components/sections/Signals";
 import Fractional, { type FractionalCopy } from "@/components/sections/Fractional";
 import Pillars, { type PillarsCopy } from "@/components/sections/Pillars";
-import { signature } from "@/content/signature";
+import { loadSignature } from "@/content/signature";
 
 /* ------------------------------------------------------------------ *
  * Textos: src/messages/{pt,en}.json. Aqui fica só o que não se traduz:
@@ -59,6 +59,7 @@ export default async function Home() {
         {/* Mensagem (entra por cima da hero fixa; ver Hero.tsx) */}
         <Manifesto
           portraitSrc={portraitSrc}
+          signature={loadSignature()}
           copy={{
             eyebrow: t("manifesto.eyebrow", { name }),
             statement,
@@ -67,8 +68,7 @@ export default async function Home() {
             name,
             role: t("site.role"),
             signatureLabel: t("manifesto.signatureLabel", { name }),
-            // só a assinatura ainda é provisória (ver src/content/signature.ts)
-            draft: signature.provisional ? t("manifesto.signatureDraft") : "",
+            draft: "",
           }}
         />
 

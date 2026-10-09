@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
+  AdditiveBlending,
   BackSide,
-  Color,
   Float32BufferAttribute,
   Group,
   Mesh,
@@ -73,47 +73,81 @@ function Framing({ anchorRef }: { anchorRef: RefObject<HTMLElement | null> }) {
 }
 
 /**
- * Estúdio gerado por código (sem HDRI externo), pensado para cromo espelhado:
- * "céu" claro em cima, horizonte escuro, chão cinza médio e faixas finas e
- * muito intensas de luz. O contraste entre áreas claras e escuras, com bordas
- * nítidas (desfoque mínimo no PMREM), é o que faz ler como prata brilhante —
- * áreas médias grandes deixariam o metal cinza e fosco.
+ * Estúdio de produto gerado por código (sem HDRI externo), pensado para cromo
+ * polido / mercúrio:
+ * - ambiente QUASE PRETO (cúpula em degradê bem escuro): as áreas escuras é que
+ *   dão o contraste do metal — um "céu" claro deixaria a bola com cara de pérola;
+ * - softboxes com BORDAS SUAVES (falloff por cor de vértice) em posições
+ *   ASSIMÉTRICAS, alguns inclinados: viram faixas de luz curvas e macias no
+ *   metal. Faixas verticais simétricas viram "parênteses" — evite;
+ * - nenhuma fonte enorme no topo (topo estourado em branco).
  */
 function buildStudioEnvironment(renderer: WebGLRenderer) {
   const room = new Scene();
 
-  // Cúpula em degradê (cores por vértice): céu claro em cima, horizonte cinza,
-  // chão escuro. Gradientes contínuos = reflexos naturais, sem "recortes".
   const dome = new SphereGeometry(30, 64, 32);
   const pos = dome.getAttribute("position");
   const colors = new Float32Array(pos.count * 3);
   for (let i = 0; i < pos.count; i++) {
     const t = pos.getY(i) / 30; // -1 (chão) … 1 (topo)
-    const v =
-      t > 0
-        ? 0.14 + (2.4 - 0.14) * Math.pow(Math.min(t / 0.85, 1), 1.6)
-        : 0.14 - 0.1 * Math.min(-t / 0.5, 1);
-    colors.set([v, v, v * 1.03], i * 3);
+    const v = t > 0 ? 0.07 + 0.2 * Math.pow(t, 1.4) : 0.07 - 0.05 * Math.min(-t / 0.4, 1);
+    colors.set([v, v, v * 1.04], i * 3);
   }
   dome.setAttribute("color", new Float32BufferAttribute(colors, 3));
   room.add(new Mesh(dome, new MeshBasicMaterial({ vertexColors: true, side: BackSide })));
 
-  const panel = (w: number, h: number, position: [number, number, number], intensity: number) => {
+  /** Softbox com borda macia: intensidade cai suavemente do centro às bordas. */
+  const softbox = (
+    w: number,
+    h: number,
+    position: [number, number, number],
+    intensity: number,
+    tilt = 0,
+  ) => {
+    const geo = new PlaneGeometry(w, h, 32, 12);
+    const p = geo.getAttribute("position");
+    const c = new Float32Array(p.count * 3);
+    const smooth = (e0: number, e1: number, x: number) => {
+      const k = Math.min(Math.max((x - e0) / (e1 - e0), 0), 1);
+      return k * k * (3 - 2 * k);
+    };
+    for (let i = 0; i < p.count; i++) {
+      const u = Math.abs(p.getX(i)) / (w / 2);
+      const v = Math.abs(p.getY(i)) / (h / 2);
+      // queda longa (do centro até a borda): o reflexo vira degradê, não "janela"
+      const f = intensity * smooth(1, 0.05, u) * smooth(1, 0.05, v);
+      c.set([f, f, f * 1.03], i * 3);
+    }
+    geo.setAttribute("color", new Float32BufferAttribute(c, 3));
+    // aditivo: a luz SOMA ao ambiente (bordas pretas do degradê não criam contorno)
     const mesh = new Mesh(
-      new PlaneGeometry(w, h),
-      new MeshBasicMaterial({ color: new Color(intensity, intensity, intensity * 1.02), side: 2 }),
+      geo,
+      new MeshBasicMaterial({
+        vertexColors: true,
+        side: 2,
+        transparent: true,
+        blending: AdditiveBlending,
+        depthWrite: false,
+      }),
     );
     mesh.position.set(...position);
     mesh.lookAt(new Vector3(0, 0, 0));
+    mesh.rotateZ(tilt);
     room.add(mesh);
   };
 
-  panel(0.9, 22, [12, 1, 5], 7); // faixa vertical à direita (brilho nítido)
-  panel(0.6, 22, [-12, 1, 4], 4.5); // faixa vertical à esquerda
-  panel(7, 1.6, [-6, 11, 6], 9); // softbox alto à esquerda: brilho perto do topo da bola
+  // Fontes fortes nas LATERAIS e ATRÁS: os reflexos vão para perto das bordas da
+  // bola. O centro (que reflete o que está atrás da câmera) recebe só um fill
+  // difuso — formas fortes no centro viram "olhos"/"rosto".
+  softbox(20, 9, [-12, 9, 3], 3.6, -0.3); // principal: faixa macia na borda superior esquerda
+  softbox(14, 10, [13, 1, -4], 2.6, 0.5); // contraluz à direita, inclinado: prata na borda
+  softbox(40, 1.4, [0, -1, -12], 2.4); // fio de horizonte atrás: linha fina perto da borda
+  softbox(16, 6, [0, 14, 0], 1.0); // teto discreto: topo prateado, sem estourar
+  softbox(26, 16, [0, 2, 14], 0.4); // fill frontal muito difuso: centro prata-grafite, sem forma
+  softbox(24, 24, [0, -12, 2], 0.3); // rebatimento do chão
 
   const pmrem = new PMREMGenerator(renderer);
-  const target = pmrem.fromScene(room, 0.02);
+  const target = pmrem.fromScene(room, 0.012);
   pmrem.dispose();
 
   room.traverse((obj) => {

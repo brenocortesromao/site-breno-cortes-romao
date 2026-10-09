@@ -14,6 +14,21 @@ gsap.registerPlugin(ScrollTrigger);
  * - Toque: o Lenis mantém o scroll nativo por padrão (syncTouch: false), o que
  *   é mais leve e mais previsível no celular.
  */
+let instance: Lenis | null = null;
+
+/**
+ * Rola a página até `y` com a mesma suavidade do Lenis (ou nativamente, quando
+ * ele não está ativo: movimento reduzido / toque). Use em botões que movem o
+ * scroll (ex.: setas do carrossel), para não "brigar" com o Lenis.
+ */
+export function scrollToY(y: number) {
+  if (instance) instance.scrollTo(y, { duration: 1.1 });
+  else {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: y, behavior: reduced ? "auto" : "smooth" });
+  }
+}
+
 export default function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -25,6 +40,7 @@ export default function SmoothScroll() {
       autoRaf: false,
     });
 
+    instance = lenis;
     lenis.on("scroll", ScrollTrigger.update);
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
@@ -34,6 +50,7 @@ export default function SmoothScroll() {
       gsap.ticker.remove(tick);
       gsap.ticker.lagSmoothing(500, 33);
       lenis.destroy();
+      instance = null;
     };
   }, []);
 

@@ -1,35 +1,75 @@
 "use client";
 
-import { useRef, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import LiquidContours from "./LiquidContours";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+type Variant = "contours-a" | "contours-b" | "grid";
+
+/** Máscara CSS com um dos SVGs de curvas (a cor vem do fundo do elemento). */
+function maskOf(file: "contours-a" | "contours-b"): CSSProperties {
+  const url = `url(/graphics/${file}.svg)`;
+  return {
+    maskImage: url,
+    WebkitMaskImage: url,
+    maskSize: "cover",
+    WebkitMaskSize: "cover",
+    maskPosition: "center",
+    WebkitMaskPosition: "center",
+    maskRepeat: "no-repeat",
+    WebkitMaskRepeat: "no-repeat",
+  };
+}
+
+function supportsWebGL2() {
+  try {
+    const gl = document.createElement("canvas").getContext("webgl2");
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    return !!gl;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Grafismo de fundo das seções claras: linhas finas na cor do token --graphic.
- * - "contours-a" / "contours-b": curvas de nível (SVGs gerados por
- *   scripts/generate-contours.mjs), aplicadas como MÁSCARA CSS — a cor vem do
- *   fundo (bg-graphic), então acompanham o tema sem duplicar arquivos.
- * - "grid": grade técnica em CSS puro (sem imagem).
- * Movimento (só sem prefers-reduced-motion; só com transform):
- * - parallax sutil com o scroll (camada externa, ~8% mais devagar);
- * - deriva orgânica contínua (camada interna): deslocamentos lentos em x/y,
- *   rotação mínima e "respiração" de escala, com períodos diferentes que não se
- *   sincronizam — as linhas parecem ondular devagar, sem loop perceptível.
- *   Pausa quando a seção sai da tela (economia no mobile).
+ * Grafismo de fundo das seções claras, na cor do token --graphic.
+ * - "contours-a" / "contours-b": curvas de nível.
+ *   - Com WebGL2 e sem prefers-reduced-motion: LÍQUIDAS em tempo real
+ *     (LiquidContours: isolinhas de ruído 3D animado + ondulação do cursor).
+ *   - Senão (e como poster até o shader ficar pronto): SVG estático gerado por
+ *     scripts/generate-contours.mjs, aplicado como máscara CSS.
+ *   A variante escolhe o desenho do SVG e a semente do shader.
+ * - "grid": grade técnica em CSS puro.
+ * Parallax sutil com o scroll na camada externa (só sem reduced motion).
  * O pai precisa ser `relative overflow-hidden`.
  */
 export default function GraphicLayer({
   variant,
   className = "",
 }: {
-  variant: "contours-a" | "contours-b" | "grid";
+  variant: Variant;
   className?: string;
 }) {
   const layer = useRef<HTMLDivElement>(null);
-  const drift = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<{ liquid: boolean; light: boolean } | null>(null);
+  const [liquidReady, setLiquidReady] = useState(false);
+
+  useEffect(() => {
+    if (variant === "grid") return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
+    setMode({
+      liquid: !reduced && supportsWebGL2(),
+      light: window.matchMedia("(pointer: coarse)").matches,
+    });
+  }, [variant]);
+
+  const handleReady = useCallback(() => setLiquidReady(true), []);
+  const handleFail = useCallback(() => setMode((m) => (m ? { ...m, liquid: false } : m)), []);
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
@@ -48,52 +88,38 @@ export default function GraphicLayer({
           },
         },
       );
-
-      // Deriva: cada eixo com período próprio (s), ida e volta em seno.
-      const tweens = [
-        gsap.to(drift.current, { paused: true, x: 22, duration: 23, ease: "sine.inOut", repeat: -1, yoyo: true }),
-        gsap.to(drift.current, { paused: true, y: -28, duration: 31, ease: "sine.inOut", repeat: -1, yoyo: true }),
-        gsap.to(drift.current, { paused: true, rotation: 0.8, duration: 41, ease: "sine.inOut", repeat: -1, yoyo: true }),
-        gsap.to(drift.current, { paused: true, scale: 1.035, duration: 29, ease: "sine.inOut", repeat: -1, yoyo: true }),
-      ];
-      // começa pausada; só anda enquanto a seção está na tela
-      const visible = ScrollTrigger.create({
-        trigger: layer.current?.parentElement,
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: (self) => tweens.forEach((t) => (self.isActive ? t.play() : t.pause())),
-      });
-      if (visible.isActive) tweens.forEach((t) => t.play());
     });
   });
-
-  const mask: CSSProperties | undefined =
-    variant === "grid"
-      ? undefined
-      : {
-          maskImage: `url(/graphics/${variant}.svg)`,
-          WebkitMaskImage: `url(/graphics/${variant}.svg)`,
-          maskSize: "cover",
-          WebkitMaskSize: "cover",
-          maskPosition: "center",
-          WebkitMaskPosition: "center",
-          maskRepeat: "no-repeat",
-          WebkitMaskRepeat: "no-repeat",
-        };
 
   return (
     <div aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
       <div ref={layer} className="absolute inset-x-0 -inset-y-[8%]">
-        {/* margem extra (-3%) para a deriva/rotação nunca revelar as bordas */}
-        <div
-          ref={drift}
-          className={`absolute -inset-[3%] will-change-transform ${
-            variant === "grid"
-              ? "bg-[linear-gradient(to_right,var(--graphic)_1px,transparent_1px),linear-gradient(to_bottom,var(--graphic)_1px,transparent_1px)] bg-[size:80px_80px]"
-              : "bg-graphic"
-          }`}
-          style={mask}
-        />
+        {variant === "grid" ? (
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--graphic)_1px,transparent_1px),linear-gradient(to_bottom,var(--graphic)_1px,transparent_1px)] bg-[size:80px_80px]" />
+        ) : (
+          <>
+            <div
+              className={`absolute inset-0 bg-graphic transition-opacity duration-700 ${
+                liquidReady ? "opacity-0" : "opacity-100"
+              }`}
+              style={maskOf(variant)}
+            />
+            {mode?.liquid && (
+              <div
+                className={`absolute inset-0 transition-opacity duration-700 ${
+                  liquidReady ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <LiquidContours
+                  seed={variant === "contours-a" ? 1 : 2}
+                  light={mode.light}
+                  onReady={handleReady}
+                  onFail={handleFail}
+                />
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

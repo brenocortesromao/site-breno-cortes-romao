@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import MediaSlot from "./MediaSlot";
 import Signature from "./Signature";
+import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -34,9 +35,12 @@ export type ManifestoCopy = {
  */
 export default function Manifesto({
   copy,
+  signature,
   portraitSrc,
 }: {
   copy: ManifestoCopy;
+  /** viewBox + paths de public/assinatura.svg (lidos no servidor). */
+  signature: SignatureData;
   portraitSrc?: string;
 }) {
   const root = useRef<HTMLElement>(null);
@@ -64,9 +68,32 @@ export default function Manifesto({
           },
         );
 
-        // Assinatura: cada traço começa escondido (dashoffset = comprimento) e é
-        // "escrito" em sequência enquanto o retrato atravessa a tela.
+        // Assinatura: caneta contínua. Cada traço começa escondido (dashoffset =
+        // comprimento) e é escrito em sequência, com duração proporcional ao
+        // comprimento, enquanto o retrato atravessa a tela.
         const paths = gsap.utils.toArray<SVGPathElement>("[data-signature-path]");
+        const shineLayer = root.current?.querySelector("[data-signature-shine-layer]");
+        const shine = root.current?.querySelector("[data-signature-shine]");
+        const sigWidth = Number(signature.viewBox.split(/\s+/)[2]) || 1000;
+
+        // Reflexo: faixa de luz que atravessa o traço da esquerda para a direita.
+        // Primeira passada ao terminar o desenho; depois repete sutil a cada ~5 s,
+        // só com a seção visível.
+        const sweep = gsap
+          .timeline({ paused: true, repeat: -1, repeatDelay: 4.5 })
+          .set(shineLayer ?? {}, { opacity: 1 })
+          .fromTo(
+            shine ?? {},
+            { attr: { x1: -sigWidth * 0.3, x2: 0 } },
+            { attr: { x1: sigWidth, x2: sigWidth * 1.3 }, duration: 1.6, ease: "power2.inOut" },
+          );
+        let drawn = false;
+        let onScreen = false;
+        const syncSweep = () => {
+          if (drawn && onScreen) sweep.play();
+          else sweep.pause();
+        };
+
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: portrait.current,
@@ -74,11 +101,31 @@ export default function Manifesto({
             end: "bottom 60%",
             scrub: 0.6,
           },
+          onUpdate: () => {
+            const done = tl.progress() >= 0.999;
+            if (done && !drawn) sweep.restart();
+            if (!done && drawn) {
+              sweep.pause(0);
+              gsap.set(shineLayer ?? {}, { opacity: 0 });
+            }
+            drawn = done;
+            syncSweep();
+          },
         });
         paths.forEach((path) => {
           const len = path.getTotalLength();
           gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
-          tl.to(path, { strokeDashoffset: 0, ease: "none", duration: len / 400 });
+          tl.to(path, { strokeDashoffset: 0, ease: "none", duration: len / 900 });
+        });
+
+        ScrollTrigger.create({
+          trigger: portrait.current,
+          start: "top bottom",
+          end: "bottom top",
+          onToggle: (self) => {
+            onScreen = self.isActive;
+            syncSweep();
+          },
         });
 
         gsap.from("[data-follow]", {
@@ -115,6 +162,7 @@ export default function Manifesto({
               sizes="(min-width: 768px) 38vw, 90vw"
             />
             <Signature
+              data={signature}
               label={copy.signatureLabel}
               className="pointer-events-none absolute -bottom-[7%] right-[-4%] w-[82%]"
             />
