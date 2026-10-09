@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // AVIF primeiro (menor), WebP como alternativa
+  images: { formats: ["image/avif", "image/webp"] },
   turbopack: {
     rules: {
       "*.css": {

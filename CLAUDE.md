@@ -6,32 +6,41 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 
 ## Estado atual (atualizado em 09/10/2026)
 
-**Etapa:** 3, estrutura completa do site (bilíngue PT/EN). A lista mestra do que falta é o `PENDENCIAS.md` (itens [x] concluídos; itens abertos têm nota com arquivos e próximo passo). Textos: `CONTEUDO-SITE.md`.
+**Etapa:** 3, estrutura completa do site (bilíngue PT/EN). A lista mestra é o `PENDENCIAS.md`: itens [x] concluídos, e os abertos têm nota com arquivos e próximo passo. Textos: `CONTEUDO-SITE.md`.
 
 **Concluído hoje:**
-- i18n (next-intl, /pt e /en, seletor) e as 14 seções do mapa, na ordem narrativa.
-- Ritmo de cores com 3 temas: preto, off-white com curvas líquidas e gradiente escuro.
+- i18n e as 14 seções na ordem narrativa.
+- Ritmo de cores: preto, off-white com curvas líquidas lentas e gradiente escuro.
 - Hero com bola cromada.
-- Assinatura definitiva em cromo, desenhada pelo scroll.
-- Gráficos do dono em "A distância".
-- Diagnóstico interativo com 8 frases.
-- Números Lightcast em black chrome.
+- Assinatura em cromo desenhada pelo scroll.
+- Gráficos do dono em "A distância" (ainda como cena fixa).
+- Diagnóstico com 8 frases e pistas de interação.
+- Números Lightcast em negrito com black chrome.
 - Antes/depois com indicador deslizante.
 - Gota líquida em "Como funciona".
 - FAQ com 11 perguntas e FAQPage.
 - Base de SEO.
-- Regras sem travessões e sem traduzir "Fractional Brand & Creative Director".
+- Regras: sem travessões e "Fractional Brand & Creative Director" sem tradução.
+- **Fundo de montanhas** (`graphics/MountainBackdrop.tsx`): envolve Pillars + Changes num `div.relative` em `page.tsx`, com imagem sticky de opacidade 24%, zoom de 1.0 a 1.5 com origem no pico (62% 70%) e fade de entrada e saída. Os gatilhos usam `refreshPriority: -1`, porque o pin dos pilares muda a altura do trecho.
 
 **Decisões importantes:**
-- Urso só na Etapa 4, nascendo da própria bola via SDF/metaballs, sem GLB.
+- Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.
 - Dados externos: só os números Lightcast, com fonte.
-- Sem páginas de case: o dono decidiu remover a lista de cases e as páginas /cases (ainda presentes no código, ver PENDENCIAS).
+- Sem cases nem páginas /cases (remoção pendente no código).
 - Off-white só em 3 seções.
-- "A distância" deve voltar a 3 blocos separados com animação por gatilho, sem a cena fixa.
+- "A distância" volta a 3 blocos sem pin, com scrub curto (do bloco entrar pela base até o gráfico chegar ao centro).
+- Títulos recentes vindos do chat (ainda não estão no CONTEUDO-SITE.md):
+  - O que eu faço: "O nível de direção das grandes marcas. Na medida da sua empresa.";
+  - O que muda: "O valor que já existe, finalmente visível.".
 
-**Onde retomar:** `PENDENCIAS.md`, Bloco 4: A distância em 3 blocos, depois a entrada profunda e animação constante da gota, depois a limpeza dos cases em Trabalhos. Em seguida, o Bloco 5 (fundo de montanhas, imagens já em `public/fundo/`). Por fim, a validação final e a revisão do dono.
+**Onde retomar:** `PENDENCIAS.md`, Bloco 4, na ordem:
+1. A distância em 3 blocos com scrub curto;
+2. entrada profunda e animação constante da gota;
+3. limpeza dos cases e legenda do carrossel em Trabalhos.
 
-**Armadilha recorrente:** depois de editar `globals.css`, o `next dev` às vezes continua servindo o CSS antigo. Pare o servidor, apague `.next/dev` e reinicie.
+Depois disso: a validação final (desktop, mobile, console, build) e parar para a revisão do dono.
+
+**Armadilha recorrente:** depois de editar `globals.css` ou `next.config.ts`, o `next dev` pode continuar com a versão antiga. Pare o servidor, apague `.next/dev` e reinicie.
 
 ## Direção do projeto
 

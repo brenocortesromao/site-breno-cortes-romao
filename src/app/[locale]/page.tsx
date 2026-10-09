@@ -13,6 +13,7 @@ import Pillars, { type PillarsCopy } from "@/components/sections/Pillars";
 import Changes, { type ChangesCopy } from "@/components/sections/Changes";
 import Process, { type ProcessCopy } from "@/components/sections/Process";
 import Works from "@/components/sections/Works";
+import MountainBackdrop from "@/components/graphics/MountainBackdrop";
 import Touchpoints from "@/components/sections/Touchpoints";
 import About from "@/components/sections/About";
 import Partnerships from "@/components/sections/Partnerships";
@@ -122,24 +123,28 @@ export default async function Home() {
           }}
         />
 
-        <Pillars
-          copy={{
-            eyebrow: t("pillars.eyebrow"),
-            title: t("pillars.title"),
-            subtitle: t("pillars.subtitle"),
-            items: t.raw("pillars.items") as PillarsCopy["items"],
-          }}
-        />
-
-        <Changes
-          copy={{
-            eyebrow: t("changes.eyebrow"),
-            title: t("changes.title"),
-            before: t("changes.before"),
-            after: t("changes.after"),
-            rows: t.raw("changes.rows") as ChangesCopy["rows"],
-          }}
-        />
+        {/* Trecho com fundo de montanhas (vista de cima → detalhe): O que eu faço + O que muda */}
+        <div className="relative">
+          <MountainBackdrop alt={t("backdrop.mountainsAlt")} />
+          <Pillars
+            copy={{
+              eyebrow: t("pillars.eyebrow"),
+              title: t("pillars.title"),
+              subtitle: t("pillars.subtitle"),
+              items: t.raw("pillars.items") as PillarsCopy["items"],
+            }}
+          />
+  
+          <Changes
+            copy={{
+              eyebrow: t("changes.eyebrow"),
+              title: t("changes.title"),
+              before: t("changes.before"),
+              after: t("changes.after"),
+              rows: t.raw("changes.rows") as ChangesCopy["rows"],
+            }}
+          />
+        </div>
 
         <Process
           copy={{

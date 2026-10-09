@@ -30,10 +30,13 @@ Regras:
 
 - Frase de abertura, em tipografia gigante, palavra por palavra:
   **Uma marca não é o que a empresa diz sobre si. É o que sobra na cabeça das pessoas quando você sai da sala.**
+  (Atenção: "sobre si." com ponto final, nunca "sobre sim". Ponto final também depois de "sala".)
 - Texto: É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca, e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.
 - Assinatura: Breno Côrtes Romão
 
-## 3. A distância (GRADIENTE ESCURO — gráficos conceituais, sem números, nota "ilustrativo")
+## 3. A distância (GRADIENTE ESCURO, gráficos conceituais, sem números, nota "ilustrativo")
+
+ESTRUTURA: três blocos SEPARADOS, um abaixo do outro, cada um com seu texto (sempre legível, sem esmaecer) e seu gráfico (public/graficos/). Nada de cena única fixa. Cada gráfico toca sua animação sozinho (2 a 3 s) quando entra na tela, sem depender de scroll contínuo.
 
 (Movida para cá: mostra o problema visualmente logo depois da mensagem do Breno.)
 
@@ -89,8 +92,8 @@ Nota: Não sou um CMO. Não assumo mídia, canais ou aquisição. Cuido do que f
 
 ## 5. O que eu faço (preto, seção fixa trocando de pilar)
 
-Título: **Da estratégia à última peça.**
-Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois, e é isso que impede a estratégia de morrer num PDF.
+Título: **Estratégia e execução, nas mesmas mãos.**
+Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois. Por isso a estratégia não fica no papel: ela chega em cada peça.
 1. **Estratégia de marca.** O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso.
 2. **Direção criativa.** Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram.
 3. **Execução.** Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação.
@@ -98,7 +101,7 @@ Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois, e é
 
 ## 6. O que muda (GRADIENTE ESCURO — antes/depois animado, cada linha vira de "antes" para "depois")
 
-Título: **O que muda quando alguém assume a marca.**
+Título: **A mesma empresa. Outra percepção.**
 | Antes | Depois |
 |---|---|
 | Ninguém entende de primeira o que vocês fazem. | Sua oferta é entendida em uma frase. |

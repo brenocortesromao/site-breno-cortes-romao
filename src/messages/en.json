@@ -161,7 +161,7 @@
   },
   "pillars": {
     "eyebrow": "O que eu faço",
-    "title": "Vejo a marca de cima. E desço até o último detalhe.",
+    "title": "O nível de direção das grandes marcas. Na medida da sua empresa.",
     "subtitle": "A maioria dos profissionais pensa ou executa. Eu faço os dois, e é isso que impede a estratégia de morrer num PDF.",
     "items": [
       {
@@ -184,7 +184,7 @@
   },
   "changes": {
     "eyebrow": "O que muda",
-    "title": "O que muda quando alguém assume a marca.",
+    "title": "O valor que já existe, finalmente visível.",
     "before": "Antes",
     "after": "Depois",
     "rows": [
@@ -421,5 +421,8 @@
   "notFound": {
     "title": "Página não encontrada",
     "back": "Voltar ao início"
+  },
+  "backdrop": {
+    "mountainsAlt": "Montanhas vistas de cima, em preto e branco"
   }
 }
