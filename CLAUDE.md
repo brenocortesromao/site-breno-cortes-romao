@@ -4,6 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Bilingual (PT default / EN) personal business site for a Fractional Brand & Creative Director, statically generated per locale. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
 
+## Estado atual (atualizado em 09/10/2026)
+
+**Etapa:** 3, estrutura completa do site (bilíngue PT/EN). A lista mestra do que falta é o `PENDENCIAS.md` (itens [x] concluídos; itens abertos têm nota com arquivos e próximo passo). Textos: `CONTEUDO-SITE.md`.
+
+**Concluído hoje:**
+- i18n (next-intl, /pt e /en, seletor) e as 14 seções do mapa, na ordem narrativa.
+- Ritmo de cores com 3 temas: preto, off-white com curvas líquidas e gradiente escuro.
+- Hero com bola cromada.
+- Assinatura definitiva em cromo, desenhada pelo scroll.
+- Gráficos do dono em "A distância".
+- Diagnóstico interativo com 8 frases.
+- Números Lightcast em black chrome.
+- Antes/depois com indicador deslizante.
+- Gota líquida em "Como funciona".
+- FAQ com 11 perguntas e FAQPage.
+- Base de SEO.
+- Regras sem travessões e sem traduzir "Fractional Brand & Creative Director".
+
+**Decisões importantes:**
+- Urso só na Etapa 4, nascendo da própria bola via SDF/metaballs, sem GLB.
+- Dados externos: só os números Lightcast, com fonte.
+- Sem páginas de case: o dono decidiu remover a lista de cases e as páginas /cases (ainda presentes no código, ver PENDENCIAS).
+- Off-white só em 3 seções.
+- "A distância" deve voltar a 3 blocos separados com animação por gatilho, sem a cena fixa.
+
+**Onde retomar:** `PENDENCIAS.md`, Bloco 4: A distância em 3 blocos, depois a entrada profunda e animação constante da gota, depois a limpeza dos cases em Trabalhos. Em seguida, o Bloco 5 (fundo de montanhas, imagens já em `public/fundo/`). Por fim, a validação final e a revisão do dono.
+
+**Armadilha recorrente:** depois de editar `globals.css`, o `next dev` às vezes continua servindo o CSS antigo. Pare o servidor, apague `.next/dev` e reinicie.
+
 ## Direção do projeto
 
 Site do negócio do dono como **Fractional Brand & Creative Director**: proposta de valor, portfólio, currículo, serviços, clientes e cases.
