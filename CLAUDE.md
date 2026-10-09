@@ -151,11 +151,21 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 **Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Onde o trabalho aparece → Trabalhos → Sobre (resumo) → Poucas parcerias → Perguntas frequentes → Contato. Other pages: `/sobre` (About `variant="page"` + Contact) and `/cases/[slug]`. Header and Footer live in the locale layout. `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
 
 **More sections** (`components/sections/*`):
-- `Distance`: three conceptual SVG charts with no numbers and the "ilustrativo" note, drawn by scroll per figure.
-  - The curves are generated from functions (`business`, `brand`, `brandClosing`) and use `pathLength=1` with a dashoffset draw.
-  - Chart C rotates/offsets the touchpoint groups into a common axis.
-  - The final SVG state is the HTML; GSAP only sets initial states.
+- `Distance`: the owner's SVGs from `public/graficos/`, inlined by `src/content/charts.ts`. Ids are prefixed `ga-`/`gb-`/`gc-`, because the files repeat ids. Chart C renders the END file, plus start poses computed from the start file.
+  - **One pinned scene** (pin `+=100%`, so the section is ~2 screens) with 3 steps:
+    1. A: curves + gap;
+    2. B: milestone, ghost, brand catching up. It has the same framing as A, so the swap is invisible;
+    3. C: consistency.
+  - Steps are **triggered timelines** (~2.5 s, play to the end even if scrolling stops; scrolling back reverses), not scrub. The text crossfades, with a 1/3 indicator.
+  - `data-mode="scene"` overlays the steps in one grid cell. Without JS or under reduced motion they stack, final and static.
+  - The hatch/glow between curves is strengthened in `globals.css` (`[data-chart] pattern[id$=-hatch]`).
 - `Diagnostic` (§3b): 6 quoted founder phrases, each a `<button aria-pressed>` (click/touch/keyboard). Marked phrases turn silver; the rest stay graphite. The counter "x de N" uses `aria-live`.
+  - Affordance cues:
+    - a one-time demo per visit (sessionStorage `diag-demo-shown`) lights the first phrase for ~1 s without counting;
+    - rings pulse (`ringPulse` keyframes) until the first interaction;
+    - on mouse hover the phrase brightens, the ring shows a faint ✓, and a custom cursor label follows ("Marcar"/"Desmarcar");
+    - the hint text switches between "Toque…" and "Clique…" via `@media(pointer:fine)` CSS.
+  - No demo or pulse under reduced motion. Phrase spans use `minmax(0,1fr)` + `break-words` so nothing clips at 1024–1440px.
   - The closing has 3 states: `closing` (0 marked or no interaction, which is what the HTML holds), `closingOne` (1 marked) and `closingMatched` (2+, plus the "Vamos conversar" CTA to `#contato`).
 - `Changes`: before/after. With `data-mode="flip"` each row flips via scroll inside a grid overlay (`[grid-area:1/1]`). The static mode shows two columns. Both texts are always in the DOM.
 - `Process`: a light section with `GraphicLayer variant="grid"`. The vertical line scrubs `scaleY`, and the steps light up.
