@@ -21,7 +21,9 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - FAQ com 11 perguntas e FAQPage.
 - Base de SEO.
 - Regras: sem travessões e "Fractional Brand & Creative Director" sem tradução.
-- **Fundo de montanhas** (`graphics/MountainBackdrop.tsx`): envolve Pillars + Changes num `div.relative` em `page.tsx`, com imagem sticky de opacidade 24%, zoom de 1.0 a 1.5 com origem no pico (62% 70%) e fade de entrada e saída. Os gatilhos usam `refreshPriority: -1`, porque o pin dos pilares muda a altura do trecho.
+- **Fundo de montanhas** (`graphics/MountainBackdrop.tsx`): envolve Pillars + Changes num `div.relative` em `page.tsx`, sticky, com fade de entrada e saída. Os gatilhos usam `refreshPriority: -1`, porque o pin dos pilares muda a altura do trecho.
+  - Com WebGL2 (Bloco 6): terreno 3D procedural, sem assets. `graphics/terrain/heightmap.ts` gera a malha (ridged multifractal, LOD radial, sombras pré-calculadas, `getTerrain()` com cache, aquecido num `requestIdleCallback`). `terrain/MountainScene.tsx` é a cena R3F, com a câmera descendo pelo progresso do scroll (`progressRef`). A cena só monta perto do trecho; opacidade 36%.
+  - Sem WebGL: a foto de `public/fundo/` com opacidade 24% e zoom de 1.0 a 1.5 no pico (62% 70%).
 
 **Decisões importantes:**
 - Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.

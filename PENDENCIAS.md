@@ -43,13 +43,33 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [x] Performance: imagem otimizada com next/image (AVIF/WebP), versão menor no mobile, transform via GPU; prefers-reduced-motion = imagem estática.
 
 ## Bloco 6. Montanhas em 3D (substitui a foto do Bloco 5, que ficou em baixa qualidade)
-- [ ] Trocar a foto por um TERRENO 3D PROCEDURAL em tempo real (React Three Fiber), no mesmo trecho "O que eu faço" + "O que muda". Nítido em qualquer resolução e zoom. Manter a foto só como fallback (sem WebGL).
-- [ ] Geração: heightmap por ruído (ridged multifractal / fbm com erosão aparente) formando cordilheiras com picos, vales e cristas marcadas, vistas de cima, como foto aérea dos Alpes.
-- [ ] Visual monocromático na paleta do site: rocha em grafite quase preto, neve/cristas em prata clara nos pontos mais altos e nas faces voltadas para a luz, luz rasante lateral (sol baixo) criando sombras longas, névoa atmosférica escura no horizonte e entre as camadas de montanhas (profundidade), nada de azul.
-- [ ] Integração: opacidade geral em torno de 30 a 40% (ajustar para o texto continuar perfeitamente legível), vinheta escura e fade para preto na entrada e na saída do trecho.
-- [ ] Câmera ligada ao scroll: começa alta, vendo várias cordilheiras ao longe, e desce suavemente em direção a um pico principal até ficar próxima das cristas no fim do trecho (como um drone descendo). Leve deriva contínua mesmo parado (a névoa se move devagar). Leve parallax com o mouse.
+- [x] Trocar a foto por um TERRENO 3D PROCEDURAL em tempo real (React Three Fiber), no mesmo trecho "O que eu faço" + "O que muda". Nítido em qualquer resolução e zoom. Manter a foto só como fallback (sem WebGL).
+- [x] Geração: heightmap por ruído (ridged multifractal / fbm com erosão aparente) formando cordilheiras com picos, vales e cristas marcadas, vistas de cima, como foto aérea dos Alpes.
+- [x] Visual monocromático na paleta do site: rocha em grafite quase preto, neve/cristas em prata clara nos pontos mais altos e nas faces voltadas para a luz, luz rasante lateral (sol baixo) criando sombras longas, névoa atmosférica escura no horizonte e entre as camadas de montanhas (profundidade), nada de azul.
+- [x] Integração: opacidade geral em torno de 30 a 40% (ajustar para o texto continuar perfeitamente legível), vinheta escura e fade para preto na entrada e na saída do trecho.
+- [x] Câmera ligada ao scroll: começa alta, vendo várias cordilheiras ao longe, e desce suavemente em direção a um pico principal até ficar próxima das cristas no fim do trecho (como um drone descendo). Leve deriva contínua mesmo parado (a névoa se move devagar). Leve parallax com o mouse.
 - [ ] Performance: malha com LOD (densidade alta só perto da câmera), shader de terreno leve, DPR limitado, pausa fora da tela, reaproveitar o renderer existente se possível. Mobile: malha menor e resolução reduzida; se o FPS cair, usar um frame renderizado estático. prefers-reduced-motion: frame estático.
+  > Feito em 09/10: graphics/terrain/heightmap.ts (ridged multifractal + domain warp, maciço largo no centro, grade com LOD radial, sombras de sol rasante pré-calculadas na CPU, geração ~220 ms com cache num requestIdleCallback) e terrain/MountainScene.tsx (R3F, shader grafite/prata com neve por altitude e inclinação, detalhe de normal de perto, névoa de distância e de vale com deriva). MountainBackdrop: cena montada só perto do trecho, opacidade 36%, foto como fallback, reduced motion = quadro estático. Não reaproveita o renderer da hero (canvas próprio; a hero já está fora da tela). Ainda não medido FPS em GPU real (headless usa SwiftShader); falta o fallback automático para quadro estático se o FPS cair.
 - [ ] Antes de seguir com o resto, me mostre capturas do início, meio e fim do trecho para eu aprovar o visual.
+
+## Bloco 6b. Montanhas 3D mais realistas e com textura (aprovado o conceito; agora refinar)
+- [ ] Forma: aplicar erosão no relevo (erosão hidráulica pré-calculada numa textura de altura, ou "erosion noise" no shader) para criar vales em V, ravinas e cristas afiadas como montanhas reais. Opcional, se ficar melhor: usar um heightmap REAL de cordilheira (dados de elevação abertos, ex.: Alpes) como base, com detalhe procedural por cima.
+- [ ] Textura: materiais PBR de rocha e neve gratuitos (CC0, ex.: Poly Haven ou ambientCG) em tons de cinza, com mapeamento triplanar (sem esticar nas encostas), normal map de microdetalhe e variação de rugosidade.
+- [ ] Neve realista: depende da altitude, da inclinação (encostas íngremes ficam com rocha exposta) e da face voltada para a luz; bordas da neve irregulares, não em faixas.
+- [ ] Luz e sombra: sombras reais (shadow map suave) do sol rasante, ambient occlusion nos vales, aerial perspective (montanhas distantes mais claras e com menos contraste, como na foto de referência).
+- [ ] Atmosfera: camadas de névoa baixa passando pelos vales e entre as cordilheiras, se movendo devagar.
+- [ ] Acabamento: leve grão de filme e vinheta para integrar ao site; paleta continua monocromática (grafite, prata, branco), sem azul.
+- [ ] Performance continua prioridade: texturas comprimidas (KTX2/Basis ou webp), LOD, sombras só no desktop, pausa fora da tela. Mobile mais leve ou frame estático.
+- [ ] Me mostre capturas do início, meio e fim do trecho antes de seguir.
+
+## Bloco 7. Animação de textos no scroll (sistema único para o site todo)
+- [ ] Criar um componente/utilitário reutilizável de revelação de texto e aplicar com consistência:
+  - Títulos grandes (h2): revelação por LINHA com máscara (cada linha sobe de trás de uma máscara, stagger ~0.08 s, easing expo-out), ao entrar na tela.
+  - Frases de impacto (como "Toda empresa que cresce rápido cria uma distância..." em A distância): palavras começam em grafite e ACENDEM para branco uma a uma conforme o scroll (scrub curto, do bloco entrando até o centro da tela), sincronizadas com o gráfico ao lado.
+  - Palavra-chave de cada frase de impacto (ex.: "distância", "parece", "fechá-la", "confiar") ganha um brilho prata/cromado que passa por ela uma vez quando acende.
+  - Parágrafos e textos de apoio: fade + leve subida (12 a 20px), discretos.
+  - Rótulos em mono (eyebrows): letras aparecem em sequência rápida, estilo terminal.
+- [ ] Não animar o que já tem animação própria (mensagem do Breno, diagnóstico, números). Texto sempre no HTML (SEO), sem layout shift, prefers-reduced-motion = texto estático visível.
 
 ## Ao final
 - [ ] Console sem erros, desktop e mobile validados, build de produção passando.
