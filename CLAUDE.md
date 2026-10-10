@@ -196,6 +196,10 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
     3. C: consistency (points align on the common axis).
   - Each chart has its own **short scrub** timeline: trigger is the `figure[data-chart]`, `start: "top bottom"`, `end: "center center"`. It is complete when the chart reaches the middle of the screen and stays where it is if scrolling stops.
   - Without JS or under reduced motion the SVGs show their final state.
+  - Each phrase **acts out** what it says, inside the same scrubbed timeline as its chart. Highlight fields in `distance.charts[]` mark the words (`gap`, `hits`, `close`, `shine`); the `text` stays clean. Words/letters are `<span aria-hidden>` under an `<h3 aria-label>` with the full sentence (and `translate="no"`). Only transform/opacity/text-stroke are animated (no layout shift):
+    - A: words light up one by one; the `gap` words on the same line slide right (0.75em, 0.3em on mobile) as the "A DISTÂNCIA" area lights.
+    - B: `hits` enter one by one with a short glitch jitter; `close` enters as if letter-spacing 0.4em closed to normal (cumulative per-letter x), with the brand curve reaching the business.
+    - C: letters start offset/rotated/heavier (text-stroke, no width change) and settle with the arrows; `shine` ("confiar") gets one silver sweep (`.text-shine-fixed` in `globals.css`, viewport-fixed gradient).
   - The hatch/glow between curves is strengthened in `globals.css` (`[data-chart] pattern[id$=-hatch]`).
 - `Diagnostic` (§3b): 6 quoted founder phrases, each a `<button aria-pressed>` (click/touch/keyboard). Marked phrases turn silver; the rest stay graphite. The counter "x de N" uses `aria-live`.
   - Affordance cues:

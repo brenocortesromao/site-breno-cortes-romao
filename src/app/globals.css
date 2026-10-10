@@ -249,3 +249,19 @@ body::before {
   background-clip: text;
   color: transparent;
 }
+
+/* Reflexo prata que atravessa uma palavra dividida em letras ("confiar", em
+   A distância). O gradiente fica em coordenadas da tela (attachment fixed),
+   então a mesma faixa passa por todas as letras; o GSAP move a faixa. Fora da
+   animação a faixa fica fora da palavra e o texto tem a cor normal. */
+.text-shine-fixed {
+  color: transparent;
+  -webkit-text-stroke-color: var(--fg);
+  background-image: linear-gradient(100deg, var(--fg) 0 49.2%, #ffffff 50%, var(--fg) 50.8% 100%);
+  background-size: 300vw 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: calc(-150vw - 200px) 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+}

@@ -52,13 +52,17 @@
     "eyebrow": "A distância",
     "charts": [
       {
-        "text": "Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece."
+        "text": "Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece.",
+        "gap": "e o que ela parece."
       },
       {
-        "text": "Essa distância custa vendas, talentos e preço. Meu trabalho é fechá-la."
+        "text": "Essa distância custa vendas, talentos e preço. Meu trabalho é fechá-la.",
+        "hits": ["vendas", "talentos", "preço"],
+        "close": "Meu trabalho é fechá-la."
       },
       {
-        "text": "Consistência não é estética. É o que faz o mercado confiar em você."
+        "text": "Consistência não é estética. É o que faz o mercado confiar em você.",
+        "shine": "confiar"
       }
     ]
   },
