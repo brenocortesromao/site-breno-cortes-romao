@@ -191,12 +191,12 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 
 **More sections** (`components/sections/*`):
 - `Distance`: the owner's SVGs from `public/graficos/`, inlined by `src/content/charts.ts`. Ids are prefixed `ga-`/`gb-`/`gc-`, because the files repeat ids. Chart C renders the END file, plus start poses computed from the start file.
-  - **One pinned scene** (pin `+=100%`, so the section is ~2 screens) with 3 steps:
+  - **Three stacked blocks, no pin**: text left (always visible), chart right; on mobile the text sits above the chart.
     1. A: curves + gap;
-    2. B: milestone, ghost, brand catching up. It has the same framing as A, so the swap is invisible;
-    3. C: consistency.
-  - Steps are **triggered timelines** (~2.5 s, play to the end even if scrolling stops; scrolling back reverses), not scrub. The text crossfades, with a 1/3 indicator.
-  - `data-mode="scene"` overlays the steps in one grid cell. Without JS or under reduced motion they stack, final and static.
+    2. B: milestone, ghost, brand catching up. It starts from A's final state;
+    3. C: consistency (points align on the common axis).
+  - Each chart has its own **short scrub** timeline: trigger is the `figure[data-chart]`, `start: "top bottom"`, `end: "center center"`. It is complete when the chart reaches the middle of the screen and stays where it is if scrolling stops.
+  - Without JS or under reduced motion the SVGs show their final state.
   - The hatch/glow between curves is strengthened in `globals.css` (`[data-chart] pattern[id$=-hatch]`).
 - `Diagnostic` (§3b): 6 quoted founder phrases, each a `<button aria-pressed>` (click/touch/keyboard). Marked phrases turn silver; the rest stay graphite. The counter "x de N" uses `aria-live`.
   - Affordance cues:
