@@ -31,7 +31,7 @@ Regras:
 - Frase de abertura, em tipografia gigante, palavra por palavra:
   **Uma marca não é o que a empresa diz sobre si. É o que sobra na cabeça das pessoas quando você sai da sala.**
   (Atenção: "sobre si." com ponto final, nunca "sobre sim". Ponto final também depois de "sala".)
-- Texto: É essa impressão que eu construo. Trabalho com empresas que cresceram mais rápido do que a própria marca, e que hoje são maiores do que parecem. Meu papel é fechar essa distância: entender o negócio, definir o que ele precisa dizer e garantir que cada ponto de contato transmita o mesmo nível que a empresa já tem.
+- Texto: É essa impressão que eu construo. Trabalho com empresas que já são grandes no que fazem, mas ainda parecem pequenas no que mostram. Entendo o negócio, decido o que ele precisa dizer e cuido para que cada peça esteja à altura dele.
 - Assinatura: Breno Côrtes Romão
 
 ## 3. A distância (GRADIENTE ESCURO, gráficos conceituais, sem números, nota "ilustrativo")
