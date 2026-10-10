@@ -160,6 +160,13 @@ export default function LiquidContours({
       return;
     }
     gl.useProgram(program);
+    // perda do contexto pelo navegador (limite de contextos, GPU): avisa o pai,
+    // que remonta a camada
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      onFail?.();
+    };
+    el.addEventListener("webglcontextlost", onLost);
 
     // triângulo que cobre a tela
     const buf = gl.createBuffer();
@@ -260,6 +267,7 @@ export default function LiquidContours({
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      el.removeEventListener("webglcontextlost", onLost);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();
     };

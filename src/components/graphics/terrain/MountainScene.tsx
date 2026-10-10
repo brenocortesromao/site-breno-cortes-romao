@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { BufferAttribute, BufferGeometry, Mesh, ShaderMaterial, Vector3 } from "three";
+import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { getTerrain, SUN, terrainSize } from "./heightmap";
 
 /**
@@ -161,12 +162,15 @@ export default function MountainScene({
   active,
   light,
   reducedMotion,
+  onContextLost,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
   active: boolean;
   light: boolean;
   reducedMotion: boolean;
+  /** Perda do contexto WebGL (o pai remonta a cena). */
+  onContextLost?: () => void;
 }) {
   return (
     <Canvas
@@ -177,6 +181,7 @@ export default function MountainScene({
       camera={{ position: [0, 26, 30], fov: 42, near: 0.1, far: 140 }}
       gl={{ antialias: !light, alpha: true, powerPreference: "default" }}
     >
+      <ContextLossWatcher onLost={onContextLost} />
       <Terrain progressRef={progressRef} pointerRef={pointerRef} light={light} still={reducedMotion} />
     </Canvas>
   );

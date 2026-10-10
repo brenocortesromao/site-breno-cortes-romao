@@ -5,6 +5,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import LiquidContours from "./LiquidContours";
+import ResilientBoundary from "@/components/ResilientBoundary";
+import { webglSupport } from "@/lib/webgl";
+import { useNearViewport } from "@/lib/useNearViewport";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -23,16 +26,6 @@ function maskOf(file: "contours-a" | "contours-b"): CSSProperties {
     maskRepeat: "no-repeat",
     WebkitMaskRepeat: "no-repeat",
   };
-}
-
-function supportsWebGL2() {
-  try {
-    const gl = document.createElement("canvas").getContext("webgl2");
-    gl?.getExtension("WEBGL_lose_context")?.loseContext();
-    return !!gl;
-  } catch {
-    return false;
-  }
 }
 
 /**
@@ -54,7 +47,10 @@ export default function GraphicLayer({
   variant: Variant;
   className?: string;
 }) {
+  const outer = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
+  /** O canvas só existe com a seção a até ~1 tela (libera o contexto WebGL longe dela). */
+  const near = useNearViewport(outer);
   const [mode, setMode] = useState<{ liquid: boolean; light: boolean } | null>(null);
   const [liquidReady, setLiquidReady] = useState(false);
 
@@ -63,12 +59,17 @@ export default function GraphicLayer({
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     setMode({
-      liquid: !reduced && supportsWebGL2(),
+      liquid: !reduced && webglSupport().webgl2,
       light: window.matchMedia("(pointer: coarse)").matches,
     });
   }, [variant]);
 
   const handleReady = useCallback(() => setLiquidReady(true), []);
+  // canvas desmontado: volta ao SVG estático até o próximo ficar pronto
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reflete a desmontagem do canvas
+    if (!near) setLiquidReady(false);
+  }, [near]);
   const handleFail = useCallback(() => setMode((m) => (m ? { ...m, liquid: false } : m)), []);
 
   useGSAP(() => {
@@ -92,7 +93,7 @@ export default function GraphicLayer({
   });
 
   return (
-    <div aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
+    <div ref={outer} aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
       <div ref={layer} className="absolute inset-x-0 -inset-y-[8%]">
         {variant === "grid" ? (
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--graphic)_1px,transparent_1px),linear-gradient(to_bottom,var(--graphic)_1px,transparent_1px)] bg-[size:80px_80px]" />
@@ -110,12 +111,19 @@ export default function GraphicLayer({
                   liquidReady ? "opacity-100" : "opacity-0"
                 }`}
               >
-                <LiquidContours
-                  seed={variant === "contours-a" ? 1 : 2}
-                  light={mode.light}
-                  onReady={handleReady}
-                  onFail={handleFail}
-                />
+                {/* falha ou perda de contexto: remonta; só fica no SVG se falhar de novo */}
+                <ResilientBoundary onGiveUp={handleFail}>
+                  {(onLost) =>
+                    near && (
+                      <LiquidContours
+                        seed={variant === "contours-a" ? 1 : 2}
+                        light={mode.light}
+                        onReady={handleReady}
+                        onFail={onLost}
+                      />
+                    )
+                  }
+                </ResilientBoundary>
               </div>
             )}
           </>

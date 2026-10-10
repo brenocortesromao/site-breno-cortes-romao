@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
 import LiquidDrop from "@/components/graphics/LiquidDrop";
+import ResilientBoundary from "@/components/ResilientBoundary";
+import { useNearViewport } from "@/lib/useNearViewport";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -30,6 +32,10 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
   /** Etapa atual (0–4) lida pela gota a cada quadro. */
   const stage = useRef(0);
   const [drop, setDrop] = useState<{ light: boolean; reduce: boolean } | null>(null);
+  /** A gota só existe com a seção a até ~1 tela (libera o contexto WebGL longe dela). */
+  const near = useNearViewport(root);
+  const [dropFailed, setDropFailed] = useState(false);
+  const handleDropFail = useCallback(() => setDropFailed(true), []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
@@ -94,14 +100,24 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
             {/* gota de metal líquido: fixa nesta coluna enquanto as etapas passam
                 (desktop); menor, acima da linha do tempo (mobile) */}
             <div className="mt-8 md:sticky md:top-32 md:mt-12">
-              {drop && (
-                <LiquidDrop
-                  stageRef={stage}
-                  light={drop.light}
-                  reduceMotion={drop.reduce}
-                  className="mx-auto aspect-square w-40 md:mx-0 md:w-[min(100%,40svh,24rem)]"
-                />
-              )}
+              {/* o espaço da gota fica reservado mesmo sem o canvas montado */}
+              <div className="mx-auto aspect-square w-40 md:mx-0 md:w-[min(100%,40svh,24rem)]">
+                {drop && !dropFailed && (
+                  <ResilientBoundary onGiveUp={handleDropFail}>
+                    {(onLost) =>
+                      near && (
+                        <LiquidDrop
+                          stageRef={stage}
+                          light={drop.light}
+                          reduceMotion={drop.reduce}
+                          onLost={onLost}
+                          className="h-full w-full"
+                        />
+                      )
+                    }
+                  </ResilientBoundary>
+                )}
+              </div>
             </div>
           </div>
 

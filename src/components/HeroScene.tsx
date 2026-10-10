@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import ContextLossWatcher from "./ContextLossWatcher";
 import {
   AdditiveBlending,
   BackSide,
@@ -330,6 +331,8 @@ export type HeroSceneProps = {
   /** Elemento do DOM que define posição e tamanho da bola (ver Framing). */
   anchorRef: RefObject<HTMLElement | null>;
   onReady: () => void;
+  /** Perda do contexto WebGL (o pai remonta a cena). */
+  onContextLost?: () => void;
 };
 
 export default function HeroScene({
@@ -339,6 +342,7 @@ export default function HeroScene({
   progress,
   anchorRef,
   onReady,
+  onContextLost,
 }: HeroSceneProps) {
   const animate = !reducedMotion;
   const interactive = animate && !coarse;
@@ -353,6 +357,7 @@ export default function HeroScene({
       camera={{ position: [0, 0, 20], fov: CAMERA_FOV }}
       gl={{ antialias: true, alpha: true, powerPreference: "default" }}
     >
+      <ContextLossWatcher onLost={onContextLost} />
       <Framing anchorRef={anchorRef} />
       <Environment onReady={onReady} />
       <Rig interactive={interactive} animate={animate} pointerRef={pointer}>

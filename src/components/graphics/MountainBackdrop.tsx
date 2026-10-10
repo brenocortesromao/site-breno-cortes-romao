@@ -1,11 +1,14 @@
 "use client";
 
-import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import ResilientBoundary from "@/components/ResilientBoundary";
+import { webglSupport } from "@/lib/webgl";
+import { useNearViewport } from "@/lib/useNearViewport";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -13,28 +16,6 @@ const MountainScene = dynamic(() => import("./terrain/MountainScene"), { ssr: fa
 
 /** Pico nevado principal da foto de fallback (fração da imagem): foco do zoom. */
 const PEAK = "62% 70%";
-
-/** Se o WebGL falhar em tempo de execução, volta para a foto. */
-class SceneBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  componentDidCatch() {
-    this.props.onError();
-  }
-  render() {
-    return this.state.failed ? null : this.props.children;
-  }
-}
-
-function hasWebGL() {
-  try {
-    return !!document.createElement("canvas").getContext("webgl2");
-  } catch {
-    return false;
-  }
-}
 
 type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
 
@@ -58,13 +39,13 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   const pointer = useRef({ x: 0, y: 0 });
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  /** A cena só é montada quando o trecho se aproxima pela primeira vez. */
-  const [armed, setArmed] = useState(false);
+  /** A cena só existe com o trecho a até ~1 tela: longe, é desmontada (libera o contexto WebGL). */
+  const near = useNearViewport(root);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
-    setEnv({ webgl: hasWebGL(), reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
+    setEnv({ webgl: webglSupport().webgl2, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
     if (reduced) progress.current = 0.45;
   }, []);
 
@@ -73,10 +54,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
     const el = root.current;
     if (!el) return;
     const io = new IntersectionObserver(
-      ([e]) => {
-        setActive(e.isIntersecting);
-        if (e.isIntersecting) setArmed(true);
-      },
+      ([e]) => setActive(e.isIntersecting),
       { rootMargin: "50% 0px" },
     );
     io.observe(el);
@@ -108,7 +86,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
 
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
   const scene = env?.webgl === true;
-  const mountScene = scene && armed;
+  const mountScene = scene && near;
 
   useGSAP(
     () => {
@@ -160,17 +138,21 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
         <div ref={layer} className="absolute inset-0">
           {scene ? (
             <div className="absolute inset-0 opacity-[0.36]">
-              <SceneBoundary onError={handleFail}>
-                {mountScene && (
-                  <MountainScene
-                    progressRef={progress}
-                    pointerRef={pointer}
-                    active={active}
-                    light={env.coarse}
-                    reducedMotion={env.reduced}
-                  />
-                )}
-              </SceneBoundary>
+              {/* erro ou perda de contexto: remonta; só cai na foto se falhar de novo */}
+              <ResilientBoundary onGiveUp={handleFail}>
+                {(onLost) =>
+                  mountScene && (
+                    <MountainScene
+                      progressRef={progress}
+                      pointerRef={pointer}
+                      active={active}
+                      light={env.coarse}
+                      reducedMotion={env.reduced}
+                      onContextLost={onLost}
+                    />
+                  )
+                }
+              </ResilientBoundary>
             </div>
           ) : (
             env && (

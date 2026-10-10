@@ -1,48 +1,21 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import HeroVisual from "./HeroVisual";
 import DraftBadge from "./theme/DraftBadge";
 import { protectTerms } from "@/components/Term";
+import ResilientBoundary from "@/components/ResilientBoundary";
+import { webglSupport } from "@/lib/webgl";
+import { useNearViewport } from "@/lib/useNearViewport";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 // Three.js só é baixado no cliente e depois que a página já está visível.
 const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
-
-/** Se a criação do WebGL falhar em tempo de execução, cai no SVG em vez de quebrar a página. */
-class SceneBoundary extends Component<
-  { children: ReactNode; onError: () => void },
-  { failed: boolean }
-> {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  componentDidCatch() {
-    this.props.onError();
-  }
-  render() {
-    return this.state.failed ? null : this.props.children;
-  }
-}
-
-function hasWebGL() {
-  try {
-    const canvas = document.createElement("canvas");
-    const gl = (canvas.getContext("webgl2") ||
-      canvas.getContext("webgl")) as WebGLRenderingContext | null;
-    if (!gl) return false;
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
 
@@ -77,16 +50,24 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
   const [env, setEnv] = useState<Env | null>(null);
   const [inView, setInView] = useState(true);
   const [sceneReady, setSceneReady] = useState(false);
+  /** A cena 3D só existe com a hero a até ~1 tela; longe, é desmontada (libera o contexto). */
+  const near = useNearViewport(section);
 
   // Detecta capacidades do dispositivo (só existe no cliente).
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de APIs do navegador
     setEnv({
-      webgl: hasWebGL(),
+      webgl: webglSupport().webgl,
       reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
       coarse: window.matchMedia("(pointer: coarse)").matches,
     });
   }, []);
+
+  // Cena desmontada: volta ao poster até a próxima ficar pronta.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reflete a desmontagem da cena
+    if (!near) setSceneReady(false);
+  }, [near]);
 
   // Pausa o render 3D quando a hero sai da tela.
   useEffect(() => {
@@ -166,6 +147,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
   );
 
   const showScene = env?.webgl === true;
+  const mountScene = showScene && near;
   const phrase =
     "font-display text-[clamp(2.4rem,11vw,4rem)] leading-[0.95] tracking-[-0.055em] md:text-[min(3.9vw,5rem)]";
 
@@ -249,16 +231,22 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
               sceneReady ? "opacity-100" : "opacity-0"
             }`}
           >
-            <SceneBoundary onError={handleFail}>
-              <HeroScene
-                active={inView}
-                reducedMotion={env.reduced}
-                coarse={env.coarse}
-                progress={progress}
-                anchorRef={anchor}
-                onReady={handleReady}
-              />
-            </SceneBoundary>
+            {/* erro ou perda de contexto: remonta; só cai no poster se falhar de novo */}
+            <ResilientBoundary onGiveUp={handleFail}>
+              {(onLost) =>
+                mountScene && (
+                  <HeroScene
+                    active={inView}
+                    reducedMotion={env.reduced}
+                    coarse={env.coarse}
+                    progress={progress}
+                    anchorRef={anchor}
+                    onReady={handleReady}
+                    onContextLost={onLost}
+                  />
+                )
+              }
+            </ResilientBoundary>
           </div>
         </div>
       )}

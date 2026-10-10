@@ -141,12 +141,15 @@ export default function LiquidDrop({
   stageRef,
   light = false,
   reduceMotion = false,
+  onLost,
   className = "",
 }: {
   /** Etapa atual (0–4), escrita pela seção. */
   stageRef: RefObject<number>;
   light?: boolean;
   reduceMotion?: boolean;
+  /** Perda do contexto WebGL pelo navegador (o pai remonta). */
+  onLost?: () => void;
   className?: string;
 }) {
   const host = useRef<HTMLDivElement>(null);
@@ -176,6 +179,11 @@ export default function LiquidDrop({
       return;
     }
     gl.useProgram(program);
+    const handleLost = (e: Event) => {
+      e.preventDefault();
+      onLost?.();
+    };
+    el.addEventListener("webglcontextlost", handleLost);
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -239,6 +247,7 @@ export default function LiquidDrop({
       draw();
       return () => {
         ro.disconnect();
+        el.removeEventListener("webglcontextlost", handleLost);
         gl.getExtension("WEBGL_lose_context")?.loseContext();
         el.remove();
       };
@@ -308,12 +317,13 @@ export default function LiquidDrop({
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onPointer);
+      el.removeEventListener("webglcontextlost", handleLost);
       io.disconnect();
       ro.disconnect();
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();
     };
-  }, [stageRef, light, reduceMotion]);
+  }, [stageRef, light, reduceMotion, onLost]);
 
   return <div ref={host} aria-hidden="true" className={className} />;
 }
