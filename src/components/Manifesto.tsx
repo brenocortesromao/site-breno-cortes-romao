@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import MediaSlot from "./MediaSlot";
 import PortraitReveal from "./PortraitReveal";
+import LiquidWorm from "./LiquidWorm";
 import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
@@ -50,6 +51,8 @@ export default function Manifesto({
   const root = useRef<HTMLElement>(null);
   const phrase = useRef<HTMLHeadingElement>(null);
   const portrait = useRef<HTMLDivElement>(null);
+  /** A minhoca só circula depois que a entrada da foto termina. */
+  const [revealed, setRevealed] = useState(false);
 
   useGSAP(
     () => {
@@ -75,8 +78,9 @@ export default function Manifesto({
         // Assinatura: caneta contínua. Cada traço começa escondido (dashoffset =
         // comprimento E opacidade 0, senão a ponta redonda deixa um ponto solto)
         // e é escrito em sequência, com duração proporcional ao comprimento.
-        // Começa depois da pintura do retrato (que termina no topo a 45%) e
-        // fica completa com o retrato ainda inteiro na tela.
+        // Começa logo depois da construção do retrato (que termina no topo a
+        // 45%) e completa numa faixa curta (topo de 42% a 28%), com o retrato
+        // inteiro na tela: quem para de rolar ali já vê a assinatura toda.
         const paths = gsap.utils.toArray<SVGPathElement>("[data-signature-path]");
         const shineLayer = root.current?.querySelector("[data-signature-shine-layer]");
         const shine = root.current?.querySelector("[data-signature-shine]");
@@ -104,7 +108,7 @@ export default function Manifesto({
           scrollTrigger: {
             trigger: portrait.current,
             start: "top 42%",
-            end: "top 10%",
+            end: "top 28%",
             scrub: 0.6,
           },
           onUpdate: () => {
@@ -158,9 +162,18 @@ export default function Manifesto({
             </p>
             {copy.draft && <DraftBadge label={copy.draft} />}
           </div>
-          <div ref={portrait} className="relative">
+          {/* retrato a ~80% da coluna, com respiro em volta para a minhoca líquida */}
+          <div ref={portrait} className="relative mx-auto w-4/5 md:mx-0 md:ml-[4%]">
             {portraitSrc ? (
-              <PortraitReveal src={portraitSrc} alt={copy.portraitAlt} sizes="(min-width: 768px) 38vw, 90vw" />
+              <>
+                <PortraitReveal
+                  src={portraitSrc}
+                  alt={copy.portraitAlt}
+                  sizes="(min-width: 768px) 31vw, 72vw"
+                  onDoneChange={setRevealed}
+                />
+                <LiquidWorm active={revealed} />
+              </>
             ) : (
               <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" />
             )}

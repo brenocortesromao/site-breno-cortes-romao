@@ -249,11 +249,14 @@ export default function PortraitReveal({
   src,
   alt,
   sizes,
+  onDoneChange,
   className = "",
 }: {
   src: string;
   alt: string;
   sizes?: string;
+  /** Avisa quando a entrada termina (ou não existe: reduced motion / sem WebGL). */
+  onDoneChange?: (done: boolean) => void;
   className?: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
@@ -319,6 +322,8 @@ export default function PortraitReveal({
   );
 
   const showCanvas = build && texture && near && !done;
+  const complete = !build || done;
+  useEffect(() => onDoneChange?.(complete), [complete, onDoneChange]);
 
   return (
     <div ref={root} className={`relative aspect-[4/5] overflow-hidden border border-line bg-surface ${className}`}>

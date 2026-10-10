@@ -41,7 +41,7 @@ export default function Signature({
   const height = vbH || 300;
 
   return (
-    <svg viewBox={data.viewBox} fill="none" role="img" aria-label={label} className={className}>
+    <svg viewBox={data.viewBox} fill="none" role="img" aria-label={label} overflow="visible" className={className}>
       <defs>
         {/* Cromo polido: faixas escuras e claras repetidas, inclinadas (como reflexo
             num metal curvo), de grafite claro a branco passando por cinzas.
