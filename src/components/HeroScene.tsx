@@ -12,8 +12,11 @@ import {
   MeshBasicMaterial,
   PMREMGenerator,
   PlaneGeometry,
+  Raycaster,
   Scene,
+  Sphere,
   SphereGeometry,
+  Vector2,
   Vector3,
   type MeshPhysicalMaterial,
   type WebGLRenderer,
@@ -21,6 +24,7 @@ import {
 import {
   createLiquidMetalMaterial,
   GRAPHITE,
+  IMPACT_SLOTS,
   SILVER,
   type LiquidUniforms,
 } from "./hero/liquidMetal";
@@ -191,6 +195,8 @@ function Environment({ onReady }: { onReady: () => void }) {
 }
 
 type Pointer = { x: number; y: number };
+/** Estado compartilhado da interação: hover (0→1, suavizado) e "tremida" dos reflexos no impacto. */
+type Fx = { hover: number; kick: number };
 
 /**
  * Mouse com atraso suave (lerp exponencial, independente do FPS): desloca e
@@ -202,11 +208,13 @@ function Rig({
   interactive,
   animate,
   pointerRef,
+  fxRef,
 }: {
   children: ReactNode;
   interactive: boolean;
   animate: boolean;
   pointerRef: RefObject<Pointer>;
+  fxRef: RefObject<Fx>;
 }) {
   const group = useRef<Group>(null);
   const target = useRef<Pointer>({ x: 0, y: 0 });
@@ -231,16 +239,23 @@ function Rig({
     p.x += (target.current.x - p.x) * k;
     p.y += (target.current.y - p.y) * k;
 
-    // deslocamento curto: cabe no respiro entre a bola e as frases da hero
+    // deslocamento curto: cabe no respiro entre a bola e as frases da hero.
+    // Com o cursor SOBRE a bola, ela gira e se inclina mais na direção dele
+    // (fx.hover sobe e desce com inércia, sem trancos).
+    const fx = fxRef.current;
+    const h = fx.hover;
     g.position.x = p.x * 0.1;
     g.position.y = -p.y * 0.08;
-    g.rotation.y = p.x * 0.14;
-    g.rotation.x = p.y * 0.09;
+    g.rotation.y = p.x * (0.14 + 0.32 * h);
+    g.rotation.x = p.y * (0.09 + 0.22 * h);
 
-    // Os reflexos "varrem" a superfície conforme o mouse e um leve drift no tempo.
-    const drift = Math.sin(clock.elapsedTime * 0.2) * 0.08;
-    scene.environmentRotation.y = p.x * 0.45 + drift;
-    scene.environmentRotation.x = p.y * 0.2;
+    // Os reflexos "varrem" a superfície conforme o mouse e um leve drift no tempo;
+    // no impacto, vibram de leve (fx.kick decai em ~0,6 s).
+    fx.kick *= Math.exp(-dt * 5);
+    const t = clock.elapsedTime;
+    const drift = Math.sin(t * 0.2) * 0.08;
+    scene.environmentRotation.y = p.x * 0.45 + drift + Math.sin(t * 38) * 0.035 * fx.kick;
+    scene.environmentRotation.x = p.y * 0.2 + Math.cos(t * 31) * 0.02 * fx.kick;
   });
 
   return <group ref={group}>{children}</group>;
@@ -258,12 +273,14 @@ function LiquidShape({
   interactive,
   pointerRef,
   progress,
+  fxRef,
 }: {
   light: boolean;
   animate: boolean;
   interactive: boolean;
   pointerRef: RefObject<Pointer>;
   progress: RefObject<number>;
+  fxRef: RefObject<Fx>;
 }) {
   const geometry = useMemo(() => createPlaceholderGeometry({ light }), [light]);
   const material = useMemo(() => createLiquidMetalMaterial({ light }), [light]);
@@ -271,6 +288,122 @@ function LiquidShape({
   const breath = useRef<Group>(null);
   const mesh = useRef<Mesh>(null);
   const baseAmp = useRef<number | null>(null);
+  const get = useThree((s) => s.get);
+  const invalidate = useThree((s) => s.invalidate);
+  const hovering = useRef(false);
+
+  // "Soquinho": raycast próprio (o canvas fica sob as frases e não recebe
+  // eventos) contra a esfera da bola em coordenadas de mundo. O ponto vira uma
+  // direção no espaço do objeto e ocupa um slot do ring buffer de impactos.
+  useEffect(() => {
+    const ray = new Raycaster();
+    const ndc = new Vector2();
+    const center = new Vector3();
+    const scale = new Vector3();
+    const sphere = new Sphere();
+    const hit = new Vector3();
+    let slot = 0;
+    let lastMouseDown = -1e9;
+
+    const pick = (cx: number, cy: number) => {
+      const m = mesh.current;
+      if (!m || (progress.current ?? 0) > 0.35) return null; // só com a bola em destaque
+      const { camera, gl } = get();
+      const r = gl.domElement.getBoundingClientRect();
+      if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) return null;
+      ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      m.getWorldPosition(center);
+      m.getWorldScale(scale);
+      sphere.set(center, SHAPE_RADIUS * scale.x);
+      if (!ray.ray.intersectSphere(sphere, hit)) return null;
+      return m.worldToLocal(hit).normalize();
+    };
+
+    // cursor: pequeno círculo que segue o mouse sobre a bola e pulsa no clique.
+    // Fica no body: a hero é fixada pelo GSAP e um position:fixed dentro dela
+    // ficaria deslocado.
+    const cursor = document.createElement("div");
+    cursor.setAttribute("aria-hidden", "true");
+    Object.assign(cursor.style, {
+      position: "fixed",
+      left: "0",
+      top: "0",
+      zIndex: "60",
+      pointerEvents: "none",
+      opacity: "0",
+      transition: "opacity 0.25s ease",
+    });
+    const ring = document.createElement("div");
+    Object.assign(ring.style, {
+      width: "18px",
+      height: "18px",
+      margin: "-9px 0 0 -9px",
+      borderRadius: "999px",
+      border: "1px solid var(--fg)",
+      background: "color-mix(in srgb, var(--fg) 12%, transparent)",
+    });
+    cursor.appendChild(ring);
+    document.body.appendChild(cursor);
+    const host = get().gl.domElement.closest("section");
+
+    const setHover = (on: boolean) => {
+      if (on === hovering.current) return;
+      hovering.current = on;
+      cursor.style.opacity = on ? "1" : "0";
+      if (host) host.style.cursor = on ? "none" : "";
+    };
+
+    const punch = (cx: number, cy: number) => {
+      const dir = pick(cx, cy);
+      const m = mesh.current;
+      if (!dir || !m) return;
+      const u = (m.material as MeshPhysicalMaterial).userData.uniforms as LiquidUniforms;
+      ring.animate(
+        [{ transform: "scale(1)" }, { transform: "scale(1.9)", opacity: 0.4 }, { transform: "scale(1)" }],
+        { duration: 380, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+      );
+      if (!animate) {
+        // reduced motion: sem ondas, só um brilho suave no ponto tocado
+        u.uGlowDir.value.copy(dir);
+        u.uGlow.value = 1;
+        invalidate();
+        return;
+      }
+      u.uImpactDir.value[slot].copy(dir);
+      u.uImpactStart.value[slot] = u.uClock.value;
+      u.uImpactForce.value[slot] = 0.85 + Math.random() * 0.3;
+      slot = (slot + 1) % IMPACT_SLOTS;
+      fxRef.current.kick = 1;
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      setHover(!!pick(e.clientX, e.clientY));
+    };
+    // mouse: no pointerdown (imediato); toque: no click, que só dispara num
+    // toque de verdade (não no início de uma rolagem)
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      lastMouseDown = performance.now();
+      punch(e.clientX, e.clientY);
+    };
+    const onClick = (e: MouseEvent) => {
+      if (performance.now() - lastMouseDown < 600) return;
+      punch(e.clientX, e.clientY);
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    window.addEventListener("click", onClick, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("click", onClick);
+      if (host) host.style.cursor = "";
+      cursor.remove();
+    };
+  }, [get, invalidate, animate, progress, fxRef]);
 
   useEffect(
     () => () => {
@@ -280,7 +413,8 @@ function LiquidShape({
     [geometry, material],
   );
 
-  useFrame(({ scene }, dt) => {
+  useFrame(({ scene }, delta) => {
+    const dt = Math.min(delta, 0.05);
     const m = mesh.current;
     const g = recede.current;
     const b = breath.current;
@@ -288,6 +422,15 @@ function LiquidShape({
     const mat = m.material as MeshPhysicalMaterial;
     const u = mat.userData.uniforms as LiquidUniforms;
     baseAmp.current ??= u.uAmp.value;
+
+    // relógio dos impactos (independe da respiração) e hover com inércia
+    u.uClock.value += dt;
+    const fx = fxRef.current;
+    fx.hover += ((hovering.current ? 1 : 0) - fx.hover) * (1 - Math.exp(-dt * 3));
+    if (u.uGlow.value > 0) {
+      u.uGlow.value = Math.max(0, u.uGlow.value - dt * 0.9);
+      invalidate(); // reduced motion (frameloop "demand"): anima só o brilho
+    }
 
     if (animate) {
       u.uTime.value += dt;
@@ -347,6 +490,7 @@ export default function HeroScene({
   const animate = !reducedMotion;
   const interactive = animate && !coarse;
   const pointer = useRef<Pointer>({ x: 0, y: 0 });
+  const fx = useRef<Fx>({ hover: 0, kick: 0 });
 
   return (
     <Canvas
@@ -360,13 +504,14 @@ export default function HeroScene({
       <ContextLossWatcher onLost={onContextLost} />
       <Framing anchorRef={anchorRef} />
       <Environment onReady={onReady} />
-      <Rig interactive={interactive} animate={animate} pointerRef={pointer}>
+      <Rig interactive={interactive} animate={animate} pointerRef={pointer} fxRef={fx}>
         <LiquidShape
           light={coarse}
           animate={animate}
           interactive={interactive}
           pointerRef={pointer}
           progress={progress}
+          fxRef={fx}
         />
       </Rig>
     </Canvas>

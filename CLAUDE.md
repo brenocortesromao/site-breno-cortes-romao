@@ -167,8 +167,13 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - `hero/liquidMetal.ts`: `MeshPhysicalMaterial` (chrome: metalness 1, roughness 0.035, clearcoat 1) with an `onBeforeCompile` injection. Radial displacement is the sum, in `lm_liquid`, of:
   1. **Shape (SDF/metaballs, for the bear)**: the ball smooth-unioned (`lm_smin`, radius `uBlend`) with up to `FEATURE_SLOTS` spheres (`uFeatureCenters`, `uFeatureRadii`, scaled by `uMorph`). The surface radius is found per vertex by 10 steps of sphere tracing inward. With `uMorph = 0` it is skipped and costs nothing.
      - **Stage 4:** set ear/snout centres and radii and animate `uMorph` 0→1 on pointer enter and 1→0 on leave. No mesh change is needed.
-  2. **Liquid**: simplex noise. Keep it low (`uAmp` 0.05, `uFreq` 0.5): higher values look like a crumpled blob, not a ball.
-  3. **Pointer pull** toward the cursor.
+  2. **Impacts ("soquinho")**: `lm_impacts`, up to `IMPACT_SLOTS` (8) simultaneous hits (`uImpactDir`/`uImpactStart`/`uImpactForce`, timed by `uClock`, which never freezes). Each is an elastic dent plus a damped sine wave travelling by geodesic (angular) distance, ~1.5 s. Displacement is radial from the base position, so it also works on the bear (`uMorph > 0`).
+     - `HeroScene` raycasts by itself against the ball's world sphere: the canvas is `pointer-events-none` under the phrases, so R3F events never fire.
+     - Mouse punches on `pointerdown`; touch punches on `click`, so the start of a scroll doesn't count.
+     - Hovering the ball: stronger tilt/turn toward the cursor (`fx.hover`, with inertia), a small circle cursor (a `body` child, because the hero is pinned) that pulses on click, and a short reflection shake (`fx.kick`).
+     - Reduced motion: no waves, only a soft glow at the hit point (`uGlow`/`uGlowDir`).
+  3. **Liquid**: simplex noise. Keep it low (`uAmp` 0.05, `uFreq` 0.5): higher values look like a crumpled blob, not a ball.
+  4. **Pointer pull** toward the cursor.
   - Normals come from finite differences over the sum. `LIQUID_LIGHT` (mobile) drops the second noise octave.
 - `HeroVisual.tsx`: the static SVG poster, rendered **inside the anchor**, so it always matches the 3D ball. Its `viewBox` is cropped to the shape. It is the no-WebGL / `SceneBoundary` fallback and cross-fades out when the scene is ready.
 - Reduced motion: no pin, no scrub, `frameloop="demand"`, frozen shader time (no breathing).

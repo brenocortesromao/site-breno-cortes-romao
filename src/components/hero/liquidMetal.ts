@@ -14,6 +14,11 @@ import { Color, MeshPhysicalMaterial, Vector3 } from "three";
  *     animar `uMorph` 0→1 faz as formas "brotarem" e 1→0 voltarem à bola.
  *  2. LÍQUIDO — ruído simplex lento (a "respiração" contínua).
  *  3. PONTEIRO — o lado voltado para o cursor estica levemente.
+ *  4. IMPACTOS ("soquinho") — até IMPACT_SLOTS cliques/toques simultâneos:
+ *     afundamento local que volta com elasticidade + onda que se propaga pela
+ *     superfície (seno amortecido pela distância angular, isto é, geodésica,
+ *     e pelo tempo, ~1,5 s). Como todo deslocamento é radial a partir da
+ *     posição base, os impactos valem também com o urso (uMorph > 0).
  * A normal é recalculada por diferenças finitas sobre a soma, então os
  * reflexos acompanham a superfície. Não há modelo GLB: o urso nasce da bola.
  */
@@ -23,6 +28,8 @@ export const GRAPHITE = new Color("#24262a");
 
 /** Quantidade máxima de esferas extras fundidas à bola (orelhas, focinho...). */
 export const FEATURE_SLOTS = 4;
+/** Impactos simultâneos (ring buffer em HeroScene). */
+export const IMPACT_SLOTS = 8;
 
 export type LiquidUniforms = {
   uTime: { value: number };
@@ -38,6 +45,17 @@ export type LiquidUniforms = {
   uFeatureCenters: { value: Vector3[] };
   /** Raios das esferas extras quando uMorph = 1 (0 = slot desligado). */
   uFeatureRadii: { value: number[] };
+  /** Relógio dos impactos (segundos; não congela com a respiração). */
+  uClock: { value: number };
+  /** Direção do ponto de impacto (espaço do objeto, unitária). */
+  uImpactDir: { value: Vector3[] };
+  /** Instante do impacto em uClock. */
+  uImpactStart: { value: number[] };
+  /** Força (0 = slot vazio). */
+  uImpactForce: { value: number[] };
+  /** Reduced motion: brilho no ponto tocado, sem ondas. */
+  uGlowDir: { value: Vector3 };
+  uGlow: { value: number };
 };
 
 // Simplex noise 3D (Ashima Arts / Stefan Gustavson, licença MIT).
@@ -97,6 +115,11 @@ uniform float uMorph;
 uniform float uBlend;
 uniform vec3 uFeatureCenters[${FEATURE_SLOTS}];
 uniform float uFeatureRadii[${FEATURE_SLOTS}];
+uniform float uClock;
+uniform vec3 uImpactDir[${IMPACT_SLOTS}];
+uniform float uImpactStart[${IMPACT_SLOTS}];
+uniform float uImpactForce[${IMPACT_SLOTS}];
+varying vec3 lmObjDir;
 ${SIMPLEX}
 // união suave polinomial (Inigo Quilez)
 float lm_smin(float a, float b, float k){
@@ -121,6 +144,25 @@ float lm_shape(vec3 p){
   for (int i = 0; i < 10; i++) t -= lm_field(dir * t, R);
   return t - R;
 }
+// impactos: afundamento elástico + onda que corre pela superfície
+float lm_impacts(vec3 p){
+  vec3 n = normalize(p);
+  float s = 0.0;
+  for (int i = 0; i < ${IMPACT_SLOTS}; i++) {
+    float f = uImpactForce[i];
+    if (f <= 0.0) continue;
+    float age = uClock - uImpactStart[i];
+    if (age < 0.0 || age > 1.8) continue;
+    float ang = acos(clamp(dot(n, uImpactDir[i]), -1.0, 1.0)); // distância geodésica (rad)
+    // afundamento local que volta como mola
+    float dent = exp(-ang * ang / 0.045) * exp(-age * 3.4) * cos(age * 13.0);
+    // onda: frente avança ~2,1 rad/s; atrás dela, seno amortecido
+    float front = age * 2.1 - ang;
+    float wave = sin(front * 11.0) * smoothstep(-0.05, 0.25, front) * exp(-front * 1.3) * exp(-age * 2.5);
+    s += f * (-0.2 * dent + 0.045 * wave);
+  }
+  return s;
+}
 float lm_liquid(vec3 p){
   // ondulação lenta e larga: lê como líquido denso, não como "gelatina"
   float n = lm_snoise(p * uFreq + vec3(0.0, uTime * 0.22, uTime * 0.12));
@@ -129,7 +171,7 @@ float lm_liquid(vec3 p){
   #endif
   // o lado voltado para o cursor "estica" levemente em direção a ele
   float pull = pow(max(dot(normalize(p), uPointerDir), 0.0), 5.0) * uPointerStrength;
-  return lm_shape(p) + n * uAmp + pull;
+  return lm_shape(p) + n * uAmp + pull + lm_impacts(p);
 }
 `;
 
@@ -147,6 +189,12 @@ export function createLiquidMetalMaterial({ light }: { light: boolean }) {
     uBlend: { value: 0.35 },
     uFeatureCenters: { value: Array.from({ length: FEATURE_SLOTS }, () => new Vector3()) },
     uFeatureRadii: { value: new Array(FEATURE_SLOTS).fill(0) },
+    uClock: { value: 0 },
+    uImpactDir: { value: Array.from({ length: IMPACT_SLOTS }, () => new Vector3(0, 0, 1)) },
+    uImpactStart: { value: new Array(IMPACT_SLOTS).fill(-10) },
+    uImpactForce: { value: new Array(IMPACT_SLOTS).fill(0) },
+    uGlowDir: { value: new Vector3(0, 0, 1) },
+    uGlow: { value: 0 },
   };
 
   // Cromo brilhante: rugosidade baixa + verniz; a "cara" vem dos reflexos do estúdio.
@@ -184,7 +232,22 @@ export function createLiquidMetalMaterial({ light }: { light: boolean }) {
         #endif
         `,
       )
-      .replace("#include <begin_vertex>", "vec3 transformed = lmDisplaced;");
+      .replace("#include <begin_vertex>", "vec3 transformed = lmDisplaced;\nlmObjDir = normalize(position);");
+
+    // brilho suave no ponto tocado (reduced motion: substitui as ondas)
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        "#include <common>\nuniform vec3 uGlowDir;\nuniform float uGlow;\nvarying vec3 lmObjDir;",
+      )
+      .replace(
+        "#include <emissivemap_fragment>",
+        /* glsl */ `#include <emissivemap_fragment>
+        if (uGlow > 0.0) {
+          float lmA = acos(clamp(dot(normalize(lmObjDir), uGlowDir), -1.0, 1.0));
+          totalEmissiveRadiance += vec3(0.55 * uGlow * exp(-lmA * lmA / 0.03));
+        }`,
+      );
   };
 
   return material;
