@@ -112,14 +112,15 @@ Título: **O valor que já existe, finalmente visível.**
 
 ## 8. Como funciona (OFF-WHITE, grade técnica — linha do tempo desenhada)
 
-Título: **Simples de começar. Contínuo por natureza.**
+Título: **Um método próprio. Feito para quem não tem tempo a perder.**
+Texto (abaixo do título): Desenvolvi um método próprio para levar a marca do que ela é hoje ao que ela precisa parecer, sem desperdício. Você não precisa preparar nada: eu conduzo cada etapa, e na proposta fica claro o que eu produzo, o que eu dirijo e o que fica com a sua equipe.
 1. **Conversa.** Entendo o momento da empresa e vemos se faz sentido trabalharmos juntos.
 2. **Diagnóstico.** Analiso o negócio, a concorrência e tudo o que a marca já comunica.
 3. **Plano.** Definimos prioridades, entregas e a dedicação mensal.
 4. **Direção contínua.** Participo das decisões, produzo e dirijo as peças combinadas.
 5. **Revisão.** Todo mês olhamos o que avançou e o que muda.
 
-Nota: Escopo, dedicação, entregas e responsabilidades ficam claros na proposta, inclusive o que eu produzo, o que eu dirijo e o que exige contratação à parte.
+Texto: Desenvolvi um método próprio para levar a marca do que ela é hoje ao que ela precisa parecer, sem desperdício. Você não precisa preparar nada: eu conduzo cada etapa, e na proposta fica claro o que eu produzo, o que eu dirijo e o que fica com a sua equipe.
 
 ## 9. Onde o trabalho aparece (preto — lista grande com reveal)
 
