@@ -266,54 +266,6 @@
       "imageAlt": "Imagem do projeto {project}, {year}",
       "placeholder": "Imagem pendente"
     },
-    "cases": {
-      "title": "Cases",
-      "readMore": "Ler o case: {title}",
-      "items": [
-        {
-          "slug": "case-01",
-          "title": "Case 01",
-          "summary": "[PENDENTE] Resumo do case em uma frase.",
-          "challenge": "[PENDENTE]",
-          "role": "[PENDENTE]",
-          "decision": "[PENDENTE]",
-          "application": "[PENDENTE]",
-          "result": "[PENDENTE]"
-        },
-        {
-          "slug": "case-02",
-          "title": "Case 02",
-          "summary": "[PENDENTE] Resumo do case em uma frase.",
-          "challenge": "[PENDENTE]",
-          "role": "[PENDENTE]",
-          "decision": "[PENDENTE]",
-          "application": "[PENDENTE]",
-          "result": "[PENDENTE]"
-        },
-        {
-          "slug": "case-03",
-          "title": "Case 03",
-          "summary": "[PENDENTE] Resumo do case em uma frase.",
-          "challenge": "[PENDENTE]",
-          "role": "[PENDENTE]",
-          "decision": "[PENDENTE]",
-          "application": "[PENDENTE]",
-          "result": "[PENDENTE]"
-        }
-      ]
-    },
-    "casePage": {
-      "eyebrow": "Case",
-      "blocks": {
-        "challenge": "Desafio",
-        "role": "Meu papel",
-        "decision": "Decisão",
-        "application": "Aplicação",
-        "result": "Resultado"
-      },
-      "back": "Voltar aos trabalhos",
-      "next": "Próximo case: {title}"
-    },
     "subtitle": "Ao longo da minha trajetória, em agências, estúdios, empresas e projetos independentes."
   },
   "about": {

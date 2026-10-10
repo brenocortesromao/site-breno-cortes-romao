@@ -6,7 +6,7 @@ import { routing, type AppLocale } from "@/i18n/routing";
 
 /**
  * Seletor PT/EN. Mantém a página atual ao trocar de idioma
- * (/pt/cases/x → /en/cases/x); o next-intl grava a escolha em cookie.
+ * (/pt/sobre → /en/sobre); o next-intl grava a escolha em cookie.
  */
 export default function LocaleSwitcher({
   label,

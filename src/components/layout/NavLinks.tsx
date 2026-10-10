@@ -4,7 +4,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 
 /**
  * Links do menu para seções da home. Na home: âncora "#secao" (o Lenis
- * desliza até ela). Em outras páginas (/sobre, /cases/...): "/#secao" no
+ * desliza até ela). Em outras páginas (/sobre): "/#secao" no
  * idioma atual, para os links não ficarem "mortos".
  */
 export default function NavLinks({ items }: { items: { label: string; hash: string }[] }) {

@@ -17,7 +17,7 @@ type MediaSlotProps = {
 };
 
 /**
- * Moldura única para fotografias e imagens de cases. Hoje renderiza um espaço
+ * Moldura única para fotografias e imagens de trabalhos. Hoje renderiza um espaço
  * reservado; ao passar `src`, a mesma moldura exibe a imagem real (com zoom
  * lento no hover quando o ancestral tem a classe `group`). Cores pelas
  * variáveis de tema, então funciona em seções claras e escuras.

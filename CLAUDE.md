@@ -28,7 +28,7 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 **Decisões importantes:**
 - Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.
 - Dados externos: só os números Lightcast, com fonte.
-- Sem cases nem páginas /cases (remoção pendente no código).
+- Sem cases nem páginas /cases (removidos do código em 09/10).
 - Off-white só em 3 seções.
 - "A distância" volta a 3 blocos sem pin, com scrub curto (do bloco entrar pela base até o gráfico chegar ao centro).
 - Títulos recentes vindos do chat (ainda não estão no CONTEUDO-SITE.md):
@@ -189,7 +189,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - On mobile, under reduced motion or without JS, the pillars are stacked with no pin.
   - The title size is bounded by the longest word ("Acompanhamento") in a 6/12 column.
 
-**Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Onde o trabalho aparece → Trabalhos → Sobre (resumo) → Poucas parcerias → Perguntas frequentes → Contato. Other pages: `/sobre` (About `variant="page"` + Contact) and `/cases/[slug]`. Header and Footer live in the locale layout. `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
+**Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Onde o trabalho aparece → Trabalhos → Sobre (resumo) → Poucas parcerias → Perguntas frequentes → Contato. Other pages: `/sobre` (About `variant="page"` + Contact). There are no case pages. Header and Footer live in the locale layout. `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
 
 **More sections** (`components/sections/*`):
 - `Distance`: the owner's SVGs from `public/graficos/`, inlined by `src/content/charts.ts`. Ids are prefixed `ga-`/`gb-`/`gc-`, because the files repeat ids. Chart C renders the END file, plus start poses computed from the start file.
@@ -217,7 +217,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - Logos are rendered as a CSS **mask** over `bg-silver`, so they become monochrome silver whatever their colors.
   - Marquee: two rows in opposite directions; each track holds the list twice and moves xPercent 50; it slows on hover (timeScale) and pauses off-screen. Loop mode is `data-mode="loop"`; otherwise it is a static grid.
   - Carousel: desktop uses a pinned ScrollTrigger with snap. The arrows call `scrollToY()` (from `SmoothScroll`, Lenis-aware) to the slide's scroll position. Mobile uses drag + arrows. Neighbors are scaled 0.7 and dimmed 0.45.
-- Case pages `src/app/[locale]/cases/[slug]/page.tsx`: `generateStaticParams` over `caseSlugs` (`src/content/cases.ts`), with texts in `works.cases.items`. **With cacheComponents, read `params` inside a `<Suspense>`** (`CaseContent`); otherwise dev throws "encountered URL data during prerendering". Known slugs still prerender fully.
+- Dynamic routes (none today; the old `/cases/[slug]` was removed): **with cacheComponents, read `params` inside a `<Suspense>`**, otherwise dev throws "encountered URL data during prerendering".
 - Signature: `src/content/signature.ts` reads `public/assinatura.svg` at build (49 stroke paths, `viewBox`); replace the file to change it.
   - `Signature` draws a polished-chrome stroke: a repeating, slanted gradient (`spreadMethod="reflect"`) from light graphite to white to greys, with **no glow/blur filter**, plus a "shine" layer.
   - `Manifesto` writes the paths in sequence (duration ∝ `getTotalLength`), then sweeps a light band (gradient `x1/x2`) on completion and every ~5 s while visible. No sweep under reduced motion.

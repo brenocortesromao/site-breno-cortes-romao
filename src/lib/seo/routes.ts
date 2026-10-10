@@ -1,5 +1,4 @@
 import { routing } from "@/i18n/routing";
-import { caseSlugs } from "@/content/cases";
 
 /**
  * Rotas indexáveis do site (sem o prefixo de idioma). Fonte única para o
@@ -10,7 +9,7 @@ import { caseSlugs } from "@/content/cases";
  * para o sitemap — com o domínio final em NEXT_PUBLIC_SITE_URL.
  */
 export function indexablePaths(): string[] {
-  return ["", "/sobre", ...caseSlugs.map((slug) => `/cases/${slug}`)];
+  return ["", "/sobre"];
 }
 
 /** Entradas por idioma, com as alternativas de cada rota (para o sitemap). */

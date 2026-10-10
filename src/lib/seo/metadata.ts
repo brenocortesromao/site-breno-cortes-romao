@@ -4,7 +4,7 @@ import { htmlLang, routing, type AppLocale } from "@/i18n/routing";
 /**
  * Metadados de uma página num idioma: título, descrição, canonical e
  * alternates/hreflang entre /pt e /en (+ x-default → /pt).
- * Use em todo `generateMetadata` (home, /sobre, /cases/[slug], ...).
+ * Use em todo `generateMetadata` (home, /sobre, ...).
  * `path` é a rota SEM o prefixo de idioma ("" para a home, "/sobre", ...).
  */
 export function pageMetadata({
