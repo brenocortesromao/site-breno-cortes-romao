@@ -80,8 +80,13 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <ThemeScroll />
           <AmbientGlow />
           <Header />
-          {children}
-          <Footer />
+          {/* Proteção contra scroll horizontal: overflow-x CLIP (não hidden) não
+              cria contêiner de rolagem, então sticky e pins continuam valendo, e
+              nada que passe da borda consegue deslocar a página para o lado. */}
+          <div className="flex flex-1 flex-col overflow-x-clip">
+            {children}
+            <Footer />
+          </div>
         </NextIntlClientProvider>
       </body>
     </html>

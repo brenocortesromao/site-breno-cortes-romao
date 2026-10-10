@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -30,6 +31,8 @@ export type DiagnosticCopy = {
 };
 
 const DEMO_KEY = "diag-demo-shown";
+/** true só no cliente (portal do cursor), sem setState em efeito. */
+const noopSubscribe = () => () => {};
 
 /**
  * Diagnóstico (§3b): frases entre aspas na voz do fundador, marcáveis (clique,
@@ -56,6 +59,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
   const [interacted, setInteracted] = useState(false);
   const [demo, setDemo] = useState<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
+  const onClient = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const count = marked.filter(Boolean).length;
   const matched = count >= 2;
   const closing = matched ? copy.closingMatched : count === 1 ? copy.closingOne : copy.closing;
@@ -115,13 +119,19 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
   }, []);
 
   // Cursor customizado: acompanha o mouse sobre a lista (só ponteiro fino).
+  // Preso dentro da tela: perto da borda direita ele não sai da viewport
+  // (nem é cortado, nem pode alargar a página).
   useEffect(() => {
     const el = list.current;
-    const c = cursor.current;
-    if (!el || !c) return;
+    if (!el) return;
     const move = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      c.style.transform = `translate(${e.clientX + 18}px, ${e.clientY + 14}px)`;
+      const c = cursor.current;
+      if (!c || e.pointerType !== "mouse") return;
+      const vw = document.documentElement.clientWidth;
+      const vh = document.documentElement.clientHeight;
+      const x = Math.min(e.clientX + 18, vw - c.offsetWidth - 8);
+      const y = Math.min(e.clientY + 14, vh - c.offsetHeight - 8);
+      c.style.transform = `translate(${x}px, ${y}px)`;
     };
     el.addEventListener("pointermove", move);
     return () => el.removeEventListener("pointermove", move);
@@ -236,16 +246,23 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
         </div>
       </div>
 
-      {/* cursor customizado (decorativo; o botão já informa o estado via aria-pressed) */}
-      <div
-        ref={cursor}
-        aria-hidden="true"
-        className={`pointer-events-none fixed left-0 top-0 z-50 hidden rounded-full border border-foreground/40 bg-background/80 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] backdrop-blur transition-opacity duration-200 [@media(pointer:fine)]:block ${
-          hover === null ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        {hover !== null && marked[hover] ? copy.cursorUnmark : copy.cursorMark}
-      </div>
+      {/* cursor customizado (decorativo; o botão já informa o estado via aria-pressed).
+          Portal direto no <body>: `fixed` sempre relativo à tela, mesmo que um
+          ancestral da seção ganhe transform (aí ele viraria absolute e o
+          translate com clientX poderia alargar a página). */}
+      {onClient &&
+        createPortal(
+          <div
+            ref={cursor}
+            aria-hidden="true"
+            className={`pointer-events-none fixed left-0 top-0 z-50 hidden rounded-full border border-foreground/40 bg-background/80 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] backdrop-blur transition-opacity duration-200 [@media(pointer:fine)]:block ${
+              hover === null ? "opacity-0" : "opacity-100"
+            }`}
+          >
+            {hover !== null && marked[hover] ? copy.cursorUnmark : copy.cursorMark}
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }

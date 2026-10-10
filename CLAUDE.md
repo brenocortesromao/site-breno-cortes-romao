@@ -186,7 +186,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - On mobile, under reduced motion or without JS, the pillars are stacked with no pin.
   - The title size is bounded by the longest word ("Acompanhamento") in a 6/12 column.
 
-**Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Onde o trabalho aparece → Trabalhos → Sobre (resumo) → Poucas parcerias → Perguntas frequentes → Contato. Other pages: `/sobre` (About `variant="page"` + Contact). There are no case pages. Header and Footer live in the locale layout. `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
+**Home order (narrativa):** Hero → Mensagem → A distância → Diagnóstico → Fractional → O que eu faço → O que muda → Como funciona → Onde o trabalho aparece → Trabalhos → Sobre (resumo) → Poucas parcerias → Perguntas frequentes → Contato. Other pages: `/sobre` (About `variant="page"` + Contact). There are no case pages. Header and Footer live in the locale layout. The page content + Footer sit in a wrapper with `overflow-x: clip` (guard against horizontal scroll; `clip`, never `hidden`, so sticky and pins keep working). `CONTEUDO-SITE.md` numbers the sections differently ("A distância" is its §7 and is shown right after the message; "Sinais" became the interactive "Diagnóstico"). Eyebrows have no numbering, so reordering doesn't break labels.
 
 **More sections** (`components/sections/*`):
 - `Distance`: the owner's SVGs from `public/graficos/`, inlined by `src/content/charts.ts`. Ids are prefixed `ga-`/`gb-`/`gc-`, because the files repeat ids. Chart C renders the END file, plus start poses computed from the start file.
@@ -203,7 +203,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - Affordance cues:
     - a one-time demo per visit (sessionStorage `diag-demo-shown`) lights the first phrase for ~1 s without counting;
     - rings pulse (`ringPulse` keyframes) until the first interaction;
-    - on mouse hover the phrase brightens, the ring shows a faint ✓, and a custom cursor label follows ("Marcar"/"Desmarcar");
+    - on mouse hover the phrase brightens, the ring shows a faint ✓, and a custom cursor label follows ("Marcar"/"Desmarcar"). The label is portaled into `<body>` (so `fixed` is always viewport-relative) and clamped inside the viewport, so it can never widen the page;
     - the hint text switches between "Toque…" and "Clique…" via `@media(pointer:fine)` CSS.
   - No demo or pulse under reduced motion. Phrase spans use `minmax(0,1fr)` + `break-words` so nothing clips at 1024–1440px.
   - The closing has 3 states: `closing` (0 marked or no interaction, which is what the HTML holds), `closingOne` (1 marked) and `closingMatched` (2+, plus the "Vamos conversar" CTA to `#contato`).
