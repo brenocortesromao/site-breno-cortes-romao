@@ -61,9 +61,9 @@ Frases em tipografia grande, na voz do fundador: as dúvidas e frases que as emp
 
 Contador discreto: "2 de 8".
 Fecho que muda conforme a interação:
-- 0 marcadas (ou sem interação): **Se alguma dessas frases já passou pela sua cabeça, não falta designer. Falta direção.**
+- 0 marcadas (ou sem interação): **Nenhuma dessas frases se resolve com mais peças. Se resolve com direção.**
 - 1 marcada: **Já é um sinal. Vale uma conversa.**
-- 2 ou mais: **Não falta designer. Falta direção.** + botão "Vamos conversar" (leva ao contato).
+- 2 ou mais: **Isso não se resolve com mais peças. Se resolve com direção.** + botão "Vamos conversar" (leva ao contato).
 Funciona sem interação (texto padrão) e com teclado; em prefers-reduced-motion, sem animação de entrada.
 
 ## 4. O que é fractional (OFF-WHITE, curvas de nível em movimento)
