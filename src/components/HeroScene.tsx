@@ -12,6 +12,7 @@ import {
   MeshBasicMaterial,
   PMREMGenerator,
   PlaneGeometry,
+  Quaternion,
   Raycaster,
   Scene,
   Sphere,
@@ -195,8 +196,15 @@ function Environment({ onReady }: { onReady: () => void }) {
 }
 
 type Pointer = { x: number; y: number };
-/** Estado compartilhado da interação: hover (0→1, suavizado) e "tremida" dos reflexos no impacto. */
-type Fx = { hover: number; kick: number };
+/**
+ * Estado compartilhado da interação: hover (0→1, suavizado), "tremida" dos
+ * reflexos no impacto e `lock` (arrastando ou girando por inércia: o rig não
+ * desloca a bola, que só gira em torno do próprio centro).
+ */
+type Fx = { hover: number; kick: number; lock: boolean };
+const IDENTITY = new Quaternion();
+const TMP_Q = new Quaternion();
+const TMP_STEP = new Quaternion();
 
 /**
  * Mouse com atraso suave (lerp exponencial, independente do FPS): desloca e
@@ -222,13 +230,13 @@ function Rig({
   useEffect(() => {
     if (!interactive) return;
     const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
+      if (e.pointerType !== "mouse" || fxRef.current.lock) return; // arrasto/inércia: sem translação
       target.current.x = (e.clientX / window.innerWidth) * 2 - 1;
       target.current.y = (e.clientY / window.innerHeight) * 2 - 1;
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
-  }, [interactive]);
+  }, [interactive, fxRef]);
 
   useFrame(({ scene, clock }, dt) => {
     const g = group.current;
@@ -286,7 +294,14 @@ function LiquidShape({
   const material = useMemo(() => createLiquidMetalMaterial({ light }), [light]);
   const recede = useRef<Group>(null);
   const breath = useRef<Group>(null);
+  /** Giro por arrasto/arremesso: só rotação em torno do centro da bola. */
+  const spin = useRef<Group>(null);
   const mesh = useRef<Mesh>(null);
+  /**
+   * w: velocidade angular (rad/s, eixo no mundo) da inércia; live: velocidade
+   * durante o arrasto; axis: eixo atual; s/sv: mola da deformação do giro.
+   */
+  const spinState = useRef({ w: new Vector3(), live: 0, dragging: false, s: 0, sv: 0, axis: new Vector3(0, 1, 0) });
   const baseAmp = useRef<number | null>(null);
   const get = useThree((s) => s.get);
   const invalidate = useThree((s) => s.invalidate);
@@ -303,7 +318,16 @@ function LiquidShape({
     const sphere = new Sphere();
     const hit = new Vector3();
     let slot = 0;
-    let lastMouseDown = -1e9;
+    const st = spinState.current;
+    const qStep = new Quaternion();
+    const axis = new Vector3();
+    const edge = new Vector3();
+    const vel = new Vector3();
+    /** Pressão em andamento sobre a bola (vira arrasto depois de 6 px). */
+    let press: { id: number; x: number; y: number } | null = null;
+    let last = { x: 0, y: 0 };
+    /** Amostras de rotação do arrasto (para a velocidade do arremesso). */
+    let samples: { t: number; x: number; y: number }[] = [];
 
     const pick = (cx: number, cy: number) => {
       const m = mesh.current;
@@ -353,6 +377,56 @@ function LiquidShape({
       cursor.style.opacity = on ? "1" : "0";
       if (host) host.style.cursor = on ? "none" : "";
     };
+    // "grab" / "grabbing" no cursor-círculo: segurando, ele encolhe e preenche
+    const setGrabbing = (on: boolean) => {
+      ring.style.transition = "transform 0.2s ease, background 0.2s ease";
+      ring.style.transform = on ? "scale(0.7)" : "";
+      ring.style.background = on
+        ? "color-mix(in srgb, var(--fg) 55%, transparent)"
+        : "color-mix(in srgb, var(--fg) 12%, transparent)";
+    };
+
+    /** Raio da bola na tela, em px (para o arrasto girar 1:1 com o dedo/mouse). */
+    const radiusPx = () => {
+      const m = mesh.current;
+      if (!m) return 200;
+      const { camera, gl } = get();
+      m.getWorldPosition(center);
+      m.getWorldScale(scale);
+      edge.set(center.x + SHAPE_RADIUS * scale.x, center.y, center.z).project(camera);
+      center.project(camera);
+      return Math.max(40, (Math.abs(edge.x - center.x) / 2) * gl.domElement.getBoundingClientRect().width);
+    };
+
+    /** Velocidade angular dos últimos ~100 ms do gesto (rad/s, vetor no mundo). */
+    const recentVelocity = (out: Vector3) => {
+      const now = performance.now();
+      samples = samples.filter((s) => now - s.t <= 100);
+      if (samples.length < 2) return out.set(0, 0, 0);
+      const span = Math.max((now - samples[0].t) / 1000, 0.016);
+      let x = 0;
+      let y = 0;
+      for (const s of samples) {
+        x += s.x;
+        y += s.y;
+      }
+      return out.set(x / span, y / span, 0);
+    };
+
+    /** Gira pelo arrasto: deslocamento em px vira arco na superfície (eixo ⟂ ao gesto). */
+    const rotateBy = (dx: number, dy: number) => {
+      const g = spin.current;
+      const len = Math.hypot(dx, dy);
+      if (!g || len === 0) return;
+      const angle = len / radiusPx();
+      axis.set(dy / len, dx / len, 0);
+      qStep.setFromAxisAngle(axis, angle);
+      g.quaternion.premultiply(qStep);
+      samples.push({ t: performance.now(), x: axis.x * angle, y: axis.y * angle });
+      st.axis.copy(axis);
+      st.live = recentVelocity(vel).length();
+      if (!animate) invalidate();
+    };
 
     const punch = (cx: number, cy: number) => {
       const dir = pick(cx, cy);
@@ -377,29 +451,61 @@ function LiquidShape({
       fxRef.current.kick = 1;
     };
 
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-      setHover(!!pick(e.clientX, e.clientY));
-    };
-    // mouse: no pointerdown (imediato); toque: no click, que só dispara num
-    // toque de verdade (não no início de uma rolagem)
+    // Pressionar sobre a bola: se mover mais de 6 px, é ARRASTO (gira 1:1 e,
+    // ao soltar, arremessa com a velocidade do gesto); se soltar antes, é o
+    // SOQUINHO. Mouse e toque seguem o mesmo caminho; no toque, só começa se o
+    // dedo pousar na bola (o alvo circular da hero tem touch-action: none).
     const onDown = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse" || e.button !== 0) return;
-      lastMouseDown = performance.now();
-      punch(e.clientX, e.clientY);
+      if (e.button !== 0 || !pick(e.clientX, e.clientY)) return;
+      press = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      last = { x: e.clientX, y: e.clientY };
+      samples = [];
     };
-    const onClick = (e: MouseEvent) => {
-      if (performance.now() - lastMouseDown < 600) return;
-      punch(e.clientX, e.clientY);
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") {
+        cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+        if (!st.dragging) setHover(!!pick(e.clientX, e.clientY));
+      }
+      if (!press || e.pointerId !== press.id) return;
+      if (!st.dragging) {
+        if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < 6) return;
+        st.dragging = true;
+        fxRef.current.lock = true;
+        st.w.set(0, 0, 0);
+        setGrabbing(true);
+      }
+      rotateBy(e.clientX - last.x, e.clientY - last.y);
+      last = { x: e.clientX, y: e.clientY };
     };
-    window.addEventListener("pointermove", onMove, { passive: true });
+    const onUp = (e: PointerEvent) => {
+      if (!press || e.pointerId !== press.id) return;
+      if (st.dragging) {
+        // arremesso: continua com a velocidade do gesto (reduced motion: para)
+        if (animate) recentVelocity(st.w);
+        else st.w.set(0, 0, 0);
+        st.dragging = false;
+        setGrabbing(false);
+        if (e.pointerType === "mouse") setHover(!!pick(e.clientX, e.clientY));
+      } else {
+        punch(e.clientX, e.clientY);
+      }
+      press = null;
+    };
+    const onCancel = (e: PointerEvent) => {
+      if (!press || e.pointerId !== press.id) return;
+      st.dragging = false;
+      setGrabbing(false);
+      press = null;
+    };
     window.addEventListener("pointerdown", onDown, { passive: true });
-    window.addEventListener("click", onClick, { passive: true });
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerup", onUp, { passive: true });
+    window.addEventListener("pointercancel", onCancel, { passive: true });
     return () => {
-      window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("click", onClick);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
       if (host) host.style.cursor = "";
       cursor.remove();
     };
@@ -432,6 +538,34 @@ function LiquidShape({
       invalidate(); // reduced motion (frameloop "demand"): anima só o brilho
     }
 
+    // Giro: inércia com atrito suave; parado, a orientação volta aos poucos à
+    // original (o urso da Etapa 4 depende dela). Só rotação, nunca translação.
+    const st = spinState.current;
+    const sg = spin.current;
+    if (sg) {
+      const speed = st.w.length();
+      if (!st.dragging && speed > 0.0005) {
+        st.axis.copy(st.w).divideScalar(speed);
+        sg.quaternion.premultiply(TMP_STEP.setFromAxisAngle(st.axis, speed * dt));
+        st.w.multiplyScalar(Math.exp(-dt * 1.1));
+        if (st.w.length() < 0.05) st.w.set(0, 0, 0);
+      }
+      if (!st.dragging && speed < 0.4) sg.quaternion.slerp(IDENTITY, 1 - Math.exp(-dt * 0.7));
+      fx.lock = st.dragging || speed > 0.4;
+      if (st.dragging) st.live *= Math.exp(-dt * 6); // dedo parado = sem velocidade
+
+      // deformação líquida ∝ velocidade angular, em mola amortecida (balanço ao frear)
+      if (animate) {
+        const live = st.dragging ? st.live : speed;
+        const target = Math.min(live / 9, 1);
+        st.sv += ((target - st.s) * 60 - st.sv * 9) * dt;
+        st.s += st.sv * dt;
+        // eixo no espaço do objeto (a malha gira junto com o grupo)
+        if (live > 0.05) u.uSpinAxis.value.copy(st.axis).applyQuaternion(TMP_Q.copy(sg.quaternion).invert());
+        u.uSpin.value = Math.abs(st.s) < 0.0005 && Math.abs(st.sv) < 0.001 ? 0 : st.s;
+      }
+    }
+
     if (animate) {
       u.uTime.value += dt;
       // respiração: ciclo lento (~11 s) de volume e de intensidade da ondulação
@@ -456,7 +590,9 @@ function LiquidShape({
   return (
     <group ref={recede}>
       <group ref={breath}>
-        <mesh ref={mesh} geometry={geometry} material={material} />
+        <group ref={spin}>
+          <mesh ref={mesh} geometry={geometry} material={material} />
+        </group>
       </group>
     </group>
   );
@@ -490,7 +626,7 @@ export default function HeroScene({
   const animate = !reducedMotion;
   const interactive = animate && !coarse;
   const pointer = useRef<Pointer>({ x: 0, y: 0 });
-  const fx = useRef<Fx>({ hover: 0, kick: 0 });
+  const fx = useRef<Fx>({ hover: 0, kick: 0, lock: false });
 
   return (
     <Canvas

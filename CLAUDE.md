@@ -159,6 +159,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
      - Mouse punches on `pointerdown`; touch punches on `click`, so the start of a scroll doesn't count.
      - Hovering the ball: stronger tilt/turn toward the cursor (`fx.hover`, with inertia), a small circle cursor (a `body` child, because the hero is pinned) that pulses on click, and a short reflection shake (`fx.kick`).
      - Reduced motion: no waves, only a soft glow at the hit point (`uGlow`/`uGlowDir`).
+     - **Drag and fling** (`spin` group around the mesh): press on the ball and move > 6 px to drag (rotation 1:1, arc length / on-screen radius); a release without moving is the punch (punch fires on `pointerup`). On release it keeps the angular velocity of the last ~100 ms and slows with friction, then slerps back to identity (the bear needs the original orientation). **Rotation only, never translation**: `fx.lock` freezes the rig's mouse offset while dragging/spinning. `lm_spin` (`uSpin`/`uSpinAxis`) flattens along the spin axis and adds a ripple around it, driven by an underdamped spring (the "sway" when it slows). Touch: the hero anchor has a circular `touch-none` target, so only touches starting on the ball rotate it. Reduced motion: rotates 1:1, no inertia or deformation.
   3. **Liquid**: simplex noise. Keep it low (`uAmp` 0.05, `uFreq` 0.5): higher values look like a crumpled blob, not a ball.
   4. **Pointer pull** toward the cursor.
   - Normals come from finite differences over the sum. `LIQUID_LIGHT` (mobile) drops the second noise octave.

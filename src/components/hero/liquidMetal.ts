@@ -19,6 +19,10 @@ import { Color, MeshPhysicalMaterial, Vector3 } from "three";
  *     superfície (seno amortecido pela distância angular, isto é, geodésica,
  *     e pelo tempo, ~1,5 s). Como todo deslocamento é radial a partir da
  *     posição base, os impactos valem também com o urso (uMorph > 0).
+ *  5. GIRO — ao arrastar/arremessar, a bola achata levemente no eixo de
+ *     rotação (polos para dentro, equador para fora) e ganha uma ondulação que
+ *     corre em volta do eixo, proporcionais a `uSpin` (mola amortecida em
+ *     HeroScene: passa um pouco do zero ao frear = "balanço" do líquido).
  * A normal é recalculada por diferenças finitas sobre a soma, então os
  * reflexos acompanham a superfície. Não há modelo GLB: o urso nasce da bola.
  */
@@ -56,6 +60,10 @@ export type LiquidUniforms = {
   /** Reduced motion: brilho no ponto tocado, sem ondas. */
   uGlowDir: { value: Vector3 };
   uGlow: { value: number };
+  /** Eixo do giro (espaço do objeto, unitário). */
+  uSpinAxis: { value: Vector3 };
+  /** Intensidade da deformação do giro (pode ficar levemente negativa no balanço). */
+  uSpin: { value: number };
 };
 
 // Simplex noise 3D (Ashima Arts / Stefan Gustavson, licença MIT).
@@ -119,6 +127,8 @@ uniform float uClock;
 uniform vec3 uImpactDir[${IMPACT_SLOTS}];
 uniform float uImpactStart[${IMPACT_SLOTS}];
 uniform float uImpactForce[${IMPACT_SLOTS}];
+uniform vec3 uSpinAxis;
+uniform float uSpin;
 varying vec3 lmObjDir;
 ${SIMPLEX}
 // união suave polinomial (Inigo Quilez)
@@ -163,6 +173,18 @@ float lm_impacts(vec3 p){
   }
   return s;
 }
+// giro: achatamento no eixo de rotação + ondulação correndo em volta dele
+float lm_spin(vec3 p){
+  if (abs(uSpin) < 0.0005) return 0.0;
+  vec3 n = normalize(p);
+  float c = dot(n, uSpinAxis);
+  float flatten = -(c * c - 0.3333) * 0.16;
+  vec3 t1 = normalize(cross(uSpinAxis, abs(uSpinAxis.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+  vec3 t2 = cross(uSpinAxis, t1);
+  float az = atan(dot(n, t2), dot(n, t1));
+  float ripple = sin(az * 5.0 - uClock * 9.0) * (1.0 - c * c) * 0.035;
+  return uSpin * (flatten + ripple);
+}
 float lm_liquid(vec3 p){
   // ondulação lenta e larga: lê como líquido denso, não como "gelatina"
   float n = lm_snoise(p * uFreq + vec3(0.0, uTime * 0.22, uTime * 0.12));
@@ -171,7 +193,7 @@ float lm_liquid(vec3 p){
   #endif
   // o lado voltado para o cursor "estica" levemente em direção a ele
   float pull = pow(max(dot(normalize(p), uPointerDir), 0.0), 5.0) * uPointerStrength;
-  return lm_shape(p) + n * uAmp + pull + lm_impacts(p);
+  return lm_shape(p) + n * uAmp + pull + lm_impacts(p) + lm_spin(p);
 }
 `;
 
@@ -195,6 +217,8 @@ export function createLiquidMetalMaterial({ light }: { light: boolean }) {
     uImpactForce: { value: new Array(IMPACT_SLOTS).fill(0) },
     uGlowDir: { value: new Vector3(0, 0, 1) },
     uGlow: { value: 0 },
+    uSpinAxis: { value: new Vector3(0, 1, 0) },
+    uSpin: { value: 0 },
   };
 
   // Cromo brilhante: rugosidade baixa + verniz; a "cara" vem dos reflexos do estúdio.

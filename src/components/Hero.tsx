@@ -182,6 +182,9 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
               showScene && sceneReady ? "opacity-0" : "opacity-100"
             }`}
           />
+          {/* alvo de toque da bola: quem começa o toque nela arrasta/gira a bola
+              (sem rolar a página); fora do círculo, a rolagem segue normal */}
+          {showScene && <div className="absolute inset-[1.5%] touch-none rounded-full" />}
         </div>
 
         {/* Frase à direita (abaixo no mobile) */}
