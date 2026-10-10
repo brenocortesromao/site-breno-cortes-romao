@@ -321,7 +321,12 @@ export default function PortraitReveal({
   const showCanvas = build && texture && near && !done;
 
   return (
-    <div ref={root} className={`relative aspect-[4/5] overflow-hidden border border-line bg-surface ${className}`}>
+    // cantos: herda o raio do cartão; isolate + rounded nas camadas garantem o
+    // recorte também do canvas (camada composta) durante a construção
+    <div
+      ref={root}
+      className={`relative isolate aspect-[4/5] overflow-hidden rounded-[inherit] border border-line bg-surface ${className}`}
+    >
       <Image
         ref={img}
         src={src}
@@ -329,12 +334,12 @@ export default function PortraitReveal({
         fill
         sizes={sizes}
         quality={90}
-        className="object-cover"
+        className="rounded-[inherit] object-cover"
         // com a construção ativa, o sync controla a visibilidade
         style={build ? { opacity: 0 } : undefined}
       />
       {build && (
-        <div ref={canvasLayer} className="absolute inset-0" style={{ opacity: 0 }}>
+        <div ref={canvasLayer} className="absolute inset-0 overflow-hidden rounded-[inherit]" style={{ opacity: 0 }}>
           <ResilientBoundary name="retrato" onGiveUp={handleGiveUp}>
             {(onLost) =>
               showCanvas && (

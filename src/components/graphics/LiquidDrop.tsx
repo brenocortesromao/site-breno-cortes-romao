@@ -10,7 +10,8 @@ import { useEffect, useRef, type RefObject } from "react";
  *   1 Diagnóstico — gota única com uma ondulação percorrendo a superfície;
  *   2 Plano — forma calma e regular;
  *   3 Direção contínua — fluxo constante, girando devagar;
- *   4 Revisão — a gota se fecha num anel líquido (toro).
+ *   4 Evolução — amadurece: pulsa com uma ondulação mais forte;
+ *   5 Parceria — a gota se fecha num anel líquido (toro) girando.
  * Os parâmetros da forma são interpolados suavemente para os alvos de cada
  * etapa (sem cortes). Cromo: reflexo de um "estúdio" procedural com áreas
  * escuras contrastadas (lê bem sobre o off-white). Fundo transparente.
@@ -46,8 +47,8 @@ mat3 rotY(float a){ float c=cos(a), s=sin(a); return mat3(c,0.,-s, 0.,1.,0., s,0
 mat3 rotX(float a){ float c=cos(a), s=sin(a); return mat3(1.,0.,0., 0.,c,s, 0.,-s,c); }
 float smin(float a, float b, float k){ float h = clamp(0.5 + 0.5*(b-a)/k, 0., 1.); return mix(b, a, h) - k*h*(1.-h); }
 
-float shape(vec3 p){
-  p = rotY(uAngle + uTilt.x) * rotX(0.25 + uTilt.y) * p;
+float shape(vec3 p0){
+  vec3 p = rotY(uAngle + uTilt.x) * rotX(0.25 + uTilt.y) * p0;
   float t = uTime;
   // gotas (duas que se fundem quando uSep -> 0)
   float k = clamp(uSep / 1.1, 0., 1.);
@@ -58,10 +59,14 @@ float shape(vec3 p){
   d1 -= uRipple * 0.045 * sin(11.0 * p.y - t * 3.2) * smoothstep(0.7, 0.0, abs(p.y));
   // fluxo orgânico
   d1 += uNoise * sin(p.x * 3.1 + t * 0.9) * sin(p.y * 3.7 - t * 0.7) * sin(p.z * 2.9 + t * 1.1);
-  // anel líquido (revisão), inclinado para ser visto
-  vec3 q = rotX(1.05) * p;
+  // anel líquido (parceria): sempre quase de frente, só balança um pouco (de
+  // perfil viraria uma pílula); gira no próprio plano (uAngle), visível pelos
+  // três volumes que correm ao longo do anel
+  vec3 q = rotX(1.05) * rotY(0.45 * sin(t * 0.35) + uTilt.x) * rotX(0.25 + uTilt.y) * p0;
+  float a = atan(q.z, q.x) + uAngle;
   float dT = length(vec2(length(q.xz) - 0.52, q.y)) - 0.19;
-  dT += uNoise * 0.6 * sin(atan(q.z, q.x) * 3.0 + t * 1.2) * 0.5;
+  dT -= 0.03 * sin(a * 3.0);
+  dT += uNoise * 0.6 * sin(a * 3.0 + t * 1.2) * 0.5;
   return mix(d1, dT, uTorus);
 }
 
@@ -126,7 +131,8 @@ const TARGETS: Target[] = [
   { sep: 0, ripple: 1, noise: 0.035, spin: 0.2, torus: 0 }, // diagnóstico
   { sep: 0, ripple: 0, noise: 0.022, spin: 0.1, torus: 0 }, // plano
   { sep: 0, ripple: 0, noise: 0.07, spin: 0.55, torus: 0 }, // direção contínua
-  { sep: 0, ripple: 0, noise: 0.02, spin: 0.22, torus: 1 }, // revisão
+  { sep: 0, ripple: 0.5, noise: 0.05, spin: 0.35, torus: 0 }, // evolução: amadurece, pulsando
+  { sep: 0, ripple: 0, noise: 0.02, spin: 0.45, torus: 1 }, // parceria: anel girando
 ];
 
 function compile(gl: WebGL2RenderingContext, type: number, src: string) {
@@ -144,7 +150,7 @@ export default function LiquidDrop({
   onLost,
   className = "",
 }: {
-  /** Etapa atual (0–4), escrita pela seção. */
+  /** Etapa atual (0–5), escrita pela seção. */
   stageRef: RefObject<number>;
   light?: boolean;
   reduceMotion?: boolean;

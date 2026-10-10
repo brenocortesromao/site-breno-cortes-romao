@@ -165,6 +165,7 @@ export default function Manifesto({
           <TiltCard
             ref={portrait}
             className="mx-auto w-4/5 md:mx-0 md:ml-[4%]"
+            radiusClass="rounded-[16px] md:rounded-[22px]"
             front={
               <Signature
                 data={signature}
@@ -176,7 +177,7 @@ export default function Manifesto({
             {portraitSrc ? (
               <PortraitReveal src={portraitSrc} alt={copy.portraitAlt} sizes="(min-width: 768px) 31vw, 72vw" />
             ) : (
-              <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" />
+              <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" className="rounded-[inherit]" />
             )}
           </TiltCard>
         </div>

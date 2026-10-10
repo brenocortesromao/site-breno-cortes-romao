@@ -11,14 +11,25 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 export type DistanceCopy = {
   eyebrow: string;
   /**
-   * Texto de cada bloco (A, B, C), conforme o CONTEUDO-SITE.md, e os trechos
-   * que a animação encena (localizados dentro do texto, então o texto segue
-   * limpo e traduzível): gap (A), hits e close (B), shine (C).
+   * Texto de cada bloco (A, B, C), conforme o CONTEUDO-SITE.md, e a
+   * palavra-chave que recebe o reflexo prata no fim da decodificação
+   * (localizada dentro do texto, então o texto segue limpo e traduzível).
    */
-  charts: { text: string; gap?: string; hits?: string[]; close?: string; shine?: string }[];
+  charts: { text: string; highlight?: string }[];
 };
 
 const STEPS = ["a", "b", "c"] as const;
+
+/** Caracteres de "código" que passam por cada letra antes de ela travar. */
+const GLYPHS = "#%&/<>=+*01ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+/** Decodificação (s): letras surgem embaralhadas em APPEAR, a 1ª trava em LEAD
+ * e a última em LEAD + SPREAD; cada uma acende de grafite a branco em FADE. */
+const APPEAR = 0.2;
+const LEAD = 0.3;
+const SPREAD = 0.85;
+const FADE = 0.45;
+/** Intervalo entre trocas de caractere aleatório (s). */
+const SWAP = 0.05;
 
 /** Prepara um path para ser "desenhado": dash = comprimento total, escondido. */
 function prepDraw(path: Element | null) {
@@ -28,27 +39,88 @@ function prepDraw(path: Element | null) {
   return len;
 }
 
-type Word = { text: string; tag?: "gap" | "hit" | "close" | "shine" };
+type Char = { ch: string; key: boolean };
 
-/** Divide o texto em palavras e marca as que pertencem aos trechos encenados. */
-function markWords(chart: DistanceCopy["charts"][number]): Word[] {
-  const words = chart.text.split(" ");
-  const tags: (Word["tag"] | undefined)[] = words.map(() => undefined);
-  const markRun = (phrase: string | undefined, tag: Word["tag"]) => {
-    if (!phrase) return;
-    const run = phrase.split(" ");
-    for (let i = 0; i + run.length <= words.length; i++) {
-      if (run.every((w, k) => words[i + k] === w || words[i + k].replace(/[.,;:!?]$/, "") === w)) {
-        run.forEach((_, k) => (tags[i + k] = tag));
-        return;
+/** Divide a frase em palavras de letras e marca as letras da palavra-chave. */
+function splitPhrase(text: string, highlight?: string): Char[][] {
+  const start = highlight ? text.indexOf(highlight) : -1;
+  const end = start + (highlight?.length ?? 0);
+  let pos = 0;
+  return text.split(" ").map((word) => {
+    const chars = Array.from(word).map((ch) => {
+      const c = { ch, key: start >= 0 && pos >= start && pos < end };
+      pos += ch.length;
+      return c;
+    });
+    pos += 1; // espaço
+    return chars;
+  });
+}
+
+const randomGlyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+
+/**
+ * Decodifica uma frase: cada letra mostra caracteres aleatórios trocando
+ * rápido (camada sobreposta em Geist Mono prata) e trava na letra certa da
+ * esquerda para a direita; ao travar, a letra real aparece em grafite e acende
+ * para branco. Chama `onDone` quando a última letra termina de acender.
+ * Retorna a limpeza (para o ticker e esvazia as camadas).
+ */
+function decode(phrase: HTMLElement, onDone: () => void) {
+  const chars = gsap.utils.toArray<HTMLElement>(phrase.querySelectorAll("[data-ch]"));
+  const glyphs = chars.map((c) => c.nextElementSibling as HTMLElement);
+  const n = chars.length;
+  const state = new Uint8Array(n); // 0 esperando, 1 embaralhando, 2 travada
+  let t0 = -1;
+  let lastSwap = -1;
+  let locked = 0;
+
+  const tick = (time: number) => {
+    if (t0 < 0) t0 = time;
+    const t = time - t0;
+    const swap = t - lastSwap >= SWAP;
+    if (swap) lastSwap = t;
+    for (let i = 0; i < n; i++) {
+      if (state[i] === 2) continue;
+      const f = n > 1 ? i / (n - 1) : 1;
+      if (t >= LEAD + f * SPREAD) {
+        state[i] = 2;
+        locked++;
+        glyphs[i].textContent = "";
+        gsap.fromTo(chars[i], { opacity: 0.16 }, { opacity: 1, duration: FADE, ease: "power1.out" });
+      } else if (t >= f * APPEAR && (state[i] === 0 || swap)) {
+        state[i] = 1;
+        glyphs[i].textContent = randomGlyph();
       }
     }
+    if (locked === n) {
+      gsap.ticker.remove(tick);
+      gsap.delayedCall(FADE, onDone);
+    }
   };
-  markRun(chart.gap, "gap");
-  markRun(chart.close, "close");
-  chart.hits?.forEach((h) => markRun(h, "hit"));
-  markRun(chart.shine, "shine");
-  return words.map((text, i) => ({ text, tag: tags[i] }));
+  gsap.ticker.add(tick);
+
+  return () => {
+    gsap.ticker.remove(tick);
+    gsap.killTweensOf(onDone);
+    glyphs.forEach((g) => (g.textContent = ""));
+  };
+}
+
+/** Reflexo prata uma vez sobre as letras da palavra-chave (ver .text-shine-fixed). */
+function shine(phrase: HTMLElement) {
+  const keys = phrase.querySelectorAll<HTMLElement>("[data-key]");
+  if (!keys.length) return;
+  const first = keys[0].getBoundingClientRect();
+  const last = keys[keys.length - 1].getBoundingClientRect();
+  const vw = window.innerWidth;
+  // gradiente em coordenadas da tela (background-attachment: fixed, 300vw com
+  // a faixa no meio): a faixa atravessa a palavra inteira e para fora dela
+  gsap.fromTo(
+    keys,
+    { backgroundPositionX: first.left - 120 - vw * 1.5 },
+    { backgroundPositionX: last.right + 120 - vw * 1.5, duration: 1.1, ease: "power2.inOut" },
+  );
 }
 
 /**
@@ -61,18 +133,15 @@ function markWords(chart: DistanceCopy["charts"][number]): Word[] {
  *  C. consistência: pontos se alinham no eixo comum.
  * Cada gráfico é animado por SCRUB curto: começa quando o bloco entra pela base
  * da tela e termina quando o gráfico chega ao centro (cerca de meia tela).
- * Cada frase ENCENA o que diz, na mesma timeline do seu gráfico:
- *  A. palavras acendem uma a uma; "e o que ela parece." se afasta para a
- *     direita, abrindo um vão, junto com a área "A DISTÂNCIA" acendendo;
- *  B. "vendas", "talentos" e "preço" entram um a um com um tremor de glitch;
- *     "Meu trabalho é fechá-la." entra com as letras espaçadas que se fecham,
- *     junto com a marca alcançando o negócio;
- *  C. as letras começam desalinhadas (deslocadas, giradas, com peso variando
- *     por text-stroke, sem mudar a largura) e se encaixam junto com as setas;
- *     no fim, "confiar" recebe um reflexo prata uma vez.
- * O texto fica inteiro no HTML (palavras/letras em <span>, aria-label com a
- * frase completa). Os efeitos usam só transform/opacity/stroke: sem layout
- * shift. Sem JS ou com prefers-reduced-motion: texto e gráficos estáticos.
+ * As três frases usam o MESMO efeito, por gatilho (não scrub): DECODIFICAÇÃO
+ * letra por letra (ver `decode`), ~1,3 s por frase, e no fim um reflexo prata
+ * na palavra-chave (`highlight`: "distância", "fechá-la", "confiar").
+ * Sem layout shift: cada letra real fica no lugar como reserva (invisível até
+ * travar) e o caractere aleatório é uma camada absoluta por cima, então as
+ * quebras de linha são as da frase final.
+ * O texto fica inteiro no HTML (letras em <span>, camadas aleatórias vazias no
+ * servidor; aria-label com a frase completa). Sem JS ou com
+ * prefers-reduced-motion: frase final estática, gráficos no estado final.
  */
 export default function Distance({ copy, charts }: { copy: DistanceCopy; charts: DistanceCharts }) {
   const root = useRef<HTMLElement>(null);
@@ -84,10 +153,6 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
         const section = root.current!;
         const q = (id: string) => section.querySelector(`#${id}`);
         const fig = (s: string) => section.querySelector(`[data-chart="${s}"]`);
-        const words = (s: string, sel = "[data-w]") =>
-          gsap.utils.toArray<HTMLElement>(section.querySelectorAll(`[data-step="${s}"] ${sel}`));
-        const em = (el: Element | undefined) => parseFloat(getComputedStyle(el ?? section).fontSize) || 16;
-        const mobile = window.matchMedia("(max-width: 767px)").matches;
         const ease = "none";
         const scrubbed = (s: string) =>
           gsap.timeline({
@@ -98,62 +163,23 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
         // ---------- A: eixos, curvas desenhadas, área da distância ----------
         prepDraw(q("ga-curva-negocio"));
         prepDraw(q("ga-curva-marca"));
-        const wA = words("a");
-        const gapA = words("a", '[data-w][data-tag="gap"]');
         scrubbed("a")
           .fromTo([q("ga-eixos"), q("ga-rotulos-eixos")], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0)
           .to([q("ga-curva-negocio"), q("ga-curva-marca")], { strokeDashoffset: 0, duration: 1.5 }, 0.2)
           .fromTo(q("ga-rotulos"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.4)
           .fromTo([q("ga-area-distancia"), q("ga-area-brilho")], { opacity: 0 }, { opacity: 1, duration: 0.7 }, 1.4)
-          .fromTo([q("ga-rotulo-distancia"), q("ga-nota")], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.9)
-          // palavras: de grafite para branco, uma a uma
-          .fromTo(wA, { opacity: 0.16 }, { opacity: 1, duration: 0.25, stagger: 1.2 / Math.max(wA.length, 1) }, 0)
-          // o vão: "e o que ela parece." se afasta, junto com a área acendendo.
-          // Só as palavras na mesma linha do início do vão (se o trecho quebrar
-          // de linha, a linha de baixo fica no lugar, sem recuo estranho).
-          .fromTo(
-            gapA,
-            { x: 0 },
-            {
-              x: (_: number, el: HTMLElement) =>
-                el.offsetTop === gapA[0].offsetTop ? em(gapA[0]) * (mobile ? 0.3 : 0.75) : 0,
-              duration: 0.7,
-              ease: "power2.out",
-            },
-            1.4,
-          );
+          .fromTo([q("ga-rotulo-distancia"), q("ga-nota")], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.9);
 
         // ---------- B: parte do estado final de A ----------
         prepDraw(q("gb-curva-marca-depois"));
-        const tlB = scrubbed("b")
+        scrubbed("b")
           .fromTo(q("gb-marco-direcao"), { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0)
           .fromTo(q("gb-curva-marca-fantasma"), { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.3)
           .to(q("gb-curva-marca-depois"), { strokeDashoffset: 0, duration: 1.4 }, 0.6)
           .to(q("gb-area-distancia"), { opacity: 0, duration: 1.4 }, 0.6)
           .fromTo(q("gb-rotulos"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.8);
-        // custos entram um a um, com um tremor curto de glitch
-        words("b", '[data-w][data-tag="hit"]').forEach((w, i) => {
-          const at = 0.1 + i * 0.22;
-          tlB
-            .fromTo(w, { opacity: 0 }, { opacity: 1, duration: 0.02 }, at)
-            .fromTo(w, { x: -4, skewX: 12 }, { x: 3, skewX: -8, duration: 0.03 }, at)
-            .to(w, { x: 0, skewX: 0, duration: 0.03 }, at + 0.03);
-        });
-        // "Meu trabalho é fechá-la.": letras espaçadas que se fecham (por x, sem reflow)
-        const closeWords = words("b", '[data-w][data-tag="close"]');
-        tlB.fromTo(closeWords, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.6);
-        // como um letter-spacing de 0,4em: cada letra desloca 0,4em a mais que a
-        // anterior, acumulando ao longo da frase (palavras seguintes também)
-        let carry = 0;
-        closeWords.forEach((w) => {
-          const chars = gsap.utils.toArray<HTMLElement>(w.querySelectorAll("[data-ch]"));
-          const step = em(w) * 0.4;
-          const base = carry;
-          tlB.fromTo(chars, { x: (i: number) => base + i * step }, { x: 0, duration: 1.4, ease: "power2.out" }, 0.6);
-          carry += chars.length * step;
-        });
 
-        // ---------- C: pontos se alinham; letras se encaixam ----------
+        // ---------- C: pontos se alinham no eixo comum ----------
         const tlC = scrubbed("c");
         charts.cStart.forEach((p, i) => {
           const g = q(p.id);
@@ -169,49 +195,20 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
             );
         });
         const axis = [q("gc-eixo-comum"), q("gc-eixo-comum")?.nextElementSibling ?? null].filter(Boolean);
-        const arrowsEnd = tlC.duration();
-        tlC.fromTo(axis, { opacity: 0 }, { opacity: 1, duration: 0.5 }, Math.max(arrowsEnd - 0.3, 0));
-        const charsC = words("c", "[data-ch]");
-        const rnd = gsap.utils.random(-1, 1, 0.01, true);
-        tlC.fromTo(
-          charsC,
-          {
-            y: () => rnd() * em(charsC[0]) * 0.16,
-            rotation: () => rnd() * 7,
-            webkitTextStrokeWidth: () => `${Math.abs(rnd()) * 1.1}px`,
-          },
-          {
-            y: 0,
-            rotation: 0,
-            webkitTextStrokeWidth: "0px",
-            duration: 0.9,
-            ease: "power2.out",
-            stagger: { amount: Math.max(arrowsEnd - 0.9, 0.3), from: "random" },
-          },
-          0,
-        );
-        // reflexo prata em "confiar", uma vez, quando a frase termina de encaixar
-        const shine = section.querySelectorAll<HTMLElement>('[data-step="c"] [data-tag="shine"] [data-ch]');
-        if (shine.length) {
+        tlC.fromTo(axis, { opacity: 0 }, { opacity: 1, duration: 0.5 }, Math.max(tlC.duration() - 0.3, 0));
+
+        // ---------- frases: decodificação ao entrar na tela, uma vez ----------
+        const cleanups: (() => void)[] = [];
+        section.querySelectorAll<HTMLElement>("[data-decode]").forEach((phrase) => {
+          gsap.set(phrase.querySelectorAll("[data-ch]"), { opacity: 0 });
           ScrollTrigger.create({
-            trigger: fig("c"),
-            start: "center center",
+            trigger: phrase,
+            start: "top 85%",
             once: true,
-            onEnter: () => {
-              const first = shine[0].getBoundingClientRect();
-              const lastR = shine[shine.length - 1].getBoundingClientRect();
-              const vw = window.innerWidth;
-              // gradiente em coordenadas da tela (background-attachment: fixed,
-              // 300vw com a faixa no meio): a faixa atravessa a palavra inteira,
-              // letra por letra, e para fora dela, à direita
-              gsap.fromTo(
-                shine,
-                { backgroundPositionX: first.left - 120 - vw * 1.5 },
-                { backgroundPositionX: lastR.right + 120 - vw * 1.5, duration: 1.1, ease: "power2.inOut" },
-              );
-            },
+            onEnter: () => cleanups.push(decode(phrase, () => shine(phrase))),
           });
-        }
+        });
+        return () => cleanups.forEach((fn) => fn());
       });
     },
     { scope: root },
@@ -235,42 +232,36 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
         <div className="mt-12 grid gap-[clamp(6rem,22vh,14rem)] md:mt-16">
           {copy.charts.map((chart, i) => {
             const step = STEPS[i];
-            const marked = markWords(chart);
             return (
               <div key={step} data-step={step} className="grid items-center gap-8 md:grid-cols-12 md:gap-10">
                 {/* aria-label: a frase inteira para leitores de tela; translate="no":
-                    palavras em <span> isolados viram lixo no tradutor automático */}
+                    letras em <span> isolados viram lixo no tradutor automático */}
                 <h3
                   aria-label={chart.text}
                   translate="no"
+                  data-decode
                   className="text-[clamp(1.7rem,3.4vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.05em] md:col-span-5"
                 >
-                  {marked.map((w, k) => {
-                    // letras separadas só onde a animação mexe nelas
-                    const perChar = step === "c" || w.tag === "close";
-                    return (
-                      <Fragment key={k}>
-                        <span
-                          aria-hidden="true"
-                          data-w
-                          data-tag={w.tag}
-                          className="inline-block whitespace-nowrap will-change-transform"
-                        >
-                          {perChar
-                            ? [...w.text].map((ch, c) => (
-                                <span
-                                  key={c}
-                                  data-ch
-                                  className={`inline-block ${w.tag === "shine" ? "text-shine-fixed" : ""}`}
-                                >
-                                  {ch}
-                                </span>
-                              ))
-                            : w.text}
-                        </span>{" "}
-                      </Fragment>
-                    );
-                  })}
+                  {splitPhrase(chart.text, chart.highlight).map((word, k) => (
+                    <Fragment key={k}>
+                      <span aria-hidden="true" className="inline-block whitespace-nowrap">
+                        {word.map((c, j) => (
+                          // letra real (reserva a largura; invisível até travar)
+                          // + camada do caractere aleatório, vazia no HTML
+                          <span key={j} className="relative inline-block">
+                            <span
+                              data-ch
+                              data-key={c.key || undefined}
+                              className={`inline-block ${c.key ? "text-shine-fixed" : ""}`}
+                            >
+                              {c.ch}
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center font-mono text-[0.78em] font-normal tracking-normal text-silver" />
+                          </span>
+                        ))}
+                      </span>{" "}
+                    </Fragment>
+                  ))}
                 </h3>
                 <figure
                   data-chart={step}

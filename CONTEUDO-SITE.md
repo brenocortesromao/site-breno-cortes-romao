@@ -97,7 +97,7 @@ Subtítulo: Estratégia sem execução vira PDF. Execução sem estratégia vira
 1. **Estratégia de marca.** O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso.
 2. **Direção criativa.** Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram.
 3. **Execução.** Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação.
-4. **Acompanhamento.** Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca não para de evoluir no mês dois.
+4. **Acompanhamento.** Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca continua evoluindo mês após mês, junto com a empresa.
 
 ## 6. O que muda (GRADIENTE ESCURO — antes/depois animado, cada linha vira de "antes" para "depois")
 
@@ -114,13 +114,32 @@ Título: **O valor que já existe, finalmente visível.**
 
 Título: **Um método próprio. Feito para quem não tem tempo a perder.**
 Texto (abaixo do título): Desenvolvi um método próprio para levar a marca do que ela é hoje ao que ela precisa parecer, sem desperdício. Você não precisa preparar nada: eu conduzo cada etapa, e na proposta fica claro o que eu produzo, o que eu dirijo e o que fica com a sua equipe.
-1. **Conversa.** Entendo o momento da empresa e vemos se faz sentido trabalharmos juntos.
-2. **Diagnóstico.** Analiso o negócio, a concorrência e tudo o que a marca já comunica.
-3. **Plano.** Definimos prioridades, entregas e a dedicação mensal.
-4. **Direção contínua.** Participo das decisões, produzo e dirijo as peças combinadas.
-5. **Revisão.** Todo mês olhamos o que avançou e o que muda.
+Cada etapa tem: número, rótulo de fase (mono, pequeno; NUNCA prazo ou tempo), título e história (2 a 3 frases, na segunda pessoa, contando o que o cliente vive). SEM linha "Você sai com". A história acende com o scroll junto do ponto da linha do tempo. São 6 etapas na mesma linha do tempo; depois da 6ª, a linha continua em pontilhado para baixo, sem fim.
 
-Texto: Desenvolvi um método próprio para levar a marca do que ela é hoje ao que ela precisa parecer, sem desperdício. Você não precisa preparar nada: eu conduzo cada etapa, e na proposta fica claro o que eu produzo, o que eu dirijo e o que fica com a sua equipe.
+1. **Conversa.**
+   Fase: ESCUTA
+   História: Você me conta onde a empresa está e onde quer chegar. Eu escuto o que está dito e, principalmente, o que não está. Na primeira conversa, a gente já sabe se faz sentido seguir juntos, e eu digo com sinceridade se não fizer.
+
+2. **Diagnóstico.**
+   Fase: DESCOBERTA
+   História: Mergulho no seu negócio como se fosse meu. Converso com quem vende, olho o que os concorrentes fazem e reviro tudo o que a marca já comunicou. Quase sempre aparece a mesma coisa: uma empresa melhor do que a história que ela conta.
+
+3. **Plano.**
+   Fase: DECISÃO
+   História: Com o diagnóstico na mesa, decidimos juntos o que vem primeiro. Nada de lista infinita: poucas prioridades, bem escolhidas, com começo, meio e fim. Você sabe exatamente o que vai acontecer e por quê.
+
+4. **Direção contínua.**
+   Fase: CONSTRUÇÃO
+   História: É aqui que a marca começa a mudar de verdade. Participo das decisões, produzo o que é essencial e dirijo quem produz o resto. Cada peça que sai passa pelo mesmo critério, e aos poucos tudo começa a falar a mesma língua.
+
+5. **Evolução.**
+   Fase: CICLO
+   História: A marca não fica pronta, ela amadurece junto com a empresa. A cada ciclo, olhamos juntos o que avançou, o que funcionou e qual é o próximo passo. Você deixa de ser o gargalo das decisões criativas e ganha alguém que conhece o seu negócio cada vez melhor.
+
+6. **Quanto mais tempo juntos, mais forte a sua marca.**
+   Fase: PARCERIA
+   História: Não é um projeto que termina na entrega. É uma parceria que cresce com a empresa: novos produtos, novos mercados, novas fases. Quanto mais tempo juntos, mais rápido e mais certeiro fica o trabalho, porque eu já conheço o seu negócio por dentro.
+   (Último ponto da linha do tempo, com o mesmo estilo dos outros 5; a gota de metal líquido termina como um anel girando.)
 
 ## 9. Onde o trabalho aparece (preto — lista grande com reveal)
 
@@ -185,7 +204,7 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
   Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio, especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você.
 
 - **Você atende empresas de outras cidades ou de fora do Brasil?**
-  [CONFIRMAR] Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido.
+  Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido.
 
 ## 14. Contato (GRADIENTE ESCURO)
 

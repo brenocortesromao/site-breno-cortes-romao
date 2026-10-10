@@ -107,8 +107,10 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
               <h3 className="overflow-hidden pb-[0.12em] md:col-span-6">
                 <span
                   data-pillar-title
-                  // escala limitada pela palavra mais longa ("Acompanhamento") na coluna de 6/12
-                  className="block text-[clamp(2.3rem,4.9vw,6rem)] font-semibold leading-[0.95] tracking-[-0.06em] text-silver-gradient"
+                  // escala limitada pela palavra mais longa ("Acompanhamento", ~7,9em) na
+                  // coluna de 6/12; o teto de 5.5rem vale a partir do contêiner de 1600px,
+                  // onde a coluna para de crescer (com 6rem o "o" final era cortado)
+                  className="block text-[clamp(2.3rem,4.9vw,5.5rem)] font-semibold leading-[0.95] tracking-[-0.06em] text-silver-gradient"
                 >
                   {item.title}
                 </span>

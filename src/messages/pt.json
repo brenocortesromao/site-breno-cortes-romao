@@ -53,16 +53,15 @@
     "charts": [
       {
         "text": "Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece.",
-        "gap": "e o que ela parece."
+        "highlight": "distância"
       },
       {
         "text": "Essa distância custa vendas, talentos e preço. Meu trabalho é fechá-la.",
-        "hits": ["vendas", "talentos", "preço"],
-        "close": "Meu trabalho é fechá-la."
+        "highlight": "fechá-la"
       },
       {
         "text": "Consistência não é estética. É o que faz o mercado confiar em você.",
-        "shine": "confiar"
+        "highlight": "confiar"
       }
     ]
   },
@@ -183,7 +182,7 @@
       },
       {
         "title": "Acompanhamento",
-        "text": "Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca não para de evoluir no mês dois."
+        "text": "Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca continua evoluindo mês após mês, junto com a empresa."
       }
     ]
   },
@@ -218,29 +217,39 @@
   "process": {
     "eyebrow": "Como funciona",
     "title": "Um método próprio. Feito para quem não tem tempo a perder.",
+    "note": "Desenvolvi um método próprio para levar a marca do que ela é hoje ao que ela precisa parecer, sem desperdício. Você não precisa preparar nada: eu conduzo cada etapa, e na proposta fica claro o que eu produzo, o que eu dirijo e o que fica com a sua equipe.",
     "steps": [
       {
+        "phase": "ESCUTA",
         "title": "Conversa",
-        "text": "Entendo o momento da empresa e vemos se faz sentido trabalharmos juntos."
+        "text": "Você me conta onde a empresa está e onde quer chegar. Eu escuto o que está dito e, principalmente, o que não está. Na primeira conversa, a gente já sabe se faz sentido seguir juntos, e eu digo com sinceridade se não fizer."
       },
       {
+        "phase": "DESCOBERTA",
         "title": "Diagnóstico",
-        "text": "Analiso o negócio, a concorrência e tudo o que a marca já comunica."
+        "text": "Mergulho no seu negócio como se fosse meu. Converso com quem vende, olho o que os concorrentes fazem e reviro tudo o que a marca já comunicou. Quase sempre aparece a mesma coisa: uma empresa melhor do que a história que ela conta."
       },
       {
+        "phase": "DECISÃO",
         "title": "Plano",
-        "text": "Definimos prioridades, entregas e a dedicação mensal."
+        "text": "Com o diagnóstico na mesa, decidimos juntos o que vem primeiro. Nada de lista infinita: poucas prioridades, bem escolhidas, com começo, meio e fim. Você sabe exatamente o que vai acontecer e por quê."
       },
       {
+        "phase": "CONSTRUÇÃO",
         "title": "Direção contínua",
-        "text": "Participo das decisões, produzo e dirijo as peças combinadas."
+        "text": "É aqui que a marca começa a mudar de verdade. Participo das decisões, produzo o que é essencial e dirijo quem produz o resto. Cada peça que sai passa pelo mesmo critério, e aos poucos tudo começa a falar a mesma língua."
       },
       {
-        "title": "Revisão",
-        "text": "Todo mês olhamos o que avançou e o que muda."
+        "phase": "CICLO",
+        "title": "Evolução",
+        "text": "A marca não fica pronta, ela amadurece junto com a empresa. A cada ciclo, olhamos juntos o que avançou, o que funcionou e qual é o próximo passo. Você deixa de ser o gargalo das decisões criativas e ganha alguém que conhece o seu negócio cada vez melhor."
+      },
+      {
+        "phase": "PARCERIA",
+        "title": "E depois? A gente continua.",
+        "text": "Não é um projeto que termina na entrega. É uma parceria que cresce com a empresa: novos produtos, novos mercados, novas fases. Quanto mais tempo juntos, mais rápido e mais certeiro fica o trabalho, porque eu já conheço o seu negócio por dentro."
       }
-    ],
-    "note": "Desenvolvi um método próprio para levar a marca do que ela é hoje ao que ela precisa parecer, sem desperdício. Você não precisa preparar nada: eu conduzo cada etapa, e na proposta fica claro o que eu produzo, o que eu dirijo e o que fica com a sua equipe."
+    ]
   },
   "touchpoints": {
     "eyebrow": "Onde o trabalho aparece",
@@ -356,7 +365,7 @@
       },
       {
         "q": "Você atende empresas de outras cidades ou de fora do Brasil?",
-        "a": "[CONFIRMAR] Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido."
+        "a": "Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido."
       }
     ]
   },

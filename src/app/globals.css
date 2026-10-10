@@ -133,6 +133,11 @@ body::before {
     opacity: 0;
     visibility: hidden;
   }
+  /* frases decodificadas (A distância): letra final reservada e invisível até
+     travar; o JS assume o estado com estilo inline logo após a hidratação */
+  .js-motion [data-decode] [data-ch] {
+    opacity: 0;
+  }
 }
 
 /* Gradiente dos títulos: branco→prata no escuro, grafite→chumbo no claro. */
@@ -250,8 +255,8 @@ body::before {
   color: transparent;
 }
 
-/* Reflexo prata que atravessa uma palavra dividida em letras ("confiar", em
-   A distância). O gradiente fica em coordenadas da tela (attachment fixed),
+/* Reflexo prata que atravessa uma palavra dividida em letras (palavras-chave
+   de A distância: "distância", "fechá-la", "confiar"). O gradiente fica em coordenadas da tela (attachment fixed),
    então a mesma faixa passa por todas as letras; o GSAP move a faixa. Fora da
    animação a faixa fica fora da palavra e o texto tem a cor normal. */
 .text-shine-fixed {

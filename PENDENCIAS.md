@@ -34,6 +34,29 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [x] Frase grande do Manifesto: text-wrap: balance, coluna um pouco mais larga, sem buraco depois de "na cabeça das".
 - [x] Remover lista de cases, rota /cases/[slug], src/content/cases.ts e mensagens relacionadas, sem links quebrados.
 
+## Bloco 0b. Pedidos da madrugada de 10/10 (conferir se já foram feitos; fazer o que faltar)
+- [x] Bola da hero: arrastar e arremessar faz girar com inércia e deformação líquida, SEM sair do lugar (só rotação). Clique rápido continua sendo o soquinho. Tag git "bola-aprovada" antes de mexer.
+  > Já feito: tag bola-aprovada criada antes; arrastar/arremessar no commit b8b21d8.
+- [x] Retrato: imagens novas em alta (public/retrato/ 2400, 1600, 900), srcset correto; estado final sempre a foto real nítida (nunca o canvas); entrada "construção digital" (pixels grandes → nítido, 2 ou 3 glitches, linha de luz prata); tamanho atual aprovado; SEM a minhoca líquida; efeito "cartão de vidro" (inclinação 3D com o mouse + reflexo translúcido, assinatura numa camada à frente); BORDAS ARREDONDADAS (20 a 24px desktop, 16px mobile) na foto, moldura, reflexo e animação; assinatura inteira, sem corte.
+  > Bordas feitas em 10/10: raio 16px (mobile) / 22px (desktop) no cartão (TiltCard `radiusClass`), herdado pela foto, moldura, reflexo e canvas da construção (rounded-[inherit] + overflow hidden + isolate); o cartão não tem overflow, então a assinatura e o 3D não são cortados. Conferido em captura (construção e final, desktop e mobile).
+- [x] "A distância": as 3 frases com efeito de DECODIFICAÇÃO letra por letra (caracteres de código em Geist Mono prata travando na letra certa, ~1 a 1,5 s, por gatilho), sem layout shift; remover o afastamento "o que ela é / o que ela parece"; brilho prata em "distância", "fechá-la" e "confiar".
+  > Feito em 10/10 (Distance.tsx `decode`): gatilho "top 85%", uma vez; ~1,6 s por frase; letra real como reserva + camada aleatória absoluta (altura do h3 igual durante e depois); reflexo via .text-shine-fixed nas letras de `highlight` (pt/en). Reduced motion: frase estática. Gráficos inalterados.
+- [x] "Como funciona": 6 etapas em storytelling conforme o CONTEUDO-SITE.md (fases ESCUTA, DESCOBERTA, DECISÃO, CONSTRUÇÃO, CICLO, PARCERIA), sem "Você sai com", etapa 06 "E depois? A gente continua." na própria linha do tempo, linha seguindo em pontilhado depois dela, gota terminando em anel.
+  > Conferido em 10/10: linha sólida completa quando o ponto 06 acende (endTrigger no ponto), pontilhado depois; o anel fica quase de frente (só balança) e gira no próprio plano, para não virar uma pílula de perfil.
+- [x] Pilares: "Acompanhamento" sem o "o" cortado; texto novo "A marca continua evoluindo mês após mês, junto com a empresa."
+  > Feito em 10/10: o corte vinha de telas ≥ ~1900px (fonte em vw crescia e a coluna não); teto do título 6rem → 5.5rem, medido de 390 a 2560px. Texto novo em pt/en.
+- [ ] Montanhas 3D: versão aprovada na tag "montanhas-3d-aprovadas"; não alterar sem pedido.
+- [ ] Sempre reler o CONTEUDO-SITE.md do disco antes de editar e nunca sobrescrevê-lo com versão antiga.
+
+## Bloco 0c. Nuvens 3D no Diagnóstico (mesmo estilo das montanhas aprovadas)
+- [ ] Fundo 3D de NUVENS vistas do céu atrás da seção "Diagnóstico", no mesmo espírito das montanhas: monocromático (branco, prata, grafite), opacidade baixa (~25 a 35%), vinheta e fade de entrada e saída.
+- [ ] Câmera ligada ao scroll: começa alta, vendo um mar de nuvens; conforme o scroll avança, desce e atravessa as camadas de nuvem, que passam por ela (parallax entre camadas). Deriva lenta contínua mesmo parado.
+- [ ] Narrativa: as nuvens representam a falta de clareza do Diagnóstico; no fim da seção, elas se abrem (clareia), preparando a transição para as seções seguintes.
+- [ ] Legibilidade: as frases clicáveis continuam 100% legíveis; nuvens mais escuras/transparentes atrás do texto.
+- [ ] Técnica e performance: nuvens leves (camadas de sprites/planos com textura de ruído animada no shader, ou raymarch em baixa resolução reescalado), nada de raymarch pesado em resolução cheia. Usar useNearViewport + ResilientBoundary + ContextLossWatcher como as montanhas; montar só perto da seção e desmontar fora dela, para nunca somar contextos WebGL. Mobile: versão mais leve ou quadro estático. prefers-reduced-motion: quadro estático.
+- [ ] NÃO mexer nas montanhas (tag montanhas-3d-aprovadas). Criar a tag "nuvens-3d-aprovadas" quando eu aprovar.
+- [ ] Me mostrar capturas do início, meio e fim antes de seguir.
+
 ## Bloco 4. Seções
 - [x] A distância: TRÊS BLOCOS SEPARADOS, um abaixo do outro (como era antes), SEM pin e SEM cena única. Cada bloco: texto à esquerda sempre legível e seu gráfico à direita (SVGs em public/graficos/: A = distância, B = fechando, C = consistência). A animação de cada gráfico continua ligada ao scroll (scrub), mas curta: começa quando o bloco entra pela parte de baixo da tela e TERMINA quando o gráfico chega ao centro da tela (cerca de meia tela de scroll). Se a pessoa parar, o gráfico fica no ponto em que está; ao chegar no centro, está completo. Textura entre as curvas visível. Cabeçalho não sobrepõe rótulos.
   > Feito em 09/10. Distance.tsx: 3 blocos empilhados, sem pin; cada gráfico tem uma timeline em scrub (trigger: o gráfico, "top bottom" até "center center"). Texto sempre visível. Conferido em desktop e mobile.
