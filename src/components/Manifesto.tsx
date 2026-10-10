@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import MediaSlot from "./MediaSlot";
 import PortraitReveal from "./PortraitReveal";
-import LiquidWorm from "./LiquidWorm";
+import TiltCard from "./TiltCard";
 import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
@@ -51,8 +51,6 @@ export default function Manifesto({
   const root = useRef<HTMLElement>(null);
   const phrase = useRef<HTMLHeadingElement>(null);
   const portrait = useRef<HTMLDivElement>(null);
-  /** A minhoca só circula depois que a entrada da foto termina. */
-  const [revealed, setRevealed] = useState(false);
 
   useGSAP(
     () => {
@@ -162,27 +160,25 @@ export default function Manifesto({
             </p>
             {copy.draft && <DraftBadge label={copy.draft} />}
           </div>
-          {/* retrato a ~80% da coluna, com respiro em volta para a minhoca líquida */}
-          <div ref={portrait} className="relative mx-auto w-4/5 md:mx-0 md:ml-[4%]">
+          {/* retrato a ~80% da coluna, como "cartão de vidro": inclina em 3D com
+              o mouse; a assinatura fica numa camada à frente da foto */}
+          <TiltCard
+            ref={portrait}
+            className="mx-auto w-4/5 md:mx-0 md:ml-[4%]"
+            front={
+              <Signature
+                data={signature}
+                label={copy.signatureLabel}
+                className="pointer-events-none absolute -bottom-[7%] right-[-4%] w-[82%]"
+              />
+            }
+          >
             {portraitSrc ? (
-              <>
-                <PortraitReveal
-                  src={portraitSrc}
-                  alt={copy.portraitAlt}
-                  sizes="(min-width: 768px) 31vw, 72vw"
-                  onDoneChange={setRevealed}
-                />
-                <LiquidWorm active={revealed} />
-              </>
+              <PortraitReveal src={portraitSrc} alt={copy.portraitAlt} sizes="(min-width: 768px) 31vw, 72vw" />
             ) : (
               <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" />
             )}
-            <Signature
-              data={signature}
-              label={copy.signatureLabel}
-              className="pointer-events-none absolute -bottom-[7%] right-[-4%] w-[82%]"
-            />
-          </div>
+          </TiltCard>
         </div>
 
         {/* Frase do problema + apoio */}
