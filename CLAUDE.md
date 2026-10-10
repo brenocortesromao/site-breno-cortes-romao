@@ -180,7 +180,8 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - Mobile (coarse pointer): lighter geometry, one noise octave, DPR capped at 1.5, no mouse tracking.
 
 **Manifesto** (`components/Manifesto.tsx`, client) is the "Mensagem de {name}" section. It has a transparent background (the darkened ball stays visible behind it) and `data-theme="dark"`.
-- Portrait: `MediaSlot tone="mono"` (grayscale/contrast filter plus a graphite→silver soft-light veil). The photo path is `portraitSrc` in `page.tsx`.
+- Portrait: the owner's **colour** photo (`public/retrato/`, path in `portraitSrc` in `page.tsx`, alt `manifesto.portraitAlt`), no B&W filter. `PaintedPortrait` reveals it "as a painting", scrubbed from the portrait entering (`top 98%`) to its top at 45%: broad charcoal B&W strokes, then finer detail strokes, then colour as the last coat (WebGL2 brush masks over the photo itself). At the end the canvas hides and the real `next/image` shows; that `<img>` is also the no-JS / reduced-motion content.
+- Signature timing: drawn from the portrait top at 42% to 10%, so it starts after the painting and is complete while the portrait is fully on screen. Undrawn paths are `opacity: 0` (a round cap would otherwise leave a loose dot).
 - Signature: `components/Signature.tsx` draws the paths from `src/content/signature.ts` with a metallic gradient stroke and a subtle glow.
   - The current one is a **provisional placeholder**. To use the owner's SVG, paste its `viewBox` and stroke `d` values there and set `provisional: false`.
   - The stroke is drawn by a scrubbed `stroke-dashoffset` timeline, path by path, as the portrait crosses the screen.

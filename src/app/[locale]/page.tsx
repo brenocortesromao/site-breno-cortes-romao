@@ -30,8 +30,9 @@ import { loadDistanceCharts } from "@/content/charts";
  * Textos: src/messages/{pt,en}.json. Imagens/logos: public/ (content/media.ts).
  * ------------------------------------------------------------------ */
 
-/** Retrato da Mensagem (monocromático pelo MediaSlot). Ex.: "/media/retrato.jpg". */
-const portraitSrc: string | undefined = undefined;
+/** Retrato da Mensagem (colorido; revelado "como pintura" em PaintedPortrait).
+ * O next/image gera as versões menores (srcset) para o mobile a partir deste arquivo. */
+const portraitSrc: string | undefined = "/retrato/breno-retrato.webp";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await rootParams.locale();
@@ -68,6 +69,7 @@ export default async function Home() {
             statement: t.raw("manifesto.statement") as { text: string; soft?: boolean }[],
             body: t("manifesto.body"),
             portrait: t("manifesto.portrait"),
+            portraitAlt: t("manifesto.portraitAlt", { name }),
             name,
             role: t("site.role"),
             signatureLabel: t("manifesto.signatureLabel", { name }),

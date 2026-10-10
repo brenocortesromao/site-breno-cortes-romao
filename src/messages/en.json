@@ -45,6 +45,7 @@
     ],
     "body": "É essa impressão que eu construo. Trabalho com empresas que já são grandes no que fazem, mas ainda parecem pequenas no que mostram. Entendo o negócio, decido o que ele precisa dizer e cuido para que cada peça esteja à altura dele.",
     "portrait": "Retrato",
+    "portraitAlt": "Retrato de {name}",
     "signatureLabel": "Assinatura de {name}"
   },
   "distance": {

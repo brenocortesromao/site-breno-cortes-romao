@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import MediaSlot from "./MediaSlot";
+import PaintedPortrait from "./PaintedPortrait";
 import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
@@ -18,6 +19,8 @@ export type ManifestoCopy = {
   statement: { text: string; soft?: boolean }[];
   body: string;
   portrait: string;
+  /** Texto alternativo do retrato ("Retrato de {name}"). */
+  portraitAlt: string;
   /** Nome completo + função, abaixo do texto de apoio. */
   name: string;
   role: string;
@@ -70,8 +73,10 @@ export default function Manifesto({
         );
 
         // Assinatura: caneta contínua. Cada traço começa escondido (dashoffset =
-        // comprimento) e é escrito em sequência, com duração proporcional ao
-        // comprimento, enquanto o retrato atravessa a tela.
+        // comprimento E opacidade 0, senão a ponta redonda deixa um ponto solto)
+        // e é escrito em sequência, com duração proporcional ao comprimento.
+        // Começa depois da pintura do retrato (que termina no topo a 45%) e
+        // fica completa com o retrato ainda inteiro na tela.
         const paths = gsap.utils.toArray<SVGPathElement>("[data-signature-path]");
         const shineLayer = root.current?.querySelector("[data-signature-shine-layer]");
         const shine = root.current?.querySelector("[data-signature-shine]");
@@ -98,8 +103,8 @@ export default function Manifesto({
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: portrait.current,
-            start: "top 55%",
-            end: "bottom 60%",
+            start: "top 42%",
+            end: "top 10%",
             scrub: 0.6,
           },
           onUpdate: () => {
@@ -115,8 +120,8 @@ export default function Manifesto({
         });
         paths.forEach((path) => {
           const len = path.getTotalLength();
-          gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
-          tl.to(path, { strokeDashoffset: 0, ease: "none", duration: len / 900 });
+          gsap.set(path, { strokeDasharray: len, strokeDashoffset: len, opacity: 0 });
+          tl.set(path, { opacity: 1 }).to(path, { strokeDashoffset: 0, ease: "none", duration: len / 900 });
         });
 
         ScrollTrigger.create({
@@ -154,14 +159,11 @@ export default function Manifesto({
             {copy.draft && <DraftBadge label={copy.draft} />}
           </div>
           <div ref={portrait} className="relative">
-            <MediaSlot
-              src={portraitSrc}
-              alt={copy.name}
-              label={copy.portrait}
-              ratio="aspect-[4/5]"
-              tone="mono"
-              sizes="(min-width: 768px) 38vw, 90vw"
-            />
+            {portraitSrc ? (
+              <PaintedPortrait src={portraitSrc} alt={copy.portraitAlt} sizes="(min-width: 768px) 38vw, 90vw" />
+            ) : (
+              <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" />
+            )}
             <Signature
               data={signature}
               label={copy.signatureLabel}
