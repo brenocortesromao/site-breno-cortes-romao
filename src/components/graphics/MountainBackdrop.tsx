@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { useNearViewport } from "@/lib/useNearViewport";
+import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -39,13 +39,14 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   const pointer = useRef({ x: 0, y: 0 });
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  /** A cena só existe com o trecho a até ~1 tela: longe, é desmontada (libera o contexto WebGL). */
-  const near = useNearViewport(root);
+  /** A cena só existe com o trecho perto da tela e com vaga no orçamento de contextos. */
+  const near = useWebglSlot(root);
+  const tier = useTier();
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const webgl = webglSupport().webgl2;
-    if (!webgl) console.warn("[montanhas] WebGL2 indisponível neste navegador: usando a foto.");
+    if (!webgl) console.info("[montanhas] sem WebGL2 acelerado: usando a foto.");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     setEnv({ webgl, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
     if (reduced) progress.current = 0.45;
@@ -63,16 +64,48 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
     return () => io.disconnect();
   }, []);
 
-  // gera o terreno (com cache) num momento ocioso logo após o carregamento
+  // gera o terreno num Web Worker (fora da thread principal) num momento
+  // ocioso logo após o carregamento; o resultado fica no cache do heightmap
   useEffect(() => {
     if (!env?.webgl) return;
-    const run = () => import("./terrain/heightmap").then((m) => m.getTerrain(m.terrainSize(env.coarse)));
+    let worker: Worker | null = null;
+    let cancelled = false;
+    const run = () =>
+      import("./terrain/heightmap").then((m) => {
+        const n = m.terrainSize(env.coarse);
+        if (cancelled || m.hasTerrain(n)) return;
+        try {
+          worker = new Worker(new URL("./terrain/terrain.worker.ts", import.meta.url), { type: "module" });
+          worker.onmessage = (e: MessageEvent<{ n: number; d: import("./terrain/heightmap").TerrainData }>) => {
+            m.primeTerrain(e.data.n, e.data.d);
+            worker?.terminate();
+            worker = null;
+          };
+          worker.onerror = () => {
+            worker?.terminate();
+            worker = null; // sem worker: a cena gera ao montar, como antes
+          };
+          worker.postMessage(n);
+        } catch {
+          /* navegador sem module worker: a cena gera ao montar */
+        }
+      });
+    const cleanup = () => {
+      cancelled = true;
+      worker?.terminate();
+    };
     if (typeof window.requestIdleCallback === "function") {
       const id = window.requestIdleCallback(run, { timeout: 4000 });
-      return () => window.cancelIdleCallback(id);
+      return () => {
+        window.cancelIdleCallback(id);
+        cleanup();
+      };
     }
     const id = setTimeout(run, 1500);
-    return () => clearTimeout(id);
+    return () => {
+      clearTimeout(id);
+      cleanup();
+    };
   }, [env]);
 
   // parallax leve com o mouse (só ponteiro fino)
@@ -89,6 +122,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
   const scene = env?.webgl === true;
   const mountScene = scene && near;
+  useSceneMonitor(mountScene);
 
   useGSAP(
     () => {
@@ -148,7 +182,8 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
                       progressRef={progress}
                       pointerRef={pointer}
                       active={active}
-                      light={env.coarse}
+                      light={env.coarse || tier === "low"}
+                      maxDpr={presetFor(tier).maxDpr}
                       reducedMotion={env.reduced}
                       onContextLost={onLost}
                     />

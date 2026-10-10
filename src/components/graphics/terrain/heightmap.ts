@@ -182,14 +182,22 @@ export function buildTerrain(n: number): TerrainData {
 
 const cache = new Map<number, TerrainData>();
 /**
- * buildTerrain com cache (~220 ms no desktop): o MountainBackdrop chama isto
- * num requestIdleCallback logo após o carregamento, para a geração não travar
- * o scroll quando o visitante chega ao trecho.
+ * buildTerrain com cache (~220 ms no desktop, ~1 s num celular). O
+ * MountainBackdrop gera o terreno num Web Worker (terrain.worker.ts) logo após
+ * o carregamento e guarda aqui com `primeTerrain`: a thread principal não
+ * trava. Se o worker não existir ou ainda não terminou quando a cena monta,
+ * gera aqui mesmo, como antes (mesmo resultado).
  */
 export function getTerrain(n: number): TerrainData {
   let d = cache.get(n);
   if (!d) cache.set(n, (d = buildTerrain(n)));
   return d;
+}
+
+export const hasTerrain = (n: number) => cache.has(n);
+/** Guarda um terreno gerado fora da thread principal (worker). */
+export function primeTerrain(n: number, d: TerrainData) {
+  if (!cache.has(n)) cache.set(n, d);
 }
 
 /** Densidade da malha (vértices por lado): desktop / mobile. */

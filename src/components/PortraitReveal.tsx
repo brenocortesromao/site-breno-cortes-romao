@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { useNearViewport } from "@/lib/useNearViewport";
+import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -202,10 +202,13 @@ function compile(gl: WebGL2RenderingContext, type: number, src: string) {
 /** Canvas do metal líquido: anima por tempo uma vez e chama `onDone` no fim. */
 function MetalCanvas({
   texture,
+  maxDpr,
   onDone,
   onLost,
 }: {
   texture: HTMLImageElement;
+  /** Teto de DPR do nível de qualidade (lib/quality). */
+  maxDpr: number;
   onDone: () => void;
   onLost: () => void;
 }) {
@@ -265,7 +268,7 @@ function MetalCanvas({
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     const imgAspect = texture.naturalWidth / texture.naturalHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2, maxDpr);
 
     let raf = 0;
     const start = performance.now();
@@ -296,7 +299,7 @@ function MetalCanvas({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();
     };
-  }, [texture, onDone, onLost]);
+  }, [texture, maxDpr, onDone, onLost]);
 
   return <div ref={host} aria-hidden="true" className="absolute inset-0" />;
 }
@@ -322,7 +325,8 @@ export default function PortraitReveal({
 }) {
   const root = useRef<HTMLDivElement>(null);
   const img = useRef<HTMLImageElement>(null);
-  const near = useNearViewport(root);
+  const near = useWebglSlot(root);
+  const tier = useTier();
   /** static: foto visível (reduced motion); metal: WebGL2; fade: sem WebGL2.
    * null até detectar (a foto do HTML fica como está). */
   const [mode, setMode] = useState<Mode | null>(null);
@@ -391,6 +395,7 @@ export default function PortraitReveal({
   }, [mode, done, onRevealed]);
 
   const showCanvas = mode === "metal" && entered && texture && near && !done;
+  useSceneMonitor(!!showCanvas);
 
   return (
     // formato: `clip` recorta tudo aqui dentro (foto, canvas e o fundo escuro);
@@ -412,7 +417,9 @@ export default function PortraitReveal({
       {mode === "metal" && (
         <ResilientBoundary name="retrato" maxRetries={1} onGiveUp={handleGiveUp}>
           {(onLost) =>
-            showCanvas && <MetalCanvas texture={texture} onDone={finish} onLost={onLost} />
+            showCanvas && (
+              <MetalCanvas texture={texture} maxDpr={presetFor(tier).maxDpr} onDone={finish} onLost={onLost} />
+            )
           }
         </ResilientBoundary>
       )}

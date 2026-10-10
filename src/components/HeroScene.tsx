@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import ContextLossWatcher from "./ContextLossWatcher";
 import {
@@ -166,31 +166,43 @@ function buildStudioEnvironment(renderer: WebGLRenderer) {
   return target;
 }
 
-function Environment({ onReady }: { onReady: () => void }) {
+function Environment({ onCompiled, onReady }: { onCompiled: () => void; onReady: () => void }) {
   const gl = useThree((s) => s.gl);
   const get = useThree((s) => s.get);
-  const invalidate = useThree((s) => s.invalidate);
 
   useEffect(() => {
-    const { scene } = get();
+    const { scene, camera } = get();
     const target = buildStudioEnvironment(gl);
     scene.environment = target.texture;
     scene.environmentIntensity = 1;
-    invalidate();
 
-    // Espera o primeiro quadro com o ambiente aplicado antes de revelar o canvas.
+    // Shaders compilados em paralelo (KHR_parallel_shader_compile) ANTES do
+    // primeiro quadro: compilar no primeiro render travava a thread principal
+    // ~1,5 s no mobile. Até lá o canvas não renderiza (frameloop "never") e o
+    // pôster SVG cobre a bola. Depois, espera o primeiro quadro com o ambiente
+    // aplicado antes de revelar o canvas.
+    let alive = true;
+    let raf1 = 0;
     let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(onReady);
-    });
+    gl.compileAsync(scene, camera)
+      .catch(() => undefined) // sem a extensão/erro: compila no primeiro render, como antes
+      .then(() => {
+        if (!alive) return;
+        onCompiled();
+        raf1 = requestAnimationFrame(() => {
+          get().invalidate(); // reduced motion (frameloop "demand"): primeiro quadro
+          raf2 = requestAnimationFrame(onReady);
+        });
+      });
 
     return () => {
+      alive = false;
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
       scene.environment = null;
       target.dispose();
     };
-  }, [gl, get, invalidate, onReady]);
+  }, [gl, get, onCompiled, onReady]);
 
   return null;
 }
@@ -605,6 +617,8 @@ export type HeroSceneProps = {
   reducedMotion: boolean;
   /** Dispositivo de toque: menos polígonos, 1 oitava de ruído, DPR menor e sem mouse. */
   coarse: boolean;
+  /** Teto de DPR do nível de qualidade (lib/quality). */
+  maxDpr: number;
   /** Progresso 0→1 da transição hero → manifesto (escrito pelo ScrollTrigger). */
   progress: RefObject<number>;
   /** Elemento do DOM que define posição e tamanho da bola (ver Framing). */
@@ -618,6 +632,7 @@ export default function HeroScene({
   active,
   reducedMotion,
   coarse,
+  maxDpr,
   progress,
   anchorRef,
   onReady,
@@ -627,19 +642,22 @@ export default function HeroScene({
   const interactive = animate && !coarse;
   const pointer = useRef<Pointer>({ x: 0, y: 0 });
   const fx = useRef<Fx>({ hover: 0, kick: 0, lock: false });
+  /** Shaders prontos (compileAsync): antes disso, nenhum quadro é desenhado. */
+  const [compiled, setCompiled] = useState(false);
+  const handleCompiled = useCallback(() => setCompiled(true), []);
 
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={reducedMotion ? "demand" : active ? "always" : "never"}
-      dpr={[1, coarse ? 1.5 : 2]}
+      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
+      dpr={[1, Math.min(coarse ? 1.5 : 2, maxDpr)]}
       camera={{ position: [0, 0, 20], fov: CAMERA_FOV }}
       gl={{ antialias: true, alpha: true, powerPreference: "default" }}
     >
       <ContextLossWatcher onLost={onContextLost} />
       <Framing anchorRef={anchorRef} />
-      <Environment onReady={onReady} />
+      <Environment onCompiled={handleCompiled} onReady={onReady} />
       <Rig interactive={interactive} animate={animate} pointerRef={pointer} fxRef={fx}>
         <LiquidShape
           light={coarse}

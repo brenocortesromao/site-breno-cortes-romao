@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { useNearViewport } from "@/lib/useNearViewport";
+import { useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -34,12 +34,13 @@ export default function CloudBackdrop() {
   const pointer = useRef({ x: 0, y: 0 });
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  const near = useNearViewport(root);
+  const near = useWebglSlot(root);
+  const tier = useTier();
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const webgl = webglSupport().webgl2;
-    if (!webgl) console.warn("[nuvens] WebGL2 indisponível neste navegador: sem fundo de nuvens.");
+    if (!webgl) console.info("[nuvens] sem WebGL2 acelerado: sem fundo de nuvens.");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     setEnv({ webgl, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
     if (reduced) progress.current = 0.3;
@@ -67,6 +68,7 @@ export default function CloudBackdrop() {
 
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
   const scene = env?.webgl === true;
+  useSceneMonitor(scene && near);
 
   useGSAP(
     () => {
@@ -116,7 +118,7 @@ export default function CloudBackdrop() {
                     progressRef={progress}
                     pointerRef={pointer}
                     active={active}
-                    light={env.coarse}
+                    light={env.coarse || tier === "low"}
                     reducedMotion={env.reduced}
                     onContextLost={onLost}
                   />

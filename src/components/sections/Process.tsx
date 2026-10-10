@@ -7,7 +7,8 @@ import { useGSAP } from "@gsap/react";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
 import LiquidDrop from "@/components/graphics/LiquidDrop";
 import ResilientBoundary from "@/components/ResilientBoundary";
-import { useNearViewport } from "@/lib/useNearViewport";
+import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
+import { webglSupport } from "@/lib/webgl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -35,17 +36,21 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
   const list = useRef<HTMLOListElement>(null);
   /** Etapa atual (0–5) lida pela gota a cada quadro. */
   const stage = useRef(0);
-  const [drop, setDrop] = useState<{ light: boolean; reduce: boolean } | null>(null);
-  /** A gota só existe com a seção a até ~1 tela (libera o contexto WebGL longe dela). */
-  const near = useNearViewport(root);
+  const [drop, setDrop] = useState<{ light: boolean; reduce: boolean; webgl: boolean } | null>(null);
+  /** A gota só existe com a seção perto da tela e com vaga no orçamento de contextos. */
+  const near = useWebglSlot(root);
+  const tier = useTier();
   const [dropFailed, setDropFailed] = useState(false);
   const handleDropFail = useCallback(() => setDropFailed(true), []);
+  useSceneMonitor(!!drop?.webgl && !dropFailed && near);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     setDrop({
       light: window.matchMedia("(pointer: coarse)").matches,
       reduce: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      // sem WebGL2 ou renderizador por software: sem gota (o espaço fica reservado)
+      webgl: webglSupport().webgl2,
     });
   }, []);
 
@@ -128,13 +133,14 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
             <div className="mt-8 md:sticky md:top-32 md:mt-12">
               {/* o espaço da gota fica reservado mesmo sem o canvas montado */}
               <div className="mx-auto aspect-square w-40 md:mx-0 md:w-[min(100%,40svh,24rem)]">
-                {drop && !dropFailed && (
+                {drop?.webgl && !dropFailed && (
                   <ResilientBoundary name="gota" onGiveUp={handleDropFail}>
                     {(onLost) =>
                       near && (
                         <LiquidDrop
                           stageRef={stage}
-                          light={drop.light}
+                          light={drop.light || tier === "low"}
+                          maxDpr={presetFor(tier).maxDpr}
                           reduceMotion={drop.reduce}
                           onLost={onLost}
                           className="h-full w-full"

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -10,7 +10,7 @@ import DraftBadge from "./theme/DraftBadge";
 import { protectTerms } from "@/components/Term";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { useNearViewport } from "@/lib/useNearViewport";
+import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -50,8 +50,9 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
   const [env, setEnv] = useState<Env | null>(null);
   const [inView, setInView] = useState(true);
   const [sceneReady, setSceneReady] = useState(false);
-  /** A cena 3D só existe com a hero a até ~1 tela; longe, é desmontada (libera o contexto). */
-  const near = useNearViewport(section);
+  /** A cena 3D só existe com a hero perto da tela e com vaga no orçamento de contextos. */
+  const near = useWebglSlot(section);
+  const tier = useTier();
 
   // Detecta capacidades do dispositivo (só existe no cliente).
   useEffect(() => {
@@ -92,22 +93,8 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
       const mm = gsap.matchMedia();
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap
-          .timeline({ defaults: { ease: "expo.out" } })
-          .fromTo(
-            "[data-reveal]",
-            // `y: 0` explícito: o GSAP lê o translateY(120%) do CSS inicial como pixels
-            // e, sem isso, deixaria esse resíduo e o título preso atrás da máscara.
-            { yPercent: 120, y: 0 },
-            { yPercent: 0, y: 0, duration: 1.5, stagger: 0.18 },
-            0.2,
-          )
-          .fromTo(
-            "[data-fade]",
-            { autoAlpha: 0, y: 14 },
-            { autoAlpha: 1, y: 0, duration: 1.1, ease: "power3.out" },
-            0.9,
-          );
+        // a entrada da tipografia é CSS (globals.css: heroReveal/heroFade), para
+        // aparecer na primeira pintura, sem esperar a hidratação
 
         // A hero fica fixa por 1 tela (pinSpacing: false) enquanto o manifesto sobe
         // por cima. Nesse trecho os textos saem, a bola recua e escurece (na cena 3D,
@@ -148,6 +135,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
 
   const showScene = env?.webgl === true;
   const mountScene = showScene && near;
+  useSceneMonitor(mountScene);
   const phrase =
     "font-display text-[clamp(2.4rem,11vw,4rem)] leading-[0.95] tracking-[-0.055em] md:text-[min(3.9vw,5rem)]";
 
@@ -192,6 +180,8 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
           <span className="block overflow-hidden pb-[0.16em] pr-[0.1em] -mb-[0.16em]">
             <span
               data-reveal
+              // ordem na entrada escalonada (heroReveal)
+              style={{ "--i": 1 } as CSSProperties}
               className="block pb-[0.1em] -mb-[0.1em] font-semibold text-silver-gradient"
             >
               {copy.right}
@@ -241,7 +231,8 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
                   <HeroScene
                     active={inView}
                     reducedMotion={env.reduced}
-                    coarse={env.coarse}
+                    coarse={env.coarse || tier === "low"}
+                    maxDpr={presetFor(tier).maxDpr}
                     progress={progress}
                     anchorRef={anchor}
                     onReady={handleReady}

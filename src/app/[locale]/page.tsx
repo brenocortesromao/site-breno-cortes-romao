@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import * as rootParams from "next/root-params";
 import { hasLocale } from "next-intl";
@@ -50,6 +51,9 @@ export default async function Home() {
 
   return (
     <>
+      {/* Cada seção depois da hero fica no próprio <Suspense>: o HTML já vem
+          pronto (sem fallback), e o React 19 hidrata seção por seção, cedendo a
+          vez ao navegador entre elas, em vez de uma tarefa longa única. */}
       <main>
         <Hero
           copy={{
@@ -63,134 +67,159 @@ export default async function Home() {
         />
 
         {/* Mensagem (entra por cima da hero fixa; ver Hero.tsx) */}
-        <Manifesto
-          portraitSrc={portraitSrc}
-          signature={loadSignature()}
-          copy={{
-            eyebrow: t("manifesto.eyebrow", { name }),
-            statement: t.raw("manifesto.statement") as { text: string; soft?: boolean }[],
-            body: t("manifesto.body"),
-            portrait: t("manifesto.portrait"),
-            portraitAlt: t("manifesto.portraitAlt", { name }),
-            name,
-            role: t("site.role"),
-            signatureLabel: t("manifesto.signatureLabel", { name }),
-            draft: "",
-          }}
-        />
+        <Suspense>
+          <Manifesto
+            portraitSrc={portraitSrc}
+            signature={loadSignature()}
+            copy={{
+              eyebrow: t("manifesto.eyebrow", { name }),
+              statement: t.raw("manifesto.statement") as { text: string; soft?: boolean }[],
+              body: t("manifesto.body"),
+              portrait: t("manifesto.portrait"),
+              portraitAlt: t("manifesto.portraitAlt", { name }),
+              name,
+              role: t("site.role"),
+              signatureLabel: t("manifesto.signatureLabel", { name }),
+              draft: "",
+            }}
+          />
+        </Suspense>
 
-        <Distance
-          charts={loadDistanceCharts()}
-          copy={{
-            eyebrow: t("distance.eyebrow"),
-            charts: t.raw("distance.charts") as DistanceCopy["charts"],
-          }}
-        />
+        <Suspense>
+          <Distance
+            charts={loadDistanceCharts()}
+            copy={{
+              eyebrow: t("distance.eyebrow"),
+              charts: t.raw("distance.charts") as DistanceCopy["charts"],
+            }}
+          />
+        </Suspense>
 
-        <Diagnostic
-          ctaHref="#contato"
-          copy={{
-            eyebrow: t("diagnostic.eyebrow"),
-            title: t("diagnostic.title"),
-            hintTouch: t("diagnostic.hintTouch"),
-            hintClick: t("diagnostic.hintClick"),
-            cursorMark: t("diagnostic.cursorMark"),
-            cursorUnmark: t("diagnostic.cursorUnmark"),
-            counters: Array.from({ length: diagnosticItems.length + 1 }, (_, count) =>
-              t("diagnostic.counter", { count, total: diagnosticItems.length }),
-            ),
-            items: diagnosticItems,
-            closing: t("diagnostic.closing"),
-            closingOne: t("diagnostic.closingOne"),
-            closingMatched: t("diagnostic.closingMatched"),
-            cta: t("diagnostic.cta"),
-          }}
-        />
+        <Suspense>
+          <Diagnostic
+            ctaHref="#contato"
+            copy={{
+              eyebrow: t("diagnostic.eyebrow"),
+              title: t("diagnostic.title"),
+              hintTouch: t("diagnostic.hintTouch"),
+              hintClick: t("diagnostic.hintClick"),
+              cursorMark: t("diagnostic.cursorMark"),
+              cursorUnmark: t("diagnostic.cursorUnmark"),
+              counters: Array.from({ length: diagnosticItems.length + 1 }, (_, count) =>
+                t("diagnostic.counter", { count, total: diagnosticItems.length }),
+              ),
+              items: diagnosticItems,
+              closing: t("diagnostic.closing"),
+              closingOne: t("diagnostic.closingOne"),
+              closingMatched: t("diagnostic.closingMatched"),
+              cta: t("diagnostic.cta"),
+            }}
+          />
+        </Suspense>
 
-        <Fractional
-          copy={{
-            eyebrow: t("fractional.eyebrow"),
-            title: t("fractional.title"),
-            text: t("fractional.text"),
-            stats: {
-              title: t("fractional.stats.title"),
-              lead: t("fractional.stats.lead"),
-              items: t.raw("fractional.stats.items") as FractionalCopy["stats"]["items"],
-              support: t("fractional.stats.support"),
-              source: t("fractional.stats.source"),
-            },
-            compare: {
-              caption: t("fractional.compare.caption"),
-              columns: t.raw("fractional.compare.columns") as string[],
-              rows: t.raw("fractional.compare.rows") as FractionalCopy["compare"]["rows"],
-            },
-            note: t("fractional.note"),
-          }}
-        />
+        <Suspense>
+          <Fractional
+            copy={{
+              eyebrow: t("fractional.eyebrow"),
+              title: t("fractional.title"),
+              text: t("fractional.text"),
+              stats: {
+                title: t("fractional.stats.title"),
+                lead: t("fractional.stats.lead"),
+                items: t.raw("fractional.stats.items") as FractionalCopy["stats"]["items"],
+                support: t("fractional.stats.support"),
+                source: t("fractional.stats.source"),
+              },
+              compare: {
+                caption: t("fractional.compare.caption"),
+                columns: t.raw("fractional.compare.columns") as string[],
+                rows: t.raw("fractional.compare.rows") as FractionalCopy["compare"]["rows"],
+              },
+              note: t("fractional.note"),
+            }}
+          />
+        </Suspense>
 
         {/* Trecho com fundo de montanhas (vista de cima → detalhe): O que eu faço + O que muda */}
-        <div className="relative">
-          <MountainBackdrop alt={t("backdrop.mountainsAlt")} />
-          <Pillars
-            copy={{
-              eyebrow: t("pillars.eyebrow"),
-              title: t("pillars.title"),
-              subtitle: t("pillars.subtitle"),
-              items: t.raw("pillars.items") as PillarsCopy["items"],
-            }}
-          />
+        <Suspense>
+          <div className="relative">
+            <MountainBackdrop alt={t("backdrop.mountainsAlt")} />
+            <Pillars
+              copy={{
+                eyebrow: t("pillars.eyebrow"),
+                title: t("pillars.title"),
+                subtitle: t("pillars.subtitle"),
+                items: t.raw("pillars.items") as PillarsCopy["items"],
+              }}
+            />
   
-          <Changes
+            <Changes
+              copy={{
+                eyebrow: t("changes.eyebrow"),
+                title: t("changes.title"),
+                before: t("changes.before"),
+                after: t("changes.after"),
+                rows: t.raw("changes.rows") as ChangesCopy["rows"],
+              }}
+            />
+          </div>
+        </Suspense>
+
+        <Suspense>
+          <Process
             copy={{
-              eyebrow: t("changes.eyebrow"),
-              title: t("changes.title"),
-              before: t("changes.before"),
-              after: t("changes.after"),
-              rows: t.raw("changes.rows") as ChangesCopy["rows"],
+              eyebrow: t("process.eyebrow"),
+              title: t("process.title"),
+              steps: t.raw("process.steps") as ProcessCopy["steps"],
+              note: t("process.note"),
             }}
           />
-        </div>
+        </Suspense>
 
-        <Process
-          copy={{
-            eyebrow: t("process.eyebrow"),
-            title: t("process.title"),
-            steps: t.raw("process.steps") as ProcessCopy["steps"],
-            note: t("process.note"),
-          }}
-        />
+        <Suspense>
+          <Touchpoints
+            copy={{
+              eyebrow: t("touchpoints.eyebrow"),
+              title: t("touchpoints.title"),
+              items: t.raw("touchpoints.items") as string[],
+            }}
+          />
+        </Suspense>
 
-        <Touchpoints
-          copy={{
-            eyebrow: t("touchpoints.eyebrow"),
-            title: t("touchpoints.title"),
-            items: t.raw("touchpoints.items") as string[],
-          }}
-        />
+        <Suspense>
+          <Works />
+        </Suspense>
 
-        <Works />
+        <Suspense>
+          <About variant="summary" />
+        </Suspense>
 
+        <Suspense>
+          <Ai
+            copy={{
+              eyebrow: t("ai.eyebrow"),
+              prompt: t("ai.prompt"),
+              title: t("ai.title"),
+              lines: t.raw("ai.lines") as AiCopy["lines"],
+              body: t("ai.body"),
+              closing: t("ai.closing"),
+              closingHighlight: t("ai.closingHighlight"),
+              footnote: t("ai.footnote"),
+            }}
+          />
+        </Suspense>
 
-        <About variant="summary" />
+        <Suspense>
+          <Partnerships />
+        </Suspense>
 
-        <Ai
-          copy={{
-            eyebrow: t("ai.eyebrow"),
-            prompt: t("ai.prompt"),
-            title: t("ai.title"),
-            lines: t.raw("ai.lines") as AiCopy["lines"],
-            body: t("ai.body"),
-            closing: t("ai.closing"),
-            closingHighlight: t("ai.closingHighlight"),
-            footnote: t("ai.footnote"),
-          }}
-        />
+        <Suspense>
+          <Faq />
+        </Suspense>
 
-        <Partnerships />
-
-        <Faq />
-
-        <Contact />
+        <Suspense>
+          <Contact />
+        </Suspense>
       </main>
 
     </>

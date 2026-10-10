@@ -45,8 +45,8 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
   > Conferido em 10/10: linha sólida completa quando o ponto 06 acende (endTrigger no ponto), pontilhado depois; o anel fica quase de frente (só balança) e gira no próprio plano, para não virar uma pílula de perfil.
 - [x] Pilares: "Acompanhamento" sem o "o" cortado; texto novo "A marca continua evoluindo mês após mês, junto com a empresa."
   > Feito em 10/10: o corte vinha de telas ≥ ~1900px (fonte em vw crescia e a coluna não); teto do título 6rem → 5.5rem, medido de 390 a 2560px. Texto novo em pt/en.
-- [ ] Montanhas 3D: versão aprovada na tag "montanhas-3d-aprovadas"; não alterar sem pedido.
-- [ ] Sempre reler o CONTEUDO-SITE.md do disco antes de editar e nunca sobrescrevê-lo com versão antiga.
+- [x] Montanhas 3D: versão aprovada na tag "montanhas-3d-aprovadas"; não alterar sem pedido. (regra permanente, seguida; na etapa de desempenho só mudou QUANDO/ONDE o terreno é gerado, num Web Worker, com o mesmo resultado)
+- [x] Sempre reler o CONTEUDO-SITE.md do disco antes de editar e nunca sobrescrevê-lo com versão antiga. (regra permanente, seguida)
 
 ## Bloco 0c. Nuvens 3D no Diagnóstico (mesmo estilo das montanhas aprovadas)
 - [x] Fundo 3D de NUVENS vistas do céu atrás da seção "Diagnóstico", no mesmo espírito das montanhas: monocromático (branco, prata, grafite), opacidade baixa (~25 a 35%), vinheta e fade de entrada e saída.
@@ -69,7 +69,32 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [x] Caixa de prompt com a objeção digitada (cursor piscando), título com a decodificação de A distância, 4 frases acendendo com o scroll, texto, fecho com reflexo prata em "o que não produzir" e linha final; link "IA" no menu; pt/en; reduced motion estático.
   > Feito em 10/10 (sections/Ai.tsx; decodificação extraída para components/decode.tsx e reaproveitada). Cabeçalho: com 7 links, o nome + cargo só aparece no tablet e a partir de 1400px (entre 1024 e 1399 colidia com o menu; já colidia com 6 links) e o espaçamento do menu cai para 24px entre 1024 e 1279.
 
+## Bloco 0h. Pedidos da tarde/noite de 10/10 (todos feitos)
+- [x] Retrato com moldura "curva líquida" (clipPath objectBoundingBox informado: 3 cantos ~4% e curva grande no inferior direito) na foto, no metal líquido e no reflexo; borda em SVG (branco 35%, non-scaling-stroke); assinatura inteira por cima; mesmo formato no mobile. (components/portraitFrame.tsx; commit bd7db71)
+- [x] Retrato "metal líquido vira você" (Bloco 0d): feito antes da curva líquida; o shader segue o mesmo formato da moldura.
+- [x] Nuvens sem quebrar o layout do Diagnóstico: fundo absoluto fora da grid, conteúdo relative z-10, seção overflow-clip; cursor "Marcar" em portal no body e preso na tela; overflow-x clip no wrapper do conteúdo. Testado sem scroll horizontal em 4 navegadores × 5 larguras.
+- [x] Seção 11b "E a inteligência artificial?" (Bloco 0f) com link "IA" no menu.
+- [x] Números +313% e 97%: a versão 3D foi feita e DESCARTADA a pedido; voltaram ao estilo da tag "numeros-antes-3d" (HTML, preto cromado, contagem e reflexo), bem visíveis no off-white. Cena WebGL, gerador de fonte e JSON removidos.
+- [x] Complemento "No Brasil, ele está só começando..." em tamanho de texto de apoio (16 a 17px, grafite médio); en com título e complemento próprios ("A model growing fast around the world." / "I was one of the first...").
+- [x] Seções off-white de volta (Fractional, Como funciona, Poucas parcerias): o ThemeScroll se refaz quando as seções são recriadas (HMR/remontagem) e, depois, foi reescrito sem tweens por variável (desempenho).
+- [x] Como funciona, etapa 06: título "Quanto mais tempo juntos," / "mais forte a sua marca." com quebra controlada (pt/en); fase PARCERIA.
+- [ ] Como funciona, etapa 06: a HISTÓRIA ainda termina com "...porque eu já conheço o seu negócio por dentro." O pedido citava um final "...mais rápido, mais certeiro e mais seu.", que NÃO está no CONTEUDO-SITE.md. Atualizar o arquivo com o texto final (ou me passar a frase) para eu aplicar em pt/en.
+- [x] FAQ "Você atende empresas de outras cidades ou de fora do Brasil?": sem [CONFIRMAR] (pt/en; entra no FAQPage).
+- [x] Cabeçalho com 7 links: nome + cargo só no tablet e a partir de 1400px (entre 1024 e 1399 colidia com o menu); espaçamento do menu 24px entre 1024 e 1279.
+
+## Etapa de desempenho e testes (10/10; detalhes e números no DESEMPENHO.md)
+- [x] Tag "antes-desempenho"; medição inicial (Lighthouse desktop/mobile, bundle, FPS por seção 1x e CPU 4x, contextos WebGL).
+- [x] Cores dos temas sem recálculo de estilo em cascata; entrada da hero em CSS; hidratação por seção (Suspense); shaders da bola com compileAsync; terreno das montanhas em Web Worker.
+- [x] Qualidade adaptativa (src/lib/quality.ts): nível de GPU, presets, monitor de FPS que rebaixa a qualidade; renderizador por software usa os fallbacks.
+- [x] Orçamento de no máximo 2 contextos WebGL (useWebglSlot); medido: máximo 2 na rolagem completa (antes 3). FPS 60 em todas as seções 3D (antes 3 a 46).
+- [x] Testes Playwright (scripts/smoke.mjs): Chromium, Edge, Firefox, WebKit × 1920/1440/1280/1024/390: 0 erros, 0 scroll horizontal, reduced motion ok. Lint, TypeScript e build passando.
+- [ ] Metas do Lighthouse NÃO atingidas: desktop 76 (meta 85), mobile 55 a 56 (meta 70). O maior custo restante é montar a bola 3D da hero na carga. DECISÃO DO DONO (muda o comportamento visual): (a) iniciar o 3D só na primeira interação/após alguns segundos, com o pôster até lá; (b) no mobile, pôster com respiração em CSS e 3D só no toque; (c) aceitar as notas (no hardware real: 60 fps e LCP observado < 0,5 s).
+- [ ] Inicializar as animações GSAP de cada seção só perto dela (hoje todas na carga).
+- [ ] Medir heap (vazamento) com várias idas e voltas, INP e tarefas longas durante a rolagem.
+- [ ] Conferir dependências não usadas com ferramenta (código morto conhecido já removido).
+
 ## Bloco 0g. Oceano 3D na seção "E a inteligência artificial?" (mesmo estilo de montanhas e nuvens)
+> PENDENTE: não iniciado (adiado para depois da etapa de desempenho, a pedido). Na implementação, usar useWebglSlot (lib/quality) no lugar de useNearViewport, que foi removido: o orçamento é de no máximo 2 contextos.
 - [ ] Narrativa: superfície = o que a IA alcança; profundidade = experiência humana. Com o scroll, a câmera começa acima do alto-mar (ondas escuras com reflexo prata, horizonte com névoa), desce até a superfície, atravessa a linha d'água e mergulha: raios de luz (god rays) e cáusticas vindo de cima, partículas em suspensão, corais em silhueta no fundo, cardume de peixes passando e um ou dois tubarões em silhueta cruzando devagar ao longe.
 - [ ] Estética: elegante e cinematográfica, NÃO game/cartoon. Paleta quase monocromática (preto, grafite, prata, com no máximo um leve tom azul-acinzentado muito escuro debaixo d'água). Opacidade baixa (~30 a 40%), vinheta e fades; texto sempre 100% legível.
 - [ ] Técnica: oceano com shader de ondas (Gerstner/FFT simplificado); embaixo d'água, fog exponencial, god rays em planos aditivos, cáusticas por textura animada. Peixes como instanced mesh com boids simples; tubarões como modelos glTF leves e gratuitos (CC0, ex.: Quaternius/Poly Pizza) com animação de nado, ou silhuetas low-poly. Corais como silhuetas low-poly/instanced.
@@ -107,6 +132,7 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [x] Antes de seguir com o resto, me mostre capturas do início, meio e fim do trecho para eu aprovar o visual.
 
 ## Bloco 6b. Montanhas 3D mais realistas e com textura (aprovado o conceito; agora refinar)
+> PAUSADO: não mexer nas montanhas sem pedido explícito (versão aprovada na tag montanhas-3d-aprovadas).
 > **PAUSADO (09/10): não mexer nas montanhas sem pedido explícito.** A versão aprovada está na tag git montanhas-3d-aprovadas. O terreno do Bloco 6 (commit 3a2a40a + estabilidade de dd19346) é a versão aprovada. Nada do 6b foi implementado. A queda para a foto foi módulo velho do HMR no navegador ("terrainSize is not a function"), não erro no código; resolve recarregando a página ou reiniciando o dev com .next/dev limpo.
 - [ ] Forma: aplicar erosão no relevo (erosão hidráulica pré-calculada numa textura de altura, ou "erosion noise" no shader) para criar vales em V, ravinas e cristas afiadas como montanhas reais. Opcional, se ficar melhor: usar um heightmap REAL de cordilheira (dados de elevação abertos, ex.: Alpes) como base, com detalhe procedural por cima.
 - [ ] Textura: materiais PBR de rocha e neve gratuitos (CC0, ex.: Poly Haven ou ambientCG) em tons de cinza, com mapeamento triplanar (sem esticar nas encostas), normal map de microdetalhe e variação de rugosidade.
@@ -118,6 +144,7 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [ ] Me mostre capturas do início, meio e fim do trecho antes de seguir.
 
 ## Bloco 7. Animação de textos no scroll (sistema único para o site todo)
+> PENDENTE: próximo bloco de funcionalidade depois das decisões de desempenho. Já existe um módulo de decodificação compartilhado (components/decode.tsx) que pode servir de base.
 - [ ] Criar um componente/utilitário reutilizável de revelação de texto e aplicar com consistência:
   - Títulos grandes (h2): revelação por LINHA com máscara (cada linha sobe de trás de uma máscara, stagger ~0.08 s, easing expo-out), ao entrar na tela.
   - Frases de impacto (como "Toda empresa que cresce rápido cria uma distância..." em A distância): palavras começam em grafite e ACENDEM para branco uma a uma conforme o scroll (scrub curto, do bloco entrando até o centro da tela), sincronizadas com o gráfico ao lado.
@@ -127,7 +154,8 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [ ] Não animar o que já tem animação própria (mensagem do Breno, diagnóstico, números). Texto sempre no HTML (SEO), sem layout shift, prefers-reduced-motion = texto estático visível.
 
 ## Ao final
-- [ ] Console sem erros, desktop e mobile validados, build de produção passando.
+> Validação final pendente (depois do Bloco 7): revisão visual completa do dono, desktop e mobile.
+- [ ] Console sem erros, desktop e mobile validados, build de produção passando. (em 10/10: smoke test em 4 navegadores × 5 larguras sem erros; build ok)
   > PARCIAL. Build, lint e tsc passando em 09/10 (WIP). Validação completa de desktop, mobile e console fica para depois do Bloco 4.
 - [ ] Commit final e resumo do que foi feito, item por item.
 - [ ] Parar e me avisar para revisão.

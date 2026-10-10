@@ -120,12 +120,15 @@ function compile(gl: WebGL2RenderingContext, type: number, src: string) {
 export default function LiquidContours({
   seed = 0,
   light = false,
+  maxDpr = 2,
   onReady,
   onFail,
 }: {
   seed?: number;
   /** Versão leve (mobile): menos linhas, 2 oitavas, resolução menor. */
   light?: boolean;
+  /** Teto de DPR do nível de qualidade (lib/quality). */
+  maxDpr?: number;
   onReady?: () => void;
   onFail?: () => void;
 }) {
@@ -180,7 +183,7 @@ export default function LiquidContours({
     const uRes = u("uRes"), uTime = u("uTime"), uLevels = u("uLevels"), uScale = u("uScale");
     const uSeed = u("uSeed"), uLineW = u("uLineW"), uColor = u("uColor"), uRipples = u("uRipples");
 
-    const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5, maxDpr);
     const resize = () => {
       const r = el.getBoundingClientRect();
       el.width = Math.max(1, Math.round(r.width * dpr));
@@ -271,7 +274,7 @@ export default function LiquidContours({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();
     };
-  }, [seed, light, onReady, onFail]);
+  }, [seed, light, maxDpr, onReady, onFail]);
 
   return <div ref={host} aria-hidden="true" className="absolute inset-0" />;
 }

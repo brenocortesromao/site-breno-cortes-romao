@@ -7,7 +7,7 @@ import { useGSAP } from "@gsap/react";
 import LiquidContours from "./LiquidContours";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { useNearViewport } from "@/lib/useNearViewport";
+import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -49,8 +49,9 @@ export default function GraphicLayer({
 }) {
   const outer = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
-  /** O canvas só existe com a seção a até ~1 tela (libera o contexto WebGL longe dela). */
-  const near = useNearViewport(outer);
+  /** O canvas só existe com a seção perto da tela e com vaga no orçamento de contextos. */
+  const near = useWebglSlot(outer);
+  const tier = useTier();
   const [mode, setMode] = useState<{ liquid: boolean; light: boolean } | null>(null);
   const [liquidReady, setLiquidReady] = useState(false);
 
@@ -71,6 +72,7 @@ export default function GraphicLayer({
     if (!near) setLiquidReady(false);
   }, [near]);
   const handleFail = useCallback(() => setMode((m) => (m ? { ...m, liquid: false } : m)), []);
+  useSceneMonitor(!!mode?.liquid && near);
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
@@ -117,7 +119,8 @@ export default function GraphicLayer({
                     near && (
                       <LiquidContours
                         seed={variant === "contours-a" ? 1 : 2}
-                        light={mode.light}
+                        light={mode.light || tier === "low"}
+                        maxDpr={presetFor(tier).maxDpr}
                         onReady={handleReady}
                         onFail={onLost}
                       />

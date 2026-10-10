@@ -121,17 +121,47 @@ body::before {
 }
 
 /*
- * Estado inicial da animação de entrada da Hero. A classe .js-motion é
- * adicionada por um script no <head> (antes da primeira pintura), então não há
- * "piscada" do texto; sem JS ou com prefers-reduced-motion, tudo fica visível.
+ * Entrada da Hero em CSS puro: roda na primeira pintura, sem esperar a
+ * hidratação (antes, o GSAP só a iniciava depois de toda a página hidratar e o
+ * LCP atrasava segundos no mobile). Mesmos valores da versão GSAP: frases sobem
+ * da máscara (expo.out, 1,5 s, 0,18 s entre elas, início em 0,2 s) e o texto de
+ * apoio aparece (power3.out, 1,1 s, em 0,9 s). Fill "backwards": o estado
+ * escondido só existe durante a animação; ao terminar, nada fica preso no
+ * elemento (a saída da hero pelo scroll é do GSAP, nos pais [data-hero-text]).
+ * A classe .js-motion é adicionada por um script no <head> (antes da primeira
+ * pintura); sem JS ou com prefers-reduced-motion, tudo fica visível.
  */
-@media (prefers-reduced-motion: no-preference) {
-  .js-motion [data-reveal] {
+@keyframes heroReveal {
+  from {
     transform: translateY(120%);
   }
-  .js-motion [data-fade] {
+  to {
+    transform: none;
+  }
+}
+@keyframes heroFade {
+  from {
     opacity: 0;
-    visibility: hidden;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .js-motion [data-reveal] {
+    animation: heroReveal 1.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: calc(0.2s + var(--i, 0) * 0.18s);
+  }
+  .js-motion [data-fade] {
+    animation: heroFade 1.1s cubic-bezier(0.215, 0.61, 0.355, 1) 0.9s backwards;
+  }
+  /* o traço do indicador de scroll também pulsa: as duas animações juntas */
+  .js-motion [data-fade].animate-pulse {
+    animation:
+      var(--animate-pulse),
+      heroFade 1.1s cubic-bezier(0.215, 0.61, 0.355, 1) 0.9s backwards;
   }
   /* frases decodificadas (A distância): letra final reservada e invisível até
      travar; o JS assume o estado com estilo inline logo após a hidratação */

@@ -146,6 +146,7 @@ function compile(gl: WebGL2RenderingContext, type: number, src: string) {
 export default function LiquidDrop({
   stageRef,
   light = false,
+  maxDpr = 2,
   reduceMotion = false,
   onLost,
   className = "",
@@ -153,6 +154,8 @@ export default function LiquidDrop({
   /** Etapa atual (0–5), escrita pela seção. */
   stageRef: RefObject<number>;
   light?: boolean;
+  /** Teto de DPR do nível de qualidade (lib/quality). */
+  maxDpr?: number;
   reduceMotion?: boolean;
   /** Perda do contexto WebGL pelo navegador (o pai remonta). */
   onLost?: () => void;
@@ -199,7 +202,7 @@ export default function LiquidDrop({
     const u = (n: string) => gl.getUniformLocation(program, n);
     const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt") };
 
-    const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5, maxDpr);
     const resize = () => {
       const r = el.getBoundingClientRect();
       el.width = Math.max(1, Math.round(r.width * dpr));
@@ -329,7 +332,7 @@ export default function LiquidDrop({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();
     };
-  }, [stageRef, light, reduceMotion, onLost]);
+  }, [stageRef, light, maxDpr, reduceMotion, onLost]);
 
   return <div ref={host} aria-hidden="true" className={className} />;
 }

@@ -161,6 +161,7 @@ export default function MountainScene({
   pointerRef,
   active,
   light,
+  maxDpr = 2,
   reducedMotion,
   onContextLost,
 }: {
@@ -168,6 +169,8 @@ export default function MountainScene({
   pointerRef: RefObject<{ x: number; y: number }>;
   active: boolean;
   light: boolean;
+  /** Teto de DPR do nível de qualidade (lib/quality). */
+  maxDpr?: number;
   reducedMotion: boolean;
   /** Perda do contexto WebGL (o pai remonta a cena). */
   onContextLost?: () => void;
@@ -177,7 +180,7 @@ export default function MountainScene({
       aria-hidden="true"
       className="!pointer-events-none"
       frameloop={reducedMotion ? "demand" : active ? "always" : "never"}
-      dpr={[1, light ? 1 : 1.5]}
+      dpr={[1, Math.min(light ? 1 : 1.5, maxDpr)]}
       camera={{ position: [0, 26, 30], fov: 42, near: 0.1, far: 140 }}
       gl={{ antialias: !light, alpha: true, powerPreference: "default" }}
     >

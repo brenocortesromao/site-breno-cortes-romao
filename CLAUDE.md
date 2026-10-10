@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Bilingual (PT default / EN) personal business site for a Fractional Brand & Creative Director, statically generated per locale. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
 
-## Estado atual (atualizado em 09/10/2026)
+## Estado atual (atualizado em 10/10/2026)
 
 **Etapa:** 3, estrutura completa do site (bilíngue PT/EN). A lista mestra é o `PENDENCIAS.md`: itens [x] concluídos, e os abertos têm nota com arquivos e próximo passo. Textos: `CONTEUDO-SITE.md`.
 
@@ -12,12 +12,21 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 
 **Concluído na noite de 09/10 (Blocos 0, 4 e 6 do PENDENCIAS.md):**
 - **Montanhas 3D** (Bloco 6, `graphics/MountainBackdrop.tsx` + `graphics/terrain/*`): terreno procedural em R3F atrás de Pillars + Changes, sticky, com câmera descendo pelo scroll, opacidade 36% e a foto de `public/fundo/` só como fallback sem WebGL. Os gatilhos usam `refreshPriority: -1` (o pin dos pilares muda a altura do trecho). **Versão aprovada na tag git `montanhas-3d-aprovadas`.**
-- **Estabilidade WebGL:** sonda única (`lib/webgl.ts`), canvases montados só perto da seção (`lib/useNearViewport.ts`), `ResilientBoundary` + `ContextLossWatcher` com remontagem e `console.warn` do motivo real. Ver "WebGL contexts" na Arquitetura.
+- **Estabilidade WebGL:** sonda única (`lib/webgl.ts`), canvases montados só perto da seção (hoje `useWebglSlot` em `lib/quality.ts`), `ResilientBoundary` + `ContextLossWatcher` com remontagem e `console.warn` do motivo real. Ver "WebGL contexts" na Arquitetura.
 - **Hero:** "soquinho" na bola (afundamento elástico + ondas, até 8 impactos), hover com giro e cursor-círculo; reduced motion só brilho.
 - **Cabeçalho** (`layout/HeaderBrand.tsx`): assinatura que se desenha em ~1 s (link para a home), nome em Archivo Expanded e cargo em Geist Mono; depois da hero fica só a assinatura; no mobile, só a assinatura.
 - **Mensagem:** retrato colorido com entrada de "construção digital" (`PortraitReveal`), assinatura completa com o retrato na tela, frase protegida do tradutor automático ("si." virava "sim") e com `text-balance`, parágrafo novo.
 - **Seções:** A distância em 3 blocos com scrub curto; gota de "Como funciona" com entrada profunda e animação constante; Trabalhos sem cases (rota /cases removida), com subtítulo, legenda (projeto, ano, papel) e loop de logos sem buraco.
 - **Textos novos** em pt/en: subtítulo de "O que eu faço", fechos do Diagnóstico, título e texto de "Como funciona", parágrafo da Mensagem.
+
+**Concluído em 10/10** (detalhes no PENDENCIAS.md, Blocos 0b a 0h e "Etapa de desempenho"):
+- **Retrato:** entrada "metal líquido vira você" (gota de cromo, mercúrio, foto por refração; canvas desmontado no fim) e moldura "curva líquida" (`components/portraitFrame.tsx`); assinatura escrita depois da foto.
+- **A distância:** as 3 frases com decodificação letra por letra (módulo compartilhado `components/decode.tsx`).
+- **Como funciona:** 6 etapas (ESCUTA a PARCERIA), linha sólida até o ponto 06 e pontilhado depois; gota termina em anel; título da 06 com quebra controlada.
+- **Diagnóstico:** nuvens 3D (tag `nuvens-3d-aprovadas`), layout sem scroll horizontal, cursor "Marcar" em portal.
+- **Nova seção 11b "E a IA?"** (`sections/Ai.tsx`, menu "IA"): prompt digitado, título decodificado, frases acendendo, fecho com reflexo.
+- **Fractional:** números de volta ao HTML preto cromado (a versão 3D foi descartada); complemento "No Brasil..." (en com texto próprio).
+- **Desempenho** (`DESEMPENHO.md`, tags `antes-desempenho` → `desempenho-ok`): ThemeScroll sem tweens por variável, entrada da hero em CSS, hidratação por seção (`<Suspense>`), `compileAsync` na bola, terreno em Web Worker, qualidade adaptativa + orçamento de 2 contextos (`lib/quality.ts`). FPS 60 em todas as seções 3D, máximo 2 contextos, 0 erros e 0 scroll horizontal em Chromium/Edge/Firefox/WebKit (`node scripts/smoke.mjs`). Lighthouse 76 desktop / 55 mobile (metas 85/70 não atingidas: falta a decisão do dono sobre iniciar a bola 3D mais tarde).
 
 **Decisões importantes:**
 - Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.
@@ -26,7 +35,12 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - Off-white só em 3 seções.
 - **Montanhas (regra fixa):** as montanhas 3D da tag `montanhas-3d-aprovadas` são a versão aprovada; qualquer alteração nelas deve ser testada antes e mostrada com captura. O Bloco 6b (refinamento) está PAUSADO: não mexer nas montanhas sem pedido explícito.
 
-**Onde retomar:** `PENDENCIAS.md`: Bloco 7 (sistema único de animação de textos no scroll); depois a validação final (desktop, mobile, console, build) e parar para a revisão do dono. Bloco 6b só com pedido explícito.
+**Onde retomar:** `PENDENCIAS.md`:
+1. Decisão do dono sobre as metas do Lighthouse (opções a/b/c na "Etapa de desempenho" e no `DESEMPENHO.md`).
+2. Texto final da história da etapa 06 (o final "...mais seu." citado não está no `CONTEUDO-SITE.md`).
+3. Bloco 0g (oceano 3D na seção da IA), adiado a pedido; usar `useWebglSlot`.
+4. Bloco 7 (sistema único de animação de textos no scroll); depois a validação final e parar para a revisão do dono.
+Bloco 6b (montanhas) PAUSADO: só com pedido explícito.
 
 **Armadilha recorrente:** depois de editar `globals.css` ou `next.config.ts`, o `next dev` pode continuar com a versão antiga. Pare o servidor, apague `.next/dev` e reinicie.
 
@@ -122,7 +136,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - `<Section theme="dark|light|gradient">` (`theme/Section.tsx`): `min-h-svh`, viewport-proportional padding, `data-theme`.
   - **Every section needs a `data-theme`** (Hero and Manifesto set it themselves). The controller only transitions where the theme changes from the previous section.
 - `ThemeScroll` (mounted in the locale layout, re-run on `pathname` change):
-  - For each theme change it scrubs the live variables from the previous palette to the new one (`top 70%` → `top 20%`).
+  - For each theme change there is ONE ScrollTrigger (`top 70%` → `top 20%`) that only stores its progress; `apply()` interpolates the palettes (read once) for the latest started transition and writes the 9 variables. No tween per variable: those read `getComputedStyle(<html>)` right after another wrote a variable, forcing whole-page style recalcs (the main load cost before 10/10).
   - Text roles switch in a short mid window, so text is never grey on grey.
   - `refreshPriority: -1`, so it is refreshed after section pins.
   - It rebuilds itself when `[data-theme]` sections are added or removed (a MutationObserver on `<body>`): after an HMR remount, triggers bound to detached sections recalculated wrong positions on the next refresh and the light sections stayed black.
@@ -170,7 +184,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 
 **Manifesto** (`components/Manifesto.tsx`, client) is the "Mensagem de {name}" section. It has a transparent background (the darkened ball stays visible behind it) and `data-theme="dark"`.
 - Portrait: the owner's **colour** photo (`public/retrato/`, path in `portraitSrc` in `page.tsx`, alt `manifesto.portraitAlt`), no B&W filter. `PortraitReveal` plays "metal líquido vira você" **by trigger** (portrait top at 78%, once, ~2.5 s, time-based): inside the dark frame a chrome drop falls, hits the bottom (slightly off-centre) and spreads like mercury with ripples, an organic noisy front and a convex meniscus at the walls (the walls follow the "curva líquida" frame shape). The surface is chrome lit by an analytic port of the hero studio (same dome gradient and four softboxes, ACES + sRGB), mirrored in z: a nearly flat surface facing the viewer would otherwise reflect only the dim fill behind the camera. The reflection is broken from symmetry on purpose (symmetric rings under the light line read as a face). As the waves damp, reflectivity falls and the photo shows through, refracted by the wave normals, settling to zero distortion at the end.
-  - **The final state is the real image:** when the animation ends the canvas is unmounted and the `next/image` (quality 90, allowed in `images.qualities`, srcset from the 2400 px original) stays. One raw WebGL2 context, only during the animation (`useNearViewport` + `ResilientBoundary`; its own `webglcontextlost` listener). Leaving the screen mid-animation jumps to the photo. No WebGL2 (or a failure): simple fade of the photo. No JS / reduced motion: photo visible from the start.
+  - **The final state is the real image:** when the animation ends the canvas is unmounted and the `next/image` (quality 90, allowed in `images.qualities`, srcset from the 2400 px original) stays. One raw WebGL2 context, only during the animation (`useWebglSlot` + `ResilientBoundary`; its own `webglcontextlost` listener). Leaving the screen mid-animation jumps to the photo. No WebGL2 (or a failure): simple fade of the photo. No JS / reduced motion: photo visible from the start.
   - The canvas uses DPR up to 2 and a full-resolution texture from the `-1600` file (never the downsized `<img>` source). `onRevealed` fires once the real photo is in place.
   - The portrait is ~80% of its column (approved size), inside `TiltCard` ("glass card", CSS 3D only): on hover it tilts toward the cursor (perspective 1000px, max 7°, lerp) and a faint silver `mix-blend-mode: screen` glare follows the tilt; the signature is the `front` layer at `translateZ(60px)`. The `ref` (ScrollTrigger trigger) sits on the outer, non-rotating wrapper. Touch: light tilt from scroll, or the gyroscope where it needs no permission. Reduced motion: no tilt, no glare. Frame shape "curva líquida" (`components/portraitFrame.tsx`, one path in objectBoundingBox units): three small corners (~4% of the width) and a large fluid curve at the bottom right. Its `clip-path: url(#…)` clips the photo + metal canvas (`PortraitReveal` `clip`) and the glare (`TiltCard` `clip`); the thin border is an SVG over them (`TiltCard` `overlay`, white 35%, non-scaling stroke). The card itself is never clipped (that would flatten the 3D and cut the signature). The metal shader uses the same shape (small corners + a superellipse with exponent 2.27 fitted to the cubic). (The earlier "liquid worm" around the frame was removed at the owner's request.)
 - Signature timing: written by time (~1.8 s, `timeScale` over the per-path durations) right after `PortraitReveal` reports `onRevealed`; without a portrait, when the frame reaches 60% of the screen. The SVG has `overflow: visible`. Undrawn paths are `opacity: 0` (a round cap would otherwise leave a loose dot).
@@ -244,12 +258,14 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 
 **WebGL contexts (regra fixa):** Chrome loses the oldest context past 16 active ones ("Too many active WebGL contexts"), and in dev HMR/Strict Mode multiply them.
 - Detect support only with `webglSupport()` (`src/lib/webgl.ts`): one cached probe that releases its context. Never call `getContext` just to test.
-- Every canvas (hero, liquid contours, drop, mountains, clouds) mounts only near its section (`useNearViewport`, ~1 screen margin) and unmounts far from it, so at most ~1–2 contexts live at once.
+- Every canvas (hero, portrait, liquid contours, drop, mountains, clouds) asks for a slot with `useWebglSlot` (`src/lib/quality.ts`): it mounts only near its section (~1 screen margin) AND among the `MAX_CONTEXTS` (2) scenes closest to the viewport, and unmounts otherwise (measured: max 2 active while scrolling the whole page).
+- Quality tiers (`lib/quality.ts`): `none` (no WebGL2 or a software renderer: static fallbacks), `low`, `medium`, `high` (= the approved look). Presets cap the DPR (2/1.5/1) and use the light geometry on `low`; a live FPS monitor drops one tier after ~3 s below 50 fps. Scenes read `useTier()` and register with `useSceneMonitor()`.
+- Hero: shaders are compiled with `renderer.compileAsync` before the first frame (`frameloop="never"` until then; the SVG poster covers the ball). Mountains: the terrain is built in a Web Worker (`terrain/terrain.worker.ts`) and cached via `primeTerrain`.
 - Wrap each scene in `ResilientBoundary`: a render error or `webglcontextlost` (R3F: `ContextLossWatcher`; raw canvases: their own listener calling `onLost`/`onFail`) remounts the scene after 0.8 s; the static fallback is used only after repeated failures.
 
 **Intro-animation gotchas**
-- Initial hidden state is pure CSS (`.js-motion [data-reveal|data-fade]` in `globals.css`, only under `prefers-reduced-motion: no-preference`). The `js-motion` class is added by an inline script in `layout.tsx` before first paint, and removed after 6s as a safety net so text can never stay hidden.
-- GSAP reads the CSS `translateY(120%)` as **pixels**. Any tween on `[data-reveal]` must set `y: 0` alongside `yPercent`, otherwise a pixel offset remains and the headline stays hidden behind its mask.
+- The hero intro is pure CSS (`heroReveal`/`heroFade` keyframes on `.js-motion [data-reveal|data-fade]` in `globals.css`, `backwards` fill, `--i` = stagger index), so it runs at first paint without waiting for hydration (LCP). Only under `prefers-reduced-motion: no-preference`. The `js-motion` class is added by an inline script in `layout.tsx` before first paint, and removed after 6s as a safety net so text can never stay hidden.
+- Do not tween `[data-reveal]`/`[data-fade]` with GSAP: the CSS animation owns them (a CSS animation overrides inline styles while it runs). The hero exit on scroll animates the parents (`[data-hero-text]`).
 - The hero animates individual `[data-hero-text]` elements (not a wrapper), so the ball anchor never moves and the 3D framing stays correct.
 
 **Images / logos / cases**: `components/MediaSlot.tsx` is the single frame for photos and case images. Without `src` it renders a labelled placeholder with the same aspect ratio; fill `image` / `src` in the arrays in `page.tsx` (paths under `public/`) to swap in real assets. Placeholder content (email, social `#` links, "Case 01…", logo slots) is still to be replaced.
