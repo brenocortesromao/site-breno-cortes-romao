@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import CloudBackdrop from "@/components/graphics/CloudBackdrop";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -44,6 +45,8 @@ const DEMO_KEY = "diag-demo-shown";
  *   "Marcar"/"Desmarcar";
  * - instrução visível com ícone ("Toque…" no toque, "Clique…" com mouse).
  * Sem pulso nem demonstração com prefers-reduced-motion.
+ * Fundo: nuvens 3D (CloudBackdrop), fixas atrás do conteúdo; a câmera as
+ * atravessa com o scroll e elas se abrem no fim da seção.
  */
 export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ctaHref: string }) {
   const root = useRef<HTMLElement>(null);
@@ -136,9 +139,14 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
       id="diagnostico"
       data-theme="dark"
       aria-labelledby="diagnostico-title"
-      className="relative z-10 min-h-svh"
+      // overflow-clip (e não hidden): recorta igual, mas não cria contêiner de
+      // rolagem, que anularia o sticky do fundo de nuvens
+      className="relative z-10 min-h-svh overflow-clip"
     >
-      <div className="mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      {/* fundo: camada absoluta atrás do conteúdo, fora da grid */}
+      <CloudBackdrop />
+      {/* conteúdo acima do fundo */}
+      <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-4">
             <div className="md:sticky md:top-32">

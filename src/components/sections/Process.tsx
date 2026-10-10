@@ -14,7 +14,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 export type ProcessCopy = {
   eyebrow: string;
   title: string;
-  /** phase: rótulo de fase em mono (nunca prazo); text: história. */
+  /** phase: rótulo de fase em mono (nunca prazo); title: "\n" = quebra de linha controlada; text: história. */
   steps: { phase: string; title: string; text: string }[];
   note: string;
 };
@@ -25,7 +25,7 @@ export type ProcessCopy = {
  * nelas. Na coluna esquerda (sticky), uma gota de metal líquido (LiquidDrop)
  * muda de forma a cada etapa: fusão → ondulação → calma → fluxo → anel.
  * Cada etapa (6): número + FASE (mono), título e história; a história acende
- * junto do ponto da linha. Depois do ponto 06 ("E depois? A gente continua."),
+ * junto do ponto da linha. Depois do ponto 06 (parceria),
  * a linha segue em pontilhado para baixo, sem ponto final e sumindo
  * (continuidade); a gota termina como um anel girando.
  * Sem JS / reduced motion: linha e etapas completas, e a gota mostra o anel estático.
@@ -174,7 +174,16 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
                     <span aria-hidden="true" className="h-px w-6 bg-line" />
                     <span>{step.phase}</span>
                   </p>
-                  <h3 className="mt-2 text-[clamp(1.6rem,2.6vw,2.6rem)] font-semibold tracking-[-0.045em]">{step.title}</h3>
+                  <h3 className="mt-2 text-[clamp(1.6rem,2.6vw,2.6rem)] font-semibold leading-[1.08] tracking-[-0.045em]">
+                    {/* "\n" no título = quebra controlada: a parte seguinte sempre
+                        começa numa linha nova (a anterior pode quebrar sozinha) */}
+                    {step.title.split("\n").map((part, k, all) => (
+                      <span key={k} className={k ? "block" : undefined}>
+                        {/* espaço no fim da linha: o texto indexado não cola as partes */}
+                        {k < all.length - 1 ? `${part} ` : part}
+                      </span>
+                    ))}
+                  </h3>
                   <p className="mt-3 max-w-md text-base leading-relaxed text-silver">{step.text}</p>
                 </div>
               </li>
