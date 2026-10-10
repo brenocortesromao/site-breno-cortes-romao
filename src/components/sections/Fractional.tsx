@@ -22,7 +22,7 @@ export type FractionalCopy = {
   /** Únicos dados externos permitidos no site (verificados, com fonte). */
   stats: {
     title: string;
-    /** Complemento abaixo do título (destaque médio); em en é outro texto, não tradução. */
+    /** Complemento abaixo do título (texto de apoio); em en é outro texto, não tradução. */
     lead: string;
     items: { prefix: string; value: number; suffix: string; caption: string }[];
     support: string;
@@ -120,7 +120,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           <h3 className="text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
             {protectTerms(copy.stats.title)}
           </h3>
-          <p className="mt-3 max-w-3xl text-[clamp(1.1rem,1.6vw,1.5rem)] leading-snug tracking-[-0.02em] text-silver">
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-silver md:text-[17px]">
             {protectTerms(copy.stats.lead)}
           </p>
           <div className="mt-8 grid gap-10 border-t border-line pt-8 md:grid-cols-2 md:gap-8">
