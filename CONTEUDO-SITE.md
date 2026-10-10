@@ -161,6 +161,27 @@ Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória, em agên
 - [PENDENTE: bio — anos de experiência, agências, marcas, formação.] Retrato + trajetória em linha do tempo.
 - Frase de método: Uso inteligência artificial como ferramenta de pesquisa, exploração e produção, sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.
 
+## 11b. E a inteligência artificial? (PRETO, seção nova, entre "Sobre" e "Poucas parcerias")
+
+Rótulo: E A INTELIGÊNCIA ARTIFICIAL?
+
+Abertura interativa: uma caixa de prompt minimalista (estilo chat de IA) onde a objeção é DIGITADA letra por letra, com cursor piscando:
+“Mas hoje eu consigo fazer isso com IA.”
+
+Título (entra depois que a frase termina de ser digitada): **Consegue gerar. Não consegue decidir.**
+
+Bloco de frases grandes, uma por linha, acendendo com o scroll:
+- A IA nunca pagou uma conta no fim do mês.
+- Nunca abraçou alguém depois de um dia difícil.
+- Nunca sentiu o silêncio do alto de uma montanha.
+- Nunca viu uma marca ganhar, ou perder, a confiança das pessoas.
+
+Texto: Ela cria mil opções em segundos. Mas não sabe o que a sua empresa não pode dizer, nem qual dessas mil opções vai fazer alguém escolher você. Eu uso IA todos os dias: ela pesquisa, explora e acelera o trabalho. Aprendo com ela, mas não terceirizo o julgamento. As decisões vêm da minha experiência, do meu repertório e de tudo o que eu vivi, coisas que nenhum modelo aprende.
+
+Fecho (grande, com brilho prata em "o que não produzir"): **Com IA, todo mundo produz mais. Por isso, o que vale agora é saber o que não produzir.**
+
+Linha final (pequena): A IA é a ferramenta mais poderosa que já existiu. Nas mãos certas.
+
 ## 12. Poucas parcerias por vez (OFF-WHITE — seção curta, impacto)
 
 [CONFIRMAR com o Breno antes de publicar — é decisão de negócio]

@@ -125,6 +125,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - For each theme change it scrubs the live variables from the previous palette to the new one (`top 70%` → `top 20%`).
   - Text roles switch in a short mid window, so text is never grey on grey.
   - `refreshPriority: -1`, so it is refreshed after section pins.
+  - It rebuilds itself when `[data-theme]` sections are added or removed (a MutationObserver on `<body>`): after an HMR remount, triggers bound to detached sections recalculated wrong positions on the next refresh and the light sections stayed black.
   - It works under reduced motion, since a color change is not movement.
   - It adds `html.theme-js`. Without it (no JS), light sections paint their own background via CSS.
 - `theme/DraftBadge.tsx`: the "Provisório" badge (`common.draft`).
