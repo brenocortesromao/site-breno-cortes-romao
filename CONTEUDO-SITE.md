@@ -93,7 +93,7 @@ Nota: Não sou um CMO. Não assumo mídia, canais ou aquisição. Cuido do que f
 ## 5. O que eu faço (preto, seção fixa trocando de pilar)
 
 Título: **O nível de direção das grandes marcas. Na medida da sua empresa.**
-Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois. Por isso a estratégia não fica no papel: ela chega em cada peça.
+Subtítulo: Estratégia sem execução vira PDF. Execução sem estratégia vira ruído. Eu cuido das duas, com o mesmo nível de exigência.
 1. **Estratégia de marca.** O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso.
 2. **Direção criativa.** Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram.
 3. **Execução.** Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação.
