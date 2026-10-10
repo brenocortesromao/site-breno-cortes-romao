@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -34,7 +34,8 @@ export type ManifestoCopy = {
  * Mensagem de Breno Côrtes Romão. Entra por cima da hero fixa (fundo
  * transparente: a bola escurecida segue visível atrás). Coreografia:
  * - as palavras da frase acendem uma a uma com o scroll;
- * - a assinatura é desenhada sobre o retrato (traço controlado pelo scroll);
+ * - o retrato entra como metal líquido que vira a foto (PortraitReveal) e, com
+ *   a foto no lugar, a assinatura é escrita sobre ele (~1,8 s, por tempo);
  * - texto de apoio e nome aparecem em seguida.
  * Com prefers-reduced-motion, tudo já aparece pronto (assinatura completa).
  */
@@ -51,6 +52,14 @@ export default function Manifesto({
   const root = useRef<HTMLElement>(null);
   const phrase = useRef<HTMLHeadingElement>(null);
   const portrait = useRef<HTMLDivElement>(null);
+  /** A foto real já está no lugar (fim da entrada do retrato). */
+  const revealed = useRef(false);
+  /** Inicia a escrita da assinatura (definido pela animação; null sem ela). */
+  const playSignature = useRef<(() => void) | null>(null);
+  const handleRevealed = useCallback(() => {
+    revealed.current = true;
+    playSignature.current?.();
+  }, []);
 
   useGSAP(
     () => {
@@ -76,9 +85,8 @@ export default function Manifesto({
         // Assinatura: caneta contínua. Cada traço começa escondido (dashoffset =
         // comprimento E opacidade 0, senão a ponta redonda deixa um ponto solto)
         // e é escrito em sequência, com duração proporcional ao comprimento.
-        // Começa logo depois da construção do retrato (que termina no topo a
-        // 45%) e completa numa faixa curta (topo de 42% a 28%), com o retrato
-        // inteiro na tela: quem para de rolar ali já vê a assinatura toda.
+        // Por tempo (~1,8 s), começando quando a foto real está no lugar (fim
+        // do metal líquido); sem retrato, quando a moldura chega a 60% da tela.
         const paths = gsap.utils.toArray<SVGPathElement>("[data-signature-path]");
         const shineLayer = root.current?.querySelector("[data-signature-shine-layer]");
         const shine = root.current?.querySelector("[data-signature-shine]");
@@ -103,20 +111,10 @@ export default function Manifesto({
         };
 
         const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: portrait.current,
-            start: "top 42%",
-            end: "top 28%",
-            scrub: 0.6,
-          },
-          onUpdate: () => {
-            const done = tl.progress() >= 0.999;
-            if (done && !drawn) sweep.restart();
-            if (!done && drawn) {
-              sweep.pause(0);
-              gsap.set(shineLayer ?? {}, { opacity: 0 });
-            }
-            drawn = done;
+          paused: true,
+          onComplete: () => {
+            drawn = true;
+            sweep.restart();
             syncSweep();
           },
         });
@@ -125,6 +123,14 @@ export default function Manifesto({
           gsap.set(path, { strokeDasharray: len, strokeDashoffset: len, opacity: 0 });
           tl.set(path, { opacity: 1 }).to(path, { strokeDashoffset: 0, ease: "none", duration: len / 900 });
         });
+        tl.timeScale(tl.duration() / 1.8);
+        const play = () => tl.play();
+        if (portraitSrc) {
+          if (revealed.current) play();
+          else playSignature.current = play;
+        } else {
+          ScrollTrigger.create({ trigger: portrait.current, start: "top 60%", once: true, onEnter: play });
+        }
 
         ScrollTrigger.create({
           trigger: portrait.current,
@@ -144,6 +150,10 @@ export default function Manifesto({
           stagger: 0.12,
           scrollTrigger: { trigger: phrase.current, start: "bottom 75%" },
         });
+
+        return () => {
+          playSignature.current = null;
+        };
       });
     },
     { scope: root },
@@ -175,7 +185,12 @@ export default function Manifesto({
             }
           >
             {portraitSrc ? (
-              <PortraitReveal src={portraitSrc} alt={copy.portraitAlt} sizes="(min-width: 768px) 31vw, 72vw" />
+              <PortraitReveal
+                src={portraitSrc}
+                alt={copy.portraitAlt}
+                sizes="(min-width: 768px) 31vw, 72vw"
+                onRevealed={handleRevealed}
+              />
             ) : (
               <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" className="rounded-[inherit]" />
             )}
