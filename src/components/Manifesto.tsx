@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import MediaSlot from "./MediaSlot";
-import PaintedPortrait from "./PaintedPortrait";
+import PortraitReveal from "./PortraitReveal";
 import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
@@ -160,7 +160,7 @@ export default function Manifesto({
           </div>
           <div ref={portrait} className="relative">
             {portraitSrc ? (
-              <PaintedPortrait src={portraitSrc} alt={copy.portraitAlt} sizes="(min-width: 768px) 38vw, 90vw" />
+              <PortraitReveal src={portraitSrc} alt={copy.portraitAlt} sizes="(min-width: 768px) 38vw, 90vw" />
             ) : (
               <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" />
             )}

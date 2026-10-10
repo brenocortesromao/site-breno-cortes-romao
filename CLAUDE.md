@@ -15,7 +15,7 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **Estabilidade WebGL:** sonda única (`lib/webgl.ts`), canvases montados só perto da seção (`lib/useNearViewport.ts`), `ResilientBoundary` + `ContextLossWatcher` com remontagem e `console.warn` do motivo real. Ver "WebGL contexts" na Arquitetura.
 - **Hero:** "soquinho" na bola (afundamento elástico + ondas, até 8 impactos), hover com giro e cursor-círculo; reduced motion só brilho.
 - **Cabeçalho** (`layout/HeaderBrand.tsx`): assinatura que se desenha em ~1 s (link para a home), nome em Archivo Expanded e cargo em Geist Mono; depois da hero fica só a assinatura; no mobile, só a assinatura.
-- **Mensagem:** retrato colorido revelado "como pintura" (`PaintedPortrait`), assinatura completa com o retrato na tela, frase protegida do tradutor automático ("si." virava "sim") e com `text-balance`, parágrafo novo.
+- **Mensagem:** retrato colorido com entrada de "construção digital" (`PortraitReveal`), assinatura completa com o retrato na tela, frase protegida do tradutor automático ("si." virava "sim") e com `text-balance`, parágrafo novo.
 - **Seções:** A distância em 3 blocos com scrub curto; gota de "Como funciona" com entrada profunda e animação constante; Trabalhos sem cases (rota /cases removida), com subtítulo, legenda (projeto, ano, papel) e loop de logos sem buraco.
 - **Textos novos** em pt/en: subtítulo de "O que eu faço", fechos do Diagnóstico, título e texto de "Como funciona", parágrafo da Mensagem.
 
@@ -168,7 +168,9 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - Mobile (coarse pointer): lighter geometry, one noise octave, DPR capped at 1.5, no mouse tracking.
 
 **Manifesto** (`components/Manifesto.tsx`, client) is the "Mensagem de {name}" section. It has a transparent background (the darkened ball stays visible behind it) and `data-theme="dark"`.
-- Portrait: the owner's **colour** photo (`public/retrato/`, path in `portraitSrc` in `page.tsx`, alt `manifesto.portraitAlt`), no B&W filter. `PaintedPortrait` reveals it "as a painting", scrubbed from the portrait entering (`top 98%`) to its top at 45%: broad charcoal B&W strokes, then finer detail strokes, then colour as the last coat (WebGL2 brush masks over the photo itself). At the end the canvas hides and the real `next/image` shows; that `<img>` is also the no-JS / reduced-motion content.
+- Portrait: the owner's **colour** photo (`public/retrato/`, path in `portraitSrc` in `page.tsx`, alt `manifesto.portraitAlt`), no B&W filter. `PortraitReveal` builds it "digitally", scrubbed from the portrait entering (`top 98%`) to its top at 45%: graphite pixel blocks shrinking 64 → 1 px, 3 time-based glitches (~100 ms: shifted bands + slight RGB split) when the progress crosses fixed points, then a silver light line sweeping down to the sharp colour photo.
+  - **The final state is the real image:** at p = 1 the canvas is unmounted and the `next/image` (quality 90 — allowed in `images.qualities` — with a srcset from the 2400 px original, so retina/4K are covered) stays. It is also the no-JS / reduced-motion content.
+  - The canvas uses DPR up to 2 and a full-resolution texture from the `-1600` file (never the downsized `<img>` source).
 - Signature timing: drawn from the portrait top at 42% to 10%, so it starts after the painting and is complete while the portrait is fully on screen. Undrawn paths are `opacity: 0` (a round cap would otherwise leave a loose dot).
 - Signature: `components/Signature.tsx` draws the paths from `src/content/signature.ts` with a metallic gradient stroke and a subtle glow.
   - The current one is a **provisional placeholder**. To use the owner's SVG, paste its `viewBox` and stroke `d` values there and set `provisional: false`.
