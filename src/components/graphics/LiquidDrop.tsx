@@ -14,8 +14,15 @@ import { useEffect, useRef, type RefObject } from "react";
  * Os parâmetros da forma são interpolados suavemente para os alvos de cada
  * etapa (sem cortes). Cromo: reflexo de um "estúdio" procedural com áreas
  * escuras contrastadas (lê bem sobre o off-white). Fundo transparente.
+ * Entrada profunda (uEmerge 0→1, ~2,8 s quando a gota aparece na tela): ela
+ * sobe do fundo no eixo Z (e um pouco de baixo), escura, desfocada (blur CSS)
+ * e pequena, e ganha nitidez, brilho e tamanho, como algo subindo de um líquido
+ * escuro. Recomeça a cada nova entrada na tela.
+ * Animação constante: respira (escala), ondula sempre um pouco e os reflexos
+ * do estúdio giram devagar, mesmo com o scroll parado. Reage levemente ao
+ * mouse (inclinação + reflexo), só com ponteiro fino.
  * Desempenho: renderiza só com a seção visível; mobile com menos passos e DPR 1.
- * reduceMotion: desenha uma vez o anel estático.
+ * reduceMotion: desenha uma vez o anel estático, já emerso.
  */
 
 const VERT = /* glsl */ `#version 300 es
@@ -31,14 +38,16 @@ uniform float uSep;
 uniform float uRipple;
 uniform float uNoise;
 uniform float uTorus;
+uniform float uEmerge;
+uniform vec2 uTilt;
 out vec4 outColor;
 
 mat3 rotY(float a){ float c=cos(a), s=sin(a); return mat3(c,0.,-s, 0.,1.,0., s,0.,c); }
 mat3 rotX(float a){ float c=cos(a), s=sin(a); return mat3(1.,0.,0., 0.,c,s, 0.,-s,c); }
 float smin(float a, float b, float k){ float h = clamp(0.5 + 0.5*(b-a)/k, 0., 1.); return mix(b, a, h) - k*h*(1.-h); }
 
-float map(vec3 p){
-  p = rotY(uAngle) * rotX(0.25) * p;
+float shape(vec3 p){
+  p = rotY(uAngle + uTilt.x) * rotX(0.25 + uTilt.y) * p;
   float t = uTime;
   // gotas (duas que se fundem quando uSep -> 0)
   float k = clamp(uSep / 1.1, 0., 1.);
@@ -54,6 +63,15 @@ float map(vec3 p){
   float dT = length(vec2(length(q.xz) - 0.52, q.y)) - 0.19;
   dT += uNoise * 0.6 * sin(atan(q.z, q.x) * 3.0 + t * 1.2) * 0.5;
   return mix(d1, dT, uTorus);
+}
+
+// posição (entrada profunda: vem de longe no eixo Z e um pouco de baixo) e
+// respiração constante na escala
+float map(vec3 p){
+  float e = 1.0 - uEmerge;
+  p -= vec3(0.0, -0.55 * e * e, -7.0 * e);
+  float b = 1.0 + 0.035 * sin(uTime * 1.25) + 0.012 * sin(uTime * 2.9 + 1.3);
+  return shape(p / b) * b;
 }
 
 vec3 normalAt(vec3 p){
@@ -82,24 +100,31 @@ void main(){
     float d = map(p);
     if (d < 0.0012) { hit = 1.0; break; }
     t += d * 0.8;
-    if (t > 5.0) break;
+    if (t > 12.0) break;
   }
   if (hit < 0.5) { outColor = vec4(0.0); return; }
   vec3 p = ro + rd * t;
   vec3 n = normalAt(p);
-  vec3 r = reflect(rd, n);
+  // reflexos se movendo na superfície: o estúdio gira devagar o tempo todo
+  vec3 r = rotY(uTime * 0.16 + uTilt.x * 1.4) * reflect(rd, n);
   float fres = pow(1.0 - max(dot(n, -rd), 0.0), 3.0);
   float c = env(r) * (0.82 + 0.18 * fres);
   vec3 col = vec3(c) * vec3(0.92, 0.935, 0.96);
   col = col / (col + 0.35) * 1.25;   // tone map suave
+  // emergindo: escura e sem brilho no fundo, ganha luz ao subir
+  float lit = smoothstep(0.0, 1.0, uEmerge);
+  col *= mix(0.04, 1.0, lit * lit);
   outColor = vec4(col, 1.0);
 }`;
 
 type Target = { sep: number; ripple: number; noise: number; spin: number; torus: number };
+/** Subida rápida que desacelera ao chegar (ease-out cúbico). */
+const easeOut = (x: number) => 1 - (1 - x) ** 3;
+
 const TARGETS: Target[] = [
   { sep: 0, ripple: 0, noise: 0.03, spin: 0.15, torus: 0 }, // conversa
   { sep: 0, ripple: 1, noise: 0.035, spin: 0.2, torus: 0 }, // diagnóstico
-  { sep: 0, ripple: 0, noise: 0.012, spin: 0.08, torus: 0 }, // plano
+  { sep: 0, ripple: 0, noise: 0.022, spin: 0.1, torus: 0 }, // plano
   { sep: 0, ripple: 0, noise: 0.07, spin: 0.55, torus: 0 }, // direção contínua
   { sep: 0, ripple: 0, noise: 0.02, spin: 0.22, torus: 1 }, // revisão
 ];
@@ -158,7 +183,7 @@ export default function LiquidDrop({
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const u = (n: string) => gl.getUniformLocation(program, n);
-    const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus") };
+    const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt") };
 
     const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5);
     const resize = () => {
@@ -174,6 +199,16 @@ export default function LiquidDrop({
     let angle = 0;
     let time = 0;
     let lastStage = -1;
+    /** Entrada profunda: 0 = no fundo, 1 = no lugar. */
+    let emerge = 0;
+    let emerging = false;
+    const tilt = { x: 0, y: 0 };
+    const pointer = { x: 0, y: 0 };
+    /** Desfoque + opacidade do canvas acompanham a subida. */
+    const styleEmerge = (e: number) => {
+      el.style.filter = e >= 1 ? "" : `blur(${((1 - e) * 16).toFixed(2)}px)`;
+      el.style.opacity = String(Math.min(1, e * 2.2));
+    };
 
     const draw = () => {
       gl.uniform2f(U.res, el.width, el.height);
@@ -183,6 +218,8 @@ export default function LiquidDrop({
       gl.uniform1f(U.ripple, s.ripple);
       gl.uniform1f(U.noise, s.noise);
       gl.uniform1f(U.torus, s.torus);
+      gl.uniform1f(U.emerge, easeOut(emerge));
+      gl.uniform2f(U.tilt, tilt.x, tilt.y);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -198,6 +235,7 @@ export default function LiquidDrop({
       // forma estática do anel
       Object.assign(s, { sep: 0, ripple: 0, noise: 0, torus: 1 });
       angle = 0.4;
+      emerge = 1;
       draw();
       return () => {
         ro.disconnect();
@@ -228,20 +266,48 @@ export default function LiquidDrop({
       s.torus += (tgt.torus - s.torus) * (1 - Math.exp(-dt * 1.6));
       angle += s.spin * dt;
       time += dt;
+      if (emerging && emerge < 1) {
+        emerge = Math.min(1, emerge + dt / 2.8);
+        // ease-out na subida (o shader recebe o valor já suavizado)
+        styleEmerge(easeOut(emerge));
+      }
+      const kt = 1 - Math.exp(-dt * 2.5);
+      tilt.x += (pointer.x * 0.35 - tilt.x) * kt;
+      tilt.y += (pointer.y * 0.25 - tilt.y) * kt;
       draw();
     };
 
-    const io = new IntersectionObserver(([entry]) => {
-      cancelAnimationFrame(raf);
-      if (entry.isIntersecting) {
+    // mouse: inclinação leve na direção do cursor (só ponteiro fino)
+    const onPointer = (ev: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      pointer.x = Math.max(-1, Math.min(1, (ev.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+      pointer.y = Math.max(-1, Math.min(1, (ev.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+    };
+    if (!light) window.addEventListener("pointermove", onPointer, { passive: true });
+    styleEmerge(0);
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        cancelAnimationFrame(raf);
+        if (!entry.isIntersecting) {
+          // saiu da tela: a próxima entrada emerge do fundo de novo
+          emerging = false;
+          emerge = 0;
+          styleEmerge(0);
+          return;
+        }
+        // emerge quando boa parte da gota está visível
+        if (entry.intersectionRatio >= 0.4) emerging = true;
         last = performance.now();
         raf = requestAnimationFrame(frame);
-      }
-    });
+      },
+      { threshold: [0, 0.4] },
+    );
     io.observe(el);
 
     return () => {
       cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onPointer);
       io.disconnect();
       ro.disconnect();
       gl.getExtension("WEBGL_lose_context")?.loseContext();

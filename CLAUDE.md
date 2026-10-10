@@ -208,6 +208,9 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - The closing has 3 states: `closing` (0 marked or no interaction, which is what the HTML holds), `closingOne` (1 marked) and `closingMatched` (2+, plus the "Vamos conversar" CTA to `#contato`).
 - `Changes`: before/after. With `data-mode="flip"` each row flips via scroll inside a grid overlay (`[grid-area:1/1]`). The static mode shows two columns. Both texts are always in the DOM.
 - `Process`: a light section with `GraphicLayer variant="grid"`. The vertical line scrubs `scaleY`, and the steps light up.
+  - The sticky `graphics/LiquidDrop` (raw WebGL2 raymarched SDF) changes shape per step via `stageRef`.
+  - Deep entrance: `uEmerge` 0→1 (~2.8 s, ease-out) once 40% of the drop is visible; it comes from far in Z, dark, with a CSS blur on the canvas. It resets when the drop leaves the screen.
+  - Always alive: scale breathing, a noise floor in every step and a slowly rotating studio. Fine pointers tilt it (`uTilt`).
 - `Works` (server) + `LogoMarquee` + `WorkCarousel`. Data lives in `public/trabalhos/trabalhos.json` and `public/logos/logos.json` (read via `src/content/media.ts`; to add one, drop the file in the folder and fill `"arquivo"`).
   - Logos are rendered as a CSS **mask** over `bg-silver`, so they become monochrome silver whatever their colors.
   - Marquee: two rows in opposite directions; each track holds the list twice and moves xPercent 50; it slows on hover (timeScale) and pauses off-screen. Loop mode is `data-mode="loop"`; otherwise it is a static grid.
