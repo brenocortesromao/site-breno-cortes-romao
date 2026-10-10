@@ -45,7 +45,9 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
-    setEnv({ webgl: webglSupport().webgl2, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
+    const webgl = webglSupport().webgl2;
+    if (!webgl) console.warn("[montanhas] WebGL2 indisponível neste navegador: usando a foto.");
+    setEnv({ webgl, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
     if (reduced) progress.current = 0.45;
   }, []);
 
@@ -139,7 +141,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
           {scene ? (
             <div className="absolute inset-0 opacity-[0.36]">
               {/* erro ou perda de contexto: remonta; só cai na foto se falhar de novo */}
-              <ResilientBoundary onGiveUp={handleFail}>
+              <ResilientBoundary name="montanhas" onGiveUp={handleFail}>
                 {(onLost) =>
                   mountScene && (
                     <MountainScene

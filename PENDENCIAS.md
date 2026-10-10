@@ -63,6 +63,7 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [ ] Antes de seguir com o resto, me mostre capturas do início, meio e fim do trecho para eu aprovar o visual.
 
 ## Bloco 6b. Montanhas 3D mais realistas e com textura (aprovado o conceito; agora refinar)
+> **PAUSADO (09/10, pedido do dono): não mexer nas montanhas até ele pedir.** O terreno do Bloco 6 (commit 3a2a40a + estabilidade de dd19346) é a versão aprovada. Nada do 6b foi implementado. A queda para a foto foi módulo velho do HMR no navegador ("terrainSize is not a function"), não erro no código; resolve recarregando a página ou reiniciando o dev com .next/dev limpo.
 - [ ] Forma: aplicar erosão no relevo (erosão hidráulica pré-calculada numa textura de altura, ou "erosion noise" no shader) para criar vales em V, ravinas e cristas afiadas como montanhas reais. Opcional, se ficar melhor: usar um heightmap REAL de cordilheira (dados de elevação abertos, ex.: Alpes) como base, com detalhe procedural por cima.
 - [ ] Textura: materiais PBR de rocha e neve gratuitos (CC0, ex.: Poly Haven ou ambientCG) em tons de cinza, com mapeamento triplanar (sem esticar nas encostas), normal map de microdetalhe e variação de rugosidade.
 - [ ] Neve realista: depende da altitude, da inclinação (encostas íngremes ficam com rocha exposta) e da face voltada para a luz; bordas da neve irregulares, não em faixas.

@@ -314,7 +314,7 @@ export default function PaintedPortrait({
       />
       {paint && (
         <div ref={canvasLayer} className="absolute inset-0" style={{ opacity: 0 }}>
-          <ResilientBoundary onGiveUp={handleGiveUp}>
+          <ResilientBoundary name="retrato" onGiveUp={handleGiveUp}>
             {(onLost) =>
               near && <PaintCanvas imgRef={img} progressRef={progress} onReady={handleReady} onLost={onLost} />
             }

@@ -103,7 +103,7 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
               {/* o espaço da gota fica reservado mesmo sem o canvas montado */}
               <div className="mx-auto aspect-square w-40 md:mx-0 md:w-[min(100%,40svh,24rem)]">
                 {drop && !dropFailed && (
-                  <ResilientBoundary onGiveUp={handleDropFail}>
+                  <ResilientBoundary name="gota" onGiveUp={handleDropFail}>
                     {(onLost) =>
                       near && (
                         <LiquidDrop

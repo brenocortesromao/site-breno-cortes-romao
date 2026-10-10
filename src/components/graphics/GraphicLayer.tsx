@@ -112,7 +112,7 @@ export default function GraphicLayer({
                 }`}
               >
                 {/* falha ou perda de contexto: remonta; só fica no SVG se falhar de novo */}
-                <ResilientBoundary onGiveUp={handleFail}>
+                <ResilientBoundary name="curvas líquidas" onGiveUp={handleFail}>
                   {(onLost) =>
                     near && (
                       <LiquidContours

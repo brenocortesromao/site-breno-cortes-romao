@@ -232,7 +232,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
             }`}
           >
             {/* erro ou perda de contexto: remonta; só cai no poster se falhar de novo */}
-            <ResilientBoundary onGiveUp={handleFail}>
+            <ResilientBoundary name="hero" onGiveUp={handleFail}>
               {(onLost) =>
                 mountScene && (
                   <HeroScene
