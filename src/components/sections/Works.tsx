@@ -22,6 +22,7 @@ export default async function Works() {
         >
           {t("title")}
         </h2>
+        <p className="mt-6 max-w-xl text-sm leading-relaxed text-silver md:text-[15px]">{t("subtitle")}</p>
       </div>
 
       <div className="mx-auto mt-16 w-full max-w-[1600px] md:mt-24">

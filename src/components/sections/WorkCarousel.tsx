@@ -9,7 +9,7 @@ import { scrollToY } from "@/components/SmoothScroll";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-export type WorkItem = { src?: string; project: string; year: string; alt: string };
+export type WorkItem = { src?: string; project: string; year: string; role: string; alt: string };
 
 export type WorkCarouselLabels = {
   title: string;
@@ -211,7 +211,10 @@ export default function WorkCarousel({ items, labels }: { items: WorkItem[]; lab
             {item?.project}
           </span>
           <span key={`y-${current}`} className="mt-1 block animate-[fadeIn_0.5s_ease] font-mono text-[11px] uppercase tracking-[0.22em] text-silver">
-            {item?.year} · {labels.counters[current]}
+            {item?.year} · {item?.role}
+          </span>
+          <span key={`c-${current}`} className="mt-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-silver/70">
+            {labels.counters[current]}
           </span>
         </p>
         <div className="flex items-center gap-3">

@@ -8,6 +8,9 @@ import type { Logo } from "@/content/media";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+/** Repetições da fileira em cada cópia (5 logos ≈ 1080px; ×3 cobre telas de até ~3200px). */
+const REPS = 3;
+
 /** Um logo em prata monocromática: o arquivo vira MÁSCARA sobre um fundo prata. */
 function LogoMark({ logo }: { logo: Logo }) {
   if (!logo.src) {
@@ -39,8 +42,10 @@ function LogoMark({ logo }: { logo: Logo }) {
 
 /**
  * Faixa de logos: 2 fileiras em loop infinito, direções opostas (cima ←,
- * baixo →), desacelerando no hover. Cada trilha tem os logos duas vezes; a
- * animação desloca exatamente uma cópia (xPercent 50) para o loop não "pular".
+ * baixo →), desacelerando no hover. Cada trilha tem duas CÓPIAS iguais e a
+ * animação desloca exatamente uma (xPercent 50) para o loop não "pular". Cada
+ * cópia repete a fileira REPS vezes, para ser mais larga que a tela: senão a
+ * borda da trilha aparece e abre um buraco no fim da fileira.
  * Pausa fora da tela. Modo animado ligado por data-mode="loop"; sem JS ou com
  * prefers-reduced-motion, os logos ficam numa grade estática (cópia oculta).
  * Logos: public/logos/ + logos.json (src/content/media.ts).
@@ -114,15 +119,21 @@ export default function LogoMarquee({
               className="flex flex-wrap gap-x-10 gap-y-6 group-data-[mode=loop]/marquee:w-max group-data-[mode=loop]/marquee:flex-nowrap group-data-[mode=loop]/marquee:gap-0"
             >
               {[0, 1].map((copyIdx) =>
-                row.map((logo, i) => (
-                  <li
-                    key={`${copyIdx}-${i}`}
-                    aria-hidden={copyIdx === 1 ? true : undefined}
-                    className={`${copyIdx === 1 ? "hidden group-data-[mode=loop]/marquee:block" : ""} pr-0 group-data-[mode=loop]/marquee:pr-10`}
-                  >
-                    <LogoMark logo={logo} />
-                  </li>
-                )),
+                Array.from({ length: REPS }, (_, rep) =>
+                  row.map((logo, i) => {
+                    // só a primeira repetição da primeira cópia é conteúdo; o resto é eco do loop
+                    const echo = copyIdx > 0 || rep > 0;
+                    return (
+                      <li
+                        key={`${copyIdx}-${rep}-${i}`}
+                        aria-hidden={echo ? true : undefined}
+                        className={`${echo ? "hidden group-data-[mode=loop]/marquee:block" : ""} pr-0 group-data-[mode=loop]/marquee:pr-10`}
+                      >
+                        <LogoMark logo={logo} />
+                      </li>
+                    );
+                  }),
+                ),
               )}
             </ul>
           </div>
