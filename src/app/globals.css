@@ -153,6 +153,13 @@ body::before {
   filter: grayscale(1) contrast(1.08) brightness(0.92);
 }
 
+/* Cursor piscando da caixa de prompt (E a IA?): liga/desliga, sem fade. */
+@keyframes caretBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
 /* Entrada suave de textos que trocam (legenda do carrossel, fecho do diagnóstico). */
 @keyframes fadeIn {
   from {

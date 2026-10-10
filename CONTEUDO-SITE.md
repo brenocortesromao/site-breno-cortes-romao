@@ -72,7 +72,11 @@ Funciona sem interação (texto padrão) e com teclado; em prefers-reduced-motio
 - Texto: Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada, sem o custo de uma contratação executiva fixa.
 
 **Dados verificados (SEM gráfico de barras — dois números gigantes com contagem animada, lado a lado):**
-- Título: **Lá fora, esse modelo já está crescendo rápido.**
+- Título (pt): **Lá fora, esse modelo já está crescendo rápido.**
+- Complemento logo abaixo do título (pt, destaque médio): **No Brasil, ele está só começando, e eu sou um dos primeiros a trazê-lo para cá.**
+- VERSÃO EN DIFERENTE (não traduzir literalmente; "lá fora" não faz sentido para quem lê em inglês):
+  - Title (en): **A model growing fast around the world.**
+  - Below the title (en): **I was one of the first to bring it to Brazil, and I work with companies wherever they are.**
 - Número 1: **+313%** — "profissionais fractional no mundo desde 2019"
 - Número 2: **97%** — "das vagas fractional nos EUA vêm de empresas pequenas e médias"
 - Frase abaixo: E não é coisa de multinacional. É o modelo de quem cresce e precisa de liderança sênior sem aumentar a equipe.

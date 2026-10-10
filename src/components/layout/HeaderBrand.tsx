@@ -80,7 +80,10 @@ export default function HeaderBrand({
         strokeWidth={7}
         className="h-auto w-[112px] shrink-0 md:w-[136px]"
       />
-      <span data-brand-text className="hidden min-w-0 md:block">
+      {/* nome + função: no tablet (sem menu) e a partir de 1400px; entre 1024 e
+          1399 o menu ocupa o espaço e fica só a assinatura (antes o nome era
+          espremido e colidia com o menu) */}
+      <span data-brand-text className="hidden min-w-0 md:block lg:hidden min-[1400px]:block">
         <span
           translate="no"
           className="block font-brand text-[11px] font-semibold uppercase tracking-[0.18em] text-[#e6e7e9] [font-stretch:125%]"

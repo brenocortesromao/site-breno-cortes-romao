@@ -11,6 +11,7 @@ const nav = [
   { key: "services", hash: "o-que-faco" },
   { key: "projects", hash: "trabalhos" },
   { key: "about", hash: "sobre" },
+  { key: "ai", hash: "ia" },
   { key: "contact", hash: "contato" },
 ] as const;
 

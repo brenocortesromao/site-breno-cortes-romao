@@ -17,6 +17,7 @@ import MountainBackdrop from "@/components/graphics/MountainBackdrop";
 import Touchpoints from "@/components/sections/Touchpoints";
 import About from "@/components/sections/About";
 import Partnerships from "@/components/sections/Partnerships";
+import Ai, { type AiCopy } from "@/components/sections/Ai";
 import Contact from "@/components/sections/Contact";
 import Faq from "@/components/sections/Faq";
 import { loadSignature } from "@/content/signature";
@@ -170,6 +171,19 @@ export default async function Home() {
 
 
         <About variant="summary" />
+
+        <Ai
+          copy={{
+            eyebrow: t("ai.eyebrow"),
+            prompt: t("ai.prompt"),
+            title: t("ai.title"),
+            lines: t.raw("ai.lines") as AiCopy["lines"],
+            body: t("ai.body"),
+            closing: t("ai.closing"),
+            closingHighlight: t("ai.closingHighlight"),
+            footnote: t("ai.footnote"),
+          }}
+        />
 
         <Partnerships />
 

@@ -13,8 +13,9 @@ export default function NavLinks({ items }: { items: { label: string; hash: stri
   const cls =
     "font-mono text-[11px] uppercase tracking-[0.28em] text-silver transition-colors hover:text-foreground";
 
+  // 1024 a 1279: espaçamento menor, para 7 links caberem ao lado da assinatura
   return (
-    <ul className="flex gap-8 xl:gap-10">
+    <ul className="flex gap-6 xl:gap-10">
       {items.map((item) => (
         <li key={item.hash}>
           {onHome ? (
