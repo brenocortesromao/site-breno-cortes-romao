@@ -92,7 +92,7 @@ Nota: Não sou um CMO. Não assumo mídia, canais ou aquisição. Cuido do que f
 
 ## 5. O que eu faço (preto, seção fixa trocando de pilar)
 
-Título: **Estratégia e execução, nas mesmas mãos.**
+Título: **O nível de direção das grandes marcas. Na medida da sua empresa.**
 Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois. Por isso a estratégia não fica no papel: ela chega em cada peça.
 1. **Estratégia de marca.** O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso.
 2. **Direção criativa.** Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram.
@@ -101,7 +101,7 @@ Subtítulo: A maioria dos profissionais pensa ou executa. Eu faço os dois. Por 
 
 ## 6. O que muda (GRADIENTE ESCURO — antes/depois animado, cada linha vira de "antes" para "depois")
 
-Título: **A mesma empresa. Outra percepção.**
+Título: **O valor que já existe, finalmente visível.**
 | Antes | Depois |
 |---|---|
 | Ninguém entende de primeira o que vocês fazem. | Sua oferta é entendida em uma frase. |

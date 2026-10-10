@@ -172,9 +172,13 @@ export default function Manifesto({
 
         {/* Frase do problema + apoio */}
         <div className="flex flex-col justify-center md:col-span-6 md:col-start-7">
+          {/* translate="no": a frase é partida em <span> por palavra para a
+              animação, e o tradutor automático do navegador traduz cada palavra
+              isolada ("si." vira "sim"). O texto já vem no idioma da página. */}
           <h2
             ref={phrase}
             id="manifesto-title"
+            translate="no"
             className="text-[clamp(2rem,4.6vw,5rem)] font-medium leading-[1.05] tracking-[-0.05em]"
           >
             {copy.statement.map((part, i) => (

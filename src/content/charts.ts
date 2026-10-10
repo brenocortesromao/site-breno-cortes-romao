@@ -32,7 +32,7 @@ function inline(svg: string, prefix: string): string {
     `aria-labelledby="${ids.split(/\s+/).map((i) => prefix + i).join(" ")}"`,
   );
   // ocupa a largura do contêiner (o viewBox mantém a proporção)
-  return s.replace("<svg ", '<svg width="100%" height="auto" style="display:block;overflow:visible" ');
+  return s.replace("<svg ", '<svg width="100%" style="display:block;height:auto;overflow:visible" ');
 }
 
 /** Centro (círculo) e ângulo (linha) de cada #ponto-N num SVG do gráfico C. */

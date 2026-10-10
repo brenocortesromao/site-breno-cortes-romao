@@ -8,9 +8,9 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [x] Nenhum travessão (— ou –) em texto visível, pt e en.
 - [x] "Fractional Brand & Creative Director" nunca traduzido; nada de "fracionário/fracionada".
 - [x] "Trabalho com poucas empresas por vez." exatamente assim.
-- [x] Título dos pilares: "Estratégia e execução, nas mesmas mãos." + subtítulo novo do CONTEUDO-SITE.md.
-  > Feito, mas com o título mais recente pedido no chat: "O nível de direção das grandes marcas. Na medida da sua empresa." (O que muda: "O valor que já existe, finalmente visível."). Esses dois títulos ainda NÃO estão no CONTEUDO-SITE.md salvo; atualize o arquivo para ficar como fonte única.
-- [ ] Título de "O que muda": "A mesma empresa. Outra percepção."
+- [x] Título dos pilares: "O nível de direção das grandes marcas. Na medida da sua empresa." + subtítulo novo do CONTEUDO-SITE.md.
+  > Feito. CONTEUDO-SITE.md já atualizado com os dois títulos (fonte única).
+- [x] Título de "O que muda": "O valor que já existe, finalmente visível."
 - [x] FAQ com 11 perguntas, acordeão, JSON-LD FAQPage.
 - [x] Regras de SEO no CLAUDE.md e aplicadas (h1 único, hierarquia, metadados, hreflang, alt).
 
