@@ -44,9 +44,9 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     const webgl = webglSupport().webgl2;
     if (!webgl) console.warn("[montanhas] WebGL2 indisponível neste navegador: usando a foto.");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     setEnv({ webgl, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
     if (reduced) progress.current = 0.45;
   }, []);

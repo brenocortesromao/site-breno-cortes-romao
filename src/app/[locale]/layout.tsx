@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import * as rootParams from "next/root-params";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo, Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -24,6 +24,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Exceção tipográfica: só o nome no cabeçalho (e assinaturas de marca), em
+// Archivo com o eixo de largura no máximo ("Archivo Expanded"). Ver CLAUDE.md.
+const archivo = Archivo({
+  variable: "--font-archivo",
+  subsets: ["latin", "latin-ext"],
+  axes: ["wdth"],
 });
 
 // Os dois idiomas são gerados no build (páginas estáticas).
@@ -54,7 +62,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
   return (
     <html
       lang={htmlLang[locale]}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

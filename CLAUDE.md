@@ -8,39 +8,25 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 
 **Etapa:** 3, estrutura completa do site (bilíngue PT/EN). A lista mestra é o `PENDENCIAS.md`: itens [x] concluídos, e os abertos têm nota com arquivos e próximo passo. Textos: `CONTEUDO-SITE.md`.
 
-**Concluído hoje:**
-- i18n e as 14 seções na ordem narrativa.
-- Ritmo de cores: preto, off-white com curvas líquidas lentas e gradiente escuro.
-- Hero com bola cromada.
-- Assinatura em cromo desenhada pelo scroll.
-- Gráficos do dono em "A distância" (ainda como cena fixa).
-- Diagnóstico com 8 frases e pistas de interação.
-- Números Lightcast em negrito com black chrome.
-- Antes/depois com indicador deslizante.
-- Gota líquida em "Como funciona".
-- FAQ com 11 perguntas e FAQPage.
-- Base de SEO.
-- Regras: sem travessões e "Fractional Brand & Creative Director" sem tradução.
-- **Fundo de montanhas** (`graphics/MountainBackdrop.tsx`): envolve Pillars + Changes num `div.relative` em `page.tsx`, sticky, com fade de entrada e saída. Os gatilhos usam `refreshPriority: -1`, porque o pin dos pilares muda a altura do trecho.
-  - Com WebGL2 (Bloco 6): terreno 3D procedural, sem assets. `graphics/terrain/heightmap.ts` gera a malha (ridged multifractal, LOD radial, sombras pré-calculadas, `getTerrain()` com cache, aquecido num `requestIdleCallback`). `terrain/MountainScene.tsx` é a cena R3F, com a câmera descendo pelo progresso do scroll (`progressRef`). A cena só monta perto do trecho; opacidade 36%.
-  - Sem WebGL: a foto de `public/fundo/` com opacidade 24% e zoom de 1.0 a 1.5 no pico (62% 70%).
+**Concluído até 09/10 (base):** i18n e as 14 seções na ordem narrativa; ritmo de cores (preto, off-white com curvas líquidas, gradiente escuro); hero com bola cromada; Diagnóstico com 8 frases; números Lightcast em black chrome; antes/depois; FAQ com FAQPage; base de SEO; regras de travessões e de termos sem tradução.
+
+**Concluído na noite de 09/10 (Blocos 0, 4 e 6 do PENDENCIAS.md):**
+- **Montanhas 3D** (Bloco 6, `graphics/MountainBackdrop.tsx` + `graphics/terrain/*`): terreno procedural em R3F atrás de Pillars + Changes, sticky, com câmera descendo pelo scroll, opacidade 36% e a foto de `public/fundo/` só como fallback sem WebGL. Os gatilhos usam `refreshPriority: -1` (o pin dos pilares muda a altura do trecho). **Versão aprovada na tag git `montanhas-3d-aprovadas`.**
+- **Estabilidade WebGL:** sonda única (`lib/webgl.ts`), canvases montados só perto da seção (`lib/useNearViewport.ts`), `ResilientBoundary` + `ContextLossWatcher` com remontagem e `console.warn` do motivo real. Ver "WebGL contexts" na Arquitetura.
+- **Hero:** "soquinho" na bola (afundamento elástico + ondas, até 8 impactos), hover com giro e cursor-círculo; reduced motion só brilho.
+- **Cabeçalho** (`layout/HeaderBrand.tsx`): assinatura que se desenha em ~1 s (link para a home), nome em Archivo Expanded e cargo em Geist Mono; depois da hero fica só a assinatura; no mobile, só a assinatura.
+- **Mensagem:** retrato colorido revelado "como pintura" (`PaintedPortrait`), assinatura completa com o retrato na tela, frase protegida do tradutor automático ("si." virava "sim") e com `text-balance`, parágrafo novo.
+- **Seções:** A distância em 3 blocos com scrub curto; gota de "Como funciona" com entrada profunda e animação constante; Trabalhos sem cases (rota /cases removida), com subtítulo, legenda (projeto, ano, papel) e loop de logos sem buraco.
+- **Textos novos** em pt/en: subtítulo de "O que eu faço", fechos do Diagnóstico, título e texto de "Como funciona", parágrafo da Mensagem.
 
 **Decisões importantes:**
 - Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.
 - Dados externos: só os números Lightcast, com fonte.
-- Sem cases nem páginas /cases (removidos do código em 09/10).
+- Sem cases nem páginas /cases.
 - Off-white só em 3 seções.
-- "A distância" volta a 3 blocos sem pin, com scrub curto (do bloco entrar pela base até o gráfico chegar ao centro).
-- Títulos recentes vindos do chat (ainda não estão no CONTEUDO-SITE.md):
-  - O que eu faço: "O nível de direção das grandes marcas. Na medida da sua empresa.";
-  - O que muda: "O valor que já existe, finalmente visível.".
+- **Montanhas (regra fixa):** as montanhas 3D da tag `montanhas-3d-aprovadas` são a versão aprovada; qualquer alteração nelas deve ser testada antes e mostrada com captura. O Bloco 6b (refinamento) está PAUSADO: não mexer nas montanhas sem pedido explícito.
 
-**Onde retomar:** `PENDENCIAS.md`, Bloco 4, na ordem:
-1. A distância em 3 blocos com scrub curto;
-2. entrada profunda e animação constante da gota;
-3. limpeza dos cases e legenda do carrossel em Trabalhos.
-
-Depois disso: a validação final (desktop, mobile, console, build) e parar para a revisão do dono.
+**Onde retomar:** `PENDENCIAS.md`: Bloco 7 (sistema único de animação de textos no scroll); depois a validação final (desktop, mobile, console, build) e parar para a revisão do dono. Bloco 6b só com pedido explícito.
 
 **Armadilha recorrente:** depois de editar `globals.css` ou `next.config.ts`, o `next dev` pode continuar com a versão antiga. Pare o servidor, apague `.next/dev` e reinicie.
 
@@ -50,6 +36,7 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 
 - **Nome (regra fixa):** sempre **"Breno Côrtes Romão"**, completo e com acento, em todo lugar: cabeçalho, manifesto, assinatura, Sobre, rodapé, `<title>`, metadados de SEO e textos nos dois idiomas. Nunca abreviar ("Breno", "Breno Côrtes"). O nome vive numa única chave das mensagens (`site.name`) e é reutilizado a partir dela.
 
+- **Tipografia de marca (exceção):** Archivo Expanded (`next/font/google`, eixo `wdth` em 125%, classe `font-brand` + `[font-stretch:125%]`) é permitida **apenas** para o nome no cabeçalho e em assinaturas de marca. O restante do site continua em Geist e Geist Mono.
 - **Termos que nunca se traduzem (regra fixa):** (se o dono relatar textos "estranhos" como "Marca fracionária", "empresas poucas vezes" ou "sobre sim", confira o HTML: costuma ser o tradutor automático do navegador, não o código) o título **"Fractional Brand & Creative Director"** fica em inglês em todos os idiomas, inclusive no /pt: cabeçalho, assinatura, rodapé, Sobre, metadados e textos. A palavra "fractional" no texto corrido também fica assim (nunca "fracionário/fracionária/fracionada"). No código, renderize textos que possam contê-los com `protectTerms()` (`src/components/Term.tsx`). Ele envolve os termos em `<span translate="no" lang="en">`, para o tradutor automático do navegador não transformá-los em "Marca fracionária e diretor criativo".
 - **Sem travessões (regra fixa):** nenhum "—" ou "–" em texto visível, em pt e en: mensagens, títulos, rótulos, metadados e strings montadas no código (ex.: rótulo "Nome, Função"; template de título "%s | Nome"). Use vírgula, dois-pontos ou ponto. Em pilares e etapas, título e descrição são elementos separados, sem traço. Verifique com uma busca por "—" e "–" em `src/messages/*.json` e no HTML renderizado.
 - **Ritmo de cores (regra fixa, mapa do `CONTEUDO-SITE.md`):** o site é majoritariamente preto. Off-white aparece em **só 3** seções: O que é fractional, Como funciona e Poucas parcerias. O gradiente escuro fica em A distância, O que muda, Sobre e Contato. O resto é preto.
@@ -261,7 +248,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 
 ## Conventions and lint traps
 
-- Typography is **sans-serif only** (Geist via `next/font`; `--font-display` aliases Geist). No serif fonts, no italics for display text; hierarchy comes from weight contrast (light vs. semibold) and tight tracking.
+- Typography is **sans-serif only** (Geist via `next/font`; `--font-display` aliases Geist). Only exception: `--font-brand` (Archivo Expanded) for the header name and brand signatures. No serif fonts, no italics for display text; hierarchy comes from weight contrast (light vs. semibold) and tight tracking.
 - Colors only through the theme tokens (see Themes); never hardcode white/black alpha utilities.
 - The React Compiler lint rules reject mutating values returned from hooks. In R3F code, get the scene via `useFrame(({ scene }) => …)` or `useThree((s) => s.get)()` instead of `const scene = useThree(...)`, and keep `onReady`-style callbacks stable (`useCallback`) since they sit in effect dependency arrays. Ref objects passed as props are only treated as mutable if the prop name ends in `Ref` (e.g. `pointerRef`). Mutate materials through a mesh ref (`mesh.current.material`), not through a `useMemo` result.
 - Windows PowerShell 5.1 `Get-Content`/`Set-Content` re-encode files (ANSI read, BOM on write) and corrupt the Portuguese accents. Edit files with the editor tools, not PowerShell text pipelines.
