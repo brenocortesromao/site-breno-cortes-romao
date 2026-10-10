@@ -16,8 +16,8 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
  * bibliotecas), por GATILHO (não scrub), ~2,5 s, uma vez:
  *  1. dentro da moldura escura, uma gota de cromo cai e, ao tocar o fundo, se
  *     espalha como mercúrio com ondas até preencher a moldura (frente orgânica
- *     com ruído; as paredes seguem os raios reais de cada canto da moldura,
- *     lidos do CSS, com menisco);
+ *     com ruído; as paredes seguem o formato "curva líquida" da moldura, ver
+ *     portraitFrame.tsx, com menisco);
  *  2. a superfície é cromo: reflexo do mesmo "estúdio" da bola da hero
  *     (domo em degradê + os mesmos softboxes, em versão analítica), normais
  *     vindas do campo de ondas;
@@ -45,7 +45,6 @@ uniform sampler2D uTex;
 uniform vec2 uRes;       // px do buffer
 uniform float uImgAspect;
 uniform float uT;        // s desde o início
-uniform vec4 uRadii;     // raios dos cantos (em larguras): sup. esq., sup. dir., inf. dir., inf. esq.
 out vec4 outColor;
 
 const float T_FALL = 0.55;
@@ -61,12 +60,22 @@ float vnoise(vec2 p){
   return mix(mix(hash(i), hash(i + vec2(1,0)), u.x), mix(hash(i + vec2(0,1)), hash(i + vec2(1,1)), u.x), u.y);
 }
 
-// moldura: retângulo arredondado com raio por canto (y para cima, em larguras)
+// moldura "curva líquida" (portraitFrame.tsx), distância aproximada em larguras
+// (y para cima): cantos de raio 0,04 e, no canto inferior direito, a curva
+// cúbica do path, aproximada por uma superelipse (expoente 2,27 passa pelo
+// ponto médio exato da cúbica) cobrindo os 38% finais de cada lado
 float frameSdf(vec2 p, vec2 size){
-  vec2 c = p - size * 0.5;
-  float r = c.x < 0.0 ? (c.y > 0.0 ? uRadii.x : uRadii.w) : (c.y > 0.0 ? uRadii.y : uRadii.z);
-  vec2 q = abs(c) - size * 0.5 + r;
-  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+  vec2 q = vec2(p.x, size.y - p.y);                     // y para baixo, como o path
+  vec2 c0 = 0.62 * size;
+  if (q.x > c0.x && q.y > c0.y) {
+    vec2 ab = (q - c0) / (0.38 * size);
+    float L = pow(pow(ab.x, 2.27) + pow(ab.y, 2.27), 1.0 / 2.27);
+    return (L - 1.0) * 0.38 * size.x;
+  }
+  float r = 0.04;
+  vec2 c = q - size * 0.5;
+  vec2 k = abs(c) - size * 0.5 + r;
+  return min(max(k.x, k.y), 0.0) + length(max(k, 0.0)) - r;
 }
 
 // raio da poça (frente orgânica) a partir do ponto de impacto
@@ -190,14 +199,6 @@ function compile(gl: WebGL2RenderingContext, type: number, src: string) {
   return s;
 }
 
-/** Raios dos cantos da moldura (px, do CSS) em larguras: sup. esq., sup. dir., inf. dir., inf. esq. */
-function readRadii(el: HTMLElement) {
-  const cs = getComputedStyle(el);
-  const w = el.clientWidth || 1;
-  const r = (v: string) => (parseFloat(v) || 0) / w;
-  return [r(cs.borderTopLeftRadius), r(cs.borderTopRightRadius), r(cs.borderBottomRightRadius), r(cs.borderBottomLeftRadius)];
-}
-
 /** Canvas do metal líquido: anima por tempo uma vez e chama `onDone` no fim. */
 function MetalCanvas({
   texture,
@@ -212,9 +213,7 @@ function MetalCanvas({
 
   useEffect(() => {
     const box = host.current;
-    // a moldura (raios dos cantos) é o contêiner do retrato
-    const frame = box?.parentElement;
-    if (!box || !frame) return;
+    if (!box) return;
     // canvas novo a cada montagem (Strict Mode: o contexto anterior já foi perdido)
     const el = document.createElement("canvas");
     el.className = "absolute inset-0 h-full w-full";
@@ -253,7 +252,7 @@ function MetalCanvas({
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const u = (n: string) => gl.getUniformLocation(program, n);
-    const U = { res: u("uRes"), aspect: u("uImgAspect"), t: u("uT"), radii: u("uRadii") };
+    const U = { res: u("uRes"), aspect: u("uImgAspect"), t: u("uT") };
 
     // textura em resolução cheia (a foto refratada precisa ser nítida no fim)
     const tex = gl.createTexture();
@@ -283,7 +282,6 @@ function MetalCanvas({
       gl.uniform2f(U.res, w, h);
       gl.uniform1f(U.aspect, imgAspect);
       gl.uniform1f(U.t, Math.min(t, DURATION));
-      gl.uniform4fv(U.radii, readRadii(frame));
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -300,7 +298,7 @@ function MetalCanvas({
     };
   }, [texture, onDone, onLost]);
 
-  return <div ref={host} aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-[inherit]" />;
+  return <div ref={host} aria-hidden="true" className="absolute inset-0" />;
 }
 
 type Mode = "static" | "metal" | "fade";
@@ -310,12 +308,15 @@ export default function PortraitReveal({
   alt,
   sizes,
   className = "",
+  clip,
   onRevealed,
 }: {
   src: string;
   alt: string;
   sizes?: string;
   className?: string;
+  /** `clip-path` da moldura: recorta a foto e a animação de entrada. */
+  clip?: string;
   /** Chamado quando a foto real está no lugar (fim da entrada ou sem animação). */
   onRevealed?: () => void;
 }) {
@@ -392,11 +393,12 @@ export default function PortraitReveal({
   const showCanvas = mode === "metal" && entered && texture && near && !done;
 
   return (
-    // cantos: herda o raio do cartão; isolate + rounded nas camadas garantem o
-    // recorte também do canvas (camada composta) durante a animação
+    // formato: `clip` recorta tudo aqui dentro (foto, canvas e o fundo escuro);
+    // a borda fina é desenhada por cima, fora deste recorte (portraitFrame)
     <div
       ref={root}
-      className={`relative isolate aspect-[4/5] overflow-hidden rounded-[inherit] border border-line bg-surface ${className}`}
+      className={`relative isolate aspect-[4/5] overflow-hidden bg-surface ${className}`}
+      style={{ clipPath: clip }}
     >
       <Image
         ref={img}
@@ -405,7 +407,7 @@ export default function PortraitReveal({
         fill
         sizes={sizes}
         quality={90}
-        className="rounded-[inherit] object-cover"
+        className="object-cover"
       />
       {mode === "metal" && (
         <ResilientBoundary name="retrato" maxRetries={1} onGiveUp={handleGiveUp}>

@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import MediaSlot from "./MediaSlot";
 import PortraitReveal from "./PortraitReveal";
 import TiltCard from "./TiltCard";
+import { PORTRAIT_FRAME_CLIP, PortraitFrameDefs, PortraitFrameOutline } from "./portraitFrame";
 import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
@@ -171,11 +172,14 @@ export default function Manifesto({
             {copy.draft && <DraftBadge label={copy.draft} />}
           </div>
           {/* retrato a ~80% da coluna, como "cartão de vidro": inclina em 3D com
-              o mouse; a assinatura fica numa camada à frente da foto */}
+              o mouse; a assinatura fica numa camada à frente da foto, fora do
+              recorte da moldura "curva líquida" */}
+          <PortraitFrameDefs />
           <TiltCard
             ref={portrait}
             className="mx-auto w-4/5 md:mx-0 md:ml-[4%]"
-            radiusClass="rounded-[16px] md:rounded-[22px]"
+            clip={PORTRAIT_FRAME_CLIP}
+            overlay={<PortraitFrameOutline />}
             front={
               <Signature
                 data={signature}
@@ -189,10 +193,13 @@ export default function Manifesto({
                 src={portraitSrc}
                 alt={copy.portraitAlt}
                 sizes="(min-width: 768px) 31vw, 72vw"
+                clip={PORTRAIT_FRAME_CLIP}
                 onRevealed={handleRevealed}
               />
             ) : (
-              <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" className="rounded-[inherit]" />
+              <div style={{ clipPath: PORTRAIT_FRAME_CLIP }}>
+                <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" className="border-0" />
+              </div>
             )}
           </TiltCard>
         </div>

@@ -14,9 +14,10 @@ import { useEffect, useRef, type ReactNode, type Ref } from "react";
  * não exige permissão), reflexo fraco. prefers-reduced-motion: nada se move.
  * `ref` vai no contêiner externo, que NÃO gira (medidas estáveis para o
  * ScrollTrigger de quem usa o cartão como gatilho).
- * Cantos: `radiusClass` vai no cartão, sem overflow (overflow achataria o 3D e
- * cortaria `front`); o filho e o reflexo herdam o raio com `rounded-[inherit]`
- * e cortam o próprio conteúdo.
+ * Formato: o cartão em si não é recortado (overflow/clip achatariam o 3D e
+ * cortariam `front`); o filho se recorta sozinho e o reflexo usa `clip` (o
+ * mesmo `clip-path` do filho). `overlay` fica por cima do reflexo e abaixo de
+ * `front` (ex.: a borda fina da moldura).
  */
 
 const MAX_DEG = 7;
@@ -27,15 +28,18 @@ export default function TiltCard({
   children,
   front,
   className = "",
-  radiusClass = "",
+  clip,
+  overlay,
 }: {
   ref?: Ref<HTMLDivElement>;
   children: ReactNode;
   /** Camada à frente da foto (ex.: a assinatura), em posição absoluta. */
   front?: ReactNode;
   className?: string;
-  /** Raio dos cantos do cartão, herdado pela foto e pelo reflexo. */
-  radiusClass?: string;
+  /** `clip-path` do reflexo (o mesmo formato do conteúdo). */
+  clip?: string;
+  /** Camada sobre a foto e o reflexo, abaixo de `front`. */
+  overlay?: ReactNode;
 }) {
   const card = useRef<HTMLDivElement>(null);
   const glare = useRef<HTMLDivElement>(null);
@@ -132,20 +136,22 @@ export default function TiltCard({
 
   return (
     <div ref={ref} className={`[perspective:1000px] ${className}`}>
-      <div ref={card} className={`relative will-change-transform [transform-style:preserve-3d] ${radiusClass}`}>
+      <div ref={card} className="relative will-change-transform [transform-style:preserve-3d]">
         {children}
         {/* reflexo prata translúcido sobre a foto (screen: só clareia, nunca esconde) */}
         <div
           ref={glare}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit] opacity-0 mix-blend-screen motion-reduce:hidden"
+          className="pointer-events-none absolute inset-0 opacity-0 mix-blend-screen motion-reduce:hidden"
           style={{
+            clipPath: clip,
             backgroundImage:
               "linear-gradient(115deg, transparent 30%, rgba(225,229,235,0.16) 46%, rgba(255,255,255,0.22) 50%, rgba(225,229,235,0.16) 54%, transparent 70%)",
             backgroundSize: "250% 250%",
             backgroundPosition: "50% 50%",
           }}
         />
+        {overlay}
         {front && (
           <div className="pointer-events-none absolute inset-0" style={{ transform: `translateZ(${FRONT_Z}px)` }}>
             {front}
