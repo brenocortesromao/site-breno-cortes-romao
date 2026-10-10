@@ -179,7 +179,10 @@ export default function Manifesto({
             ref={phrase}
             id="manifesto-title"
             translate="no"
-            className="text-[clamp(2rem,4.6vw,5rem)] font-medium leading-[1.05] tracking-[-0.05em]"
+            // text-balance: linhas equilibradas, sem buraco à direita. No desktop
+            // a frase avança um pouco sobre a área do retrato (sem chegar na
+            // assinatura, que termina antes desse recuo).
+            className="text-balance text-[clamp(2rem,4.6vw,5rem)] font-medium leading-[1.05] tracking-[-0.05em] md:-ml-[clamp(0px,5vw,6rem)]"
           >
             {copy.statement.map((part, i) => (
               <span key={i} className={part.soft ? "font-light text-silver" : undefined}>
