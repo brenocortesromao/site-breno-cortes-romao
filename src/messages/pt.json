@@ -400,7 +400,11 @@
     "whatsappLabel": "Conversar no WhatsApp",
     "whatsappMessage": "Olá, Breno! Vi seu site e quero conversar sobre a marca da minha empresa.",
     "emailLabel": "Enviar e-mail",
-    "emailSubject": "Conversa sobre a minha marca"
+    "emailSubject": "Conversa sobre a minha marca",
+    "emailGmail": "Abrir no Gmail",
+    "emailApp": "Abrir no app de e-mail",
+    "emailCopy": "Copiar e-mail",
+    "emailCopied": "Copiado ✓"
   },
   "footer": {
     "rights": "© {year} {name}. Todos os direitos reservados.",

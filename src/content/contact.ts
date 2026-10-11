@@ -7,7 +7,7 @@ export const contactConfig = {
   calUrl: "https://cal.com",
   calProvisional: true,
   /** E-mail: NÃO fica aqui (iria para o HTML). É montado no cliente por
-   *  components/contact/EmailLink.tsx (proteção contra spam). */
+   *  components/contact/EmailMenu.tsx (proteção contra spam). */
   /** WhatsApp (DDI + DDD + número, só dígitos). */
   whatsapp: "5511975415501",
   /** Mídia kit em /public (ex.: "/midia-kit.pdf"). [PENDENTE] */

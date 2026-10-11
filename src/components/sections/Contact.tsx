@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { contactConfig, whatsappUrl } from "@/content/contact";
-import EmailLink from "@/components/contact/EmailLink";
+import EmailMenu from "@/components/contact/EmailMenu";
 import DraftBadge from "@/components/theme/DraftBadge";
 import { protectTerms } from "@/components/Term";
 
@@ -9,8 +9,8 @@ const button =
 
 /**
  * Contato (§14). Botões: Agendar conversa (Cal.com, link provisório),
- * WhatsApp (mensagem pré-preenchida), E-mail (endereço montado só no cliente,
- * ver EmailLink) e Mídia kit (PDF). Itens sem dado aparecem desativados com
+ * WhatsApp (mensagem pré-preenchida), E-mail (menu com Gmail, app de e-mail e
+ * copiar; endereço montado só no cliente, ver EmailMenu) e Mídia kit (PDF). Itens sem dado aparecem desativados com
  * "[PENDENTE]" (configuração em src/content/contact.ts).
  */
 export default async function Contact() {
@@ -52,9 +52,21 @@ export default async function Contact() {
             </a>
           </li>
           <li>
-            <EmailLink subject={t("emailSubject")} label={t("emailLabel")} className={`${button} w-full border-line hover:border-foreground`}>
+            <EmailMenu
+              copy={{
+                label: t("emailLabel"),
+                subject: t("emailSubject"),
+                gmail: t("emailGmail"),
+                app: t("emailApp"),
+                copy: t("emailCopy"),
+                copied: t("emailCopied"),
+              }}
+              align="left"
+              wrapClassName="h-full w-full"
+              className={`${button} w-full border-line hover:border-foreground`}
+            >
               {t("email")} <span aria-hidden="true">→</span>
-            </EmailLink>
+            </EmailMenu>
           </li>
           <li>
             {mediaKit ? (
