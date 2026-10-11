@@ -4,6 +4,9 @@ import HeaderBrand from "./HeaderBrand";
 import LocaleSwitcher from "./LocaleSwitcher";
 import NavLinks from "./NavLinks";
 import { protectTerms } from "@/components/Term";
+import HeaderContact from "@/components/contact/HeaderContact";
+import WhatsAppFloat from "@/components/contact/WhatsAppFloat";
+import { whatsappUrl } from "@/content/contact";
 
 const nav = [
   { key: "manifesto", hash: "manifesto" },
@@ -16,13 +19,15 @@ const nav = [
 ] as const;
 
 /**
- * Cabeçalho fixo: assinatura + nome completo + função (HeaderBrand), navegação
- * e seletor PT/EN.
+ * Cabeçalho fixo: assinatura + nome completo + função (HeaderBrand), navegação,
+ * seletor PT/EN e ícones de contato (WhatsApp, e-mail). No mobile, também o
+ * botão flutuante de WhatsApp (WhatsAppFloat).
  * Usa as variáveis de tema, então acompanha a troca claro/escuro do scroll;
  * o degradê do fundo garante leitura sobre qualquer conteúdo.
  */
 export default async function Header() {
   const t = await getTranslations();
+  const whatsapp = whatsappUrl(t("contact.whatsappMessage"));
 
   return (
     <header className="fixed inset-x-0 top-0 z-40">
@@ -38,7 +43,9 @@ export default async function Header() {
           homeLabel={t("nav.home")}
           signatureLabel={t("manifesto.signatureLabel", { name: t("site.name") })}
         />
-        <div className="flex shrink-0 items-center gap-10">
+        {/* abaixo de 1440 os espaços diminuem para o menu, o seletor e os
+            ícones caberem ao lado do nome (ver HeaderBrand) */}
+        <div className="flex shrink-0 items-center gap-4 md:gap-6 lg:gap-4 min-[1440px]:gap-10">
           <nav aria-label={t("nav.label")} className="hidden lg:block">
             <NavLinks items={nav.map((item) => ({ hash: item.hash, label: t(`nav.${item.key}`) }))} />
           </nav>
@@ -50,8 +57,15 @@ export default async function Header() {
               en: t("nav.switchTo", { language: t("languages.en") }),
             }}
           />
+          <HeaderContact
+            whatsappHref={whatsapp}
+            whatsappLabel={t("contact.whatsappLabel")}
+            emailLabel={t("contact.emailLabel")}
+            emailSubject={t("contact.emailSubject")}
+          />
         </div>
       </div>
+      <WhatsAppFloat href={whatsapp} label={t("contact.whatsappLabel")} />
     </header>
   );
 }

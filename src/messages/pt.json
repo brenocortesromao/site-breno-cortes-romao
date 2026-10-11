@@ -395,7 +395,12 @@
     "scheduleNote": "Link provisório",
     "email": "E-mail",
     "mediaKit": "Baixar mídia kit (PDF)",
-    "pending": "[PENDENTE]"
+    "pending": "[PENDENTE]",
+    "whatsapp": "WhatsApp",
+    "whatsappLabel": "Conversar no WhatsApp",
+    "whatsappMessage": "Olá, Breno! Vi seu site e quero conversar sobre a marca da minha empresa.",
+    "emailLabel": "Enviar e-mail",
+    "emailSubject": "Conversa sobre a minha marca"
   },
   "footer": {
     "rights": "© {year} {name}. Todos os direitos reservados.",

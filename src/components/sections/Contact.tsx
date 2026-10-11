@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { contactConfig } from "@/content/contact";
+import { contactConfig, whatsappUrl } from "@/content/contact";
+import EmailLink from "@/components/contact/EmailLink";
 import DraftBadge from "@/components/theme/DraftBadge";
 import { protectTerms } from "@/components/Term";
 
@@ -7,13 +8,14 @@ const button =
   "inline-flex h-full min-h-[4.5rem] items-center justify-between gap-6 border px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors";
 
 /**
- * Contato (§14). Botões: Agendar conversa (Cal.com — link provisório),
- * E-mail e Mídia kit (PDF). Itens sem dado aparecem desativados com
+ * Contato (§14). Botões: Agendar conversa (Cal.com, link provisório),
+ * WhatsApp (mensagem pré-preenchida), E-mail (endereço montado só no cliente,
+ * ver EmailLink) e Mídia kit (PDF). Itens sem dado aparecem desativados com
  * "[PENDENTE]" (configuração em src/content/contact.ts).
  */
 export default async function Contact() {
   const t = await getTranslations("contact");
-  const { calUrl, calProvisional, email, mediaKit } = contactConfig;
+  const { calUrl, calProvisional, mediaKit } = contactConfig;
 
   return (
     <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 border-t border-line">
@@ -25,7 +27,8 @@ export default async function Contact() {
         </h2>
         <p className="mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
 
-        <ul className="mt-14 grid gap-4 md:max-w-4xl md:grid-cols-3">
+        {/* 2 × 2; o vão entre as linhas acomoda o selo "Link provisório" */}
+        <ul className="mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2 md:gap-y-14">
           <li>
             <a
               href={calUrl}
@@ -38,15 +41,20 @@ export default async function Contact() {
             {calProvisional && <DraftBadge label={t("scheduleNote")} className="mt-3" />}
           </li>
           <li>
-            {email ? (
-              <a href={`mailto:${email}`} className={`${button} w-full border-line hover:border-foreground`}>
-                {t("email")} <span aria-hidden="true">→</span>
-              </a>
-            ) : (
-              <span aria-disabled="true" className={`${button} w-full cursor-not-allowed border-dashed border-line text-silver`}>
-                {t("email")} <span>{t("pending")}</span>
-              </span>
-            )}
+            <a
+              href={whatsappUrl(t("whatsappMessage"))}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("whatsappLabel")}
+              className={`${button} w-full border-line hover:border-foreground`}
+            >
+              {t("whatsapp")} <span aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <EmailLink subject={t("emailSubject")} label={t("emailLabel")} className={`${button} w-full border-line hover:border-foreground`}>
+              {t("email")} <span aria-hidden="true">→</span>
+            </EmailLink>
           </li>
           <li>
             {mediaKit ? (

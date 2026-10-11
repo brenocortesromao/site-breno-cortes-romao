@@ -189,10 +189,13 @@ Linha final (pequena): A IA é a ferramenta mais poderosa que já existiu. Nas m
 
 ## 12. Poucas parcerias por vez (OFF-WHITE — seção curta, impacto)
 
-[CONFIRMAR com o Breno antes de publicar — é decisão de negócio]
 - Título (exatamente assim, sem inverter palavras): **Trabalho com poucas empresas por vez.**
 - Texto: Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa, não por proposta enviada em massa.
-- Indicador discreto: "Agenda para novas parcerias: [CONFIRMAR]"
+- CTA (substitui o indicador "[CONFIRMAR]"):
+  - Status (Geist Mono, com ponto prata pulsando): AGENDA ABERTA PARA NOVAS PARCERIAS
+  - Frase: Se a sua marca está pronta para acompanhar o seu crescimento, vamos conversar enquanto há espaço na agenda.
+  - Botão: Quero conversar → WhatsApp (https://wa.me/5511975415501 com mensagem pré-preenchida "Olá, Breno! Vi seu site e quero conversar sobre uma parceria para a minha marca.")
+  - EN: status "BOOKING NEW PARTNERSHIPS", frase "If your brand is ready to keep up with your growth, let's talk while there's room on my calendar.", botão "Let's talk".
 
 ## 13. Perguntas frequentes (preto — acordeão, uma aberta por vez)
 
@@ -236,4 +239,5 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
 
 - Título: **Vamos fechar essa distância?**
 - Texto: Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você. E, se não fizer, te digo o que faria.
-- Botões: **Agendar conversa** (Cal.com, link provisório) · E-mail [PENDENTE] · Baixar mídia kit (PDF) [PENDENTE]
+- Botões: **Agendar conversa** (Cal.com, link provisório) · **WhatsApp** (wa.me/5511975415501, mensagem pré-preenchida: pt "Olá, Breno! Vi seu site e quero conversar sobre a marca da minha empresa." / en "Hi Breno! I saw your website and would like to talk about my company's brand.") · **E-mail** breno.romao@gmail.com (assunto: pt "Conversa sobre a minha marca" / en "About my brand"; endereço montado no navegador, fora do HTML, contra spam) · Baixar mídia kit (PDF) [PENDENTE]
+- Cabeçalho: ícones de WhatsApp e e-mail depois do seletor PT/EN (também no mobile) e, no mobile, botão flutuante de WhatsApp no canto inferior direito depois da hero.
