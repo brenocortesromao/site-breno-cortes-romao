@@ -15,6 +15,8 @@ export type FractionalCopy = {
   text: string;
   compare: {
     caption: string;
+    /** Rótulo em mono acima do título da coluna em destaque ("O modelo"). */
+    highlightLabel: string;
     columns: string[];
     rows: { label: string; values: string[] }[];
   };
@@ -33,10 +35,36 @@ export type FractionalCopy = {
 /** Índice da coluna em destaque (Fractional). */
 const HIGHLIGHT = 2;
 
+/** Cartão da coluna em destaque: um pouco mais claro que o fundo (no preto;
+ *  no off-white, um pouco mais escuro), borda prata fina e brilho suave. */
+const CARD =
+  "rounded-2xl border border-silver/45 bg-[color-mix(in_srgb,var(--fg)_6%,var(--bg))] shadow-[0_0_48px_-6px_color-mix(in_srgb,var(--fg)_16%,transparent)]";
+
+/** Faixa de luz que passa uma vez pelo cartão no fim da entrada. */
+function CardShine() {
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+      <span
+        data-fx-shine
+        className="absolute inset-y-0 left-0 w-2/3 opacity-0 bg-[linear-gradient(105deg,transparent_20%,color-mix(in_srgb,var(--fg)_16%,transparent)_50%,transparent_80%)]"
+      />
+    </span>
+  );
+}
+
+/** Marcador prata antes de cada célula da coluna em destaque. */
+function Marker() {
+  return <span aria-hidden="true" className="mt-[0.5em] h-1.5 w-1.5 shrink-0 rounded-full bg-silver" />;
+}
+
 /**
  * "O que é fractional" — seção CLARA (off-white) com curvas de nível.
- * Comparativo: as 3 colunas entram uma a uma quando o quadro chega à tela
- * (desktop: tabela; mobile: 3 cartões). A coluna Fractional fica em destaque.
+ * Comparativo (versão 2 do CONTEUDO-SITE.md): as 3 colunas entram uma a uma
+ * quando o quadro chega à tela (desktop: tabela; mobile: 3 cartões). A coluna
+ * Fractional é um cartão em destaque (CARD), com o rótulo "O modelo" em mono,
+ * título em prata, textos com mais peso e marcador prata em cada célula; ela
+ * entra por último e uma faixa de luz passa por ela uma vez. Agência e
+ * Contratação ficam em cinza médio, peso normal.
  */
 export default function Fractional({ copy }: { copy: FractionalCopy }) {
   const root = useRef<HTMLElement>(null);
@@ -86,6 +114,10 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             c * 0.35,
           );
         });
+        // a coluna em destaque entra por último; depois, o brilho passa uma vez
+        tl.set("[data-fx-shine]", { opacity: 1 })
+          .fromTo("[data-fx-shine]", { xPercent: -110 }, { xPercent: 160, duration: 1.2, ease: "power2.inOut" })
+          .to("[data-fx-shine]", { opacity: 0, duration: 0.2 });
       });
     },
     { scope: root },
@@ -155,8 +187,13 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
         </figure>
 
         <div ref={board} className="mt-16 md:mt-24">
-          {/* Desktop: tabela semântica */}
-          <table className="hidden w-full table-fixed border-collapse text-left md:table">
+          {/* Desktop: tabela semântica; o cartão da coluna em destaque fica atrás
+              dela (colunas: rótulos 22%, modelos 26% cada) */}
+          <div className="relative hidden md:block">
+            <div data-col={HIGHLIGHT} aria-hidden="true" className={`absolute -bottom-2 -top-3 left-[74%] w-[26%] ${CARD}`}>
+              <CardShine />
+            </div>
+          <table className="relative w-full table-fixed border-collapse text-left">
             <caption className="sr-only">{copy.compare.caption}</caption>
             <thead>
               <tr>
@@ -166,11 +203,20 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
                     key={col}
                     scope="col"
                     data-col={c}
-                    className={`border-b px-6 pb-5 align-bottom text-[clamp(1.1rem,1.6vw,1.6rem)] font-semibold tracking-[-0.03em] ${
-                      c === HIGHLIGHT ? "border-foreground bg-surface/70 pt-5" : "border-line"
+                    className={`border-b border-line px-6 pb-5 align-bottom text-[clamp(1.1rem,1.6vw,1.6rem)] font-semibold tracking-[-0.03em] ${
+                      c === HIGHLIGHT ? "pt-5" : "text-silver"
                     }`}
                   >
-                    {protectTerms(col)}
+                    {c === HIGHLIGHT ? (
+                      <>
+                        <span aria-hidden="true" className="mb-2 block font-mono text-[10px] font-normal uppercase tracking-[0.28em] text-silver">
+                          {copy.compare.highlightLabel}
+                        </span>
+                        <span className="text-silver-gradient">{protectTerms(col)}</span>
+                      </>
+                    ) : (
+                      protectTerms(col)
+                    )}
                   </th>
                 ))}
               </tr>
@@ -188,19 +234,25 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
                     <td
                       key={c}
                       data-col={c}
-                      className={`border-b px-6 py-6 align-top text-[15px] leading-snug ${
-                        c === HIGHLIGHT
-                          ? "border-line bg-surface/70 font-medium text-foreground"
-                          : "border-line text-silver"
+                      className={`border-b border-line px-6 py-6 align-top text-[15px] leading-snug ${
+                        c === HIGHLIGHT ? "font-medium text-foreground" : "font-normal text-silver"
                       }`}
                     >
-                      {value}
+                      {c === HIGHLIGHT ? (
+                        <span className="flex gap-3">
+                          <Marker />
+                          <span>{value}</span>
+                        </span>
+                      ) : (
+                        value
+                      )}
                     </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
 
           {/* Mobile: um cartão por modelo */}
           <div className="grid gap-4 md:hidden">
@@ -208,17 +260,26 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
               <div
                 key={col}
                 data-col={c}
-                className={`border p-5 ${c === HIGHLIGHT ? "border-foreground bg-surface/70" : "border-line"}`}
+                className={`relative p-5 ${c === HIGHLIGHT ? CARD : "border border-line"}`}
               >
-                <h3 className="text-xl font-semibold tracking-[-0.03em]">{protectTerms(col)}</h3>
+                {c === HIGHLIGHT && <CardShine />}
+                {c === HIGHLIGHT && (
+                  <p aria-hidden="true" className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-silver">
+                    {copy.compare.highlightLabel}
+                  </p>
+                )}
+                <h3 className={`text-xl font-semibold tracking-[-0.03em] ${c === HIGHLIGHT ? "" : "text-silver"}`}>
+                  {c === HIGHLIGHT ? <span className="text-silver-gradient">{protectTerms(col)}</span> : protectTerms(col)}
+                </h3>
                 <dl className="mt-4 grid gap-3">
                   {rows.map((row) => (
                     <div key={row.label} className="grid grid-cols-[7.5rem_1fr] gap-3">
                       <dt className="pt-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
                         {row.label}
                       </dt>
-                      <dd className={`text-sm leading-snug ${c === HIGHLIGHT ? "font-medium" : "text-silver"}`}>
-                        {row.values[c]}
+                      <dd className={`text-sm leading-snug ${c === HIGHLIGHT ? "flex gap-2.5 font-medium text-foreground" : "text-silver"}`}>
+                        {c === HIGHLIGHT && <Marker />}
+                        {c === HIGHLIGHT ? <span>{row.values[c]}</span> : row.values[c]}
                       </dd>
                     </div>
                   ))}

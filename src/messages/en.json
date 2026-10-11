@@ -115,6 +115,7 @@
     },
     "compare": {
       "caption": "Comparativo entre agência, contratação executiva e fractional",
+      "highlightLabel": "O modelo",
       "columns": [
         "Agência",
         "Contratação executiva",
@@ -124,41 +125,49 @@
         {
           "label": "Visão do negócio",
           "values": [
-            "Por projeto",
-            "Contínua",
-            "Contínua"
+            "De fora, um projeto por vez",
+            "De dentro, mas presa à rotina",
+            "Contínua, com o olhar de fora e o compromisso de dentro"
           ]
         },
         {
-          "label": "Decisão de marca",
+          "label": "Quem decide a marca",
           "values": [
-            "Fica com você",
-            "Interna",
-            "Compartilhada, com responsável"
+            "Você, entre uma entrega e outra",
+            "Um cargo fixo",
+            "Um diretor sênior, ao seu lado, todo mês"
           ]
         },
         {
-          "label": "Custo",
+          "label": "Investimento",
           "values": [
             "Variável a cada job",
-            "Salário + encargos fixos",
-            "Dedicação mensal acordada"
+            "Salário, encargos e benefícios",
+            "Mensal e previsível, sem custo de contratação"
           ]
         },
         {
           "label": "Continuidade",
           "values": [
-            "Termina com o job",
-            "Total",
-            "Ao longo da parceria"
+            "Termina na entrega",
+            "Depende de quem fica",
+            "Cresce a cada mês de parceria"
           ]
         },
         {
           "label": "Senioridade",
           "values": [
-            "Varia por equipe",
-            "Depende de quem você consegue contratar",
+            "Varia conforme a equipe",
+            "Depende de quem você consegue atrair",
             "Sênior desde o primeiro dia"
+          ]
+        },
+        {
+          "label": "Começo",
+          "values": [
+            "Novo briefing a cada projeto",
+            "Meses de recrutamento",
+            "Direto, a partir da primeira conversa"
           ]
         }
       ]

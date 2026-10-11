@@ -132,6 +132,7 @@ export default async function Home() {
               },
               compare: {
                 caption: t("fractional.compare.caption"),
+                highlightLabel: t("fractional.compare.highlightLabel"),
                 columns: t.raw("fractional.compare.columns") as string[],
                 rows: t.raw("fractional.compare.rows") as FractionalCopy["compare"]["rows"],
               },
