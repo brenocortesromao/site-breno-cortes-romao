@@ -35,7 +35,7 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **Desempenho** (`DESEMPENHO.md`, tags `antes-desempenho` → `desempenho-ok`): ThemeScroll sem tweens por variável, entrada da hero em CSS, hidratação por seção (`<Suspense>`), `compileAsync` na bola, terreno em Web Worker, qualidade adaptativa + orçamento de 2 contextos (`lib/quality.ts`). FPS 60 em todas as seções 3D, máximo 2 contextos, 0 erros e 0 scroll horizontal em Chromium/Edge/Firefox/WebKit (`node scripts/smoke.mjs`). Lighthouse 76 desktop / 55 mobile (metas 85/70 não atingidas: falta a decisão do dono sobre iniciar a bola 3D mais tarde).
 
 **Decisões importantes:**
-- Bola da hero aprovada; NÃO vira urso (etapa "urso" cancelada em 10/10). O urso existe só como animal 3D na floresta da seção "Sobre".
+- ~~Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.~~ **CANCELADO (10/10):** a bola da hero está aprovada e não vira urso. O urso existe só como animal 3D na floresta da seção "Sobre".
 - Dados externos: só os números Lightcast, com fonte.
 - Sem cases nem páginas /cases.
 - Off-white só em 3 seções.
@@ -62,7 +62,7 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 - **Ritmo de cores (regra fixa, mapa do `CONTEUDO-SITE.md`):** o site é majoritariamente preto. Off-white aparece em **só 3** seções: O que é fractional, Como funciona e Poucas parcerias. O gradiente escuro fica em A distância, O que muda, Sobre e Contato. O resto é preto.
 - **Visual:** fundo preto, grafite e prata líquida; estética startup tech premium e corporativa; tipografia exclusivamente sans-serif.
 - **Elemento central:** uma bola de metal líquido cromado e brilhante, centralizada, com cerca de 60% da altura da tela. Ela "respira" o tempo todo e reage ao mouse com atraso suave. **Aprovada; não vira urso** (a etapa "urso" foi cancelada em 10/10; não altere a bola). **Sem órbitas nem partículas decorativas.**
-- **Decisão: urso CANCELADO na bola (10/10).** A bola não vira urso. A arquitetura SDF/metaballs que existia para isso continua desligada no shader (`uMorph = 0`, ver `hero/liquidMetal.ts`) e não deve ser ativada. O urso só aparece como animal 3D na floresta da seção "Sobre".
+- ~~**Decisão — urso (Etapa 4):** sem modelo GLB. Orelhas e focinho brotam da própria bola com o mouse e voltam a ser bola quando ele sai. São esferas extras fundidas por união suave (SDF/metaballs) no vertex shader.~~ **CANCELADO (10/10):** a bola não vira urso. O código continua desligado como está (`uMorph = 0`, ver `hero/liquidMetal.ts`) e não deve ser ativado nem mexido. O urso só aparece como animal 3D na floresta da seção "Sobre".
 - **Hero (composição):** uma frase grande à esquerda da bola e outra à direita, com a bola levemente por cima das palavras. O texto de apoio curto fica no canto inferior esquerdo. No mobile, a ordem é frase, bola, frase e texto de apoio.
 - **Referência de movimento:** landonorris.com — apenas o comportamento de scroll, o uso de 3D e o ritmo. Não copiar o visual, a identidade nem os assets.
 - **Assets:** não usar assets externos (modelos, imagens, fontes, logos) sem aprovação explícita do dono. Fotos, logos de clientes e cases reais serão fornecidos por ele.
@@ -78,7 +78,7 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
    5. Onde o trabalho aparece; Sobre (claro; resumo na home + `/sobre`); Poucas parcerias por vez ([CONFIRMAR]); Contato completo — **concluída**.
    6. Perguntas frequentes (`<details>` nativo); rodapé no layout — **concluída**.
    Pendências de conteúdo do dono: retrato, logos, imagens de trabalhos, cases, bio/trajetória, e-mail, mídia kit, link do Cal.com, itens [CONFIRMAR], 6 frases da "3b Diagnóstico" (o arquivo ainda tem as 5 de "Sinais") e tradução EN.
-4. ~~Urso 3D nascendo da bola~~: **CANCELADA em 10/10** (a bola fica como está; o urso existe só na floresta da seção "Sobre").
+4. ~~Urso 3D: orelhas e focinho brotando da bola (SDF/metaballs) com o mouse.~~ **CANCELADO (10/10):** a bola fica como está; o urso existe só na floresta da seção "Sobre".
 5. Conteúdo real PT/EN (fotos, logos, cases, textos, tradução).
 6. Lançamento.
 
