@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import MediaSlot from "@/components/MediaSlot";
 import AboutStory from "@/components/sections/AboutStory";
+import ForestBackdrop from "@/components/graphics/ForestBackdrop";
 
 /** Retrato do Sobre (monocromático pelo MediaSlot). Ex.: "/media/retrato-sobre.jpg". */
 export const aboutPortraitSrc: string | undefined = undefined;
@@ -11,6 +12,8 @@ export const aboutPortraitSrc: string | undefined = undefined;
  * - variant "summary" (home): retrato, título (h2), bio, trajetória e link para /sobre.
  * - variant "page" (/sobre): o mesmo conteúdo, com o título como h1.
  * Bio, fecho e trajetória: AboutStory (client, animações de scroll).
+ * Fundo: floresta 3D com urso (ForestBackdrop, sticky; seção em overflow-clip,
+ * pois overflow-hidden anularia o sticky).
  */
 export default async function About({ variant }: { variant: "summary" | "page" }) {
   const t = await getTranslations("about");
@@ -22,10 +25,11 @@ export default async function About({ variant }: { variant: "summary" | "page" }
       id="sobre"
       data-theme="gradient"
       aria-labelledby="sobre-title"
-      className="relative z-10 min-h-svh overflow-hidden"
+      className="relative z-10 min-h-svh overflow-clip"
     >
+      <ForestBackdrop />
       <div
-        className={`relative mx-auto grid w-full max-w-[1600px] gap-12 px-6 md:grid-cols-12 md:gap-8 md:px-12 ${
+        className={`relative z-10 mx-auto grid w-full max-w-[1600px] gap-12 px-6 md:grid-cols-12 md:gap-8 md:px-12 ${
           isPage ? "pb-[clamp(6rem,16vh,12rem)] pt-40" : "py-[clamp(6rem,16vh,12rem)]"
         }`}
       >

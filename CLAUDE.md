@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## REGRA PRINCIPAL
 
-**O estado da tag `site-aprovado-10-10` está aprovado pelo Breno. Não altere nada além do que for pedido explicitamente em cada mensagem. Nada de melhorias, refatorações ou ajustes por conta própria.**
+**O estado da tag `site-aprovado-10-10-noite` é o NOVO ESTADO APROVADO pelo Breno (substitui `site-aprovado-10-10`): todas as animações, cenas 3D (bola da hero, montanhas, nuvens, oceano, floresta com urso, gota, curvas líquidas) e textos atuais. Nada deve ser alterado sem pedido explícito. Não altere nada além do que for pedido em cada mensagem. Nada de melhorias, refatorações ou ajustes por conta própria.**
 
 **Bola da hero (decisão de 10/10):** a bola de metal líquido da hero está APROVADA e **NÃO vai virar urso**: a etapa "urso" foi CANCELADA. Não altere a bola. O urso existe apenas como animal 3D na floresta da seção "Sobre".
 
@@ -46,6 +46,10 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **O que eu faço:** subtítulo novo.
 - **Lighthouse (A/B na mesma máquina e hora):** o oceano não baixou as notas (desktop 69-70 contra 65 antes do oceano; mobile 51 nos dois). As notas absolutas abaixo do DESEMPENHO.md vêm da carga da máquina no momento.
 
+**Concluído na noite de 10/10, parte 2** (tag `site-aprovado-10-10-noite`, o novo estado aprovado):
+- **Sobre, bio completa** (`sections/AboutStory.tsx`): abertura em destaque, 3 parágrafos (3º com o texto novo: "...e liderei estratégias de marketing, marketing digital e growth."), fecho com reflexo prata, trajetória em Geist Mono acendendo com o scroll (DESIGNER → COORDENADOR DE DESIGN → DIRETOR DE MARKETING → MARKETING DIGITAL & GROWTH → FRACTIONAL BRAND & CREATIVE DIRECTOR; en: DIGITAL MARKETING & GROWTH; último em prata), referência às marcas só em texto. Frase de método antiga removida.
+- **Floresta 3D com urso no Sobre** (`graphics/ForestBackdrop.tsx` + `graphics/forest/*`; tag `antes-floresta` antes): abetos procedurais instanciados com 2 níveis de LOD, 3 camadas distantes no quadro de fundo (parallax), névoa baixa que deriva, luz fria em contraluz, neve, árvores balançando, câmera avançando pela trilha com o scroll; urso-pardo PROCEDURAL (não existe glTF CC0 de urso com caminhada: Poly Pizza só CC-BY; Quaternius e Gobkit sem urso; OpenGameArt só um .blend sem esqueleto), animado no shader (marcha, parada, cabeça virando para a câmera), silhueta com contorno prateado, atravessa a clareira uma vez a partir de ~30% da seção. Opacidade 38%, vinheta, useWebglSlot, modo leve no toque/nível low, reduced motion = quadro parado. A tag `floresta-3d-aprovada` não foi criada (aprovação geral via `site-aprovado-10-10-noite`).
+
 **Decisões importantes:**
 - ~~Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.~~ **CANCELADO (10/10):** a bola da hero está aprovada e não vira urso. O urso existe só como animal 3D na floresta da seção "Sobre".
 - Dados externos: só os números Lightcast, com fonte.
@@ -55,8 +59,8 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **Montanhas (regra fixa):** as montanhas 3D da tag `montanhas-3d-aprovadas` são a versão aprovada; qualquer alteração nelas deve ser testada antes e mostrada com captura. O Bloco 6b (refinamento) está PAUSADO: não mexer nas montanhas sem pedido explícito.
 
 **Onde retomar:** `PENDENCIAS.md`, bloco "Pedidos da noite de 10/10", itens abertos:
-1. Bio completa da seção "Sobre" (§11 do CONTEUDO-SITE.md, atualizada pelo dono).
-2. Floresta 3D com urso na seção "Sobre" (criar a tag `antes-floresta` antes; tag `floresta-3d-aprovada` só com aprovação).
+1. ~~Bio completa do Sobre~~ e ~~floresta 3D com urso~~: feitas (tag `site-aprovado-10-10-noite`). Falta medir o Lighthouse com a floresta.
+2. (sem item)
 3. "A distância" em off-white (gráficos invertidos, transição, tooltip nativo "Fechando a distância" removido) + curvas líquidas ao fundo; números +313%/97% em off-white metálico; decidir "O que é fractional" e "Poucas parcerias" em preto.
 4. Aprovação da tartaruga (tag `oceano-tartaruga`).
 5. Antigos: metas do Lighthouse (opções a/b/c no `DESEMPENHO.md`); texto final da etapa 06; Bloco 7 (animação de textos); validação final.
