@@ -255,6 +255,7 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
 ## 14. Contato (GRADIENTE ESCURO)
 
 - Título: **Vamos fechar essa distância?**
-- Texto: Me conta o momento da sua empresa. Em uma conversa de 30 minutos, eu te digo se o modelo fractional faz sentido para você. E, se não fizer, te digo o que faria.
+- Texto: Toda grande marca começou com uma conversa. Me conta onde a sua empresa está e onde quer chegar.
+- Texto EN: Every great brand started with a conversation. Tell me where your company is and where it wants to go.
 - Botões: **Agendar conversa** (Cal.com, link provisório) · **WhatsApp** (wa.me/5511975415501, mensagem pré-preenchida: pt "Olá, Breno! Vi seu site e quero conversar sobre a marca da minha empresa." / en "Hi Breno! I saw your website and would like to talk about my company's brand.") · **E-mail** breno.romao@gmail.com (assunto: pt "Conversa sobre a minha marca" / en "About my brand"; endereço montado no navegador, fora do HTML, contra spam) · Baixar mídia kit (PDF) [PENDENTE]
 - Cabeçalho: ícones de WhatsApp e e-mail depois do seletor PT/EN (também no mobile) e, no mobile, botão flutuante de WhatsApp no canto inferior direito depois da hero.
