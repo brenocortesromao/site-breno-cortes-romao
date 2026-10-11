@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Bilingual (PT default / EN) personal business site for a Fractional Brand & Creative Director, statically generated per locale. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
 
-## Estado atual (atualizado em 10/10/2026)
+## Estado atual (atualizado no fim de 10/10/2026, tag `fim-10-10`)
 
 **Etapa:** 3, estrutura completa do site (bilíngue PT/EN). A lista mestra é o `PENDENCIAS.md`: itens [x] concluídos, e os abertos têm nota com arquivos e próximo passo. Textos: `CONTEUDO-SITE.md`.
 
@@ -46,7 +46,7 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **O que eu faço:** subtítulo novo.
 - **Lighthouse (A/B na mesma máquina e hora):** o oceano não baixou as notas (desktop 69-70 contra 65 antes do oceano; mobile 51 nos dois). As notas absolutas abaixo do DESEMPENHO.md vêm da carga da máquina no momento.
 
-**Concluído na noite de 10/10, parte 2** (tag `site-aprovado-10-10-noite`, o novo estado aprovado):
+**Concluído na noite de 10/10, parte 2** (tag `site-aprovado-10-10-noite`, o novo estado aprovado; depois dela só entrou o texto novo do Contato, `213e239`, incluído na tag `fim-10-10`):
 - **Sobre, bio completa** (`sections/AboutStory.tsx`): abertura em destaque, 3 parágrafos (3º com o texto novo: "...e liderei estratégias de marketing, marketing digital e growth."), fecho com reflexo prata, trajetória em Geist Mono acendendo com o scroll (DESIGNER → COORDENADOR DE DESIGN → DIRETOR DE MARKETING → MARKETING DIGITAL & GROWTH → FRACTIONAL BRAND & CREATIVE DIRECTOR; en: DIGITAL MARKETING & GROWTH; último em prata), referência às marcas só em texto. Frase de método antiga removida.
 - **Floresta 3D com urso no Sobre** (`graphics/ForestBackdrop.tsx` + `graphics/forest/*`; tag `antes-floresta` antes): abetos procedurais instanciados com 2 níveis de LOD, 3 camadas distantes no quadro de fundo (parallax), névoa baixa que deriva, luz fria em contraluz, neve, árvores balançando, câmera avançando pela trilha com o scroll; urso-pardo PROCEDURAL (não existe glTF CC0 de urso com caminhada: Poly Pizza só CC-BY; Quaternius e Gobkit sem urso; OpenGameArt só um .blend sem esqueleto), animado no shader (marcha, parada, cabeça virando para a câmera), silhueta com contorno prateado, atravessa a clareira uma vez a partir de ~30% da seção. Opacidade 38%, vinheta, useWebglSlot, modo leve no toque/nível low, reduced motion = quadro parado. A tag `floresta-3d-aprovada` não foi criada (aprovação geral via `site-aprovado-10-10-noite`).
 
@@ -59,8 +59,8 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **Montanhas (regra fixa):** as montanhas 3D da tag `montanhas-3d-aprovadas` são a versão aprovada; qualquer alteração nelas deve ser testada antes e mostrada com captura. O Bloco 6b (refinamento) está PAUSADO: não mexer nas montanhas sem pedido explícito.
 
 **Onde retomar:** `PENDENCIAS.md`, bloco "Pedidos da noite de 10/10", itens abertos:
-1. ~~Bio completa do Sobre~~ e ~~floresta 3D com urso~~: feitas (tag `site-aprovado-10-10-noite`). Falta medir o Lighthouse com a floresta.
-2. (sem item)
+1. ~~Bio completa do Sobre~~ e ~~floresta 3D com urso~~: feitas (tag `site-aprovado-10-10-noite`). Lighthouse com a floresta: desktop 77/78, mobile 52/51 (não baixou as notas). Contato com texto novo (`213e239`).
+2. Conferir o limite de 2 contextos WebGL com a floresta (o contador achou até 4 `<canvas>`, contando os 2D); só medir.
 3. "A distância" em off-white (gráficos invertidos, transição, tooltip nativo "Fechando a distância" removido) + curvas líquidas ao fundo; números +313%/97% em off-white metálico; decidir "O que é fractional" e "Poucas parcerias" em preto.
 4. Aprovação da tartaruga (tag `oceano-tartaruga`).
 5. Antigos: metas do Lighthouse (opções a/b/c no `DESEMPENHO.md`); texto final da etapa 06; Bloco 7 (animação de textos); validação final.
