@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## REGRA PRINCIPAL
+
+**O estado da tag `site-aprovado-10-10` está aprovado pelo Breno. Não altere nada além do que for pedido explicitamente em cada mensagem. Nada de melhorias, refatorações ou ajustes por conta própria.**
+
 Bilingual (PT default / EN) personal business site for a Fractional Brand & Creative Director, statically generated per locale. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
 
 ## Estado atual (atualizado em 10/10/2026)
