@@ -334,7 +334,11 @@
     "eyebrow": "Poucas parcerias por vez",
     "title": "Trabalho com poucas empresas por vez.",
     "text": "Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa, não por proposta enviada em massa.",
-    "indicator": "Agenda para novas parcerias: [CONFIRMAR]"
+    "indicator": "Agenda aberta para novas parcerias",
+    "cta": "Se a sua marca está pronta para acompanhar o seu crescimento, o próximo passo começa com uma conversa.",
+    "button": "Quero conversar",
+    "buttonLabel": "Quero conversar (abre o WhatsApp)",
+    "whatsappMessage": "Olá, Breno! Vi seu site e quero conversar sobre uma parceria para a minha marca."
   },
   "faq": {
     "eyebrow": "Perguntas frequentes",
