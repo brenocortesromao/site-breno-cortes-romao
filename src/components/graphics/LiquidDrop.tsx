@@ -13,8 +13,9 @@ import { useEffect, useRef, type RefObject } from "react";
  *   4 Evolução — amadurece: pulsa com uma ondulação mais forte;
  *   5 Parceria — a gota se fecha num anel líquido (toro) girando.
  * Os parâmetros da forma são interpolados suavemente para os alvos de cada
- * etapa (sem cortes). Cromo: reflexo de um "estúdio" procedural com áreas
- * escuras contrastadas (lê bem sobre o off-white). Fundo transparente.
+ * etapa (sem cortes). Cromo prata brilhante: reflexo de um "estúdio"
+ * procedural no estilo do da bola da hero, ajustado para o fundo preto da
+ * seção. Fundo transparente.
  * Entrada profunda (uEmerge 0→1, ~2,8 s quando a gota aparece na tela): ela
  * sobe do fundo no eixo Z (e um pouco de baixo), escura, desfocada (blur CSS)
  * e pequena, e ganha nitidez, brilho e tamanho, como algo subindo de um líquido
@@ -84,13 +85,23 @@ vec3 normalAt(vec3 p){
   return normalize(e.xyy*map(p+e.xyy) + e.yyx*map(p+e.yyx) + e.yxy*map(p+e.yxy) + e.xxx*map(p+e.xxx));
 }
 
-// estúdio procedural: chão escuro, topo claro, faixa escura vertical, softbox
+// estúdio procedural para fundo PRETO (mesma ideia do estúdio da bola da
+// hero): cúpula com céu claro, horizonte cinza e chão escuro mas não preto
+// (o contorno não some no fundo), tiras verticais finas e intensas em
+// posições assimétricas (sem "rosto" no reflexo) e softbox alto
+float strip(float az, float at, float w){
+  float d = abs(mod(az - at + 3.14159, 6.28318) - 3.14159);
+  return exp(-d * d / (w * w));
+}
 float env(vec3 r){
-  float base = mix(0.06, 0.92, smoothstep(-0.25, 0.65, r.y));
-  base *= 1.0 - 0.75 * smoothstep(0.22, 0.0, abs(r.x + 0.35));        // faixa escura
-  base *= 1.0 - 0.55 * (1.0 - smoothstep(0.0, 0.09, abs(r.y - 0.06))); // linha do horizonte
-  base += 1.6 * pow(max(dot(r, normalize(vec3(-0.55, 0.65, 0.55))), 0.0), 36.0); // softbox
-  base += 0.5 * pow(max(dot(r, normalize(vec3(0.8, 0.1, 0.4))), 0.0), 18.0);     // recorte
+  float base = r.y > 0.0 ? mix(0.3, 1.05, smoothstep(0.0, 0.8, r.y)) : mix(0.24, 0.04, smoothstep(0.0, 0.35, -r.y));
+  base += 0.55 * exp(-(r.y - 0.02) * (r.y - 0.02) / 0.0008); // linha do horizonte nítida
+  float az = atan(r.z, r.x);
+  float up = smoothstep(-0.25, 0.35, r.y);
+  base *= 1.0 - 0.65 * strip(az, -0.4, 0.3) * up; // painel escuro: o céu não fica chapado
+  base += (1.5 * strip(az, 0.9, 0.06) + 1.1 * strip(az, 2.6, 0.04) + 0.8 * strip(az, -1.9, 0.05)) * up;
+  base += 1.8 * pow(max(dot(r, normalize(vec3(-0.35, 0.9, 0.3))), 0.0), 24.0); // softbox alto
+  base += 0.5 * pow(max(dot(r, normalize(vec3(0.8, 0.1, 0.4))), 0.0), 18.0);   // recorte
   return base;
 }
 

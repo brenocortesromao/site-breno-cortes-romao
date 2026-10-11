@@ -21,7 +21,7 @@ export type ProcessCopy = {
 };
 
 /**
- * "Como funciona" — seção CLARA com grade técnica. Linha do tempo vertical
+ * "Como funciona": seção PRETA com grade técnica (linhas finas claras, baixa opacidade). Linha do tempo vertical
  * desenhada pelo scroll (scaleY) e etapas que acendem quando a linha chega
  * nelas. Na coluna esquerda (sticky), uma gota de metal líquido (LiquidDrop)
  * muda de forma a cada etapa: fusão → ondulação → calma → fluxo → anel.
@@ -108,7 +108,7 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
     <section
       ref={root}
       id="como-funciona"
-      data-theme="light"
+      data-theme="dark"
       aria-labelledby="como-funciona-title"
       // overflow-clip (e não hidden): recorta igual, mas não cria contêiner de
       // rolagem, que anularia o sticky da gota
