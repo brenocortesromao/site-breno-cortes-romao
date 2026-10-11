@@ -296,29 +296,23 @@
   "about": {
     "eyebrow": "Sobre",
     "title": "Quem vai cuidar da sua marca.",
-    "bio": "[PENDENTE: bio, anos de experiência, agências, marcas, formação.]",
+    "opening": "Cresci entre palavras e histórias.",
+    "paragraphs": [
+      "Sou filho de um dos maiores escritores e palestrantes do país e de uma mãe jornalista. Em casa, ideias eram assunto de jantar, e contar bem uma história era quase uma regra da família. A criatividade não foi algo que eu escolhi: ela sempre esteve ali. O que eu escolhi foi transformá-la em ofício.",
+      "No caminho, tive a oportunidade de aprender e trabalhar ao lado de profissionais que ajudaram a construir marcas como Nubank, XP Investimentos, Mercado Livre, Itaú Digital e diversas outras gigantes. Foi ali que entendi que branding não é sobre um logo bonito. É sobre fazer o mercado enxergar o valor que uma empresa já tem.",
+      "Passei por quase todas as cadeiras de uma marca: designer, coordenador de design, diretor de marketing e gestor de tráfego. Por isso enxergo o trabalho por inteiro, do conceito à mídia, da identidade ao resultado. Nunca separei branding de resultado, e é essa visão que levo para cada empresa que acompanho."
+    ],
+    "closing": "Criatividade, dados e tecnologia, nas mesmas mãos.",
+    "trajectory": [
+      "Designer",
+      "Coordenador de design",
+      "Diretor de marketing",
+      "Gestor de tráfego",
+      "Fractional Brand & Creative Director"
+    ],
+    "reference": "Aprendi ao lado de quem ajudou a construir Nubank, XP Investimentos, Mercado Livre, Itaú Digital e diversas outras gigantes.",
     "portrait": "Retrato",
     "timelineTitle": "Trajetória",
-    "timeline": [
-      {
-        "period": "[PENDENTE]",
-        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
-      },
-      {
-        "period": "[PENDENTE]",
-        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
-      },
-      {
-        "period": "[PENDENTE]",
-        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
-      },
-      {
-        "period": "[PENDENTE]",
-        "text": "[PENDENTE: cargo, empresa ou marco da carreira]"
-      }
-    ],
-    "methodTitle": "Método",
-    "method": "Uso inteligência artificial como ferramenta de pesquisa, exploração e produção, sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.",
     "more": "Conhecer a trajetória completa",
     "back": "Voltar ao início",
     "metaTitle": "Sobre",
