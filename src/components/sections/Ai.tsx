@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { DecodeLetters, decode, hideLetters, shine } from "@/components/decode";
+import OceanBackdrop from "@/components/graphics/OceanBackdrop";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -110,8 +111,10 @@ export default function Ai({ copy }: { copy: AiCopy }) {
   const after = at >= 0 ? copy.closing.slice(at + copy.closingHighlight.length) : "";
 
   return (
-    <section ref={root} id="ia" data-theme="dark" aria-labelledby="ia-title" className="relative z-10 min-h-svh">
-      <div className="mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+    <section ref={root} id="ia" data-theme="dark" aria-labelledby="ia-title" className="relative z-10 min-h-svh overflow-clip">
+      {/* oceano 3D fixo atrás do conteúdo (alto-mar → linha d'água → recife) */}
+      <OceanBackdrop />
+      <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
 
         {/* caixa de prompt (estilo chat de IA) */}
