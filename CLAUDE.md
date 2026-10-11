@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **O estado da tag `site-aprovado-10-10` está aprovado pelo Breno. Não altere nada além do que for pedido explicitamente em cada mensagem. Nada de melhorias, refatorações ou ajustes por conta própria.**
 
+**Bola da hero (decisão de 10/10):** a bola de metal líquido da hero está APROVADA e **NÃO vai virar urso**: a etapa "urso" foi CANCELADA. Não altere a bola. O urso existe apenas como animal 3D na floresta da seção "Sobre".
+
 Bilingual (PT default / EN) personal business site for a Fractional Brand & Creative Director, statically generated per locale. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
 
 ## Estado atual (atualizado em 10/10/2026)
@@ -33,7 +35,7 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **Desempenho** (`DESEMPENHO.md`, tags `antes-desempenho` → `desempenho-ok`): ThemeScroll sem tweens por variável, entrada da hero em CSS, hidratação por seção (`<Suspense>`), `compileAsync` na bola, terreno em Web Worker, qualidade adaptativa + orçamento de 2 contextos (`lib/quality.ts`). FPS 60 em todas as seções 3D, máximo 2 contextos, 0 erros e 0 scroll horizontal em Chromium/Edge/Firefox/WebKit (`node scripts/smoke.mjs`). Lighthouse 76 desktop / 55 mobile (metas 85/70 não atingidas: falta a decisão do dono sobre iniciar a bola 3D mais tarde).
 
 **Decisões importantes:**
-- Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.
+- Bola da hero aprovada; NÃO vira urso (etapa "urso" cancelada em 10/10). O urso existe só como animal 3D na floresta da seção "Sobre".
 - Dados externos: só os números Lightcast, com fonte.
 - Sem cases nem páginas /cases.
 - Off-white só em 3 seções.
@@ -59,8 +61,8 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
 - **Sem travessões (regra fixa):** nenhum "—" ou "–" em texto visível, em pt e en: mensagens, títulos, rótulos, metadados e strings montadas no código (ex.: rótulo "Nome, Função"; template de título "%s | Nome"). Use vírgula, dois-pontos ou ponto. Em pilares e etapas, título e descrição são elementos separados, sem traço. Verifique com uma busca por "—" e "–" em `src/messages/*.json` e no HTML renderizado.
 - **Ritmo de cores (regra fixa, mapa do `CONTEUDO-SITE.md`):** o site é majoritariamente preto. Off-white aparece em **só 3** seções: O que é fractional, Como funciona e Poucas parcerias. O gradiente escuro fica em A distância, O que muda, Sobre e Contato. O resto é preto.
 - **Visual:** fundo preto, grafite e prata líquida; estética startup tech premium e corporativa; tipografia exclusivamente sans-serif.
-- **Elemento central:** uma bola de metal líquido cromado e brilhante, centralizada, com cerca de 60% da altura da tela. Ela "respira" o tempo todo e reage ao mouse com atraso suave. Futuramente vira um urso escultórico, sem aparência infantil ou cartoon. **Sem órbitas nem partículas decorativas.**
-- **Decisão — urso (Etapa 4):** **sem modelo GLB.** Orelhas e focinho **brotam da própria bola** com o mouse e voltam a ser bola quando ele sai. São esferas extras fundidas por união suave (SDF/metaballs) no vertex shader. A arquitetura já existe e está desligada (`uMorph = 0`): ver `hero/liquidMetal.ts`.
+- **Elemento central:** uma bola de metal líquido cromado e brilhante, centralizada, com cerca de 60% da altura da tela. Ela "respira" o tempo todo e reage ao mouse com atraso suave. **Aprovada; não vira urso** (a etapa "urso" foi cancelada em 10/10; não altere a bola). **Sem órbitas nem partículas decorativas.**
+- **Decisão: urso CANCELADO na bola (10/10).** A bola não vira urso. A arquitetura SDF/metaballs que existia para isso continua desligada no shader (`uMorph = 0`, ver `hero/liquidMetal.ts`) e não deve ser ativada. O urso só aparece como animal 3D na floresta da seção "Sobre".
 - **Hero (composição):** uma frase grande à esquerda da bola e outra à direita, com a bola levemente por cima das palavras. O texto de apoio curto fica no canto inferior esquerdo. No mobile, a ordem é frase, bola, frase e texto de apoio.
 - **Referência de movimento:** landonorris.com — apenas o comportamento de scroll, o uso de 3D e o ritmo. Não copiar o visual, a identidade nem os assets.
 - **Assets:** não usar assets externos (modelos, imagens, fontes, logos) sem aprovação explícita do dono. Fotos, logos de clientes e cases reais serão fornecidos por ele.
@@ -76,7 +78,7 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
    5. Onde o trabalho aparece; Sobre (claro; resumo na home + `/sobre`); Poucas parcerias por vez ([CONFIRMAR]); Contato completo — **concluída**.
    6. Perguntas frequentes (`<details>` nativo); rodapé no layout — **concluída**.
    Pendências de conteúdo do dono: retrato, logos, imagens de trabalhos, cases, bio/trajetória, e-mail, mídia kit, link do Cal.com, itens [CONFIRMAR], 6 frases da "3b Diagnóstico" (o arquivo ainda tem as 5 de "Sinais") e tradução EN.
-4. Urso 3D: orelhas e focinho brotando da bola (SDF/metaballs) com o mouse.
+4. ~~Urso 3D nascendo da bola~~: **CANCELADA em 10/10** (a bola fica como está; o urso existe só na floresta da seção "Sobre").
 5. Conteúdo real PT/EN (fotos, logos, cases, textos, tradução).
 6. Lançamento.
 
@@ -171,8 +173,8 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
   - `LiquidShape`: **breathing** (a slow scale sine plus `uAmp` modulation, always on unless reduced motion), the pointer → uniforms, and the scroll `progress`.
 - `hero/shape.ts`: a dense icosphere (`SHAPE_RADIUS` 1.6; detail 48 desktop / 20 mobile). The density defines how sharp ears/snout can get.
 - `hero/liquidMetal.ts`: `MeshPhysicalMaterial` (chrome: metalness 1, roughness 0.035, clearcoat 1) with an `onBeforeCompile` injection. Radial displacement is the sum, in `lm_liquid`, of:
-  1. **Shape (SDF/metaballs, for the bear)**: the ball smooth-unioned (`lm_smin`, radius `uBlend`) with up to `FEATURE_SLOTS` spheres (`uFeatureCenters`, `uFeatureRadii`, scaled by `uMorph`). The surface radius is found per vertex by 10 steps of sphere tracing inward. With `uMorph = 0` it is skipped and costs nothing.
-     - **Stage 4:** set ear/snout centres and radii and animate `uMorph` 0→1 on pointer enter and 1→0 on leave. No mesh change is needed.
+  1. **Shape (SDF/metaballs; was meant for the bear, which was CANCELLED on 10/10: keep `uMorph = 0`)**: the ball smooth-unioned (`lm_smin`, radius `uBlend`) with up to `FEATURE_SLOTS` spheres (`uFeatureCenters`, `uFeatureRadii`, scaled by `uMorph`). The surface radius is found per vertex by 10 steps of sphere tracing inward. With `uMorph = 0` it is skipped and costs nothing.
+     - Do not enable it: the ball is approved as is and will not become a bear.
   2. **Impacts ("soquinho")**: `lm_impacts`, up to `IMPACT_SLOTS` (8) simultaneous hits (`uImpactDir`/`uImpactStart`/`uImpactForce`, timed by `uClock`, which never freezes). Each is an elastic dent plus a damped sine wave travelling by geodesic (angular) distance, ~1.5 s. Displacement is radial from the base position, so it also works on the bear (`uMorph > 0`).
      - `HeroScene` raycasts by itself against the ball's world sphere: the canvas is `pointer-events-none` under the phrases, so R3F events never fire.
      - Mouse punches on `pointerdown`; touch punches on `click`, so the start of a scroll doesn't count.

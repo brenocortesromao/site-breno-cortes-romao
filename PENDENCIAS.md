@@ -2,6 +2,10 @@
 
 Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item no código, implemente o que ainda não estiver feito e marque cada item com [x] neste arquivo ao concluir. Fonte dos textos: CONTEUDO-SITE.md. Commit ao final de cada bloco.
 
+## Decisão de 10/10: bola da hero aprovada, SEM urso
+- A bola de metal líquido da hero está APROVADA e NÃO vai virar urso: a etapa "urso" (antiga Etapa 4) foi CANCELADA. Não altere a bola.
+- O urso existe apenas como animal 3D na floresta da seção "Sobre".
+
 ## Bloco 1. Textos e regras
 - [x] Todos os textos do CONTEUDO-SITE.md aplicados em pt (en repete pt por enquanto).
 - [x] Mensagem do Breno: frase grande com "sobre si." (hoje está "sobre sim", sem ponto) e ponto final depois de "sala". Parágrafo novo começando com "É essa impressão que eu construo."
@@ -29,7 +33,7 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
   > Feito em 09/10 (dd19346, 3574b49): sonda WebGL única, canvases montados só perto da seção, ResilientBoundary com remontagem e console.warn com o motivo. A queda para a foto era módulo velho do HMR no navegador ("terrainSize is not a function"); resolvido reiniciando o dev com .next/dev limpo. Versão aprovada salva na tag git montanhas-3d-aprovadas.
 - [x] Cabeçalho (logo): opção D escolhida. Assinatura (public/assinatura.svg) pequena (120 a 150px) em prata metálica, desenhando-se em ~1 s no carregamento, como link para a home; ao lado, "Breno Côrtes Romão" em Archivo Expanded (next/font/google, eixo wdth 125%, peso 600, caixa alta, letter-spacing 0.18em, #e6e7e9) e embaixo "Fractional Brand & Creative Director" em Geist Mono. Ao rolar após a hero, nome e cargo somem e fica só a assinatura; mobile só a assinatura. Registrar no CLAUDE.md que Archivo Expanded é exceção só para o nome.
 - [x] Retrato COLORIDO no Manifesto: public/retrato/breno-retrato(.webp/.jpg 1200px) e breno-retrato-800 (mobile), 4:5, sem filtro P&B, alt "Retrato de Breno Côrtes Romão". Entrada "como pintura": pinceladas em P&B (esboço a carvão) que preenchem e ganham detalhe, cor entra no final; shader com máscara de pinceladas avançando com o scroll, completa em menos de uma tela, antes da assinatura. Corrigir a assinatura que aparece cortada (desenhar os 49 paths por completo).
-- [x] Bola da hero: hover gira e inclina na direção do cursor; clique/toque = "soquinho" com afundamento no ponto (raycast) e ondas de impacto amortecidas se propagando pela superfície, até 8 impactos simultâneos somando-se, normais recalculadas, cursor em círculo que pulsa no clique. Mobile igual; reduced motion só um brilho. Compatível com o urso da Etapa 4.
+- [x] Bola da hero: hover gira e inclina na direção do cursor; clique/toque = "soquinho" com afundamento no ponto (raycast) e ondas de impacto amortecidas se propagando pela superfície, até 8 impactos simultâneos somando-se, normais recalculadas, cursor em círculo que pulsa no clique. Mobile igual; reduced motion só um brilho. (O urso da Etapa 4 foi cancelado em 10/10: a bola fica como está.)
 - [x] Textos atualizados no CONTEUDO-SITE.md: parágrafo da Mensagem ("É essa impressão que eu construo. Trabalho com empresas que já são grandes no que fazem..."), subtítulo de "O que eu faço" ("Estratégia sem execução vira PDF..."), fechos do Diagnóstico ("Nenhuma dessas frases se resolve com mais peças. Se resolve com direção."), título e texto de "Como funciona" ("Um método próprio. Feito para quem não tem tempo a perder.").
 - [x] Frase grande do Manifesto: text-wrap: balance, coluna um pouco mais larga, sem buraco depois de "na cabeça das".
 - [x] Remover lista de cases, rota /cases/[slug], src/content/cases.ts e mensagens relacionadas, sem links quebrados.
