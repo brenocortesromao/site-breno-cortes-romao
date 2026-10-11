@@ -26,7 +26,7 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **Textos novos** em pt/en: subtítulo de "O que eu faço", fechos do Diagnóstico, título e texto de "Como funciona", parágrafo da Mensagem.
 
 **Concluído em 10/10** (detalhes no PENDENCIAS.md, Blocos 0b a 0h e "Etapa de desempenho"):
-- **Retrato:** entrada "metal líquido vira você" (gota de cromo, mercúrio, foto por refração; canvas desmontado no fim) e moldura "curva líquida" (`components/portraitFrame.tsx`); assinatura escrita depois da foto.
+- **Retrato:** moldura "curva líquida" (`components/portraitFrame.tsx`); assinatura escrita depois da foto. (A entrada "metal líquido" deste dia foi trocada na noite de 10/10, ver abaixo.)
 - **A distância:** as 3 frases com decodificação letra por letra (módulo compartilhado `components/decode.tsx`).
 - **Como funciona:** 6 etapas (ESCUTA a PARCERIA), linha sólida até o ponto 06 e pontilhado depois; gota termina em anel; título da 06 com quebra controlada.
 - **Diagnóstico:** nuvens 3D (tag `nuvens-3d-aprovadas`), layout sem scroll horizontal, cursor "Marcar" em portal.
@@ -34,18 +34,32 @@ Bilingual (PT default / EN) personal business site for a Fractional Brand & Crea
 - **Fractional:** números de volta ao HTML preto cromado (a versão 3D foi descartada); complemento "No Brasil..." (en com texto próprio).
 - **Desempenho** (`DESEMPENHO.md`, tags `antes-desempenho` → `desempenho-ok`): ThemeScroll sem tweens por variável, entrada da hero em CSS, hidratação por seção (`<Suspense>`), `compileAsync` na bola, terreno em Web Worker, qualidade adaptativa + orçamento de 2 contextos (`lib/quality.ts`). FPS 60 em todas as seções 3D, máximo 2 contextos, 0 erros e 0 scroll horizontal em Chromium/Edge/Firefox/WebKit (`node scripts/smoke.mjs`). Lighthouse 76 desktop / 55 mobile (metas 85/70 não atingidas: falta a decisão do dono sobre iniciar a bola 3D mais tarde).
 
+**Concluído na noite de 10/10** (commits de `antes-oceano` a `437b9c8`; detalhes no PENDENCIAS.md, bloco "Pedidos da noite de 10/10"):
+- **Oceano 3D** na seção da IA (`graphics/OceanBackdrop.tsx` + `graphics/ocean/*`): alto-mar, linha d'água, mergulho com god rays, cáusticas, partículas, recife procedural, cardume com boids, tubarões (glb Draco de 3,5 KB, Quaternius CC0, `scripts/build-ocean-models.mjs`), um que passa perto, rim light prateado e UMA tartaruga procedural. Tags `oceano-v1`, `oceano-3d-aprovado` (= `site-aprovado-10-10`); a tartaruga única (`a93173b`) aguarda aprovação para a tag `oceano-tartaruga`.
+- **Cabeçalho:** nome e cargo de volta em todo o desktop (a classe `lg:hidden` vencia e escondia o nome); ícones de WhatsApp e e-mail; botão flutuante de WhatsApp no mobile; e-mail com menu Gmail / app de e-mail / copiar (`contact/EmailMenu.tsx`, endereço montado só no cliente).
+- **Contato:** botões Agendar, WhatsApp, E-mail (menu) e Mídia kit em 2 × 2.
+- **Retrato:** entrada "luz de estúdio acendendo" (CSS/máscaras, sem WebGL) e recorte da moldura como máscara CSS (a foto respeita a curva). Tag `retrato-antes-luz` antes da troca.
+- **Como funciona:** fundo preto; gota com estúdio de cromo para fundo escuro.
+- **Onde o trabalho aparece:** título "pintado com spray" (`components/SprayTitle.tsx`, canvas 2D).
+- **O que é fractional:** comparativo versão 2 com a coluna Fractional em cartão de destaque.
+- **Poucas parcerias:** CTA (status, frase, botão "Quero conversar" para o WhatsApp).
+- **O que eu faço:** subtítulo novo.
+- **Lighthouse (A/B na mesma máquina e hora):** o oceano não baixou as notas (desktop 69-70 contra 65 antes do oceano; mobile 51 nos dois). As notas absolutas abaixo do DESEMPENHO.md vêm da carga da máquina no momento.
+
 **Decisões importantes:**
 - ~~Urso só na Etapa 4, nascendo da bola (SDF), sem GLB.~~ **CANCELADO (10/10):** a bola da hero está aprovada e não vira urso. O urso existe só como animal 3D na floresta da seção "Sobre".
 - Dados externos: só os números Lightcast, com fonte.
 - Sem cases nem páginas /cases.
-- Off-white só em 3 seções.
+- Ritmo de cores (decisão nova no CONTEUDO-SITE.md): site todo preto, exceto "A distância" em off-white. AINDA NÃO aplicado por completo: hoje "O que é fractional" e "Poucas parcerias" seguem off-white no código e "A distância" segue escura (pendente no PENDENCIAS.md). "Como funciona" já é preta.
+- **CONTEUDO-SITE.md é editado também fora da conversa:** antes de qualquer edição, releia o arquivo do disco e altere só o trecho necessário (nunca reescreva o arquivo inteiro).
 - **Montanhas (regra fixa):** as montanhas 3D da tag `montanhas-3d-aprovadas` são a versão aprovada; qualquer alteração nelas deve ser testada antes e mostrada com captura. O Bloco 6b (refinamento) está PAUSADO: não mexer nas montanhas sem pedido explícito.
 
-**Onde retomar:** `PENDENCIAS.md`:
-1. Decisão do dono sobre as metas do Lighthouse (opções a/b/c na "Etapa de desempenho" e no `DESEMPENHO.md`).
-2. Texto final da história da etapa 06 (o final "...mais seu." citado não está no `CONTEUDO-SITE.md`).
-3. Bloco 0g (oceano 3D na seção da IA), adiado a pedido; usar `useWebglSlot`.
-4. Bloco 7 (sistema único de animação de textos no scroll); depois a validação final e parar para a revisão do dono.
+**Onde retomar:** `PENDENCIAS.md`, bloco "Pedidos da noite de 10/10", itens abertos:
+1. Bio completa da seção "Sobre" (§11 do CONTEUDO-SITE.md, atualizada pelo dono).
+2. Floresta 3D com urso na seção "Sobre" (criar a tag `antes-floresta` antes; tag `floresta-3d-aprovada` só com aprovação).
+3. "A distância" em off-white (gráficos invertidos, transição, tooltip nativo "Fechando a distância" removido) + curvas líquidas ao fundo; números +313%/97% em off-white metálico; decidir "O que é fractional" e "Poucas parcerias" em preto.
+4. Aprovação da tartaruga (tag `oceano-tartaruga`).
+5. Antigos: metas do Lighthouse (opções a/b/c no `DESEMPENHO.md`); texto final da etapa 06; Bloco 7 (animação de textos); validação final.
 Bloco 6b (montanhas) PAUSADO: só com pedido explícito.
 
 **Armadilha recorrente:** depois de editar `globals.css` ou `next.config.ts`, o `next dev` pode continuar com a versão antiga. Pare o servidor, apague `.next/dev` e reinicie.

@@ -160,11 +160,28 @@ Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória, em agên
 - Mural compacto, 6 a 9 peças, grid irregular, legenda de projeto e ano [PENDENTE: imagens].
 - SEM lista de cases e SEM páginas de case (removidos por decisão do Breno). A seção fica só com logos + carrossel de imagens; cada imagem do carrossel tem legenda curta (projeto, ano e papel do Breno).
 
-## 11. Sobre (GRADIENTE ESCURO)
+## 11. Sobre (PRETO, com floresta 3D ao fundo)
 
+- Rótulo: SOBRE
 - Título: **Quem vai cuidar da sua marca.**
-- [PENDENTE: bio — anos de experiência, agências, marcas, formação.] Retrato + trajetória em linha do tempo.
-- Frase de método: Uso inteligência artificial como ferramenta de pesquisa, exploração e produção, sempre com critério e revisão humana. A tecnologia acelera; a decisão continua sendo minha.
+- Frase de abertura (grande, em destaque): **Cresci entre palavras e histórias.**
+- Texto (3 parágrafos):
+  Sou filho de um dos maiores escritores e palestrantes do país e de uma mãe jornalista. Em casa, ideias eram assunto de jantar, e contar bem uma história era quase uma regra da família. A criatividade não foi algo que eu escolhi: ela sempre esteve ali. O que eu escolhi foi transformá-la em ofício.
+
+  No caminho, tive a oportunidade de aprender e trabalhar ao lado de profissionais que ajudaram a construir marcas como Nubank, XP Investimentos, Mercado Livre, Itaú Digital e diversas outras gigantes. Foi ali que entendi que branding não é sobre um logo bonito. É sobre fazer o mercado enxergar o valor que uma empresa já tem.
+
+  Passei por quase todas as cadeiras de uma marca: designer, coordenador de design, diretor de marketing e gestor de tráfego. Por isso enxergo o trabalho por inteiro, do conceito à mídia, da identidade ao resultado. Nunca separei branding de resultado, e é essa visão que levo para cada empresa que acompanho.
+- Fecho (destaque, com brilho prata): **Criatividade, dados e tecnologia, nas mesmas mãos.**
+- Trajetória (linha do tempo horizontal em Geist Mono, acendendo em sequência com o scroll): DESIGNER → COORDENADOR DE DESIGN → DIRETOR DE MARKETING → GESTOR DE TRÁFEGO → FRACTIONAL BRAND & CREATIVE DIRECTOR (último item em destaque prata).
+- Linha de referência (pequena, Geist Mono, SEM logos): "Aprendi ao lado de quem ajudou a construir Nubank, XP Investimentos, Mercado Livre, Itaú Digital e diversas outras gigantes." Não apresentar essas marcas como clientes.
+- Remover a antiga "Frase de método" sobre IA (já existe a seção 11b).
+- [CONFIRMAR com o Breno: citar o nome do pai? Incluir anos de experiência e formação?]
+- EN (adaptar, não traduzir literalmente):
+  Opening: **I grew up surrounded by words and stories.**
+  I'm the son of one of Brazil's best-known writers and speakers and of a journalist mother. At home, ideas were dinner conversation, and telling a good story was almost a family rule. Creativity wasn't something I chose; it was always there. What I chose was to turn it into a craft.
+  Along the way, I had the chance to learn and work alongside professionals who helped build brands like Nubank, XP Investimentos, Mercado Livre, Itaú Digital and many other giants. That's where I learned that branding isn't about a pretty logo. It's about making the market see the value a company already has.
+  I've sat in almost every seat of a brand: designer, design coordinator, marketing director and paid media manager. That's why I see the work as a whole, from concept to media, from identity to results. I've never separated branding from results, and that's the view I bring to every company I work with.
+  Closing: **Creativity, data and technology, in the same hands.**
 
 ## 11b. E a inteligência artificial? (PRETO, seção nova, entre "Sobre" e "Poucas parcerias")
 

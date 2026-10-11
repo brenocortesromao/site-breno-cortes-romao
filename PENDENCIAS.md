@@ -97,8 +97,35 @@ Leia este arquivo e o CONTEUDO-SITE.md antes de começar. Confira item por item 
 - [ ] Medir heap (vazamento) com várias idas e voltas, INP e tarefas longas durante a rolagem.
 - [ ] Conferir dependências não usadas com ferramenta (código morto conhecido já removido).
 
+## Pedidos da noite de 10/10 (conferência antes de limpar a conversa)
+
+Feitos (commit entre parênteses):
+- [x] Oceano 3D na seção da IA, tag `antes-oceano` antes; v1 (`dbbd6c0`, tag `oceano-v1`); debaixo d'água mais claro, rim light prateado, boids, tubarão perto, opacidade maior submersa (`a637ff8`, tags `site-aprovado-10-10` e `oceano-3d-aprovado`). Lighthouse A/B: o oceano não baixou as notas.
+- [x] UMA tartaruga no oceano, bem visível no meio do mergulho (`a93173b`). **Aguarda aprovação** para criar a tag `oceano-tartaruga`.
+- [x] Cabeçalho: nome e cargo de volta no desktop, sem colisão com o menu (`ad1e946`).
+- [x] Regra principal no CLAUDE.md (só o que for pedido) (`ffe75ab`).
+- [x] "Como funciona" em fundo preto, gota com cromo para fundo escuro (`896548d`).
+- [x] Subtítulo de "O que eu faço" (`4770026`).
+- [x] Ícones de WhatsApp e e-mail no cabeçalho, botão flutuante de WhatsApp no mobile, WhatsApp e e-mail no Contato (`0885afb`).
+- [x] Retrato com "luz de estúdio acendendo" e recorte na curva líquida (máscara CSS); tag `retrato-antes-luz` antes (`a18f022`).
+- [x] Menu do e-mail com Abrir no Gmail / Abrir no app de e-mail / Copiar e-mail, no cabeçalho e no Contato; 42 testes no navegador (`0509699`).
+- [x] CTA de "Poucas parcerias" (status, frase nova, botão "Quero conversar" para o WhatsApp) (`32199f5`).
+- [x] Registro de que a bola NÃO vira urso, com os 3 trechos antigos marcados como CANCELADOS (`d35f12c`, `92379a9`).
+- [x] Título "Onde você vai ver a diferença." pintado com spray (`47eac0f`).
+- [x] Comparativo versão 2 em "O que é fractional", coluna Fractional em cartão de destaque (`437b9c8`). en segue cópia do pt (sem tradução no CONTEUDO-SITE.md).
+
+Não feitos (abertos):
+- [ ] **Bio completa da seção "Sobre"**: usar a §11 do CONTEUDO-SITE.md, que o dono acabou de atualizar (reler o arquivo do disco antes).
+- [ ] **Floresta 3D com urso na seção "Sobre"**: criar a tag `antes-floresta` ANTES de começar. Abetos/pinheiros estilo Alasca em camadas, névoa baixa, luz fria rasante, quase monocromático; neve leve; árvores balançando; câmera avança com o scroll (parallax); urso-pardo (glTF CC0 leve e comprimido, com caminhada) passa ao fundo, para, vira a cabeça e segue, em silhueta com rim light prateado. Opacidade baixa, vinheta, texto 100% legível. Regras do DESEMPENHO.md (useWebglSlot, instancing com LOD, Draco/meshopt, qualidade adaptativa, mobile leve, reduced motion estático). Capturas do início, do urso e do fim + Lighthouse. Tag `floresta-3d-aprovada` só com aprovação. Não alterar nada fora da seção.
+- [ ] **"A distância" em off-white (#ECEAE5)** (pedido posto em espera pelo "faça SOMENTE isto"): texto grafite quase preto; gráficos invertidos (linhas, pontos, rótulos, eixos e textura em grafite, mesma hierarquia); decodificação e brilho da palavra-chave adaptados ao claro; transição gradual preto → off-white → preto; remover o tooltip nativo "Fechando a distância" (trocar `title` por aria-label/`<title>` sem tooltip). Capturas dos 3 blocos.
+- [ ] **Curvas líquidas (LiquidContours) ao fundo de "A distância"** (em espera, junto com o item acima): grafite, baixa opacidade, menos linhas atrás dos gráficos, ondulação no mouse, parallax; useWebglSlot; quadro estático em reduced motion.
+- [ ] **Números +313% e 97% em off-white metálico** (em espera): gradiente vertical #ECEAE5 → #C9CBCF → faixa #9A9DA2 → #E6E7E9 via background-clip:text; manter formato, contagem e reflexo (agora branco); reduced motion estático. Hoje a seção ainda é off-white no código, onde o preto cromado lê bem: aplicar junto com a seção em preto.
+- [ ] **Decidir/aplicar o ritmo de cores novo**: CONTEUDO-SITE.md diz "site todo preto, exceto A distância", mas "O que é fractional" e "Poucas parcerias" seguem off-white no código (o cartão da tabela v2 já funciona nos dois fundos).
+- [ ] Tradução EN da tabela v2 e de outros textos que seguem cópia do pt.
+- [ ] Assets antigos do retrato sem uso (`breno-retrato-800.*`, `breno-retrato-cor.jpg`, `breno-retrato.jpg`): não são da animação de metal; só apagar se o dono pedir.
+
 ## Bloco 0g. Oceano 3D na seção "E a inteligência artificial?" (mesmo estilo de montanhas e nuvens)
-> PENDENTE: não iniciado (adiado para depois da etapa de desempenho, a pedido). Na implementação, usar useWebglSlot (lib/quality) no lugar de useNearViewport, que foi removido: o orçamento é de no máximo 2 contextos.
+> Feito na noite de 10/10 (ver "Pedidos da noite de 10/10" acima): `graphics/OceanBackdrop.tsx` + `graphics/ocean/*`, useWebglSlot, tags `oceano-v1` e `oceano-3d-aprovado`.
 - [ ] Narrativa: superfície = o que a IA alcança; profundidade = experiência humana. Com o scroll, a câmera começa acima do alto-mar (ondas escuras com reflexo prata, horizonte com névoa), desce até a superfície, atravessa a linha d'água e mergulha: raios de luz (god rays) e cáusticas vindo de cima, partículas em suspensão, corais em silhueta no fundo, cardume de peixes passando e um ou dois tubarões em silhueta cruzando devagar ao longe.
 - [ ] Estética: elegante e cinematográfica, NÃO game/cartoon. Paleta quase monocromática (preto, grafite, prata, com no máximo um leve tom azul-acinzentado muito escuro debaixo d'água). Opacidade baixa (~30 a 40%), vinheta e fades; texto sempre 100% legível.
 - [ ] Técnica: oceano com shader de ondas (Gerstner/FFT simplificado); embaixo d'água, fog exponencial, god rays em planos aditivos, cáusticas por textura animada. Peixes como instanced mesh com boids simples; tubarões como modelos glTF leves e gratuitos (CC0, ex.: Quaternius/Poly Pizza) com animação de nado, ou silhuetas low-poly. Corais como silhuetas low-poly/instanced.
