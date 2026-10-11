@@ -72,7 +72,12 @@ export default function HeaderBrand({
   );
 
   return (
-    <Link ref={root} href="/" aria-label={homeLabel} className="flex min-w-0 items-center gap-4 leading-tight">
+    <Link
+      ref={root}
+      href="/"
+      aria-label={homeLabel}
+      className="flex min-w-0 items-center gap-4 leading-tight lg:max-xl:flex-col lg:max-xl:items-start lg:max-xl:gap-2"
+    >
       <Signature
         data={signature}
         label={signatureLabel}
@@ -80,17 +85,24 @@ export default function HeaderBrand({
         strokeWidth={7}
         className="h-auto w-[112px] shrink-0 md:w-[136px]"
       />
-      {/* nome + função: no tablet (sem menu) e a partir de 1400px; entre 1024 e
-          1399 o menu ocupa o espaço e fica só a assinatura (antes o nome era
-          espremido e colidia com o menu) */}
-      <span data-brand-text className="hidden min-w-0 md:block lg:hidden min-[1400px]:block">
+      {/* nome + função em todo o desktop e no tablet (no mobile, só a
+          assinatura). Larguras com o menu de 7 links:
+          - a partir de 1440: ao lado da assinatura, função numa linha;
+          - 1280 a 1439: ao lado, função em 2 linhas (quebra depois do "&");
+          - 1024 a 1279: não há espaço ao lado; nome e função ficam ABAIXO da
+            assinatura, um pouco menores.
+          Não use "lg:hidden" + "min-[…]:block" aqui: no Tailwind 4 a ordem das
+          variantes fazia o lg:hidden vencer e o nome sumia em todo desktop. */}
+      <span data-brand-text className="hidden min-w-0 md:block">
         <span
           translate="no"
-          className="block font-brand text-[11px] font-semibold uppercase tracking-[0.18em] text-[#e6e7e9] [font-stretch:125%]"
+          className="block font-brand text-[11px] font-semibold uppercase tracking-[0.18em] text-[#e6e7e9] [font-stretch:125%] lg:max-xl:text-[10px]"
         >
           {name}
         </span>
-        <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.22em] text-silver">{role}</span>
+        <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.22em] text-silver lg:max-[1439px]:max-w-[12rem] lg:max-xl:text-[9px]">
+          {role}
+        </span>
       </span>
     </Link>
   );
