@@ -7,7 +7,7 @@ import { useGSAP } from "@gsap/react";
 import MediaSlot from "./MediaSlot";
 import PortraitReveal from "./PortraitReveal";
 import TiltCard from "./TiltCard";
-import { PORTRAIT_FRAME_CLIP, PortraitFrameDefs, PortraitFrameOutline } from "./portraitFrame";
+import { PORTRAIT_FRAME_MASK, PortraitFrameOutline } from "./portraitFrame";
 import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
@@ -35,7 +35,7 @@ export type ManifestoCopy = {
  * Mensagem de Breno Côrtes Romão. Entra por cima da hero fixa (fundo
  * transparente: a bola escurecida segue visível atrás). Coreografia:
  * - as palavras da frase acendem uma a uma com o scroll;
- * - o retrato entra como metal líquido que vira a foto (PortraitReveal) e, com
+ * - o retrato entra com uma luz de estúdio acendendo (PortraitReveal) e, com
  *   a foto no lugar, a assinatura é escrita sobre ele (~1,8 s, por tempo);
  * - texto de apoio e nome aparecem em seguida.
  * Com prefers-reduced-motion, tudo já aparece pronto (assinatura completa).
@@ -87,7 +87,7 @@ export default function Manifesto({
         // comprimento E opacidade 0, senão a ponta redonda deixa um ponto solto)
         // e é escrito em sequência, com duração proporcional ao comprimento.
         // Por tempo (~1,8 s), começando quando a foto real está no lugar (fim
-        // do metal líquido); sem retrato, quando a moldura chega a 60% da tela.
+        // da luz de estúdio); sem retrato, quando a moldura chega a 60% da tela.
         const paths = gsap.utils.toArray<SVGPathElement>("[data-signature-path]");
         const shineLayer = root.current?.querySelector("[data-signature-shine-layer]");
         const shine = root.current?.querySelector("[data-signature-shine]");
@@ -174,11 +174,10 @@ export default function Manifesto({
           {/* retrato a ~80% da coluna, como "cartão de vidro": inclina em 3D com
               o mouse; a assinatura fica numa camada à frente da foto, fora do
               recorte da moldura "curva líquida" */}
-          <PortraitFrameDefs />
           <TiltCard
             ref={portrait}
             className="mx-auto w-4/5 md:mx-0 md:ml-[4%]"
-            clip={PORTRAIT_FRAME_CLIP}
+            shape={PORTRAIT_FRAME_MASK}
             overlay={<PortraitFrameOutline />}
             front={
               <Signature
@@ -193,11 +192,11 @@ export default function Manifesto({
                 src={portraitSrc}
                 alt={copy.portraitAlt}
                 sizes="(min-width: 768px) 31vw, 72vw"
-                clip={PORTRAIT_FRAME_CLIP}
+                shape={PORTRAIT_FRAME_MASK}
                 onRevealed={handleRevealed}
               />
             ) : (
-              <div style={{ clipPath: PORTRAIT_FRAME_CLIP }}>
+              <div style={PORTRAIT_FRAME_MASK}>
                 <MediaSlot label={copy.portrait} ratio="aspect-[4/5]" className="border-0" />
               </div>
             )}

@@ -193,9 +193,9 @@ Linha final (pequena): A IA é a ferramenta mais poderosa que já existiu. Nas m
 - Texto: Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa, não por proposta enviada em massa.
 - CTA (substitui o indicador "[CONFIRMAR]"):
   - Status (Geist Mono, com ponto prata pulsando): AGENDA ABERTA PARA NOVAS PARCERIAS
-  - Frase: Se a sua marca está pronta para acompanhar o seu crescimento, vamos conversar enquanto há espaço na agenda.
+  - Frase: Se a sua marca está pronta para acompanhar o seu crescimento, o próximo passo começa com uma conversa.
   - Botão: Quero conversar → WhatsApp (https://wa.me/5511975415501 com mensagem pré-preenchida "Olá, Breno! Vi seu site e quero conversar sobre uma parceria para a minha marca.")
-  - EN: status "BOOKING NEW PARTNERSHIPS", frase "If your brand is ready to keep up with your growth, let's talk while there's room on my calendar.", botão "Let's talk".
+  - EN: status "BOOKING NEW PARTNERSHIPS", frase "If your brand is ready to keep up with your growth, the next step starts with a conversation.", botão "Let's talk".
 
 ## 13. Perguntas frequentes (preto — acordeão, uma aberta por vez)
 

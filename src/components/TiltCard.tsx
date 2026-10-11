@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode, type Ref } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode, type Ref } from "react";
 
 /**
  * "Cartão de vidro" (CSS 3D, sem WebGL): com o mouse sobre o cartão, ele
@@ -15,8 +15,8 @@ import { useEffect, useRef, type ReactNode, type Ref } from "react";
  * `ref` vai no contêiner externo, que NÃO gira (medidas estáveis para o
  * ScrollTrigger de quem usa o cartão como gatilho).
  * Formato: o cartão em si não é recortado (overflow/clip achatariam o 3D e
- * cortariam `front`); o filho se recorta sozinho e o reflexo usa `clip` (o
- * mesmo `clip-path` do filho). `overlay` fica por cima do reflexo e abaixo de
+ * cortariam `front`); o filho se recorta sozinho e o reflexo usa `shape` (a
+ * mesma máscara do filho). `overlay` fica por cima do reflexo e abaixo de
  * `front` (ex.: a borda fina da moldura).
  */
 
@@ -28,7 +28,7 @@ export default function TiltCard({
   children,
   front,
   className = "",
-  clip,
+  shape,
   overlay,
 }: {
   ref?: Ref<HTMLDivElement>;
@@ -36,8 +36,8 @@ export default function TiltCard({
   /** Camada à frente da foto (ex.: a assinatura), em posição absoluta. */
   front?: ReactNode;
   className?: string;
-  /** `clip-path` do reflexo (o mesmo formato do conteúdo). */
-  clip?: string;
+  /** Recorte do reflexo (a mesma máscara CSS do conteúdo). */
+  shape?: CSSProperties;
   /** Camada sobre a foto e o reflexo, abaixo de `front`. */
   overlay?: ReactNode;
 }) {
@@ -144,7 +144,7 @@ export default function TiltCard({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 opacity-0 mix-blend-screen motion-reduce:hidden"
           style={{
-            clipPath: clip,
+            ...shape,
             backgroundImage:
               "linear-gradient(115deg, transparent 30%, rgba(225,229,235,0.16) 46%, rgba(255,255,255,0.22) 50%, rgba(225,229,235,0.16) 54%, transparent 70%)",
             backgroundSize: "250% 250%",

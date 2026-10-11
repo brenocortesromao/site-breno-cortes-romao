@@ -32,9 +32,9 @@ import { loadDistanceCharts } from "@/content/charts";
  * Textos: src/messages/{pt,en}.json. Imagens/logos: public/ (content/media.ts).
  * ------------------------------------------------------------------ */
 
-/** Retrato da Mensagem (colorido; entrada de "construção digital" em PortraitReveal).
+/** Retrato da Mensagem (colorido; entrada "luz de estúdio" em PortraitReveal).
  * Original de 2400 px: o next/image gera o srcset (mobile, retina e 4K) a partir
- * dele, e o canvas da animação usa a versão "-1600" do mesmo nome. */
+ * dele. */
 const portraitSrc: string | undefined = "/retrato/breno-retrato.webp";
 
 export async function generateMetadata(): Promise<Metadata> {
