@@ -76,13 +76,19 @@ const bedH = (x: number, z: number) =>
 /** Região do cardume (centro e tamanho): à frente da câmera no fim da descida. */
 const BOX = { x0: 0, y0: -6.6, z0: -31, w: 22, h: 4.5, d: 10 };
 
-// tartarugas: [x0, y0, z0, rumo x, rumo z, velocidade, meio trajeto, comprimento]
-// a 1ª aparece no meio do mergulho; as outras perto do recife
-const TURTLES: [number, number, number, number, number, number, number, number][] = [
-  [-1, -5.2, -18, 0.75, -0.66, 0.55, 26, 1.7],
-  [3, -9.2, -33, -0.62, -0.78, 0.45, 30, 1.4],
-  [-6, -12, -45, 0.8, 0.6, 0.4, 32, 1.2],
-];
+// UMA tartaruga: volta lenta numa elipse inclinada à frente da câmera no meio
+// do mergulho (p ~0,6 a 0,8, a 8 a 13 unidades): a metade da frente da volta é
+// a travessia em diagonal, bem visível; a de trás fica mais longe, na névoa
+const TURTLE = {
+  center: new Vector3(1, -6, -19),
+  a: new Vector3(0.8, 0, -0.6), // eixo maior (diagonal)
+  b: new Vector3(0.6, 0, 0.8), // eixo menor (para perto / para longe)
+  ra: 8,
+  rb: 4,
+  w: 0.06, // ~0,5 unidade/s; volta em ~105 s
+  phase: -1.13, // passa mais perto por volta dos 15 s depois de a cena montar
+  len: 1.9,
+};
 
 type Boids = { pos: Float32Array; vel: Float32Array; size: Float32Array; goal: Vector3; next: number; rand: () => number };
 
@@ -191,11 +197,10 @@ export class OceanWorld {
   }
 
   private buildTurtles() {
-    const n = this.light ? 1 : TURTLES.length;
     const geo = turtleGeometry(this.light);
-    geo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0, 2.3, 4.1].slice(0, n)), 1));
+    geo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0]), 1));
     this.geos.push(geo);
-    const mesh = new InstancedMesh(geo, this.silhouette({ tint: 0.065, rim: 1.1, fog: 0.55, flap: true }), n);
+    const mesh = new InstancedMesh(geo, this.silhouette({ tint: 0.065, rim: 1.1, fog: 0.55, flap: true }), 1);
     mesh.frustumCulled = false;
     this.under.add(mesh);
     return mesh;
@@ -361,21 +366,23 @@ export class OceanWorld {
       this.stepBoids(dt, t);
       this.writeFish();
     }
-    // tartarugas: diagonal lenta, subindo e descendo devagar (o corpo inclina
-    // junto com a subida); encolhem até sumir nas pontas do trajeto (longe)
-    for (let i = 0; i < this.turtles.count; i++) {
-      const [x0, y0, z0, dx, dz, speed, range, len] = TURTLES[i];
-      const span = range * 2;
-      const s = ((((t * speed + i * 17) % span) + span) % span) - range;
-      const w = 0.16 + i * 0.03;
-      const y = y0 + 1.1 * Math.sin(t * w + i * 2);
-      const vy = (1.1 * w * Math.cos(t * w + i * 2)) / speed;
-      tmpQ.setFromUnitVectors(Z, tmpD.set(dx, vy, dz).normalize());
-      const k = len * Math.min(1, (range - Math.abs(s)) / 4);
-      tmpM.compose(tmpP.set(x0 + dx * s, y, z0 + dz * s), tmpQ, tmpS.set(k, k, k));
-      this.turtles.setMatrixAt(i, tmpM);
+    // tartaruga: diagonal lenta, subindo e descendo devagar (o corpo inclina
+    // junto com a subida)
+    {
+      const T = TURTLE;
+      const ang = t * T.w + T.phase;
+      const ca = Math.cos(ang);
+      const sa = Math.sin(ang);
+      tmpP.copy(T.center).addScaledVector(T.a, T.ra * ca).addScaledVector(T.b, T.rb * sa);
+      tmpP.y += 1.1 * Math.sin(t * 0.16);
+      // rumo = derivada da elipse; subida/descida em proporção à velocidade
+      tmpD.copy(T.a).multiplyScalar(-T.ra * sa * T.w).addScaledVector(T.b, T.rb * ca * T.w);
+      tmpD.y = 1.1 * 0.16 * Math.cos(t * 0.16);
+      tmpQ.setFromUnitVectors(Z, tmpD.normalize());
+      tmpM.compose(tmpP, tmpQ, tmpS.set(T.len, T.len, T.len));
+      this.turtles.setMatrixAt(0, tmpM);
+      this.turtles.instanceMatrix.needsUpdate = true;
     }
-    this.turtles.instanceMatrix.needsUpdate = true;
 
     if (this.sharks) {
       // ao longe, cruzando devagar em sentidos opostos
