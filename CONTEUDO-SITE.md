@@ -12,9 +12,7 @@ Regras:
 - Gráficos da seção 3 ("A distância") são conceituais, sem números.
 - Ordem narrativa: Hero → Mensagem → A distância (problema) → Diagnóstico interativo (identificação) → O que é fractional (modelo) → O que eu faço → O que muda → Como funciona → Onde aparece → Trabalhos → Sobre → Poucas parcerias → FAQ → Contato.
 - Curvas de nível do off-white: movimento líquido LENTO e calmo.
-- RITMO DE CORES (o site é majoritariamente preto; off-white só para variar, 3 vezes, espalhadas):
-  1 Hero: PRETO · 2 Mensagem: PRETO · 3 A distância: GRADIENTE ESCURO · 3b Diagnóstico: PRETO · 4 O que é fractional: OFF-WHITE · 5 O que eu faço: PRETO · 6 O que muda: GRADIENTE ESCURO · 8 Como funciona: OFF-WHITE · 9 Onde aparece: PRETO · 10 Trabalhos: PRETO · 11 Sobre: GRADIENTE ESCURO · 12 Poucas parcerias: OFF-WHITE · 13 FAQ: PRETO · 14 Contato: GRADIENTE ESCURO (fechamento).
-  GRADIENTE ESCURO = terceiro tema: preto com um brilho grafite/prata muito suave (radial ou linear), que se move devagar com o scroll; nunca claro.
+- RITMO DE CORES (decisão de 10/10, substitui a anterior): o site é TODO PRETO, exceto a seção "A distância" (os 3 blocos com gráficos), que é OFF-WHITE (#ECEAE5), com texto e gráficos em grafite.
 
 ---
 
@@ -83,14 +81,17 @@ Funciona sem interação (texto padrão) e com teclado; em prefers-reduced-motio
 - Fonte (letra pequena): Lightcast, The Rise of Fractional Leadership (2026).
 - Não usar mais o dado "9 → 24 a cada 1.000".
 
-**Comparativo (já aprovado visualmente — manter):**
+**Comparativo (versão 2, mais valor para o fractional):**
 | | Agência | Contratação executiva | Fractional |
 |---|---|---|---|
-| Visão do negócio | Por projeto | Contínua | Contínua |
-| Decisão de marca | Fica com você | Interna | Compartilhada, com responsável |
-| Custo | Variável a cada job | Salário + encargos fixos | Dedicação mensal acordada |
-| Continuidade | Termina com o job | Total | Ao longo da parceria |
-| Senioridade | Varia por equipe | Depende de quem você consegue contratar | Sênior desde o primeiro dia |
+| Visão do negócio | De fora, um projeto por vez | De dentro, mas presa à rotina | Contínua, com o olhar de fora e o compromisso de dentro |
+| Quem decide a marca | Você, entre uma entrega e outra | Um cargo fixo | Um diretor sênior, ao seu lado, todo mês |
+| Investimento | Variável a cada job | Salário, encargos e benefícios | Mensal e previsível, sem custo de contratação |
+| Continuidade | Termina na entrega | Depende de quem fica | Cresce a cada mês de parceria |
+| Senioridade | Varia conforme a equipe | Depende de quem você consegue atrair | Sênior desde o primeiro dia |
+| Começo | Novo briefing a cada projeto | Meses de recrutamento | Direto, a partir da primeira conversa |
+
+Destaque visual da coluna Fractional: cartão levemente mais claro que o fundo, com borda prata fina e um brilho suave; título "Fractional" em off-white metálico; um pequeno rótulo em Geist Mono acima, "O MODELO"; textos da coluna em off-white com peso maior; um marcador prata (✓ ou ponto) antes de cada célula. Colunas Agência e Contratação em cinza médio, peso normal. A coluna Fractional entra por último na animação, com o brilho passando uma vez.
 
 Nota: Não sou um CMO. Não assumo mídia, canais ou aquisição. Cuido do que faz tudo isso funcionar: a marca.
 
@@ -142,7 +143,7 @@ Cada etapa tem: número, rótulo de fase (mono, pequeno; NUNCA prazo ou tempo), 
 
 6. **Quanto mais tempo juntos, mais forte a sua marca.**
    Fase: PARCERIA
-   História: Não é um projeto que termina na entrega. É uma parceria que cresce com a empresa: novos produtos, novos mercados, novas fases. Quanto mais tempo juntos, mais rápido e mais certeiro fica o trabalho, porque eu já conheço o seu negócio por dentro.
+   História: Não é um projeto que termina na entrega. É uma parceria que cresce com a empresa: novos produtos, novos mercados, novas fases. A cada mês, eu conheço o seu negócio mais a fundo, e o trabalho fica mais rápido, mais certeiro e mais seu.
    (Último ponto da linha do tempo, com o mesmo estilo dos outros 5; a gota de metal líquido termina como um anel girando.)
 
 ## 9. Onde o trabalho aparece (preto — lista grande com reveal)

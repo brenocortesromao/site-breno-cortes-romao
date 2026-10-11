@@ -18,6 +18,7 @@ import {
   type WebGLRenderer,
 } from "three";
 import { branchCoral, fanCoral, moundCoral, seeded } from "./coral";
+import { turtleGeometry } from "./turtle";
 import type { OceanModels } from "./models";
 import {
   BACKDROP_FRAG,
@@ -72,7 +73,18 @@ function cameraAt(p: number): [number, number, number] {
 const bedH = (x: number, z: number) =>
   BED_LEVEL + 1.3 * Math.sin(x * 0.08 + 1.0) * Math.sin(z * 0.06) + 0.5 * Math.sin(x * 0.21 + z * 0.17);
 
-type Fish = { off: Vector3; f: number; ph: number; s: number };
+/** Região do cardume (centro e tamanho): à frente da câmera no fim da descida. */
+const BOX = { x0: 0, y0: -6.6, z0: -31, w: 22, h: 4.5, d: 10 };
+
+// tartarugas: [x0, y0, z0, rumo x, rumo z, velocidade, meio trajeto, comprimento]
+// a 1ª aparece no meio do mergulho; as outras perto do recife
+const TURTLES: [number, number, number, number, number, number, number, number][] = [
+  [-1, -5.2, -18, 0.75, -0.66, 0.55, 26, 1.7],
+  [3, -9.2, -33, -0.62, -0.78, 0.45, 30, 1.4],
+  [-6, -12, -45, 0.8, 0.6, 0.4, 32, 1.2],
+];
+
+type Boids = { pos: Float32Array; vel: Float32Array; size: Float32Array; goal: Vector3; next: number; rand: () => number };
 
 const Z = new Vector3(0, 0, 1);
 const tmpM = new Matrix4();
@@ -93,7 +105,11 @@ export class OceanWorld {
   private snow: ShaderMaterial;
   private fish: InstancedMesh | null = null;
   private sharks: InstancedMesh | null = null;
-  private school: Fish[] = [];
+  private boids: Boids | null = null;
+  private turtles: InstancedMesh;
+  /** Início (tempo) da passagem do tubarão perto da câmera; -1 = parado. */
+  private passStart = -1;
+  private passArmed = true;
   private time = 0;
   private prog = -1;
   private tilt = new Vector2();
@@ -120,17 +136,26 @@ export class OceanWorld {
 
     this.buildReef();
     this.snow = this.buildSnow();
+    this.turtles = this.buildTurtles();
   }
 
-  private silhouette(swim?: [number, number, number], tint = 0.03) {
+  /**
+   * Material de silhueta: tom, luz de contorno prateada (0 = sem) e fator da
+   * névoa (1 = normal; os animais usam menos névoa para se destacarem).
+   */
+  private silhouette(o: { tint: number; rim: number; fog: number; swim?: [number, number, number]; flap?: boolean }) {
+    const defines: Record<string, string> = { ...this.defines };
+    if (o.swim) defines.SWIM = "";
+    if (o.flap) defines.FLAP = "";
     const m = new ShaderMaterial({
       vertexShader: SILHOUETTE_VERT,
       fragmentShader: SILHOUETTE_FRAG,
-      defines: swim ? { ...this.defines, SWIM: "" } : this.defines,
+      defines,
       uniforms: {
         ...this.shared,
-        uTint: { value: new Vector3(tint, tint * 1.08, tint * 1.15) },
-        uSwim: { value: new Vector3(...(swim ?? [0, 0, 0])) },
+        uTint: { value: new Vector3(o.tint, o.tint * 1.08, o.tint * 1.15) },
+        uSwim: { value: new Vector3(...(o.swim ?? [0, 0, 0])) },
+        uLook: { value: new Vector2(o.rim, o.fog) },
       },
     });
     this.mats.push(m);
@@ -141,13 +166,13 @@ export class OceanWorld {
     const rand = seeded(7);
     const types: [BufferGeometry, number, [number, number], number][] = [
       // geometria, quantidade, escala, tom
-      [branchCoral(11, this.light), this.light ? 10 : 22, [1.1, 2.6], 0.034],
-      [fanCoral(23, this.light), this.light ? 8 : 16, [1.6, 3.4], 0.03],
-      [moundCoral(31, this.light), this.light ? 12 : 26, [0.8, 2.3], 0.04],
+      [branchCoral(11, this.light), this.light ? 10 : 22, [1.1, 2.6], 0.06],
+      [fanCoral(23, this.light), this.light ? 8 : 16, [1.6, 3.4], 0.055],
+      [moundCoral(31, this.light), this.light ? 12 : 26, [0.8, 2.3], 0.07],
     ];
     types.forEach(([geo, count, [s0, s1], tint], ti) => {
       this.geos.push(geo);
-      const mesh = new InstancedMesh(geo, this.silhouette(undefined, tint), count);
+      const mesh = new InstancedMesh(geo, this.silhouette({ tint, rim: 0.4, fog: 0.85 }), count);
       for (let i = 0; i < count; i++) {
         const side = rand() < 0.5 ? -1 : 1;
         const x = side * Math.pow(rand(), 1.25) * 42;
@@ -163,6 +188,17 @@ export class OceanWorld {
       mesh.frustumCulled = false;
       this.under.add(mesh);
     });
+  }
+
+  private buildTurtles() {
+    const n = this.light ? 1 : TURTLES.length;
+    const geo = turtleGeometry(this.light);
+    geo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0, 2.3, 4.1].slice(0, n)), 1));
+    this.geos.push(geo);
+    const mesh = new InstancedMesh(geo, this.silhouette({ tint: 0.065, rim: 1.1, fog: 0.55, flap: true }), n);
+    mesh.frustumCulled = false;
+    this.under.add(mesh);
+    return mesh;
   }
 
   private buildSnow() {
@@ -204,77 +240,166 @@ export class OceanWorld {
     const n = this.light ? 45 : 130;
     const fishGeo = m.fish.clone();
     const phase = new Float32Array(n);
+    const size = new Float32Array(n);
+    const pos = new Float32Array(n * 3);
+    const vel = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
       phase[i] = rand() * Math.PI * 2;
-      // cardume: elipsoide achatado, mais denso no meio
-      const r = Math.cbrt(rand());
-      const a = rand() * Math.PI * 2;
-      const b = Math.acos(rand() * 2 - 1);
-      this.school.push({
-        off: new Vector3(Math.sin(b) * Math.cos(a) * 4.2 * r, Math.cos(b) * 1.1 * r, Math.sin(b) * Math.sin(a) * 2.0 * r),
-        f: 0.6 + rand() * 0.6,
-        ph: rand() * Math.PI * 2,
-        s: 0.34 + rand() * 0.14,
-      });
+      size[i] = 0.34 + rand() * 0.14;
+      pos[i * 3] = BOX.x0 + (rand() - 0.5) * 6;
+      pos[i * 3 + 1] = BOX.y0 + (rand() - 0.5) * 2;
+      pos[i * 3 + 2] = BOX.z0 + (rand() - 0.5) * 4;
+      vel[i * 3] = 1.6 + rand() * 0.3;
+      vel[i * 3 + 1] = (rand() - 0.5) * 0.2;
+      vel[i * 3 + 2] = (rand() - 0.5) * 0.4;
     }
+    this.boids = { pos, vel, size, goal: new Vector3(BOX.x0 + 6, BOX.y0, BOX.z0), next: 0, rand };
+    // pré-aquece: o cardume já aparece organizado (inclusive no quadro parado)
+    for (let k = 0; k < 90; k++) this.stepBoids(1 / 30, k / 30);
     fishGeo.setAttribute("aPhase", new InstancedBufferAttribute(phase, 1));
-    this.fish = new InstancedMesh(fishGeo, this.silhouette([0.1, 11, 9], 0.05), n);
+    this.fish = new InstancedMesh(fishGeo, this.silhouette({ tint: 0.075, rim: 1.2, fog: 0.55, swim: [0.1, 11, 9] }), n);
     this.fish.frustumCulled = false;
 
+    // tubarões ao longe (1 ou 2) + 1 que passa perto da câmera (ver passStart)
+    const far = this.light ? 1 : 2;
     const sharkGeo = m.shark.clone();
-    sharkGeo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0, 2.1]), 1));
-    this.sharks = new InstancedMesh(sharkGeo, this.silhouette([0.07, 2.2, 5], 0.022), this.light ? 1 : 2);
+    sharkGeo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0, 2.1, 4.4].slice(0, far + 1)), 1));
+    this.sharks = new InstancedMesh(sharkGeo, this.silhouette({ tint: 0.045, rim: 1.0, fog: 0.55, swim: [0.07, 2.2, 5] }), far + 1);
     this.sharks.frustumCulled = false;
     this.geos.push(fishGeo, sharkGeo);
     this.under.add(this.fish, this.sharks);
+    this.writeFish();
   }
 
-  private animateLife(t: number) {
-    if (this.fish) {
-      // o cardume dá voltas largas à frente do recife: passa pela tela,
-      // some na névoa ao fundo e volta
-      const w = 0.12;
-      const cx = 10 * Math.cos(t * w);
-      const cy = -7.4 + 0.7 * Math.sin(t * 0.21);
-      const cz = -35 + 5 * Math.sin(t * w);
-      const head = tmpD.set(-Math.sin(t * w) * 10, (0.7 * 0.21 * Math.cos(t * 0.21)) / w, Math.cos(t * w) * 5).normalize();
-      const hx = head.x;
-      const hy = head.y;
-      const hz = head.z;
-      // eixo lateral do cardume (perpendicular ao rumo, no plano horizontal)
-      const lx = -hz;
-      const lz = hx;
-      this.school.forEach((f, i) => {
-        const o = f.off;
-        const wob = Math.sin(t * f.f + f.ph);
-        // o elipsoide se alonga no rumo; uma onda leve percorre o cardume
-        tmpP.set(
-          cx + hx * o.x + lx * o.z + 0.25 * wob,
-          cy + o.y + 0.3 * Math.sin(t * 0.9 + o.x * 0.6),
-          cz + hz * o.x + lz * o.z + 0.25 * Math.cos(t * f.f * 1.3 + f.ph),
-        );
-        const dir = tmpS.set(hx + 0.14 * wob, hy + 0.06 * Math.sin(t * f.f * 1.7 + f.ph), hz + 0.14 * Math.cos(t * f.f + f.ph)).normalize();
-        tmpQ.setFromUnitVectors(Z, dir);
-        const s = f.s;
-        tmpM.compose(tmpP, tmpQ, tmpS.set(s, s, s));
-        this.fish!.setMatrixAt(i, tmpM);
-      });
-      this.fish.instanceMatrix.needsUpdate = true;
+  /**
+   * Cardume com boids simples (separação, alinhamento, coesão) seguindo um
+   * alvo que muda de lugar a cada 7 a 13 s: o cardume vira de direção de vez
+   * em quando, sem rota fixa. Vizinhos por força bruta, mas N <= 130.
+   */
+  private stepBoids(dt: number, t: number) {
+    const b = this.boids!;
+    if (t >= b.next) {
+      b.goal.set(BOX.x0 + (b.rand() - 0.5) * BOX.w, BOX.y0 + (b.rand() - 0.5) * BOX.h, BOX.z0 + (b.rand() - 0.5) * BOX.d);
+      b.next = t + 7 + b.rand() * 6;
     }
+    const { pos, vel } = b;
+    const n = pos.length / 3;
+    for (let i = 0; i < n; i++) {
+      const i3 = i * 3;
+      const px = pos[i3];
+      const py = pos[i3 + 1];
+      const pz = pos[i3 + 2];
+      let sx = 0, sy = 0, sz = 0, ax = 0, ay = 0, az = 0, cx = 0, cy = 0, cz = 0, cnt = 0;
+      for (let j = 0; j < n; j++) {
+        if (j === i) continue;
+        const j3 = j * 3;
+        const dx = pos[j3] - px;
+        const dy = pos[j3 + 1] - py;
+        const dz = pos[j3 + 2] - pz;
+        const d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 > 4) continue;
+        ax += vel[j3];
+        ay += vel[j3 + 1];
+        az += vel[j3 + 2];
+        cx += dx;
+        cy += dy;
+        cz += dz;
+        cnt++;
+        if (d2 < 0.3) {
+          const k = 1 / (d2 + 0.02);
+          sx -= dx * k;
+          sy -= dy * k;
+          sz -= dz * k;
+        }
+      }
+      let fx = sx * 0.05;
+      let fy = sy * 0.05;
+      let fz = sz * 0.05;
+      if (cnt) {
+        fx += (ax / cnt - vel[i3]) * 0.9 + (cx / cnt) * 0.6;
+        fy += (ay / cnt - vel[i3 + 1]) * 0.9 + (cy / cnt) * 0.6;
+        fz += (az / cnt - vel[i3 + 2]) * 0.9 + (cz / cnt) * 0.6;
+      }
+      // alvo (rumo do cardume); vertical mais contida
+      const gx = b.goal.x - px;
+      const gy = b.goal.y - py;
+      const gz = b.goal.z - pz;
+      const gl = Math.hypot(gx, gy, gz) || 1;
+      fx += (gx / gl) * 0.8;
+      fy += (gy / gl) * 0.4;
+      fz += (gz / gl) * 0.8;
+      let vx = vel[i3] + fx * dt;
+      let vy = (vel[i3 + 1] + fy * dt) * 0.98;
+      let vz = vel[i3 + 2] + fz * dt;
+      const sp = Math.hypot(vx, vy, vz) || 1;
+      const lim = Math.min(2.3, Math.max(1.1, sp)) / sp;
+      vx *= lim;
+      vy *= lim;
+      vz *= lim;
+      vel[i3] = vx;
+      vel[i3 + 1] = vy;
+      vel[i3 + 2] = vz;
+    }
+    for (let i = 0; i < pos.length; i++) pos[i] += vel[i] * dt;
+  }
+
+  private writeFish() {
+    const b = this.boids;
+    if (!b || !this.fish) return;
+    for (let i = 0; i < b.size.length; i++) {
+      const i3 = i * 3;
+      tmpQ.setFromUnitVectors(Z, tmpD.set(b.vel[i3], b.vel[i3 + 1], b.vel[i3 + 2]).normalize());
+      const s = b.size[i];
+      tmpM.compose(tmpP.set(b.pos[i3], b.pos[i3 + 1], b.pos[i3 + 2]), tmpQ, tmpS.set(s, s, s));
+      this.fish.setMatrixAt(i, tmpM);
+    }
+    this.fish.instanceMatrix.needsUpdate = true;
+  }
+
+  private animateLife(t: number, dt: number, cam: Vector3, still: boolean) {
+    if (this.boids && dt > 0) {
+      this.stepBoids(dt, t);
+      this.writeFish();
+    }
+    // tartarugas: diagonal lenta, subindo e descendo devagar (o corpo inclina
+    // junto com a subida); encolhem até sumir nas pontas do trajeto (longe)
+    for (let i = 0; i < this.turtles.count; i++) {
+      const [x0, y0, z0, dx, dz, speed, range, len] = TURTLES[i];
+      const span = range * 2;
+      const s = ((((t * speed + i * 17) % span) + span) % span) - range;
+      const w = 0.16 + i * 0.03;
+      const y = y0 + 1.1 * Math.sin(t * w + i * 2);
+      const vy = (1.1 * w * Math.cos(t * w + i * 2)) / speed;
+      tmpQ.setFromUnitVectors(Z, tmpD.set(dx, vy, dz).normalize());
+      const k = len * Math.min(1, (range - Math.abs(s)) / 4);
+      tmpM.compose(tmpP.set(x0 + dx * s, y, z0 + dz * s), tmpQ, tmpS.set(k, k, k));
+      this.turtles.setMatrixAt(i, tmpM);
+    }
+    this.turtles.instanceMatrix.needsUpdate = true;
+
     if (this.sharks) {
-      // dois tubarões cruzando devagar, longe, em sentidos opostos
+      // ao longe, cruzando devagar em sentidos opostos
+      // (as fases deixam um deles em cena logo nos primeiros segundos)
       const paths: [number, number, number, number, number][] = [
-        // x(t), y, z, rumo, comprimento
-        // (as fases deixam um deles em cena logo nos primeiros segundos)
         [-30 + ((t * 0.95 + 47) % 60), -8.6 + 0.5 * Math.sin(t * 0.11), -42, 1, 4.6],
         [40 - ((t * 0.75 + 78) % 80), -12 + 0.4 * Math.sin(t * 0.09 + 1), -54, -1, 4.0],
       ];
-      for (let i = 0; i < this.sharks.count; i++) {
+      const far = this.sharks.count - 1;
+      for (let i = 0; i < far; i++) {
         const [x, y, z, dir, len] = paths[i];
         tmpQ.setFromUnitVectors(Z, tmpD.set(dir, 0.02 * Math.sin(t * 0.2 + i), 0.1 * Math.sin(t * 0.17 + i * 2)).normalize());
         tmpM.compose(tmpP.set(x, y, z), tmpQ, tmpS.set(len, len, len));
         this.sharks.setMatrixAt(i, tmpM);
       }
+      // o que passa PERTO: disparado uma vez quando a descida passa de ~60%
+      // (de novo se a pessoa voltar para cima e descer outra vez); atravessa
+      // a tela em ~11 s, a ~9 unidades da câmera e um pouco abaixo dela
+      const u = still ? 0.55 : this.passStart < 0 ? -1 : (t - this.passStart) / 11;
+      if (u >= 0 && u <= 1) {
+        tmpQ.setFromUnitVectors(Z, tmpD.set(1, 0.04, -0.12).normalize());
+        tmpM.compose(tmpP.set(cam.x - 17 + 34 * u, cam.y - 1.7 + 0.25 * Math.sin(t * 0.4), cam.z - 9 - 1.2 * u), tmpQ, tmpS.set(4.8, 4.8, 4.8));
+      } else tmpM.makeScale(0, 0, 0);
+      this.sharks.setMatrixAt(far, tmpM);
       this.sharks.instanceMatrix.needsUpdate = true;
     }
   }
@@ -303,9 +428,16 @@ export class OceanWorld {
     u.uTan.value = Math.tan((camera.fov * Math.PI) / 360);
     this.snow.uniforms.uPx.value = u.uRes.value.y * 0.011;
 
+    // passagem do tubarão perto: dispara ao passar de 60% da descida; rearma
+    // ao voltar acima da linha d'água
+    if (this.passArmed && this.prog > 0.6) {
+      this.passArmed = false;
+      this.passStart = t;
+    } else if (this.prog < 0.4) this.passArmed = true;
+
     // acima da superfície nada embaixo aparece: nem desenha
     this.under.visible = camera.position.y < 1.2;
-    if (this.under.visible) this.animateLife(t);
+    if (this.under.visible) this.animateLife(t, still ? 0 : dt, camera.position, still);
   }
 
   dispose() {

@@ -23,7 +23,8 @@ type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
  * Narrativa (superfície = o que a IA alcança; profundidade = a experiência
  * humana): a câmera começa acima do alto-mar, desce, atravessa a linha d'água
  * e mergulha até o recife, com raios de luz, cáusticas, partículas, cardume e
- * tubarões ao longe (ver ocean/world.ts). Opacidade ~40%, vinheta e fades.
+ * tartarugas, cardume e tubarões (ver ocean/world.ts). Opacidade 40% acima
+ * d'água e 52% submersa, vinheta e fades.
  * - Sem WebGL2: nada (fundo preto da seção).
  * - Toque / nível "low": versão leve (menos ondas, peixes, corais e
  *   partículas, resolução 0,6x).
@@ -34,6 +35,8 @@ type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
 export default function OceanBackdrop() {
   const root = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
+  /** Opacidade da cena: 0,4 acima d'água, um pouco mais (0,52) submersa. */
+  const fade = useRef<HTMLDivElement>(null);
   /** Progresso da seção (0→1), lido pela câmera a cada quadro. */
   const progress = useRef(0);
   const pointer = useRef({ x: 0, y: 0 });
@@ -49,6 +52,10 @@ export default function OceanBackdrop() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     setEnv({ webgl, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
     if (reduced) progress.current = 0.92;
+  }, []);
+
+  const setDepth = useCallback((p: number) => {
+    if (fade.current) fade.current.style.opacity = String(0.4 + 0.12 * Math.min(1, Math.max(0, (p - 0.4) / 0.15)));
   }, []);
 
   // renderiza só com a seção na tela (com margem para não piscar ao entrar)
@@ -88,7 +95,10 @@ export default function OceanBackdrop() {
           start: "top 70%",
           end: "bottom 85%",
           refreshPriority: -1,
-          onUpdate: (self) => (progress.current = self.progress),
+          onUpdate: (self) => {
+            progress.current = self.progress;
+            setDepth(self.progress);
+          },
         });
         // entra em fade com a seção; sai em fade no fim (antes do off-white
         // de "Poucas parcerias"), depois de a câmera chegar ao recife
@@ -105,7 +115,7 @@ export default function OceanBackdrop() {
         });
       });
     },
-    { scope: root, dependencies: [scene], revertOnUpdate: true },
+    { scope: root, dependencies: [scene, setDepth], revertOnUpdate: true },
   );
 
   if (!scene) return <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" />;
@@ -114,7 +124,7 @@ export default function OceanBackdrop() {
     <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={layer} className="absolute inset-0">
-          <div className="absolute inset-0 opacity-[0.4]">
+          <div ref={fade} className="absolute inset-0" style={{ opacity: env.reduced ? 0.52 : 0.4 }}>
             {/* erro ou perda de contexto: remonta; desiste (sem oceano) se falhar de novo */}
             <ResilientBoundary name="oceano" onGiveUp={handleFail}>
               {(onLost) =>

@@ -73,14 +73,14 @@ vec2 waveGrad(vec2 p) {
 }
 
 // ---- debaixo d'água: cor da água vista na direção rd (fundo e névoa)
-float depthLight(float y) { return exp(min(y, 0.0) * 0.04); }
+float depthLight(float y) { return exp(min(y, 0.0) * 0.028); }
 vec3 waterCol(vec3 rd) {
   float k = depthLight(uCamPos.y);
   float up = smoothstep(-0.7, 1.0, rd.y);
-  vec3 deep = vec3(0.016, 0.022, 0.027);
-  vec3 shallow = vec3(0.24, 0.27, 0.29);
+  vec3 deep = vec3(0.045, 0.057, 0.068); // grafite azulado médio (não preto)
+  vec3 shallow = vec3(0.30, 0.34, 0.37);
   vec3 c = mix(deep, shallow * k, up);
-  c += vec3(0.21, 0.23, 0.24) * pow(max(dot(rd, SUN), 0.0), 6.0) * k * 0.7;
+  c += vec3(0.21, 0.23, 0.24) * pow(max(dot(rd, SUN), 0.0), 6.0) * k * 0.85;
   return c;
 }
 float fogF(float d) { return 1.0 - exp(-d * FOG_D); }
@@ -196,12 +196,12 @@ vec3 underWater(vec3 ro, vec3 rd) {
       vec3 p = ro + rd * t;
       float kb = depthLight(p.y);
       float sand = 0.85 + 0.3 * noise2(p.xz * 0.7);
-      vec3 bed = vec3(0.06, 0.065, 0.068) * sand * kb * 2.4;
-      bed += vec3(0.42, 0.44, 0.45) * caustic(p.xz * 0.45) * kb;
+      vec3 bed = vec3(0.085, 0.092, 0.098) * sand * kb * 2.4;
+      bed += vec3(0.62, 0.65, 0.67) * caustic(p.xz * 0.45) * kb;
       c = mix(bed, base, fogF(t));
     }
   }
-  c += vec3(0.42, 0.45, 0.47) * godRays(rd);
+  c += vec3(0.6, 0.64, 0.67) * godRays(rd);
   return c;
 }
 
@@ -219,18 +219,34 @@ void main() {
 // ------------------------------------------------------------------ silhuetas
 export const SILHOUETTE_VERT = /* glsl */ `
 uniform float uTime;
-#ifdef SWIM
+#if defined(SWIM) || defined(FLAP)
 attribute float aPhase;
+#endif
+#ifdef SWIM
 uniform vec3 uSwim; // amplitude, frequência, número de onda ao longo do corpo
+#endif
+#ifdef FLAP
+// tartaruga: peso da nadadeira (0 = casco) e 1 = dianteira / 0 = traseira
+attribute vec2 aFlap;
 #endif
 varying vec3 vWorld;
 varying vec3 vNormal;
 void main() {
   vec3 p = position;
+  vec3 nrm = normal;
 #ifdef SWIM
   // nado: onda lateral que cresce da cabeça (+Z) para a cauda (-Z)
   float tail = clamp(0.45 - p.z, 0.0, 1.0);
   p.x += sin(uTime * uSwim.y + aPhase - p.z * uSwim.z) * uSwim.x * tail * tail;
+#endif
+#ifdef FLAP
+  // batida lenta das nadadeiras (dianteiras amplas, traseiras defasadas e curtas);
+  // a ponta sobe/desce e recua um pouco, como um voo debaixo d'água
+  float beat = sin(uTime * 1.3 + aPhase + (1.0 - aFlap.y) * 1.3);
+  float amp = mix(0.12, 0.42, aFlap.y) * aFlap.x;
+  p.y += beat * amp;
+  p.z -= abs(beat) * amp * 0.35 * aFlap.y;
+  nrm = normalize(nrm + vec3(-sign(p.x) * beat * amp * 1.5, 0.0, 0.0));
 #endif
   mat4 m = modelMatrix;
 #ifdef USE_INSTANCING
@@ -238,12 +254,14 @@ void main() {
 #endif
   vec4 wp = m * vec4(p, 1.0);
   vWorld = wp.xyz;
-  vNormal = normalize(mat3(m) * normal);
+  vNormal = normalize(mat3(m) * nrm);
   gl_Position = projectionMatrix * viewMatrix * wp;
 }`;
 
 export const SILHOUETTE_FRAG = /* glsl */ `
 uniform vec3 uTint;
+// x: luz de contorno (rim), y: fator da névoa (< 1 = menos névoa sobre o objeto)
+uniform vec2 uLook;
 ${COMMON}
 varying vec3 vWorld;
 varying vec3 vNormal;
@@ -255,10 +273,14 @@ void main() {
   vec3 n = normalize(vNormal);
   float k = depthLight(vWorld.y);
   float top = max(n.y, 0.0);
-  // silhueta escura; só o dorso pega um pouco da luz de cima e das cáusticas
+  // silhueta escura; o dorso pega a luz de cima e as cáusticas
   vec3 c = uTint * (0.35 + 0.65 * top) * k;
-  c += vec3(0.16, 0.17, 0.18) * caustic(vWorld.xz * 0.45) * top * k;
-  gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d)), 1.0);
+  c += vec3(0.2, 0.21, 0.22) * caustic(vWorld.xz * 0.45) * top * k;
+  // contorno prateado (fresnel), mais forte nas bordas viradas para cima:
+  // destaca o animal do fundo sem iluminá-lo por inteiro
+  float fres = pow(1.0 - abs(dot(n, -rd)), 2.5);
+  c += vec3(0.62, 0.66, 0.7) * fres * smoothstep(-0.35, 0.7, n.y) * uLook.x * k;
+  gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d * uLook.y)), 1.0);
 }`;
 
 // ------------------------------------------------------------------ partículas
