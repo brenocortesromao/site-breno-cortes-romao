@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -58,10 +58,146 @@ function Marker() {
   return <span aria-hidden="true" className="mt-[0.5em] h-1.5 w-1.5 shrink-0 rounded-full bg-silver" />;
 }
 
+/** Cartões do carrossel: cada um vai de 85% da largura (o próximo aparece na borda). */
+type Row = { label: string; values: string[] };
+
+/**
+ * Mobile (até 767px): comparativo POR CRITÉRIO, um cartão por linha da tabela,
+ * num carrossel horizontal com scroll-snap. Cada cartão: critério + contador,
+ * resposta do Fractional em destaque (mesmo cartão CARD do desktop) e, abaixo
+ * de uma linha fina, Agência e Contratação executiva em linhas compactas.
+ * Bolinhas embaixo marcam o cartão ativo. Ao trocar de cartão, a resposta do
+ * Fractional entra com fade/blur e as outras duas logo depois (escalonadas);
+ * os cartões vizinhos ficam com as respostas apagadas. Decorativo para
+ * leitores de tela (aria-hidden): a <table> segue no DOM (sr-only no mobile).
+ * Sem JS / reduced motion: tudo visível, sem animação.
+ */
+function CriteriaCarousel({ columns, rows }: { columns: string[]; rows: Row[] }) {
+  const track = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const [seen, setSeen] = useState(false);
+  const total = String(rows.length).padStart(2, "0");
+  const others = columns.map((_, c) => c).filter((c) => c !== HIGHLIGHT);
+
+  // cartão ativo pela posição do scroll horizontal
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const cards = el.children as HTMLCollectionOf<HTMLElement>;
+      if (cards.length < 2) return;
+      const step = cards[1].offsetLeft - cards[0].offsetLeft;
+      const max = el.scrollWidth - el.clientWidth;
+      const i = el.scrollLeft >= max - 2 ? cards.length - 1 : Math.round(el.scrollLeft / step);
+      setActive(Math.min(Math.max(i, 0), cards.length - 1));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(read);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    // a primeira entrada acontece quando o carrossel chega à tela
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        setSeen(true);
+        io.disconnect();
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+      io.disconnect();
+    };
+  }, []);
+
+  // respostas: a do Fractional primeiro, depois as outras duas
+  useEffect(() => {
+    const el = track.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    [...(el.children as HTMLCollectionOf<HTMLElement>)].forEach((card, i) => {
+      const fx = card.querySelectorAll("[data-cr-fx]");
+      if (seen && i === active) {
+        gsap.to(fx, { autoAlpha: 1, filter: "blur(0px)", y: 0, duration: 0.6, ease: "power3.out", stagger: 0.12, overwrite: true });
+      } else {
+        gsap.to(fx, { autoAlpha: 0.15, filter: "blur(4px)", y: 6, duration: seen ? 0.3 : 0, ease: "power2.out", overwrite: true });
+      }
+    });
+  }, [active, seen]);
+
+  const go = (i: number) => {
+    const el = track.current;
+    const card = el?.children[i] as HTMLElement | undefined;
+    if (!el || !card) return;
+    el.scrollTo({ left: card.offsetLeft - (el.children[0] as HTMLElement).offsetLeft, behavior: "smooth" });
+  };
+
+  return (
+    <div aria-hidden="true" className="md:hidden">
+      <div
+        ref={track}
+        className="relative -mx-6 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto overscroll-x-contain px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {rows.map((row, r) => (
+          <div key={row.label} className="flex w-[85%] shrink-0 snap-start flex-col rounded-2xl border border-line p-5">
+            <div className="flex items-baseline justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.22em] text-silver">
+              <span>{row.label}</span>
+              <span className="shrink-0 tabular-nums tracking-[0.12em]">
+                {String(r + 1).padStart(2, "0")} / {total}
+              </span>
+            </div>
+
+            <div className={`relative mt-5 p-4 ${CARD}`}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-silver">
+                <span className="mr-1.5">●</span>
+                {protectTerms(columns[HIGHLIGHT])}
+              </p>
+              <p data-cr-fx className="mt-2 break-words text-[18px] font-medium leading-snug tracking-[-0.01em] text-foreground">
+                {row.values[HIGHLIGHT]}
+              </p>
+            </div>
+
+            <div className="mt-5 h-px bg-line" />
+
+            <div className="mt-4 grid gap-3">
+              {others.map((c) => (
+                <div key={c} className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-baseline gap-3">
+                  <span className="font-mono text-[10px] uppercase leading-snug tracking-[0.16em] text-silver/75">
+                    {protectTerms(columns[c])}
+                  </span>
+                  <span data-cr-fx className="break-words text-[14px] leading-snug text-silver">
+                    {row.values[c]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 flex justify-center gap-1">
+        {rows.map((row, r) => (
+          <button key={row.label} type="button" tabIndex={-1} onClick={() => go(r)} className="p-1.5">
+            <span
+              className={`block h-2 w-2 rounded-full border transition-colors duration-300 ${
+                r === active ? "border-foreground bg-foreground" : "border-silver/60 bg-transparent"
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /**
  * "O que é fractional" — seção CLARA (off-white) com curvas de nível.
  * Comparativo (versão 2 do CONTEUDO-SITE.md): as 3 colunas entram uma a uma
- * quando o quadro chega à tela (desktop: tabela; mobile: 3 cartões). A coluna
+ * quando o quadro chega à tela (desktop: tabela; mobile: carrossel por critério,
+ * CriteriaCarousel). A coluna
  * Fractional é um cartão em destaque (CARD), com o rótulo "O modelo" em mono,
  * título em prata, textos com mais peso e marcador prata em cada célula; ela
  * entra por último e uma faixa de luz passa por ela uma vez. Agência e
@@ -104,7 +240,8 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             { backgroundPosition: "0% 0", duration: 1.5, ease: "power2.inOut", stagger: 0.2 },
           )
           .to("[data-num-shine]", { opacity: 0, duration: 0.3 });
-
+      });
+      mm.add("(prefers-reduced-motion: no-preference) and (min-width: 768px)", () => {
         const tl = gsap.timeline({
           scrollTrigger: { trigger: board.current, start: "top 72%" },
         });
@@ -192,7 +329,8 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
         <div ref={board} className="mt-16 md:mt-24">
           {/* Desktop: tabela semântica; o cartão da coluna em destaque fica atrás
               dela (colunas: rótulos 22%, modelos 26% cada) */}
-          <div className="relative hidden md:block">
+          {/* (no mobile a tabela fica só para leitores de tela: sr-only) */}
+          <div className="relative max-md:sr-only">
             <div data-col={HIGHLIGHT} aria-hidden="true" className={`absolute -bottom-2 -top-3 left-[74%] w-[26%] ${CARD}`}>
               <CardShine />
             </div>
@@ -257,39 +395,8 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           </table>
           </div>
 
-          {/* Mobile: um cartão por modelo */}
-          <div className="grid gap-4 md:hidden">
-            {columns.map((col, c) => (
-              <div
-                key={col}
-                data-col={c}
-                className={`relative p-5 ${c === HIGHLIGHT ? CARD : "border border-line"}`}
-              >
-                {c === HIGHLIGHT && <CardShine />}
-                {c === HIGHLIGHT && (
-                  <p aria-hidden="true" className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-silver">
-                    {copy.compare.highlightLabel}
-                  </p>
-                )}
-                <h3 className={`text-xl font-semibold tracking-[-0.03em] ${c === HIGHLIGHT ? "" : "text-silver"}`}>
-                  {c === HIGHLIGHT ? <span className="text-silver-gradient">{protectTerms(col)}</span> : protectTerms(col)}
-                </h3>
-                <dl className="mt-4 grid gap-3">
-                  {rows.map((row) => (
-                    <div key={row.label} className="grid grid-cols-[7.5rem_1fr] gap-3">
-                      <dt className="pt-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
-                        {row.label}
-                      </dt>
-                      <dd className={`text-sm leading-snug ${c === HIGHLIGHT ? "flex gap-2.5 font-medium text-foreground" : "text-silver"}`}>
-                        {c === HIGHLIGHT && <Marker />}
-                        {c === HIGHLIGHT ? <span>{row.values[c]}</span> : row.values[c]}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            ))}
-          </div>
+          {/* Mobile: um cartão por critério, em carrossel */}
+          <CriteriaCarousel columns={columns} rows={rows} />
 
           <p className="m-center mt-10 max-w-xl text-sm leading-relaxed text-silver max-md:mx-auto">{protectTerms(copy.note)}</p>
         </div>
