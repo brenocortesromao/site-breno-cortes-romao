@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { protectTerms } from "@/components/Term";
 import JsonLdScript from "@/components/seo/JsonLdScript";
 import { faqJsonLd } from "@/lib/seo/structured-data";
+import FaqAscii from "@/components/sections/FaqAscii";
 
 /**
  * Perguntas frequentes (§13). Acordeão com <details>/<summary> NATIVOS:
@@ -12,6 +13,9 @@ import { faqJsonLd } from "@/lib/seo/structured-data";
  * Uma aberta por vez: todos os <details> compartilham o mesmo `name`
  * (acordeão exclusivo nativo; navegadores antigos só deixam abrir várias).
  * SEO: dados estruturados FAQPage (JSON-LD) com as mesmas perguntas.
+ * Coluna esquerda: abaixo do título, o "?" em ASCII (FaqAscii), que vira "!"
+ * com uma pergunta aberta; título + "?" ficam juntos no sticky (desktop).
+ * Fundo: grão sutil que troca de posição a cada ~120 ms (.faq-grain).
  */
 export default async function Faq() {
   const t = await getTranslations("faq");
@@ -21,14 +25,18 @@ export default async function Faq() {
     <>
     <JsonLdScript data={faqJsonLd(items)} />
     <section id="perguntas" data-theme="dark" aria-labelledby="perguntas-title" className="relative z-10 min-h-svh">
-      <div className="mx-auto grid w-full max-w-[1600px] gap-12 px-6 py-[clamp(6rem,16vh,12rem)] md:grid-cols-12 md:gap-8 md:px-12">
+      <div aria-hidden="true" className="faq-grain pointer-events-none absolute inset-0 overflow-hidden" />
+      <div className="relative mx-auto grid w-full max-w-[1600px] gap-12 px-6 py-[clamp(6rem,16vh,12rem)] md:grid-cols-12 md:gap-8 md:px-12">
         <div className="md:col-span-4">
-          <h2
-            id="perguntas-title"
-            className="m-center text-[clamp(2.3rem,4.4vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:sticky md:top-32"
-          >
-            {t("title")}
-          </h2>
+          <div className="md:sticky md:top-32">
+            <h2
+              id="perguntas-title"
+              className="m-center text-[clamp(2.3rem,4.4vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
+            >
+              {t("title")}
+            </h2>
+            <FaqAscii text={items.map((item) => `${item.q} ${item.a}`).join(" ")} />
+          </div>
         </div>
 
         <div className="border-t border-line md:col-span-7 md:col-start-6">

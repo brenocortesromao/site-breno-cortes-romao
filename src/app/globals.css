@@ -316,6 +316,40 @@ html.custom-cursor * {
   }
 }
 
+/* Perguntas frequentes: grão sutil (~4%) no fundo; a camada troca de posição
+   a cada ~120 ms só com a seção na tela (data-faq-live, ligado pelo FaqAscii).
+   Reduced motion: grão parado. */
+.faq-grain::before {
+  content: "";
+  position: absolute;
+  inset: -120px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.04;
+  animation: faqGrain 0.96s infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+[data-faq-live] .faq-grain::before {
+  animation-play-state: running;
+}
+@keyframes faqGrain {
+  0% { transform: translate(0, 0); animation-timing-function: steps(1, end); }
+  12.5% { transform: translate(-63px, 41px); animation-timing-function: steps(1, end); }
+  25% { transform: translate(37px, -89px); animation-timing-function: steps(1, end); }
+  37.5% { transform: translate(-101px, -23px); animation-timing-function: steps(1, end); }
+  50% { transform: translate(79px, 67px); animation-timing-function: steps(1, end); }
+  62.5% { transform: translate(-17px, 103px); animation-timing-function: steps(1, end); }
+  75% { transform: translate(97px, -51px); animation-timing-function: steps(1, end); }
+  87.5% { transform: translate(-83px, -97px); animation-timing-function: steps(1, end); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq-grain::before {
+    animation: none;
+  }
+}
+
 /*
  * Gráficos de "A distância" (SVGs do dono, inline): a textura entre as curvas
  * (#*-hatch) e o brilho (#*-gapfill) foram desenhados para tamanho real; na
