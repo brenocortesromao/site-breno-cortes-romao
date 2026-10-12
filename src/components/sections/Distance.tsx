@@ -6,6 +6,18 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { DistanceCharts } from "@/content/charts";
 import { DecodeLetters, decode, hideLetters, shine } from "@/components/decode";
+import FlowField, { type FlowStage } from "@/components/graphics/FlowField";
+
+/**
+ * Fundo em fluxo (FlowField), uma etapa por bloco: 1) correntes bem separadas
+ * (a distância); 2) mais agitado (fechando a distância); 3) as correntes voltam
+ * a se aproximar (o gráfico 3 termina com tudo alinhado na "mesma direção").
+ */
+const FLOW_STAGES: FlowStage[] = [
+  { separation: 1, turbulence: 1 },
+  { separation: 0.9, turbulence: 1.9 },
+  { separation: 0.12, turbulence: 0.8 },
+];
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -130,7 +142,8 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
       aria-labelledby="distancia-title"
       className="relative z-10 overflow-x-clip"
     >
-      <div className="mx-auto w-full max-w-[1600px] px-6 pb-[clamp(6rem,16vh,12rem)] pt-[clamp(6rem,16vh,12rem)] md:px-12">
+      <FlowField stagesSelector="[data-step]" stages={FLOW_STAGES} dimSelector="[data-step] h3, [data-chart]" />
+      <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 pb-[clamp(6rem,16vh,12rem)] pt-[clamp(6rem,16vh,12rem)] md:px-12">
         <h2 id="distancia-title" className="font-mono text-[11px] font-normal uppercase tracking-[0.28em] text-silver">
           {copy.eyebrow}
         </h2>
