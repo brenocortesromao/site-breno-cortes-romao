@@ -14,6 +14,7 @@ import JsonLdScript from "@/components/seo/JsonLdScript";
 import { personJsonLd, professionalServiceJsonLd } from "@/lib/seo/structured-data";
 import ThemeScroll from "@/components/theme/ThemeScroll";
 import AmbientGlow from "@/components/theme/AmbientGlow";
+import CustomCursor from "@/components/CustomCursor";
 import { htmlLang, routing } from "@/i18n/routing";
 
 const geistSans = Geist({
@@ -58,6 +59,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
   const locale = await rootParams.locale();
   if (!hasLocale(routing.locales, locale)) notFound();
   const site = await getTranslations({ locale, namespace: "site" });
+  const common = await getTranslations({ locale, namespace: "common" });
 
   return (
     <html
@@ -79,6 +81,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <SmoothScroll />
           <ThemeScroll />
           <AmbientGlow />
+          <CustomCursor viewLabel={common("cursorView")} />
           <Header />
           {/* Proteção contra scroll horizontal: overflow-x CLIP (não hidden) não
               cria contêiner de rolagem, então sticky e pins continuam valendo, e

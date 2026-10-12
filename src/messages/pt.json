@@ -8,7 +8,8 @@
     "description": "Breno Côrtes Romão, Fractional Brand & Creative Director. Direção de marca e criação sênior, dentro da sua empresa, sem o peso de uma contratação executiva."
   },
   "common": {
-    "draft": "Provisório"
+    "draft": "Provisório",
+    "cursorView": "Ver"
   },
   "nav": {
     "label": "Principal",

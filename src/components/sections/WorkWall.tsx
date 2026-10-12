@@ -258,6 +258,7 @@ export default function WorkWall({ items, labels }: { items: WallItem[]; labels:
                         tabIndex={primary ? 0 : -1}
                         aria-hidden={primary ? undefined : true}
                         aria-label={it.open}
+                        data-cursor="ver"
                         onClick={(e) => show(card.item, e.currentTarget)}
                         style={{ width: `calc(var(--card-h) * ${card.aspect})` } as CSSProperties}
                         className="group/card relative h-[var(--card-h)] shrink-0 cursor-[inherit] rounded-[12px] outline-none transition-[transform,filter] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] [filter:saturate(0.55)_brightness(0.9)] focus-visible:z-10 focus-visible:scale-[1.06] focus-visible:![filter:none] focus-visible:ring-1 focus-visible:ring-foreground group-hover/wall:[filter:saturate(0.5)_brightness(0.55)] hover:z-10 hover:scale-[1.06] hover:![filter:none]"
