@@ -160,15 +160,15 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-4">
             <div className="md:sticky md:top-32">
-              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
+              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
               <h2
                 id="diagnostico-title"
-                className="mt-6 text-[clamp(2.1rem,4vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
+                className="m-center mt-6 text-[clamp(2.1rem,4vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
               >
                 {copy.title}
               </h2>
               {/* instrução com ícone; texto por tipo de ponteiro (CSS, sem JS) */}
-              <p className="mt-6 flex max-w-xs items-center gap-3 text-base leading-snug text-foreground/85">
+              <p className="mt-6 flex max-w-xs items-center gap-3 text-base leading-snug text-foreground/85 max-md:mx-auto max-md:justify-center">
                 <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="12" cy="12" r="3.2" />
                   <circle cx="12" cy="12" r="8" strokeOpacity="0.45" />
@@ -176,7 +176,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
                 <span className="[@media(pointer:fine)]:hidden">{copy.hintTouch}</span>
                 <span className="hidden [@media(pointer:fine)]:inline">{copy.hintClick}</span>
               </p>
-              <p aria-live="polite" className="mt-6 font-mono text-[11px] uppercase tracking-[0.22em]">
+              <p aria-live="polite" className="m-center mt-6 font-mono text-[11px] uppercase tracking-[0.22em]">
                 {copy.counters[count]}
               </p>
             </div>
@@ -231,7 +231,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
         <div aria-live="polite" className="mt-16 md:ml-[calc(41.666%+1rem)] md:mt-24">
           <p
             key={count >= 2 ? "m" : count === 1 ? "o" : "d"}
-            className="max-w-2xl animate-[fadeIn_0.6s_ease] text-[clamp(1.5rem,2.6vw,2.6rem)] font-semibold leading-[1.1] tracking-[-0.04em]"
+            className="m-center max-w-2xl max-md:mx-auto animate-[fadeIn_0.6s_ease] text-[clamp(1.5rem,2.6vw,2.6rem)] font-semibold leading-[1.1] tracking-[-0.04em]"
           >
             {closing}
           </p>

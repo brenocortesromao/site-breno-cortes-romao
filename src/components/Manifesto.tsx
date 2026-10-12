@@ -174,7 +174,7 @@ export default function Manifesto({
         {/* Retrato + assinatura */}
         <div className="md:col-span-5">
           <div className="mb-8 flex flex-wrap items-center gap-4 md:mb-10">
-            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">
               {copy.eyebrow}
             </p>
             {copy.draft && <DraftBadge label={copy.draft} />}
@@ -225,7 +225,7 @@ export default function Manifesto({
             // text-balance: linhas equilibradas, sem buraco à direita. No desktop
             // a frase avança um pouco sobre a área do retrato (sem chegar na
             // assinatura, que termina antes desse recuo).
-            className="text-balance text-[clamp(2rem,4.6vw,5rem)] font-medium leading-[1.05] tracking-[-0.05em] md:-ml-[clamp(0px,5vw,6rem)]"
+            className="m-center text-balance text-[clamp(2rem,4.6vw,5rem)] font-medium leading-[1.05] tracking-[-0.05em] md:-ml-[clamp(0px,5vw,6rem)]"
           >
             {copy.statement.map((part, i) => (
               <span key={i} className={part.soft ? "font-light text-silver" : undefined}>

@@ -25,7 +25,7 @@ export default async function Faq() {
         <div className="md:col-span-4">
           <h2
             id="perguntas-title"
-            className="text-[clamp(2.3rem,4.4vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:sticky md:top-32"
+            className="m-center text-[clamp(2.3rem,4.4vw,4.75rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:sticky md:top-32"
           >
             {t("title")}
           </h2>

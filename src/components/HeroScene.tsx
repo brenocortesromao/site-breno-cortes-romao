@@ -229,10 +229,13 @@ function Rig({
   animate,
   pointerRef,
   fxRef,
+  scrollRef,
 }: {
   children: ReactNode;
   interactive: boolean;
   animate: boolean;
+  /** Toque: o progresso da transição hero → Mensagem guia o "ponteiro" (sem mouse). */
+  scrollRef?: RefObject<number>;
   pointerRef: RefObject<Pointer>;
   fxRef: RefObject<Fx>;
 }) {
@@ -254,6 +257,13 @@ function Rig({
     const g = group.current;
     if (!g || !animate) return;
 
+    // toque: a bola percorre a frase da Mensagem conforme o scroll (zero no
+    // início da hero: a primeira tela não muda)
+    if (scrollRef) {
+      const s = Math.min(Math.max(scrollRef.current ?? 0, 0), 1);
+      target.current.x = Math.sin(Math.PI * s) * 0.85;
+      target.current.y = -Math.sin(2 * Math.PI * s) * 0.35;
+    }
     const p = pointerRef.current;
     const k = 1 - Math.exp(-dt * 2.2); // atraso perceptível, sem "elástico"
     p.x += (target.current.x - p.x) * k;
@@ -640,6 +650,8 @@ export default function HeroScene({
 }: HeroSceneProps) {
   const animate = !reducedMotion;
   const interactive = animate && !coarse;
+  /** Toque (sem mouse): o ponteiro vem do scroll. */
+  const scrollDriven = animate && coarse;
   const pointer = useRef<Pointer>({ x: 0, y: 0 });
   const fx = useRef<Fx>({ hover: 0, kick: 0, lock: false });
   /** Shaders prontos (compileAsync): antes disso, nenhum quadro é desenhado. */
@@ -658,11 +670,11 @@ export default function HeroScene({
       <ContextLossWatcher onLost={onContextLost} />
       <Framing anchorRef={anchorRef} />
       <Environment onCompiled={handleCompiled} onReady={onReady} />
-      <Rig interactive={interactive} animate={animate} pointerRef={pointer} fxRef={fx}>
+      <Rig interactive={interactive} animate={animate} pointerRef={pointer} fxRef={fx} scrollRef={scrollDriven ? progress : undefined}>
         <LiquidShape
           light={coarse}
           animate={animate}
-          interactive={interactive}
+          interactive={interactive || scrollDriven}
           pointerRef={pointer}
           progress={progress}
           fxRef={fx}

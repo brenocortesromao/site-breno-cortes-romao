@@ -115,7 +115,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
       {/* oceano 3D fixo atrás do conteúdo (alto-mar → linha d'água → recife) */}
       <OceanBackdrop />
       <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
-        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
 
         {/* caixa de prompt (estilo chat de IA) */}
         <div data-ai-prompt className="mt-10 max-w-2xl rounded-2xl border border-line bg-surface px-5 py-5 md:mt-12 md:px-7 md:py-6">
@@ -149,7 +149,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
           aria-label={copy.title}
           translate="no"
           data-decode
-          className="mt-16 max-w-5xl text-[clamp(2.4rem,5.6vw,6rem)] font-semibold leading-[1.02] tracking-[-0.055em] md:mt-24"
+          className="m-center mt-16 max-w-5xl text-[clamp(2.4rem,5.6vw,6rem)] font-semibold leading-[1.02] tracking-[-0.055em] md:mt-24"
         >
           <DecodeLetters text={copy.title} />
         </h2>
@@ -175,7 +175,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
 
         <p
           ref={closing}
-          className="mt-[clamp(5rem,14vh,10rem)] max-w-5xl text-[clamp(2rem,4.4vw,4.75rem)] font-semibold leading-[1.04] tracking-[-0.05em]"
+          className="m-center mt-[clamp(5rem,14vh,10rem)] max-w-5xl text-[clamp(2rem,4.4vw,4.75rem)] font-semibold leading-[1.04] tracking-[-0.05em]"
         >
           {before}
           {at >= 0 &&
@@ -193,7 +193,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
             ))}
           {after}
         </p>
-        <p className="mt-8 text-sm text-silver md:text-base">{copy.footnote}</p>
+        <p className="m-center mt-8 text-sm text-silver md:text-base">{copy.footnote}</p>
       </div>
     </section>
   );

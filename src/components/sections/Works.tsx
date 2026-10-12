@@ -29,14 +29,14 @@ export default async function Works() {
   return (
     <section id="trabalhos" data-theme="dark" aria-labelledby="trabalhos-title" className="relative z-10">
       <div className="mx-auto w-full max-w-[1600px] px-6 pt-[clamp(6rem,16vh,12rem)] md:px-12">
-        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("eyebrow")}</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
         <h2
           id="trabalhos-title"
-          className="mt-6 max-w-4xl text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
+          className="m-center mt-6 max-w-4xl text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
         >
           {t("title")}
         </h2>
-        <p className="mt-6 max-w-xl text-sm leading-relaxed text-silver md:text-[15px]">{t("subtitle")}</p>
+        <p className="m-center mt-6 max-w-xl text-sm leading-relaxed text-silver max-md:mx-auto md:text-[15px]">{t("subtitle")}</p>
       </div>
 
       <div className="mx-auto mt-16 w-full max-w-[1600px] md:mt-24">

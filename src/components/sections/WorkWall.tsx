@@ -190,6 +190,25 @@ export default function WorkWall({ items, labels }: { items: WallItem[]; labels:
         place(s);
       });
     };
+    // toque (sem hover): a cada ~2,4 s um card visível perto do meio da tela
+    // acende como no hover (cresce, cor total, legenda)
+    const touch = !window.matchMedia("(hover: hover)").matches;
+    let lit: HTMLElement | null = null;
+    let spot: gsap.core.Tween | null = null;
+    const highlight = () => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const candidates = [...el.querySelectorAll<HTMLElement>("button[data-cursor]")].filter((b) => {
+        const r = b.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        return cx > vw * 0.2 && cx < vw * 0.8 && cy > vh * 0.25 && cy < vh * 0.75 && b !== lit;
+      });
+      if (lit) delete lit.dataset.active;
+      lit = candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : null;
+      if (lit) lit.dataset.active = "";
+      spot = gsap.delayedCall(2.4, highlight);
+    };
     let running = false;
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -197,9 +216,13 @@ export default function WorkWall({ items, labels }: { items: WallItem[]; labels:
           lastScroll = window.scrollY;
           gsap.ticker.add(tick);
           running = true;
+          if (touch) spot = gsap.delayedCall(0.8, highlight);
         } else if (!entry.isIntersecting && running) {
           gsap.ticker.remove(tick);
           running = false;
+          spot?.kill();
+          if (lit) delete lit.dataset.active;
+          lit = null;
         }
       },
       { rootMargin: "100px 0px" },
@@ -210,6 +233,8 @@ export default function WorkWall({ items, labels }: { items: WallItem[]; labels:
       ro.disconnect();
       io.disconnect();
       gsap.ticker.remove(tick);
+      spot?.kill();
+      if (lit) delete lit.dataset.active;
       el.removeEventListener("pointerdown", down);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", up);
@@ -261,7 +286,7 @@ export default function WorkWall({ items, labels }: { items: WallItem[]; labels:
                         data-cursor="ver"
                         onClick={(e) => show(card.item, e.currentTarget)}
                         style={{ width: `calc(var(--card-h) * ${card.aspect})` } as CSSProperties}
-                        className="group/card relative h-[var(--card-h)] shrink-0 cursor-[inherit] rounded-[12px] outline-none transition-[transform,filter] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] [filter:saturate(0.55)_brightness(0.9)] focus-visible:z-10 focus-visible:scale-[1.06] focus-visible:![filter:none] focus-visible:ring-1 focus-visible:ring-foreground group-hover/wall:[filter:saturate(0.5)_brightness(0.55)] hover:z-10 hover:scale-[1.06] hover:![filter:none]"
+                        className="group/card relative h-[var(--card-h)] shrink-0 cursor-[inherit] rounded-[12px] outline-none transition-[transform,filter] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] [filter:saturate(0.55)_brightness(0.9)] focus-visible:z-10 focus-visible:scale-[1.06] focus-visible:![filter:none] focus-visible:ring-1 focus-visible:ring-foreground group-hover/wall:[filter:saturate(0.5)_brightness(0.55)] hover:z-10 hover:scale-[1.06] hover:![filter:none] data-[active]:z-10 data-[active]:scale-[1.06] data-[active]:![filter:none]"
                       >
                         <MediaSlot
                           src={it.src}
@@ -273,7 +298,7 @@ export default function WorkWall({ items, labels }: { items: WallItem[]; labels:
                         />
                         <span
                           aria-hidden="true"
-                          className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-[12px] bg-gradient-to-t from-background/85 to-transparent px-3 pb-2.5 pt-8 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-foreground opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-focus-visible/card:opacity-100"
+                          className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-[12px] bg-gradient-to-t from-background/85 to-transparent px-3 pb-2.5 pt-8 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-foreground opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-focus-visible/card:opacity-100 group-data-[active]/card:opacity-100"
                         >
                           {it.caption}
                         </span>

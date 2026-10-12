@@ -65,10 +65,10 @@ export default function Changes({ copy }: { copy: ChangesCopy }) {
   return (
     <section ref={root} id="o-que-muda" data-theme="gradient" aria-labelledby="o-que-muda-title" className="group relative z-10 min-h-svh">
       <div className="mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
-        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
         <h2
           id="o-que-muda-title"
-          className="mt-6 max-w-4xl text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
+          className="m-center mt-6 max-w-4xl text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
         >
           {copy.title}
         </h2>

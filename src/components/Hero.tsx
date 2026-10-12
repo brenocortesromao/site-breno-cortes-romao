@@ -143,14 +143,14 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
       ref={section}
       data-theme="dark"
       aria-labelledby="hero-title"
-      className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 pb-10 pt-24 md:px-12 md:pb-14 md:pt-28"
+      className="relative flex min-h-svh flex-col justify-center overflow-hidden px-6 pb-10 pt-[clamp(7rem,calc(4.5rem+9svh),9rem)] md:px-12 md:pb-14 md:pt-28"
     >
       {/* Título semântico completo (leitores de tela/SEO); as frases visuais ao redor da bola são decorativas. */}
       <h1 id="hero-title" className="sr-only">{`${copy.left} ${copy.right}`}</h1>
 
       <div className="relative z-30 mx-auto flex w-full max-w-[1600px] flex-col items-center gap-6 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-[3.5vw]">
         {/* Frase à esquerda (acima no mobile) */}
-        <div aria-hidden="true" data-hero-text className={`${phrase} w-full md:text-right`}>
+        <div aria-hidden="true" data-hero-text className={`${phrase} m-center w-full text-center md:text-right`}>
           <span className="block overflow-hidden pb-[0.16em] -mb-[0.16em]">
             <span data-reveal className="block font-light">
               {copy.left}
@@ -175,7 +175,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
         </div>
 
         {/* Frase à direita (abaixo no mobile) */}
-        <div aria-hidden="true" data-hero-text className={`${phrase} w-full`}>
+        <div aria-hidden="true" data-hero-text className={`${phrase} m-center w-full text-center max-md:-mt-6 md:text-left`}>
           <span className="block overflow-hidden pb-[0.16em] pr-[0.1em] -mb-[0.16em]">
             <span
               data-reveal
@@ -194,7 +194,8 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
         data-hero-text
         className="relative z-30 mx-auto mt-10 w-full max-w-[1600px] md:absolute md:inset-x-12 md:bottom-14 md:mt-0"
       >
-        <div data-fade className="max-w-sm">
+        {/* mobile: centralizado; desktop: canto inferior esquerdo */}
+        <div data-fade className="m-center max-w-sm max-md:mx-auto">
           {copy.draft && <DraftBadge label={copy.draft} className="mb-4" />}
           <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-silver">
             {protectTerms(copy.label)}
@@ -207,7 +208,8 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
       <a
         href="#manifesto"
         data-hero-text
-        className="absolute bottom-10 right-6 z-30 hidden items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-silver transition-colors hover:text-foreground md:bottom-14 md:right-12 md:flex"
+        // mobile: no fluxo, centralizado abaixo do texto de apoio; desktop: canto inferior direito
+        className="relative z-30 mx-auto mt-8 flex w-fit flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-silver transition-colors hover:text-foreground md:absolute md:bottom-14 md:right-12 md:mx-0 md:mt-0 md:w-auto md:flex-row md:gap-3"
       >
         <span data-fade>{copy.scrollHint}</span>
         <span aria-hidden="true" data-fade className="block h-8 w-px origin-top animate-pulse bg-silver" />

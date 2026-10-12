@@ -119,7 +119,9 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   }, [env]);
 
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
-  const scene = env?.webgl === true;
+  // toque: a foto com parallax/zoom (garante a seção preenchida no celular e
+  // libera um contexto WebGL); o terreno 3D aprovado fica no desktop
+  const scene = env?.webgl === true && !env.coarse;
   const mountScene = scene && near;
   const tier = useSceneTier("montanhas", root, mountScene);
 

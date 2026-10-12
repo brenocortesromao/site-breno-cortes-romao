@@ -144,7 +144,7 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
     >
       <FlowField stagesSelector="[data-step]" stages={FLOW_STAGES} dimSelector="[data-step] h3, [data-chart]" />
       <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 pb-[clamp(6rem,16vh,12rem)] pt-[clamp(6rem,16vh,12rem)] md:px-12">
-        <h2 id="distancia-title" className="font-mono text-[11px] font-normal uppercase tracking-[0.28em] text-silver">
+        <h2 id="distancia-title" className="font-mono text-[11px] font-normal uppercase tracking-[0.28em] text-silver m-center">
           {copy.eyebrow}
         </h2>
 
@@ -159,7 +159,7 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
                   aria-label={chart.text}
                   translate="no"
                   data-decode
-                  className="text-[clamp(1.7rem,3.4vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.05em] md:col-span-5"
+                  className="text-[clamp(1.7rem,3.4vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.05em] m-center md:col-span-5"
                 >
                   <DecodeLetters text={chart.text} highlight={chart.highlight} />
                 </h3>

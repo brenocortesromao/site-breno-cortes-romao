@@ -136,13 +136,13 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
     >
       <GraphicLayer variant="contours-a" />
       <div className="relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
-        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">
           {protectTerms(copy.eyebrow)}
         </p>
         <div className="mt-6 grid gap-10 md:grid-cols-12 md:gap-8">
           <TechnicalText
             id="fractional-title"
-            className="text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8"
+            className="m-center text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8"
             text={copy.title}
           />
           <p className="max-w-md self-end text-base leading-relaxed text-silver md:col-span-4 md:text-[17px]">
@@ -152,10 +152,10 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
 
         {/* Dados verificados: dois números gigantes (empilhados no mobile) */}
         <figure data-stats className="mt-16 md:mt-24">
-          <h3 className="text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
+          <h3 className="m-center text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
             {protectTerms(copy.stats.title)}
           </h3>
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-silver md:text-[17px]">
+          <p className="m-center mt-3 max-w-2xl text-base leading-relaxed text-silver max-md:mx-auto md:text-[17px]">
             {protectTerms(copy.stats.lead)}
           </p>
           <div className="mt-8 grid gap-10 border-t border-line pt-8 md:grid-cols-2 md:gap-8">
@@ -181,7 +181,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
               </div>
             ))}
           </div>
-          <figcaption className="mt-10 max-w-2xl">
+          <figcaption className="m-center mt-10 max-w-2xl max-md:mx-auto">
             <span className="block text-base leading-relaxed md:text-lg">{protectTerms(copy.stats.support)}</span>
             <span className="mt-3 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
               {protectTerms(copy.stats.source)}
@@ -291,7 +291,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             ))}
           </div>
 
-          <p className="mt-10 max-w-xl text-sm leading-relaxed text-silver">{protectTerms(copy.note)}</p>
+          <p className="m-center mt-10 max-w-xl text-sm leading-relaxed text-silver max-md:mx-auto">{protectTerms(copy.note)}</p>
         </div>
       </div>
     </section>

@@ -175,6 +175,17 @@ body::before {
   }
 }
 
+/* Mobile (até 767px): títulos, rótulos e frases de destaque centralizados,
+   com linhas equilibradas (nenhuma palavra sozinha na última linha). O
+   desktop não muda. Parágrafos longos, listas, FAQ, tabelas e timelines
+   continuam à esquerda. */
+@media (max-width: 767.98px) {
+  .m-center {
+    text-align: center;
+    text-wrap: balance;
+  }
+}
+
 /* Cursor do site (CustomCursor): esconde o nativo só quando ele está ativo
    (mouse); no toque, a classe não é adicionada. */
 html.custom-cursor,

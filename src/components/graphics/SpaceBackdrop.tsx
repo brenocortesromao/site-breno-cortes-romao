@@ -58,6 +58,40 @@ export default function SpaceBackdrop() {
     return () => io.disconnect();
   }, []);
 
+  // toque: warp ao tocar no botão principal e uma vez quando a seção entra
+  useEffect(() => {
+    if (!env || !env.coarse || env.reduced) return;
+    const section = root.current?.parentElement;
+    if (!section) return;
+    const w = { v: 0 };
+    const fire = () =>
+      gsap
+        .timeline({ onUpdate: () => (warp.current = w.v) })
+        .to(w, { v: 1, duration: 0.25, ease: "power2.out", overwrite: true })
+        .to(w, { v: 0, duration: 0.6, ease: "power2.inOut" }, "+=0.35");
+    const onDown = (e: Event) => {
+      if ((e.target as Element).closest("[data-warp]")) fire();
+    };
+    section.addEventListener("pointerdown", onDown);
+    let done = false;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (done || !e.isIntersecting) return;
+        done = true;
+        io.disconnect();
+        gsap.delayedCall(0.6, fire); // depois da cena compilar e aparecer
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(section);
+    return () => {
+      section.removeEventListener("pointerdown", onDown);
+      io.disconnect();
+      gsap.killTweensOf(w);
+      gsap.killTweensOf(fire);
+    };
+  }, [env]);
+
   // parallax com o mouse + warp no hover do botão principal (só ponteiro fino)
   useEffect(() => {
     if (!env || env.coarse || env.reduced) return;

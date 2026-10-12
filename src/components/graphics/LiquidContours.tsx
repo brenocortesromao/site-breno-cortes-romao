@@ -203,22 +203,32 @@ export default function LiquidContours({
     const ripples = new Float32Array(MAX_RIPPLES * 3).fill(-1);
     let next = 0;
     let lastX = -1e4, lastY = -1e4;
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
+    const addRipple = (x: number, y: number) => {
       const r = el.getBoundingClientRect();
-      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
-      if (Math.hypot(e.clientX - lastX, e.clientY - lastY) < 70) return;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      ripples[next * 3] = (e.clientX - r.left) * dpr;
-      ripples[next * 3 + 1] = (r.bottom - e.clientY) * dpr; // origem do GL é embaixo
+      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return;
+      if (Math.hypot(x - lastX, y - lastY) < 70) return;
+      lastX = x;
+      lastY = y;
+      ripples[next * 3] = (x - r.left) * dpr;
+      ripples[next * 3 + 1] = (r.bottom - y) * dpr; // origem do GL é embaixo
       ripples[next * 3 + 2] = 0;
       next = (next + 1) % MAX_RIPPLES;
     };
-    // ondulações sempre que houver mouse (também no modo leve: são só uniforms);
-    // no toque, não
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") addRipple(e.clientX, e.clientY);
+    };
+    // toque: onda onde o dedo encosta e enquanto ele desliza
+    const onTouch = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) addRipple(t.clientX, t.clientY);
+    };
+    // ondulações sempre que houver mouse (também no modo leve: são só uniforms)
     const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (hasMouse) window.addEventListener("pointermove", onMove, { passive: true });
+    else {
+      window.addEventListener("touchstart", onTouch, { passive: true });
+      window.addEventListener("touchmove", onTouch, { passive: true });
+    }
 
     let visible = false;
     let raf = 0;
@@ -273,6 +283,8 @@ export default function LiquidContours({
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("touchstart", onTouch);
+      window.removeEventListener("touchmove", onTouch);
       el.removeEventListener("webglcontextlost", onLost);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();

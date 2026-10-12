@@ -167,6 +167,14 @@ export default function FlowField({
     const onLeave = () => {
       mouse.x = mouse.y = -9999;
     };
+    // toque: o dedo afasta as partículas enquanto encosta/desliza
+    const onTouch = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      const r = cv.getBoundingClientRect();
+      mouse.x = t.clientX - r.left;
+      mouse.y = t.clientY - r.top;
+    };
 
     let t = 0;
     let frame = 0;
@@ -271,6 +279,9 @@ export default function FlowField({
     ro.observe(cv);
     window.addEventListener("pointermove", onMove, { passive: true });
     document.documentElement.addEventListener("mouseleave", onLeave);
+    window.addEventListener("touchstart", onTouch, { passive: true });
+    window.addEventListener("touchmove", onTouch, { passive: true });
+    window.addEventListener("touchend", onLeave, { passive: true });
 
     return () => {
       io.disconnect();
@@ -279,6 +290,9 @@ export default function FlowField({
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("touchstart", onTouch);
+      window.removeEventListener("touchmove", onTouch);
+      window.removeEventListener("touchend", onLeave);
     };
   }, [stagesSelector, stages, dimSelector]);
 

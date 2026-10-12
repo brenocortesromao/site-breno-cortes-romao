@@ -20,8 +20,8 @@ export default async function Contact() {
     <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 overflow-clip border-t border-line">
       <SpaceBackdrop />
       <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
-        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("eyebrow")}</p>
-        <h2 id="contato-title" className="mt-10 text-[clamp(2.75rem,10vw,10.5rem)] leading-[0.9] tracking-[-0.06em]">
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
+        <h2 id="contato-title" className="m-center mt-10 text-[clamp(2.75rem,10vw,10.5rem)] leading-[0.9] tracking-[-0.06em]">
           <span className="block font-light">{t("titleLight")}</span>
           <span className="block font-semibold text-silver-gradient md:pl-[12vw]">{t("titleStrong")}</span>
         </h2>

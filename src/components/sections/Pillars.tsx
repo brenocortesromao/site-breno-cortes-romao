@@ -77,12 +77,12 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
       >
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">
               {copy.eyebrow}
             </p>
             <BlurRevealTitle
               id="o-que-faco-title"
-              className="mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
+              className="m-center mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
               text={copy.title}
             />
             <p className="mt-5 max-w-xl text-base leading-relaxed text-silver md:text-lg">{copy.subtitle}</p>

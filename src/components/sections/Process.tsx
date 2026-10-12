@@ -119,10 +119,10 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-5 md:flex md:flex-col">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
+              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
               <BlurRevealTitle
                 id="como-funciona-title"
-                className="mt-6 text-[clamp(2.3rem,4.6vw,5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
+                className="m-center mt-6 text-[clamp(2.3rem,4.6vw,5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
                 text={copy.title}
               />
               <p className="mt-8 max-w-md text-sm leading-relaxed text-silver md:text-[15px]">{copy.note}</p>
