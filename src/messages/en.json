@@ -208,24 +208,28 @@
     "after": "Depois",
     "rows": [
       {
+        "before": "A marca acompanhou o começo, mas não o crescimento.",
+        "after": "Uma marca construída de verdade, feita para fazer o negócio crescer."
+      },
+      {
+        "before": "A marca parece menor do que a empresa é.",
+        "after": "A marca finalmente tem o tamanho do negócio."
+      },
+      {
         "before": "Ninguém entende de primeira o que vocês fazem.",
         "after": "Sua oferta é entendida em uma frase."
       },
       {
-        "before": "Cada material conta uma história.",
-        "after": "Site, vendas e campanhas falam a mesma língua."
+        "before": "Cada peça tem uma cara diferente.",
+        "after": "Uma identidade sênior, reconhecida antes mesmo do logo aparecer."
       },
       {
-        "before": "Refação sem fim.",
-        "after": "Briefings claros, critérios de aprovação, menos retrabalho."
+        "before": "O cliente compara vocês pelo preço.",
+        "after": "O cliente enxerga valor antes de perguntar o preço."
       },
       {
         "before": "O fundador aprova até o post.",
         "after": "O fundador volta a cuidar do negócio."
-      },
-      {
-        "before": "Fornecedores sem rumo.",
-        "after": "Fornecedores entregando na direção certa."
       }
     ]
   },
@@ -406,8 +410,6 @@
     "titleLight": "Vamos fechar",
     "titleStrong": "essa distância?",
     "text": "Every great brand started with a conversation. Tell me where your company is and where it wants to go.",
-    "schedule": "Agendar conversa",
-    "scheduleNote": "Link provisório",
     "email": "E-mail",
     "mediaKit": "Baixar mídia kit (PDF)",
     "pending": "[PENDENTE]",

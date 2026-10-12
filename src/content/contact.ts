@@ -3,9 +3,6 @@
  * chegarem. Vazio = item [PENDENTE] (aparece desativado, com selo discreto).
  */
 export const contactConfig = {
-  /** Link de agendamento no Cal.com. PROVISÓRIO até o dono enviar o link dele. */
-  calUrl: "https://cal.com",
-  calProvisional: true,
   /** E-mail: NÃO fica aqui (iria para o HTML). É montado no cliente por
    *  components/contact/EmailMenu.tsx (proteção contra spam). */
   /** WhatsApp (DDI + DDD + número, só dígitos). */

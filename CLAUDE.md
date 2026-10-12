@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **O estado da tag `site-aprovado-10-10-noite` é o NOVO ESTADO APROVADO pelo Breno (substitui `site-aprovado-10-10`): todas as animações, cenas 3D (bola da hero, montanhas, nuvens, oceano, floresta com urso, gota, curvas líquidas) e textos atuais. Nada deve ser alterado sem pedido explícito. Não altere nada além do que for pedido em cada mensagem. Nada de melhorias, refatorações ou ajustes por conta própria.**
 
+**O CONTEUDO-SITE.md é somente leitura para o Claude Code. Ele é editado fora daqui. Nunca escreva, salve, reformate nem restaure versões desse arquivo, mesmo que pareça desatualizado. Sempre releia do disco antes de usar.**
+
 **Bola da hero (decisão de 10/10):** a bola de metal líquido da hero está APROVADA e **NÃO vai virar urso**: a etapa "urso" foi CANCELADA. Não altere a bola. O urso existe apenas como animal 3D na floresta da seção "Sobre".
 
 Bilingual (PT default / EN) personal business site for a Fractional Brand & Creative Director, statically generated per locale. Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4 + TypeScript, with Lenis smooth scroll, GSAP/ScrollTrigger, and Three.js via React Three Fiber in the hero.
@@ -95,7 +97,7 @@ Site do negócio do dono como **Fractional Brand & Creative Director**: proposta
    4. A distância (3 gráficos conceituais), O que muda (antes/depois), Como funciona (claro, grade); Trabalhos (faixa de logos, carrossel, 3 cases com página própria); textos v2; base de SEO — **concluída**.
    5. Onde o trabalho aparece; Sobre (claro; resumo na home + `/sobre`); Poucas parcerias por vez ([CONFIRMAR]); Contato completo — **concluída**.
    6. Perguntas frequentes (`<details>` nativo); rodapé no layout — **concluída**.
-   Pendências de conteúdo do dono: retrato, logos, imagens de trabalhos, cases, bio/trajetória, e-mail, mídia kit, link do Cal.com, itens [CONFIRMAR], 6 frases da "3b Diagnóstico" (o arquivo ainda tem as 5 de "Sinais") e tradução EN.
+   Pendências de conteúdo do dono: retrato, logos, imagens de trabalhos, cases, bio/trajetória, e-mail, mídia kit, itens [CONFIRMAR], 6 frases da "3b Diagnóstico" (o arquivo ainda tem as 5 de "Sinais") e tradução EN.
 4. ~~Urso 3D: orelhas e focinho brotando da bola (SDF/metaballs) com o mouse.~~ **CANCELADO (10/10):** a bola fica como está; o urso existe só na floresta da seção "Sobre".
 5. Conteúdo real PT/EN (fotos, logos, cases, textos, tradução).
 6. Lançamento.
@@ -268,7 +270,7 @@ Routes live under `src/app/[locale]/` (`layout.tsx` is the root layout, `page.ts
 - `Ai` (§11b "E a inteligência artificial?", black, between Sobre and Poucas parcerias; menu "IA"): a minimal chat prompt box where the objection is typed letter by letter with a blinking caret (`caretBlink` keyframes) when it enters the screen. The real sentence sits in a transparent layer (accessible, indexable, reserves the box size); the typed layer is `aria-hidden`. Typing is time-based (a precomputed schedule read by the GSAP ticker), so it finishes on time even on a busy main thread. Then the h2 decodes (`components/decode.tsx`). The 4 "A IA nunca..." lines light from graphite to white by scrub; the closing gets one silver sweep on `ai.closingHighlight`. Reduced motion / no JS: everything static and visible, no caret.
 - `Partnerships`: [CONFIRMAR] text exactly as in the content file.
 - `Faq`: native `<details name="faq">`/`<summary>`, an exclusive accordion (one open at a time) that works without JS; answers stay in the HTML. It also emits a `FAQPage` JSON-LD (`faqJsonLd`), skipping [CONFIRMAR]/[PENDENTE] items. The smooth open uses `::details-content` + `interpolate-size` in `globals.css`.
-- `Contact`: channels are configured in `src/content/contact.ts` (`calUrl` is provisional; `email`/`mediaKit` empty means a disabled [PENDENTE] button).
+- `Contact`: channels are configured in `src/content/contact.ts` (`mediaKit` empty means a disabled [PENDENTE] button). WhatsApp is the main button (full row, off-white highlight); E-mail (menu) and Mídia kit sit side by side below it. There is no Cal.com/scheduling button (removed on 12/10).
 - `layout/NavLinks` (client): on the home, links are `#section` (Lenis glides); on other pages they are `/#section` in the current locale.
 
 **Background graphics** (`components/graphics/GraphicLayer.tsx`), used by every light section:

@@ -1,21 +1,19 @@
 import { getTranslations } from "next-intl/server";
 import { contactConfig, whatsappUrl } from "@/content/contact";
 import EmailMenu from "@/components/contact/EmailMenu";
-import DraftBadge from "@/components/theme/DraftBadge";
 import { protectTerms } from "@/components/Term";
 
 const button =
   "inline-flex h-full min-h-[4.5rem] items-center justify-between gap-6 border px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors";
 
 /**
- * Contato (§14). Botões: Agendar conversa (Cal.com, link provisório),
- * WhatsApp (mensagem pré-preenchida), E-mail (menu com Gmail, app de e-mail e
+ * Contato (§14). Botões: WhatsApp (principal, mensagem pré-preenchida), E-mail (menu com Gmail, app de e-mail e
  * copiar; endereço montado só no cliente, ver EmailMenu) e Mídia kit (PDF). Itens sem dado aparecem desativados com
  * "[PENDENTE]" (configuração em src/content/contact.ts).
  */
 export default async function Contact() {
   const t = await getTranslations("contact");
-  const { calUrl, calProvisional, mediaKit } = contactConfig;
+  const { mediaKit } = contactConfig;
 
   return (
     <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 border-t border-line">
@@ -27,26 +25,15 @@ export default async function Contact() {
         </h2>
         <p className="mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
 
-        {/* 2 × 2; o vão entre as linhas acomoda o selo "Link provisório" */}
-        <ul className="mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2 md:gap-y-14">
-          <li>
-            <a
-              href={calUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${button} w-full border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground`}
-            >
-              {t("schedule")} <span aria-hidden="true">↗</span>
-            </a>
-            {calProvisional && <DraftBadge label={t("scheduleNote")} className="mt-3" />}
-          </li>
-          <li>
+        {/* WhatsApp (principal) na linha inteira; E-mail e Mídia kit lado a lado */}
+        <ul className="mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2">
+          <li className="md:col-span-2">
             <a
               href={whatsappUrl(t("whatsappMessage"))}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={t("whatsappLabel")}
-              className={`${button} w-full border-line hover:border-foreground`}
+              className={`${button} w-full border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground`}
             >
               {t("whatsapp")} <span aria-hidden="true">↗</span>
             </a>
