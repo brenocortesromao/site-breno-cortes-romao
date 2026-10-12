@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
 import { protectTerms } from "@/components/Term";
+import TechnicalText from "@/components/TechnicalText";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -139,9 +140,11 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           {protectTerms(copy.eyebrow)}
         </p>
         <div className="mt-6 grid gap-10 md:grid-cols-12 md:gap-8">
-          <h2 id="fractional-title" className="text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8">
-            {protectTerms(copy.title)}
-          </h2>
+          <TechnicalText
+            id="fractional-title"
+            className="text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8"
+            text={copy.title}
+          />
           <p className="max-w-md self-end text-base leading-relaxed text-silver md:col-span-4 md:text-[17px]">
             {protectTerms(copy.text)}
           </p>
