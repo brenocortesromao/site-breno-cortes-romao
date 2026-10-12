@@ -168,6 +168,10 @@ body::before {
   .js-motion [data-decode] [data-ch] {
     opacity: 0;
   }
+  /* títulos com revelação por desfoque (BlurRevealTitle): mesmo princípio */
+  .js-motion [data-blur-reveal] [data-ch] {
+    opacity: 0;
+  }
 }
 
 /* Gradiente dos títulos: branco→prata no escuro, grafite→chumbo no claro. */

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import BlurRevealTitle from "@/components/BlurRevealTitle";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
 import LiquidDrop from "@/components/graphics/LiquidDrop";
 import ResilientBoundary from "@/components/ResilientBoundary";
@@ -120,12 +121,11 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
           <div className="md:col-span-5 md:flex md:flex-col">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{copy.eyebrow}</p>
-              <h2
+              <BlurRevealTitle
                 id="como-funciona-title"
                 className="mt-6 text-[clamp(2.3rem,4.6vw,5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
-              >
-                {copy.title}
-              </h2>
+                text={copy.title}
+              />
               <p className="mt-8 max-w-md text-sm leading-relaxed text-silver md:text-[15px]">{copy.note}</p>
             </div>
             {/* gota de metal líquido: fixa nesta coluna enquanto as etapas passam

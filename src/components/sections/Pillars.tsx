@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import BlurRevealTitle from "@/components/BlurRevealTitle";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -79,9 +80,11 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
             <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">
               {copy.eyebrow}
             </p>
-            <h2 id="o-que-faco-title" className="mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]">
-              {copy.title}
-            </h2>
+            <BlurRevealTitle
+              id="o-que-faco-title"
+              className="mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
+              text={copy.title}
+            />
             <p className="mt-5 max-w-xl text-base leading-relaxed text-silver md:text-lg">{copy.subtitle}</p>
           </div>
           {/* Progresso (só no modo fixo) */}
