@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { contactConfig, whatsappUrl } from "@/content/contact";
 import EmailMenu from "@/components/contact/EmailMenu";
+import SpaceBackdrop from "@/components/graphics/SpaceBackdrop";
 import { protectTerms } from "@/components/Term";
 
 const button =
@@ -16,8 +17,9 @@ export default async function Contact() {
   const { mediaKit } = contactConfig;
 
   return (
-    <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 border-t border-line">
-      <div className="mx-auto flex min-h-svh w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+    <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 overflow-clip border-t border-line">
+      <SpaceBackdrop />
+      <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("eyebrow")}</p>
         <h2 id="contato-title" className="mt-10 text-[clamp(2.75rem,10vw,10.5rem)] leading-[0.9] tracking-[-0.06em]">
           <span className="block font-light">{t("titleLight")}</span>
@@ -33,6 +35,7 @@ export default async function Contact() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={t("whatsappLabel")}
+              data-warp
               className={`${button} w-full border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground`}
             >
               {t("whatsapp")} <span aria-hidden="true">↗</span>
