@@ -167,7 +167,8 @@ export default function Ai({ copy }: { copy: AiCopy }) {
         </ul>
 
         <div className="mt-[clamp(5rem,14vh,10rem)] grid gap-12 md:grid-cols-12 md:gap-8">
-          <p className="max-w-xl text-base leading-relaxed text-silver md:col-span-6 md:col-start-7 md:text-lg">
+          {/* degradê escuro suave atrás do parágrafo: legível mesmo com um tubarão passando */}
+          <p className="relative max-w-xl text-base leading-relaxed text-silver before:pointer-events-none before:absolute before:-inset-x-16 before:-inset-y-14 before:-z-10 before:bg-[radial-gradient(ellipse_at_center,var(--bg)_25%,transparent_72%)] before:opacity-80 md:col-span-6 md:col-start-7 md:text-lg">
             {copy.body}
           </p>
         </div>

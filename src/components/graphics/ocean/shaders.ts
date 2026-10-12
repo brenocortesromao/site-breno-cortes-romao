@@ -262,6 +262,9 @@ export const SILHOUETTE_FRAG = /* glsl */ `
 uniform vec3 uTint;
 // x: luz de contorno (rim), y: fator da névoa (< 1 = menos névoa sobre o objeto)
 uniform vec2 uLook;
+// luz de dorso dos animais (contorno prateado #BFC4C8 vindo de cima + brilho
+// suave no lombo); 0 = sem (corais)
+uniform float uDorsal;
 ${COMMON}
 varying vec3 vWorld;
 varying vec3 vNormal;
@@ -280,6 +283,8 @@ void main() {
   // destaca o animal do fundo sem iluminá-lo por inteiro
   float fres = pow(1.0 - abs(dot(n, -rd)), 2.5);
   c += vec3(0.62, 0.66, 0.7) * fres * smoothstep(-0.35, 0.7, n.y) * uLook.x * k;
+  // animais: contorno mais forte no dorso e um brilho largo onde a luz de cima bate
+  c += vec3(0.749, 0.769, 0.784) * (fres * smoothstep(0.05, 0.85, n.y) + 0.12 * pow(top, 3.0)) * uDorsal * k;
   gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d * uLook.y)), 1.0);
 }`;
 

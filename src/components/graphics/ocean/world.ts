@@ -149,7 +149,15 @@ export class OceanWorld {
    * Material de silhueta: tom, luz de contorno prateada (0 = sem) e fator da
    * névoa (1 = normal; os animais usam menos névoa para se destacarem).
    */
-  private silhouette(o: { tint: number; rim: number; fog: number; swim?: [number, number, number]; flap?: boolean }) {
+  private silhouette(o: {
+    tint: number;
+    rim: number;
+    fog: number;
+    /** Luz de dorso (só nos animais). */
+    dorsal?: number;
+    swim?: [number, number, number];
+    flap?: boolean;
+  }) {
     const defines: Record<string, string> = { ...this.defines };
     if (o.swim) defines.SWIM = "";
     if (o.flap) defines.FLAP = "";
@@ -162,6 +170,7 @@ export class OceanWorld {
         uTint: { value: new Vector3(o.tint, o.tint * 1.08, o.tint * 1.15) },
         uSwim: { value: new Vector3(...(o.swim ?? [0, 0, 0])) },
         uLook: { value: new Vector2(o.rim, o.fog) },
+        uDorsal: { value: o.dorsal ?? 0 },
       },
     });
     this.mats.push(m);
@@ -200,7 +209,7 @@ export class OceanWorld {
     const geo = turtleGeometry(this.light);
     geo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0]), 1));
     this.geos.push(geo);
-    const mesh = new InstancedMesh(geo, this.silhouette({ tint: 0.065, rim: 1.1, fog: 0.55, flap: true }), 1);
+    const mesh = new InstancedMesh(geo, this.silhouette({ tint: 0.075, rim: 1.1, fog: 0.47, dorsal: 0.2, flap: true }), 1);
     mesh.frustumCulled = false;
     this.under.add(mesh);
     return mesh;
@@ -262,14 +271,14 @@ export class OceanWorld {
     // pré-aquece: o cardume já aparece organizado (inclusive no quadro parado)
     for (let k = 0; k < 90; k++) this.stepBoids(1 / 30, k / 30);
     fishGeo.setAttribute("aPhase", new InstancedBufferAttribute(phase, 1));
-    this.fish = new InstancedMesh(fishGeo, this.silhouette({ tint: 0.075, rim: 1.2, fog: 0.55, swim: [0.1, 11, 9] }), n);
+    this.fish = new InstancedMesh(fishGeo, this.silhouette({ tint: 0.086, rim: 1.2, fog: 0.47, dorsal: 0.2, swim: [0.1, 11, 9] }), n);
     this.fish.frustumCulled = false;
 
     // tubarões ao longe (1 ou 2) + 1 que passa perto da câmera (ver passStart)
     const far = this.light ? 1 : 2;
     const sharkGeo = m.shark.clone();
     sharkGeo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0, 2.1, 4.4].slice(0, far + 1)), 1));
-    this.sharks = new InstancedMesh(sharkGeo, this.silhouette({ tint: 0.045, rim: 1.0, fog: 0.55, swim: [0.07, 2.2, 5] }), far + 1);
+    this.sharks = new InstancedMesh(sharkGeo, this.silhouette({ tint: 0.056, rim: 1.0, fog: 0.385, dorsal: 0.35, swim: [0.07, 2.2, 5] }), far + 1);
     this.sharks.frustumCulled = false;
     this.geos.push(fishGeo, sharkGeo);
     this.under.add(this.fish, this.sharks);
