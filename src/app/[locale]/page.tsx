@@ -18,6 +18,7 @@ import MountainBackdrop from "@/components/graphics/MountainBackdrop";
 import Touchpoints from "@/components/sections/Touchpoints";
 import About from "@/components/sections/About";
 import Partnerships from "@/components/sections/Partnerships";
+import OneOffProjects from "@/components/sections/OneOffProjects";
 import Ai, { type AiCopy } from "@/components/sections/Ai";
 import Contact from "@/components/sections/Contact";
 import Faq from "@/components/sections/Faq";
@@ -28,7 +29,7 @@ import { loadDistanceCharts } from "@/content/charts";
  * Home. Ordem narrativa (CONTEUDO-SITE.md, com "A distância" logo depois
  * da Mensagem): Hero → Mensagem → A distância → Diagnóstico → Fractional →
  * O que eu faço → O que muda → Como funciona → Onde o trabalho aparece →
- * Trabalhos → Sobre (resumo) → Poucas parcerias → Perguntas frequentes → Contato.
+ * Trabalhos → Sobre (resumo) → Poucas parcerias → Projetos pontuais → Perguntas frequentes → Contato.
  * Textos: src/messages/{pt,en}.json. Imagens/logos: public/ (content/media.ts).
  * ------------------------------------------------------------------ */
 
@@ -212,6 +213,10 @@ export default async function Home() {
 
         <Suspense>
           <Partnerships />
+        </Suspense>
+
+        <Suspense>
+          <OneOffProjects />
         </Suspense>
 
         <Suspense>

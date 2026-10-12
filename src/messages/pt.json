@@ -356,6 +356,39 @@
     "buttonLabel": "Quero conversar (abre o WhatsApp)",
     "whatsappMessage": "Olá, Breno! Vi seu site e quero conversar sobre uma parceria para a minha marca."
   },
+  "oneOff": {
+    "eyebrow": "Projetos pontuais",
+    "title": "Nem toda marca precisa começar com uma parceria.",
+    "text": "Para projetos com começo, meio e fim, também assumo trabalhos pontuais, com o mesmo nível de direção. Muitas parcerias começaram exatamente assim.",
+    "strips": [
+      [
+        "Branding",
+        "Identidade visual",
+        "Logo",
+        "Rebranding",
+        "Naming",
+        "Posicionamento",
+        "Manual de marca",
+        "Tom de voz",
+        "Key visual"
+      ],
+      [
+        "Site",
+        "Landing page",
+        "Mídia kit",
+        "Apresentações institucionais",
+        "Pitch deck",
+        "Campanhas",
+        "Direção de arte",
+        "Social media",
+        "Embalagem"
+      ]
+    ],
+    "button": "Falar sobre um projeto",
+    "whatsappMessage": "Oi Breno, tenho um projeto pontual e queria conversar.",
+    "buttonLabel": "Falar sobre um projeto (abre o WhatsApp)",
+    "listLabel": "Serviços em projetos pontuais"
+  },
   "faq": {
     "eyebrow": "Perguntas frequentes",
     "title": "Perguntas frequentes.",
