@@ -303,24 +303,6 @@ html.custom-cursor * {
   color: transparent;
 }
 
-/* Prata cromada para texto em fundo escuro (palavra acesa nas faixas de
-   Projetos pontuais): faixas de reflexo claras e escuras, como metal polido. */
-.text-chrome {
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #e6e7e9 22%,
-    #9a9da2 42%,
-    #f4f5f6 52%,
-    #b9bcc0 64%,
-    #6f7277 80%,
-    #d9dbde 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 /* Reflexo prata que atravessa uma palavra dividida em letras (palavras-chave
    de A distância: "distância", "fechá-la", "confiar"). O gradiente fica em coordenadas da tela (attachment fixed),
    então a mesma faixa passa por todas as letras; o GSAP move a faixa. Fora da

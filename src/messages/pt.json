@@ -359,35 +359,55 @@
   "oneOff": {
     "eyebrow": "Projetos pontuais",
     "title": "Nem toda marca precisa começar com uma parceria.",
-    "text": "Para projetos com começo, meio e fim, também assumo trabalhos pontuais, com o mesmo nível de direção. Muitas parcerias começaram exatamente assim.",
-    "strips": [
-      [
-        "Branding",
-        "Identidade visual",
-        "Logo",
-        "Rebranding",
-        "Naming",
-        "Posicionamento",
-        "Manual de marca",
-        "Tom de voz",
-        "Key visual"
-      ],
-      [
-        "Site",
-        "Landing page",
-        "Mídia kit",
-        "Apresentações institucionais",
-        "Pitch deck",
-        "Campanhas",
-        "Direção de arte",
-        "Social media",
-        "Embalagem"
-      ]
+    "text": "Para projetos com começo, meio e fim, também assumo trabalhos pontuais, da marca à tecnologia, com o mesmo nível de direção. Muitas parcerias começaram exatamente assim.",
+    "columns": [
+      {
+        "title": "Marca",
+        "items": [
+          "Branding",
+          "Identidade visual",
+          "Logo",
+          "Rebranding",
+          "Naming",
+          "Posicionamento",
+          "Manual de marca",
+          "Tom de voz",
+          "Key visual"
+        ]
+      },
+      {
+        "title": "Comunicação",
+        "items": [
+          "Site",
+          "Landing page",
+          "Mídia kit",
+          "Apresentações institucionais",
+          "Pitch deck",
+          "Campanhas",
+          "Direção de arte",
+          "Social media",
+          "Embalagem"
+        ]
+      },
+      {
+        "title": "Tecnologia",
+        "items": [
+          "Sistemas web",
+          "Plataformas sob medida",
+          "Dashboards",
+          "Automações",
+          "Agentes de IA",
+          "Integrações",
+          "Ferramentas internas",
+          "Portais de clientes",
+          "E-commerce",
+          "Experiências 3D"
+        ]
+      }
     ],
     "button": "Falar sobre um projeto",
     "whatsappMessage": "Oi Breno, tenho um projeto pontual e queria conversar.",
-    "buttonLabel": "Falar sobre um projeto (abre o WhatsApp)",
-    "listLabel": "Serviços em projetos pontuais"
+    "buttonLabel": "Falar sobre um projeto (abre o WhatsApp)"
   },
   "faq": {
     "eyebrow": "Perguntas frequentes",

@@ -359,35 +359,55 @@
   "oneOff": {
     "eyebrow": "One-off projects",
     "title": "Not every brand needs to start with a partnership.",
-    "text": "For projects with a clear beginning, middle and end, I also take on one-off work, with the same level of direction. Many partnerships started exactly this way.",
-    "strips": [
-      [
-        "Branding",
-        "Visual identity",
-        "Logo",
-        "Rebranding",
-        "Naming",
-        "Positioning",
-        "Brand guidelines",
-        "Tone of voice",
-        "Key visual"
-      ],
-      [
-        "Website",
-        "Landing page",
-        "Media kit",
-        "Company presentations",
-        "Pitch deck",
-        "Campaigns",
-        "Art direction",
-        "Social media",
-        "Packaging"
-      ]
+    "text": "For projects with a clear beginning, middle and end, I also take on one-off work, from brand to technology, with the same level of direction. Many partnerships started exactly this way.",
+    "columns": [
+      {
+        "title": "Brand",
+        "items": [
+          "Branding",
+          "Visual identity",
+          "Logo",
+          "Rebranding",
+          "Naming",
+          "Positioning",
+          "Brand guidelines",
+          "Tone of voice",
+          "Key visual"
+        ]
+      },
+      {
+        "title": "Communication",
+        "items": [
+          "Website",
+          "Landing page",
+          "Media kit",
+          "Company presentations",
+          "Pitch deck",
+          "Campaigns",
+          "Art direction",
+          "Social media",
+          "Packaging"
+        ]
+      },
+      {
+        "title": "Technology",
+        "items": [
+          "Web systems",
+          "Custom platforms",
+          "Dashboards",
+          "Automations",
+          "AI agents",
+          "Integrations",
+          "Internal tools",
+          "Client portals",
+          "E-commerce",
+          "3D experiences"
+        ]
+      }
     ],
     "button": "Talk about a project",
     "whatsappMessage": "Hi Breno, I have a one-off project and would like to talk.",
-    "buttonLabel": "Talk about a project (opens WhatsApp)",
-    "listLabel": "One-off project services"
+    "buttonLabel": "Talk about a project (opens WhatsApp)"
   },
   "faq": {
     "eyebrow": "Perguntas frequentes",
