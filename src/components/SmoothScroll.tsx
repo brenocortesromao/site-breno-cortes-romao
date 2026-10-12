@@ -29,6 +29,13 @@ export function scrollToY(y: number) {
   }
 }
 
+/** Trava/destrava o scroll da página (ex.: lightbox aberto), com ou sem Lenis. */
+export function lockScroll(locked: boolean) {
+  if (locked) instance?.stop();
+  else instance?.start();
+  document.documentElement.style.overflow = locked ? "hidden" : "";
+}
+
 export default function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

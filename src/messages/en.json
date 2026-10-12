@@ -287,12 +287,16 @@
     },
     "gallery": {
       "title": "Projetos",
-      "label": "Carrossel de projetos",
+      "label": "Mural de projetos",
       "prev": "Projeto anterior",
       "next": "Próximo projeto",
+      "close": "Fechar",
+      "lightbox": "Projeto ampliado",
+      "open": "Ampliar {caption}",
       "counter": "{current} de {total}",
-      "dragHint": "Arraste para navegar",
       "imageAlt": "Imagem do projeto {project}, {year}",
+      "imageAltNoYear": "Imagem do projeto {project}",
+      "placeholderProject": "Projeto {n}",
       "placeholder": "Imagem pendente"
     },
     "subtitle": "Ao longo da minha trajetória, em agências, estúdios, empresas e projetos independentes."

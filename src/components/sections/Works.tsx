@@ -1,16 +1,30 @@
 import { getTranslations } from "next-intl/server";
-import { logos, trabalhos } from "@/content/media";
+import { logos } from "@/content/media";
+import { loadTrabalhos } from "@/content/works";
 import LogoMarquee from "./LogoMarquee";
-import WorkCarousel from "./WorkCarousel";
+import WorkWall from "./WorkWall";
+
+/** Placeholders enquanto public/trabalhos/ estiver vazia. */
+const PLACEHOLDERS = 8;
 
 /**
- * Trabalhos (escura, pouco visual): faixa de logos e carrossel de projetos.
+ * Trabalhos (escura, pouco visual): faixa de logos e mural inclinado de projetos.
  * Sem lista de cases nem páginas /cases (decisão do dono).
- * Dados de imagens/logos: public/trabalhos e public/logos (ver content/media.ts).
+ * Imagens: public/trabalhos/ (lidas no build, ver content/works.ts); logos:
+ * public/logos (ver content/media.ts).
  */
 export default async function Works() {
   const t = await getTranslations("works");
-  const total = trabalhos.length;
+  const found = loadTrabalhos();
+  const works =
+    found.length > 0
+      ? found
+      : Array.from({ length: PLACEHOLDERS }, (_, i) => ({
+          src: undefined,
+          project: t("gallery.placeholderProject", { n: String(i + 1).padStart(2, "0") }),
+          year: undefined,
+        }));
+  const total = works.length;
 
   return (
     <section id="trabalhos" data-theme="dark" aria-labelledby="trabalhos-title" className="relative z-10">
@@ -30,23 +44,30 @@ export default async function Works() {
       </div>
 
       <div className="mt-16 pb-[clamp(6rem,16vh,12rem)] md:mt-24">
-        <WorkCarousel
-          items={trabalhos.map((w) => ({
-            ...w,
-            alt: t("gallery.imageAlt", { project: w.project, year: w.year }),
-          }))}
+        <WorkWall
+          items={works.map((w) => {
+            const caption = w.year ? `${w.project} · ${w.year}` : w.project;
+            return {
+              src: w.src,
+              caption,
+              alt: w.year
+                ? t("gallery.imageAlt", { project: w.project, year: w.year })
+                : t("gallery.imageAltNoYear", { project: w.project }),
+              open: t("gallery.open", { caption }),
+            };
+          })}
           labels={{
             title: t("gallery.title"),
             label: t("gallery.label"),
             prev: t("gallery.prev"),
             next: t("gallery.next"),
-            counters: trabalhos.map((_, i) => t("gallery.counter", { current: i + 1, total })),
-            dragHint: t("gallery.dragHint"),
+            close: t("gallery.close"),
+            lightbox: t("gallery.lightbox"),
+            counters: works.map((_, i) => t("gallery.counter", { current: i + 1, total })),
             placeholder: t("gallery.placeholder"),
           }}
         />
       </div>
-
     </section>
   );
 }
