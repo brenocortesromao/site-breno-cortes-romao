@@ -32,6 +32,7 @@ export default function BlurRevealTitle({
   className,
   as: Tag = "h2",
   start = "top 80%",
+  stagger: fixedStagger,
 }: {
   text: string;
   id?: string;
@@ -39,6 +40,8 @@ export default function BlurRevealTitle({
   as?: "h1" | "h2" | "h3";
   /** Início do ScrollTrigger (padrão: topo do título a 80% da tela). */
   start?: string;
+  /** Intervalo fixo entre letras (s). Sem ele, ajusta entre 35 e 40 ms para ~2 s no total. */
+  stagger?: number;
 }) {
   const root = useRef<HTMLHeadingElement>(null);
 
@@ -48,10 +51,9 @@ export default function BlurRevealTitle({
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const chars = gsap.utils.toArray<HTMLElement>(root.current!.querySelectorAll("[data-ch]"));
         if (!chars.length) return;
-        const stagger = Math.min(
-          STAGGER_MAX,
-          Math.max(STAGGER_MIN, (TOTAL - DURATION) / Math.max(chars.length - 1, 1)),
-        );
+        const stagger =
+          fixedStagger ??
+          Math.min(STAGGER_MAX, Math.max(STAGGER_MIN, (TOTAL - DURATION) / Math.max(chars.length - 1, 1)));
         gsap.set(chars, { opacity: 0, filter: "blur(10px)" });
         ScrollTrigger.create({
           trigger: root.current,
@@ -73,7 +75,7 @@ export default function BlurRevealTitle({
         });
       });
     },
-    { scope: root, dependencies: [text, start] },
+    { scope: root, dependencies: [text, start, fixedStagger] },
   );
 
   const words = text.split(" ");

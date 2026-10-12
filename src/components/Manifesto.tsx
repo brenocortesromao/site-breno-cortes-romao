@@ -34,7 +34,8 @@ export type ManifestoCopy = {
 /**
  * Mensagem de Breno Côrtes Romão. Entra por cima da hero fixa (fundo
  * transparente: a bola escurecida segue visível atrás). Coreografia:
- * - as palavras da frase acendem uma a uma com o scroll;
+ * - a frase se forma letra por letra, do desfocado ao nítido, acompanhando o
+ *   scroll (opacity 0 + blur 10px → opacity 1 + blur 0; scrub);
  * - o retrato entra com uma luz de estúdio acendendo (PortraitReveal) e, com
  *   a foto no lugar, a assinatura é escrita sobre ele (~1,8 s, por tempo);
  * - texto de apoio e nome aparecem em seguida.
@@ -66,19 +67,26 @@ export default function Manifesto({
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // frase: letra por letra, do desfocado ao nítido, com o scroll (sem
+        // movimento nem escala). will-change só enquanto o trecho está ativo.
+        const letters = gsap.utils.toArray<HTMLElement>("[data-ch]", phrase.current!);
         gsap.fromTo(
-          "[data-word]",
-          { opacity: 0.12, yPercent: 35 },
+          letters,
+          { opacity: 0, filter: "blur(10px)" },
           {
             opacity: 1,
-            yPercent: 0,
-            ease: "none",
-            stagger: 0.05,
+            filter: "blur(0px)",
+            ease: "power2.out",
+            duration: 0.5,
+            stagger: 0.035,
+            // nítida no fim (já com o atraso do scrub): tira o filtro (blur 0) para não pesar
+            onComplete: () => gsap.set(letters, { clearProps: "filter" }),
             scrollTrigger: {
               trigger: phrase.current,
-              start: "top 85%",
-              end: "bottom 50%",
-              scrub: 0.8,
+              start: "top 80%",
+              end: "bottom 40%",
+              scrub: 0.6,
+              onToggle: (self) => gsap.set(letters, { willChange: self.isActive ? "filter, opacity" : "auto" }),
             },
           },
         );
@@ -212,6 +220,8 @@ export default function Manifesto({
             ref={phrase}
             id="manifesto-title"
             translate="no"
+            aria-label={copy.statement.map((p) => p.text).join(" ")}
+            data-blur-scrub
             // text-balance: linhas equilibradas, sem buraco à direita. No desktop
             // a frase avança um pouco sobre a área do retrato (sem chegar na
             // assinatura, que termina antes desse recuo).
@@ -221,8 +231,13 @@ export default function Manifesto({
               <span key={i} className={part.soft ? "font-light text-silver" : undefined}>
                 {part.text.split(" ").map((word, j) => (
                   <span key={j}>
-                    <span data-word className="inline-block">
-                      {word}
+                    {/* palavra inteira na quebra; letras inline (mantém o kerning) */}
+                    <span aria-hidden="true" className="inline-block whitespace-nowrap">
+                      {Array.from(word).map((ch, k) => (
+                        <span key={k} aria-hidden="true" data-ch>
+                          {ch}
+                        </span>
+                      ))}
                     </span>{" "}
                   </span>
                 ))}

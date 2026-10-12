@@ -169,7 +169,8 @@ body::before {
     opacity: 0;
   }
   /* títulos com revelação por desfoque (BlurRevealTitle): mesmo princípio */
-  .js-motion [data-blur-reveal] [data-ch] {
+  .js-motion [data-blur-reveal] [data-ch],
+  .js-motion [data-blur-scrub] [data-ch] {
     opacity: 0;
   }
 }

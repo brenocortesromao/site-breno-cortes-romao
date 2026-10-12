@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { whatsappUrl } from "@/content/contact";
+import BlurRevealTitle from "@/components/BlurRevealTitle";
 import ServiceColumns, { type ServiceColumn } from "./ServiceColumns";
 
 /**
@@ -21,12 +22,12 @@ export default async function OneOffProjects() {
       <div className="mx-auto grid w-full max-w-[1600px] gap-y-12 px-6 py-[clamp(3.6rem,9.6vh,7.2rem)] md:px-12 lg:grid-cols-[2fr_3fr] lg:gap-x-16">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver">{t("eyebrow")}</p>
-          <h2
+          <BlurRevealTitle
             id="projetos-pontuais-title"
             className="mt-6 text-[clamp(32px,3.2vw,48px)] font-semibold leading-[1] tracking-[-0.05em]"
-          >
-            {t("title")}
-          </h2>
+            text={t("title")}
+            stagger={0.035}
+          />
           <p className="mt-6 max-w-md text-base leading-relaxed text-silver md:text-lg">{t("text")}</p>
         </div>
 
