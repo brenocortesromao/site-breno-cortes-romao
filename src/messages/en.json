@@ -44,7 +44,11 @@
         "soft": true
       }
     ],
-    "body": "É essa impressão que eu construo. Trabalho com empresas que já são grandes no que fazem, mas ainda parecem pequenas no que mostram. Entendo o negócio, decido o que ele precisa dizer e cuido para que cada peça esteja à altura dele.",
+    "body": [
+      "That's the impression I build.",
+      "I grew up between a writer and a journalist, learned alongside people who helped build Nubank, XP Investimentos, Mercado Livre and Itaú Digital, and sat in the key seats of a brand: design, marketing leadership, digital marketing and growth. Today I put all of that to work for companies that are already great at what they do, but still look small in what they show.",
+      "I don't arrive with a ready-made formula, and I don't leave after delivery. I step in as your company's brand director: I define what it needs to say, create how it will say it, and follow every piece until the market sees the value you've already built, or the one you want to build."
+    ],
     "portrait": "Retrato",
     "portraitAlt": "Retrato de {name}",
     "signatureLabel": "Assinatura de {name}"
@@ -295,7 +299,7 @@
   },
   "about": {
     "eyebrow": "Sobre",
-    "title": "Quem vai cuidar da sua marca.",
+    "subtitle": "The one who will take care of your brand.",
     "opening": "I grew up surrounded by words and stories.",
     "paragraphs": [
       "I'm the son of one of Brazil's best-known writers and speakers and of a journalist mother. At home, ideas were dinner conversation, and telling a good story was almost a family rule. Creativity wasn't something I chose; it was always there. What I chose was to turn it into a craft.",

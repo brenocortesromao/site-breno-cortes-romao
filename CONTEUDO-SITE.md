@@ -29,7 +29,18 @@ Regras:
 - Frase de abertura, em tipografia gigante, palavra por palavra:
   **Uma marca não é o que a empresa diz sobre si. É o que sobra na cabeça das pessoas quando você sai da sala.**
   (Atenção: "sobre si." com ponto final, nunca "sobre sim". Ponto final também depois de "sala".)
-- Texto: É essa impressão que eu construo. Trabalho com empresas que já são grandes no que fazem, mas ainda parecem pequenas no que mostram. Entendo o negócio, decido o que ele precisa dizer e cuido para que cada peça esteja à altura dele.
+- Texto (3 blocos curtos):
+  É essa impressão que eu construo.
+
+  Cresci entre um escritor e uma jornalista, aprendi ao lado de quem ajudou a construir Nubank, XP Investimentos, Mercado Livre e Itaú Digital, e passei pelas principais cadeiras de uma marca: design, direção de marketing, marketing digital e growth. Hoje coloco tudo isso a serviço de empresas que já são grandes no que fazem, mas ainda parecem pequenas no que mostram.
+
+  Não chego com fórmula pronta nem vou embora depois da entrega. Entro como diretor de marca da sua empresa: defino o que ela precisa dizer, crio como ela vai dizer e acompanho cada peça até o mercado enxergar o valor que você já construiu, ou o que você quer construir.
+- EN:
+  That's the impression I build.
+
+  I grew up between a writer and a journalist, learned alongside people who helped build Nubank, XP Investimentos, Mercado Livre and Itaú Digital, and sat in the key seats of a brand: design, marketing leadership, digital marketing and growth. Today I put all of that to work for companies that are already great at what they do, but still look small in what they show.
+
+  I don't arrive with a ready-made formula, and I don't leave after delivery. I step in as your company's brand director: I define what it needs to say, create how it will say it, and follow every piece until the market sees the value you've already built, or the one you want to build.
 - Assinatura: Breno Côrtes Romão
 
 ## 3. A distância (GRADIENTE ESCURO, gráficos conceituais, sem números, nota "ilustrativo")
@@ -163,7 +174,9 @@ Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória, em agên
 ## 11. Sobre (PRETO, com floresta 3D ao fundo)
 
 - Rótulo: SOBRE
-- Título: **Quem vai cuidar da sua marca.**
+- Título (nome, grande): **Breno Côrtes Romão**
+- Subtítulo (logo abaixo, menor, peso leve): Quem vai cuidar da sua marca.
+- EN: título "Breno Côrtes Romão", subtítulo "The one who will take care of your brand."
 - Frase de abertura (grande, em destaque): **Cresci entre palavras e histórias.**
 - Texto (3 parágrafos):
   Sou filho de um dos maiores escritores e palestrantes do país e de uma mãe jornalista. Em casa, ideias eram assunto de jantar, e contar bem uma história era quase uma regra da família. A criatividade não foi algo que eu escolhi: ela sempre esteve ali. O que eu escolhi foi transformá-la em ofício.

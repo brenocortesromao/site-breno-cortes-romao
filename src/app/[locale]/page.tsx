@@ -74,7 +74,7 @@ export default async function Home() {
             copy={{
               eyebrow: t("manifesto.eyebrow", { name }),
               statement: t.raw("manifesto.statement") as { text: string; soft?: boolean }[],
-              body: t("manifesto.body"),
+              body: t.raw("manifesto.body") as string[],
               portrait: t("manifesto.portrait"),
               portraitAlt: t("manifesto.portraitAlt", { name }),
               name,

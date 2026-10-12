@@ -19,7 +19,7 @@ export type ManifestoCopy = {
   eyebrow: string;
   /** Frase em trechos; `soft` = peso leve em prata (contraste editorial). */
   statement: { text: string; soft?: boolean }[];
-  body: string;
+  body: string[];
   portrait: string;
   /** Texto alternativo do retrato ("Retrato de {name}"). */
   portraitAlt: string;
@@ -230,12 +230,14 @@ export default function Manifesto({
             ))}
           </h2>
           <div className="mt-12 grid gap-8 md:mt-16 md:grid-cols-6">
-            <p
+            <div
               data-follow
-              className="max-w-md text-sm leading-relaxed text-silver md:col-span-4 md:col-start-3 md:text-[15px]"
+              className="max-w-md space-y-4 text-sm leading-relaxed text-silver md:col-span-4 md:col-start-3 md:text-[15px]"
             >
-              {protectTerms(copy.body)}
-            </p>
+              {copy.body.map((paragraph) => (
+                <p key={paragraph}>{protectTerms(paragraph)}</p>
+              ))}
+            </div>
             <p data-follow className="md:col-span-4 md:col-start-3">
               <span className="block text-sm font-semibold tracking-[-0.01em]">{copy.name}</span>
               <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.22em] text-silver">

@@ -44,7 +44,11 @@
         "soft": true
       }
     ],
-    "body": "É essa impressão que eu construo. Trabalho com empresas que já são grandes no que fazem, mas ainda parecem pequenas no que mostram. Entendo o negócio, decido o que ele precisa dizer e cuido para que cada peça esteja à altura dele.",
+    "body": [
+      "É essa impressão que eu construo.",
+      "Cresci entre um escritor e uma jornalista, aprendi ao lado de quem ajudou a construir Nubank, XP Investimentos, Mercado Livre e Itaú Digital, e passei pelas principais cadeiras de uma marca: design, direção de marketing, marketing digital e growth. Hoje coloco tudo isso a serviço de empresas que já são grandes no que fazem, mas ainda parecem pequenas no que mostram.",
+      "Não chego com fórmula pronta nem vou embora depois da entrega. Entro como diretor de marca da sua empresa: defino o que ela precisa dizer, crio como ela vai dizer e acompanho cada peça até o mercado enxergar o valor que você já construiu, ou o que você quer construir."
+    ],
     "portrait": "Retrato",
     "portraitAlt": "Retrato de {name}",
     "signatureLabel": "Assinatura de {name}"
@@ -295,7 +299,7 @@
   },
   "about": {
     "eyebrow": "Sobre",
-    "title": "Quem vai cuidar da sua marca.",
+    "subtitle": "Quem vai cuidar da sua marca.",
     "opening": "Cresci entre palavras e histórias.",
     "paragraphs": [
       "Sou filho de um dos maiores escritores e palestrantes do país e de uma mãe jornalista. Em casa, ideias eram assunto de jantar, e contar bem uma história era quase uma regra da família. A criatividade não foi algo que eu escolhi: ela sempre esteve ali. O que eu escolhi foi transformá-la em ofício.",

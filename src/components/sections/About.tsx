@@ -49,7 +49,8 @@ export default async function About({ variant }: { variant: "summary" | "page" }
           page={isPage}
           copy={{
             eyebrow: t("eyebrow"),
-            title: t("title"),
+            title: name,
+            subtitle: t("subtitle"),
             opening: t("opening"),
             paragraphs: t.raw("paragraphs") as string[],
             closing: t("closing"),
