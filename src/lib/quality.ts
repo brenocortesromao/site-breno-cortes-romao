@@ -16,10 +16,14 @@ import { webglSupport } from "./webgl";
  * Presets: DPR máximo (2 / 1,5 / 1) e geometria leve (as variantes "light"
  * que já existiam para o mobile) no "low".
  *
- * MONITOR DE FPS: enquanto há cena 3D montada, mede o tempo entre quadros; se
- * a média ficar abaixo de ~50 fps por 3 s seguidos (ignorando os primeiros
- * segundos, aba em segundo plano e picos), desce um nível (high → medium →
- * low). Nunca sobe de volta na mesma visita (evita oscilar).
+ * MONITOR DE FPS (por cena): enquanto há cena 3D montada, mede o fps em
+ * janelas de 1 s. Janelas com rolagem da página são ignoradas (engasgo de
+ * rolagem é do DOM, não da cena), assim como os primeiros segundos, a aba em
+ * segundo plano e pausas longas. A janela é atribuída à cena com mais área
+ * visível; 3 janelas seguidas abaixo de ~50 fps rebaixam SÓ essa cena (high →
+ * medium → low). Depois de ~10 s estáveis acima de 55 fps, ela volta a subir um
+ * nível; se cair de novo depois de subir, fica travada no nível menor (sem
+ * oscilar). As cenas pedem o nível com `useSceneTier(nome, ref, montada)`.
  *
  * ORÇAMENTO: no máximo MAX_CONTEXTS contextos WebGL ao mesmo tempo. Cada cena
  * pede uma vaga com `useWebglSlot`; ganham as que estão mais perto da tela
@@ -67,15 +71,6 @@ export function getTier(): Tier {
 
 export const presetFor = (tier: Tier) => PRESETS[tier];
 
-function downgrade() {
-  const t = getTier();
-  const i = ORDER.indexOf(t);
-  if (i <= 1) return; // "low" é o piso (o "none" só vem da detecção)
-  current = ORDER[i - 1];
-  console.info(`[qualidade] FPS baixo: nível ${t} → ${current}`);
-  emit();
-}
-
 /** Nível atual (reativo: muda se o monitor de FPS rebaixar). */
 export function useTier(): Tier {
   return useSyncExternalStore(
@@ -89,16 +84,88 @@ export function useTier(): Tier {
 }
 
 // ---------------------------------------------------------------- monitor de FPS
+type SceneEntry = { name: string; el: Element | null };
+const sceneEntries = new Map<symbol, SceneEntry>();
+/** Nível de cada cena (por nome: vale também quando ela remonta). */
+const sceneTier = new Map<string, Tier>();
+const sceneState = new Map<string, { slow: number; good: number; upgraded: boolean; locked: boolean }>();
 let activeScenes = 0;
 let raf = 0;
+let lastScroll = 0;
+let scrollWatch = false;
+
+const tierOf = (name: string) => {
+  const g = getTier();
+  const own = sceneTier.get(name);
+  return own && ORDER.indexOf(own) < ORDER.indexOf(g) ? own : g;
+};
+const stateOf = (name: string) => {
+  let st = sceneState.get(name);
+  if (!st) sceneState.set(name, (st = { slow: 0, good: 0, upgraded: false, locked: false }));
+  return st;
+};
+/** Cena com mais área visível agora (a "dona" da janela medida). */
+function foreground(): string | null {
+  let best: string | null = null;
+  let bestArea = 0;
+  const vh = window.innerHeight;
+  const vw = window.innerWidth;
+  sceneEntries.forEach((e) => {
+    if (!e.el) return;
+    const r = e.el.getBoundingClientRect();
+    const h = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+    const w = Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0));
+    if (h * w > bestArea) {
+      bestArea = h * w;
+      best = e.name;
+    }
+  });
+  return best;
+}
+
+function setSceneTier(name: string, next: Tier, why: string) {
+  const from = tierOf(name);
+  sceneTier.set(name, next);
+  console.info(`[qualidade] ${why} em "${name}": nível ${from} → ${next}`);
+  emit();
+}
+
+function judge(fps: number) {
+  const name = foreground();
+  if (!name) return;
+  const st = stateOf(name);
+  const t = tierOf(name);
+  const i = ORDER.indexOf(t);
+  if (fps < 50) {
+    st.good = 0;
+    st.slow++;
+    if (st.slow >= 3 && i > 1) {
+      st.slow = 0;
+      if (st.upgraded) st.locked = true; // caiu de novo depois de subir: fica aqui
+      setSceneTier(name, ORDER[i - 1], "FPS baixo");
+    }
+  } else {
+    st.slow = 0;
+    st.good = fps >= 55 ? st.good + 1 : 0;
+    const top = ORDER.indexOf(getTier());
+    if (st.good >= 10 && i < top && !st.locked) {
+      st.good = 0;
+      st.upgraded = true;
+      setSceneTier(name, ORDER[i + 1], "FPS estável");
+    }
+  }
+}
 
 function startMonitor() {
   if (raf || typeof window === "undefined") return;
+  if (!scrollWatch) {
+    scrollWatch = true;
+    window.addEventListener("scroll", () => (lastScroll = performance.now()), { passive: true });
+  }
   const started = performance.now();
   let last = started;
   let windowStart = started;
   let frames = 0;
-  let slowWindows = 0;
   const loop = (now: number) => {
     raf = activeScenes > 0 ? requestAnimationFrame(loop) : 0;
     const dt = now - last;
@@ -112,12 +179,8 @@ function startMonitor() {
     if (now - started < 4000) return; // carga, compilação de shaders
     frames++;
     if (now - windowStart >= 1000) {
-      const fps = (frames * 1000) / (now - windowStart);
-      slowWindows = fps < 50 ? slowWindows + 1 : 0;
-      if (slowWindows >= 3) {
-        slowWindows = 0;
-        downgrade();
-      }
+      // janela com rolagem: não conta (engasgo de rolagem não é da cena)
+      if (lastScroll < windowStart) judge((frames * 1000) / (now - windowStart));
       windowStart = now;
       frames = 0;
     }
@@ -125,16 +188,31 @@ function startMonitor() {
   raf = requestAnimationFrame(loop);
 }
 
-/** Registra uma cena 3D montada (o monitor só roda enquanto houver alguma). */
-export function useSceneMonitor(mounted: boolean) {
+/**
+ * Nível de qualidade desta cena (reativo) e registro no monitor de FPS
+ * enquanto ela estiver montada. `ref`: o elemento da cena (para saber quanto
+ * dela está na tela).
+ */
+export function useSceneTier(name: string, ref: RefObject<Element | null>, mounted: boolean): Tier {
+  const [id] = useState(() => Symbol(name));
   useEffect(() => {
     if (!mounted) return;
+    sceneEntries.set(id, { name, el: ref.current });
     activeScenes++;
     startMonitor();
     return () => {
+      sceneEntries.delete(id);
       activeScenes--;
     };
-  }, [mounted]);
+  }, [mounted, name, ref, id]);
+  return useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => listeners.delete(l);
+    },
+    () => tierOf(name),
+    () => "high" as Tier,
+  );
 }
 
 // ---------------------------------------------------------------- orçamento de contextos

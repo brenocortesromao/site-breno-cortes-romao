@@ -68,11 +68,24 @@ Script: `scratchpad` da sessão (CDP), injeta um contador de contextos no `getCo
 6. **Qualidade adaptativa** (`src/lib/quality.ts`):
    - nível detectado (`none`/`low`/`medium`/`high`): `none` = sem WebGL2 ou renderizador por software (SwiftShader, llvmpipe, etc.), que usa os fallbacks estáticos;
    - presets de DPR máximo (2/1,5/1) e geometria leve no `low`; o `high` é exatamente o visual aprovado;
-   - monitor de FPS em tempo real: abaixo de ~50 fps por 3 s seguidos, desce um nível (ignora a carga, a aba em segundo plano e picos).
+   - monitor de FPS em tempo real: abaixo de ~50 fps por 3 s seguidos, desce um nível (ignora a carga, a aba em segundo plano e picos). **Revisto em 12/10** (ver "Monitor de qualidade por cena").
 7. **Orçamento de contextos WebGL**: no máximo 2 ativos (`useWebglSlot`). Ganham as cenas mais perto da tela; as outras desmontam e liberam o contexto. Isso substituiu o `useNearViewport` (removido).
 8. **Pausa**: as cenas param fora da tela (IntersectionObserver / `frameloop`) e o `requestAnimationFrame` para sozinho com a aba em segundo plano.
 9. **Cena 3D dos números descartada a pedido** (voltou ao HTML): menos um contexto e menos JS.
 10. **Imagens**: `next/image` com AVIF/WebP (já configurado), lazy fora da primeira tela; fontes via `next/font` (swap); CLS 0.
+
+## Monitor de qualidade por cena (12/10)
+
+**Problema:** as curvas líquidas pararam de reagir ao mouse. O monitor de FPS media a página inteira e rebaixava o nível GLOBAL sempre que havia qualquer cena montada. Rolando o site de cima a baixo (desktop, RTX 3050), ele disparou "[qualidade] FPS baixo" duas vezes: `high → medium` com "A distância" na tela (sem cena WebGL ali, só o FlowField 2D) e `medium → low` no oceano da IA. Nenhuma das cenas novas (floresta aérea, espaço) disparou. A causa eram os engasgos de ROLAGEM do DOM (medidos antes: iguais com e sem as cenas 3D), que rebaixavam todas as cenas para sempre; no "low" as curvas (modo leve) não registravam o `pointermove`.
+
+**O que mudou:**
+- `LiquidContours`: ondulações do cursor sempre que há mouse (`(hover: hover) and (pointer: fine)`), também no modo leve (são só uniforms). No toque, continuam desligadas.
+- `lib/quality.ts`: o nível agora é **por cena** (`useSceneTier(nome, ref, montada)`; substitui `useTier` + `useSceneMonitor` nas 8 cenas). Cada janela de 1 s é atribuída à cena com mais área visível; **janelas com rolagem são ignoradas** (engasgo de rolagem não é custo da cena); 3 janelas seguidas abaixo de ~50 fps rebaixam só aquela cena; depois de ~10 s estáveis acima de 55 fps ela volta a subir um nível; se cair de novo depois de subir, fica travada no nível menor (sem oscilar). O console diz qual cena: `[qualidade] FPS baixo em "oceano": nível high → medium`.
+- Espaço (Contato): sem alocação por quadro (alvo da câmera e deriva orbital reaproveitam vetores), luzes estáticas com a matriz congelada, partículas dos anéis 7.000 → 5.500 (mistura aditiva: sem diferença visível). DPR já limitado a 1,5.
+
+**Medido depois:** rolagem do site inteiro (desktop, GPU real): **nenhum "[qualidade]" no console**. Parado 12 s em cada cena: hero, nuvens, curvas (Fractional), montanhas, gota, floresta, oceano, curvas (Parcerias) e espaço a **60 fps**, sem rebaixar. Curvas: a imagem muda mais com o mouse passando do que só com o tempo (Fractional 2,96 contra 2,25; Parcerias 1,68 contra 1,03, diferença média de pixels), ou seja, as ondulações respondem.
+
+**Engasgos de rolagem do DOM (continuam):** nas rolagens de "A distância", do Sobre e na entrada do Contato há quadros longos que já existiam antes das cenas (A/B com cada cena bloqueada: mesmo resultado). Não derrubam mais a qualidade das cenas; a causa (provável: trabalho de ScrollTrigger/estilos nessas seções) ainda não foi investigada.
 
 ## Testes
 

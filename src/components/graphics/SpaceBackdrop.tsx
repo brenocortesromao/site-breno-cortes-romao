@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
+import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -39,9 +39,7 @@ export default function SpaceBackdrop() {
   const warp = useRef(0);
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  const near = useWebglSlot(root);
-  const tier = useTier();
-
+  const near = useWebglSlot(root);
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const webgl = webglSupport().webgl2;
@@ -89,7 +87,7 @@ export default function SpaceBackdrop() {
 
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
   const scene = env?.webgl === true;
-  useSceneMonitor(scene && near);
+  const tier = useSceneTier("espaço", root, scene && near);
 
   useGSAP(
     () => {

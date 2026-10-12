@@ -10,7 +10,7 @@ import DraftBadge from "./theme/DraftBadge";
 import { protectTerms } from "@/components/Term";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
+import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -52,7 +52,6 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
   const [sceneReady, setSceneReady] = useState(false);
   /** A cena 3D só existe com a hero perto da tela e com vaga no orçamento de contextos. */
   const near = useWebglSlot(section);
-  const tier = useTier();
 
   // Detecta capacidades do dispositivo (só existe no cliente).
   useEffect(() => {
@@ -135,7 +134,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
 
   const showScene = env?.webgl === true;
   const mountScene = showScene && near;
-  useSceneMonitor(mountScene);
+  const tier = useSceneTier("bola da hero", section, mountScene);
   const phrase =
     "font-display text-[clamp(2.4rem,11vw,4rem)] leading-[0.95] tracking-[-0.055em] md:text-[min(3.9vw,5rem)]";
 

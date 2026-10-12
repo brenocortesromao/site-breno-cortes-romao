@@ -8,7 +8,7 @@ import BlurRevealTitle from "@/components/BlurRevealTitle";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
 import LiquidDrop from "@/components/graphics/LiquidDrop";
 import ResilientBoundary from "@/components/ResilientBoundary";
-import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
+import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { webglSupport } from "@/lib/webgl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -40,10 +40,9 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
   const [drop, setDrop] = useState<{ light: boolean; reduce: boolean; webgl: boolean } | null>(null);
   /** A gota só existe com a seção perto da tela e com vaga no orçamento de contextos. */
   const near = useWebglSlot(root);
-  const tier = useTier();
   const [dropFailed, setDropFailed] = useState(false);
   const handleDropFail = useCallback(() => setDropFailed(true), []);
-  useSceneMonitor(!!drop?.webgl && !dropFailed && near);
+  const tier = useSceneTier("gota", root, !!drop?.webgl && !dropFailed && near);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador

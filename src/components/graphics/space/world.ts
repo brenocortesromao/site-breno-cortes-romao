@@ -345,6 +345,7 @@ export class SpaceWorld {
   private cam = new Vector3(0, 0, 16);
   private look = new Vector3();
   private tmp = new Vector3();
+  private camTarget = new Vector3();
   private tmpQ = new Quaternion();
   private axisX = new Vector3(1, 0, 0);
   private axisY = new Vector3(0, 1, 0);
@@ -521,7 +522,7 @@ export class SpaceWorld {
     });
     this.ringTilt.add(new Mesh(new RingGeometry(RING_IN, RING_OUT, light ? 128 : 256, 1), this.ringMat));
     {
-      const n = light ? 1800 : 7000;
+      const n = light ? 1800 : 5500;
       const rr = new Float32Array(n);
       const aa = new Float32Array(n);
       const zz = new Float32Array(n);
@@ -620,6 +621,11 @@ export class SpaceWorld {
     const rim = new DirectionalLight(0xcfd6e0, 0.9);
     rim.position.set(4, 2, -6);
     this.root.add(rim);
+    // estáticas: sem recalcular a matriz a cada quadro
+    for (const l of [key, rim]) {
+      l.updateMatrix();
+      l.matrixAutoUpdate = false;
+    }
 
     // --- poeira desfocada atravessando a cena em várias profundidades ---
     if (!light) {
@@ -749,18 +755,22 @@ export class SpaceWorld {
     const e = progress * progress * (3 - 2 * progress);
     const px = this.planetGroup.position.x;
     const py = this.planetGroup.position.y;
-    const target = new Vector3(px * 0.06 * e, py * 0.04 * e, 16 - 1.6 * e);
+    const target = this.camTarget.set(px * 0.06 * e, py * 0.04 * e, 16 - 1.6 * e);
     if (still) this.cam.copy(target);
     else this.cam.lerp(target, 1 - Math.exp(-dt * 4));
     // deriva orbital lenta em volta do planeta: câmera e alvo giram juntos em
     // torno do centro dele (o planeta fica no lugar na tela; o fundo desliza)
     const yaw = Math.sin(t * 0.05) * 0.1;
     const pitch = Math.sin(t * 0.037 + 0.7) * 0.04;
-    const c = this.planetUniforms.uCenter.value;
-    const orbit = (v: Vector3) => v.sub(c).applyAxisAngle(this.axisY, yaw).applyAxisAngle(this.axisX, pitch).add(c);
-    camera.position.copy(orbit(this.tmp.copy(this.cam)));
+    camera.position.copy(this.orbit(this.tmp.copy(this.cam), yaw, pitch));
     this.look.set(this.cam.x, this.cam.y, 0);
-    camera.lookAt(orbit(this.look));
+    camera.lookAt(this.orbit(this.look, yaw, pitch));
+  }
+
+  /** Gira `v` em torno do centro do planeta (deriva orbital da câmera), sem alocar. */
+  private orbit(v: Vector3, yaw: number, pitch: number) {
+    const c = this.planetUniforms.uCenter.value;
+    return v.sub(c).applyAxisAngle(this.axisY, yaw).applyAxisAngle(this.axisX, pitch).add(c);
   }
 
   /** Estrela cadente ocasional (a cada 4 a 8 s), fina e rápida, na metade direita do fundo. */

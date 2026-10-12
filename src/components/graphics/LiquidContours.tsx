@@ -215,7 +215,10 @@ export default function LiquidContours({
       ripples[next * 3 + 2] = 0;
       next = (next + 1) % MAX_RIPPLES;
     };
-    if (!light) window.addEventListener("pointermove", onMove, { passive: true });
+    // ondulações sempre que houver mouse (também no modo leve: são só uniforms);
+    // no toque, não
+    const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (hasMouse) window.addEventListener("pointermove", onMove, { passive: true });
 
     let visible = false;
     let raf = 0;

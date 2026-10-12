@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
+import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -43,7 +43,6 @@ export default function OceanBackdrop() {
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
   const near = useWebglSlot(root);
-  const tier = useTier();
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -80,7 +79,7 @@ export default function OceanBackdrop() {
 
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
   const scene = env?.webgl === true;
-  useSceneMonitor(scene && near);
+  const tier = useSceneTier("oceano", root, scene && near);
 
   useGSAP(
     () => {

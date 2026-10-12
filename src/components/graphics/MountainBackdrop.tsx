@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
+import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -41,7 +41,6 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   const [active, setActive] = useState(false);
   /** A cena só existe com o trecho perto da tela e com vaga no orçamento de contextos. */
   const near = useWebglSlot(root);
-  const tier = useTier();
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -122,7 +121,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
   const scene = env?.webgl === true;
   const mountScene = scene && near;
-  useSceneMonitor(mountScene);
+  const tier = useSceneTier("montanhas", root, mountScene);
 
   useGSAP(
     () => {

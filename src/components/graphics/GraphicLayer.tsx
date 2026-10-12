@@ -7,7 +7,7 @@ import { useGSAP } from "@gsap/react";
 import LiquidContours from "./LiquidContours";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality";
+import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -51,7 +51,6 @@ export default function GraphicLayer({
   const layer = useRef<HTMLDivElement>(null);
   /** O canvas só existe com a seção perto da tela e com vaga no orçamento de contextos. */
   const near = useWebglSlot(outer);
-  const tier = useTier();
   const [mode, setMode] = useState<{ liquid: boolean; light: boolean } | null>(null);
   const [liquidReady, setLiquidReady] = useState(false);
 
@@ -72,7 +71,7 @@ export default function GraphicLayer({
     if (!near) setLiquidReady(false);
   }, [near]);
   const handleFail = useCallback(() => setMode((m) => (m ? { ...m, liquid: false } : m)), []);
-  useSceneMonitor(!!mode?.liquid && near);
+  const tier = useSceneTier("curvas", outer, !!mode?.liquid && near);
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
