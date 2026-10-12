@@ -5,10 +5,9 @@ import {
   BufferGeometry,
   Color,
   DirectionalLight,
+  DoubleSide,
   Group,
   IcosahedronGeometry,
-  LineBasicMaterial,
-  LineLoop,
   LineSegments,
   Mesh,
   MeshStandardMaterial,
@@ -16,6 +15,8 @@ import {
   PerspectiveCamera,
   PlaneGeometry,
   Points,
+  Quaternion,
+  RingGeometry,
   Scene,
   ShaderMaterial,
   SphereGeometry,
@@ -33,9 +34,17 @@ import {
  *   prata acetinado com ambiente ESCURO próprio e ondulação por noise
  *   (normais por diferenças finitas), girando devagar. Diferente da bola da
  *   hero (cromo espelhado em estúdio claro), que não é tocada.
- * - Anéis finos de partículas (e uma linha) inclinados, velocidades diferentes.
- * - Galáxia espiral cinza, bem fraca, no alto à esquerda, atrás do título.
- * - Poeira desfocada em primeiro plano (não no modo leve).
+ * - Anéis estilo Saturno: disco largo e fino (RingGeometry + shader) com faixas
+ *   claras e escuras e a divisão de Cassini (sp_ring; a mesma função existe em
+ *   JS para distribuir as partículas), brilho de poeira de gelo com luz
+ *   lateral e milhares de partículas em órbita kepleriana (mais rápidas perto
+ *   do planeta). Sombra do planeta nos anéis e dos anéis no planeta, calculadas
+ *   no shader (sem shadow map). Inclinação ~22° com oscilação lenta.
+ * - 1 ou 2 luas metálicas em órbitas inclinadas (1 no modo leve).
+ * - Estrelas cadentes ocasionais (a cada 4 a 8 s), só na metade direita.
+ * - Galáxia espiral cinza, fraca, no alto à esquerda, girando devagar.
+ * - Poeira desfocada atravessando a cena em várias profundidades (não no modo leve).
+ * - Câmera: avanço pelo scroll + deriva orbital lenta em volta do planeta.
  */
 
 const STAR_VERT = /* glsl */ `
@@ -118,6 +127,114 @@ const SIMPLEX = /* glsl */ `
   }
 `;
 
+/** Raios do disco dos anéis (em raios do planeta). */
+const RING_IN = 1.3;
+const RING_OUT = 2.34;
+
+/** Densidade dos anéis pelo raio: faixas + divisão de Cassini; e a sombra do planeta. */
+const RING_GLSL = /* glsl */ `
+  float sp_ring(float r) {
+    float base = smoothstep(1.30, 1.40, r) * (1.0 - smoothstep(2.20, 2.34, r));
+    float b = 0.55 + 0.30 * sin(r * 38.0 + sin(r * 11.0) * 1.6) + 0.15 * sin(r * 91.0 + 1.3);
+    float gap = 1.0 - (smoothstep(1.80, 1.83, r) - smoothstep(1.87, 1.90, r));
+    float inner = mix(0.4, 1.0, smoothstep(1.50, 1.58, r));
+    return clamp(base * b * gap * inner, 0.0, 1.0);
+  }
+  float sp_planetShadow(vec3 p, vec3 c, float rad, vec3 l) {
+    vec3 toC = c - p;
+    float t = dot(toC, l);
+    float d = sqrt(max(dot(toC, toC) - t * t, 0.0));
+    return t > 0.0 ? smoothstep(rad * 0.94, rad * 1.04, d) : 1.0;
+  }
+`;
+/** sp_ring em JS (distribuição das partículas pelas faixas). */
+function ringDensity(r: number) {
+  const sm = (a: number, b: number, x: number) => {
+    const t = Math.min(Math.max((x - a) / (b - a), 0), 1);
+    return t * t * (3 - 2 * t);
+  };
+  const base = sm(1.3, 1.4, r) * (1 - sm(2.2, 2.34, r));
+  const b = 0.55 + 0.3 * Math.sin(r * 38 + Math.sin(r * 11) * 1.6) + 0.15 * Math.sin(r * 91 + 1.3);
+  const gap = 1 - (sm(1.8, 1.83, r) - sm(1.87, 1.9, r));
+  const inner = 0.4 + 0.6 * sm(1.5, 1.58, r);
+  return Math.min(Math.max(base * b * gap * inner, 0), 1);
+}
+
+const RING_VERT = /* glsl */ `
+  varying vec2 vL;
+  varying vec3 vW;
+  void main() {
+    vL = position.xy;
+    vec4 w = modelMatrix * vec4(position, 1.0);
+    vW = w.xyz;
+    gl_Position = projectionMatrix * viewMatrix * w;
+  }
+`;
+const RING_FRAG = /* glsl */ `
+  uniform vec3 uLight;
+  uniform vec3 uCenter;
+  uniform float uRadius;
+  uniform vec3 uRingN;
+  varying vec2 vL;
+  varying vec3 vW;
+  ${RING_GLSL}
+  void main() {
+    float r = length(vL); // geometria local: já em raios do planeta
+    float d = sp_ring(r);
+    if (d < 0.004) discard;
+    float g = fract(sin(dot(floor(vL * 700.0), vec2(12.9898, 78.233))) * 43758.5453); // grão de poeira
+    float sh = sp_planetShadow(vW, uCenter, uRadius, uLight);
+    vec3 V = normalize(cameraPosition - vW);
+    float side = 1.0 - abs(dot(uRingN, uLight));    // luz rasante: faixas mais claras
+    float fwd = pow(max(dot(-V, uLight), 0.0), 6.0); // gelo contra a luz: brilho especular sutil
+    vec3 col = vec3(0.74, 0.76, 0.8) * (0.5 + 0.5 * side) + vec3(0.92) * fwd * 0.5;
+    col *= 0.85 + 0.25 * g;
+    gl_FragColor = vec4(col * mix(0.22, 1.0, sh), d * 0.6 * mix(0.45, 1.0, sh));
+  }
+`;
+const RING_PTS_VERT = /* glsl */ `
+  attribute float aR;
+  attribute float aA;
+  attribute float aZ;
+  attribute float aSize;
+  attribute float aBright;
+  attribute float aTw;
+  attribute float aPhase;
+  uniform float uTime;
+  uniform float uDpr;
+  uniform float uK;
+  uniform vec3 uLight;
+  uniform vec3 uCenter;
+  uniform float uRadius;
+  varying float vB;
+  ${RING_GLSL}
+  void main() {
+    float a = aA + uTime * uK / pow(aR, 1.5); // órbita kepleriana: mais rápida perto do planeta
+    vec4 w = modelMatrix * vec4(cos(a) * aR, sin(a) * aR, aZ, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * w;
+    float tw = aTw > 0.0 ? 0.55 + 0.45 * sin(uTime * aTw + aPhase) : 1.0;
+    vB = aBright * tw * mix(0.12, 1.0, sp_planetShadow(w.xyz, uCenter, uRadius, uLight));
+    gl_PointSize = aSize * uDpr;
+  }
+`;
+const METEOR_VERT = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const METEOR_FRAG = /* glsl */ `
+  uniform float uFade;
+  varying vec2 vUv;
+  void main() {
+    float tail = pow(vUv.x, 3.0); // cabeça na ponta, cauda sumindo
+    float across = 1.0 - abs(vUv.y - 0.5) * 2.0;
+    float a = tail * across * uFade;
+    gl_FragColor = vec4(vec3(0.9, 0.92, 0.95) * a, a);
+  }
+`;
+
 type Rand = () => number;
 /** PRNG determinístico (mesma cena a cada carga). */
 function mulberry(seed: number): Rand {
@@ -152,7 +269,7 @@ function pointsGeometry(pos: Float32Array, size: Float32Array, bright: Float32Ar
   return g;
 }
 
-/** Ambiente escuro do planeta: cúpula em degradê quase preto + 2 faixas frias fracas. */
+/** Ambiente escuro do planeta e das luas: cúpula em degradê quase preto + 2 faixas frias fracas. */
 function darkEnvironment(gl: WebGLRenderer): Texture {
   const scene = new Scene();
   const dome = new Mesh(
@@ -198,18 +315,39 @@ export class SpaceWorld {
   private planetGroup = new Group();
   private planet: Mesh;
   private planetMat: MeshStandardMaterial;
-  private planetUniforms = { uTime: { value: 0 }, uAmp: { value: 0.0065 }, uFreq: { value: 1.5 } };
-  private rings: { group: Group; speed: number }[] = [];
-  private ringMats: ShaderMaterial[] = [];
+  /** Uniforms do planeta (luz, centro, normal dos anéis e escala servem também às sombras). */
+  private planetUniforms = {
+    uTime: { value: 0 },
+    uAmp: { value: 0.01 },
+    uFreq: { value: 1.5 },
+    uLight: { value: new Vector3(-7, 3.5, 1.5).normalize() },
+    uCenter: { value: new Vector3() },
+    uRingN: { value: new Vector3(0, 0, 1) },
+    uScale: { value: 1 },
+  };
+  private ringTilt = new Group();
+  private ringMat: ShaderMaterial;
+  private ringPtsMat: ShaderMaterial;
+  private moons: { pivot: Group; speed: number }[] = [];
+  private moonMat: MeshStandardMaterial;
+  private meteor: Mesh;
+  private meteorMat: ShaderMaterial;
+  private meteorState = { next: 3, life: 0, dur: 1, dx: 0, dy: 0 };
   private galaxy: Points;
   private galaxyMat: ShaderMaterial;
   private dust: Points | null = null;
   private dustMat: ShaderMaterial | null = null;
   private dustVel: Float32Array | null = null;
+  private dustBound: Float32Array | null = null;
   private env: Texture | null = null;
+  private rand = mulberry(11);
   private time = 0;
   private cam = new Vector3(0, 0, 16);
   private look = new Vector3();
+  private tmp = new Vector3();
+  private tmpQ = new Quaternion();
+  private axisX = new Vector3(1, 0, 0);
+  private axisY = new Vector3(0, 1, 0);
   private par = { x: 0, y: 0 };
   private aspect = 0;
   private halfW = 1;
@@ -226,7 +364,7 @@ export class SpaceWorld {
       [-38, -18],
       [-16, -4],
     ];
-    const parallax = [0.08, 0.25, 0.6];
+    const parallax = [0.16, 0.5, 1.2]; // ~2x o anterior
     split.forEach((f, li) => {
       const n = Math.round(total * f);
       const pos = new Float32Array(n * 3);
@@ -310,7 +448,7 @@ export class SpaceWorld {
       this.root.add(this.galaxy);
     }
 
-    // --- planeta + anéis ---
+    // --- planeta ---
     const detail = light ? 24 : 64;
     this.planetMat = new MeshStandardMaterial({ color: 0xaeb1b6, metalness: 1, roughness: 0.36, envMapIntensity: 1 });
     this.planetMat.onBeforeCompile = (shader) => {
@@ -320,9 +458,10 @@ export class SpaceWorld {
           "#include <common>",
           `#include <common>
           uniform float uTime; uniform float uAmp; uniform float uFreq;
+          varying vec3 vSpWorld;
           ${SIMPLEX}
           float sp_disp(vec3 n) {
-            vec3 q = n * uFreq + vec3(0.0, uTime * 0.06, uTime * 0.03);
+            vec3 q = n * uFreq + vec3(0.0, uTime * 0.08, uTime * 0.04);
             return uAmp * (sp_snoise(q) + 0.35 * sp_snoise(q * 2.3 + 7.1));
           }`,
         )
@@ -337,83 +476,174 @@ export class SpaceWorld {
           vec3 objectNormal = normalize(cross(sp_p1 - sp_p0, sp_p2 - sp_p0));
           if (dot(objectNormal, sp_n0) < 0.0) objectNormal = -objectNormal;`,
         )
-        .replace("#include <begin_vertex>", "vec3 transformed = sp_p0;");
+        .replace("#include <begin_vertex>", "vec3 transformed = sp_p0;")
+        .replace("#include <project_vertex>", "#include <project_vertex>\nvSpWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;");
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          `#include <common>
+          uniform vec3 uLight; uniform vec3 uCenter; uniform vec3 uRingN; uniform float uScale;
+          varying vec3 vSpWorld;
+          ${RING_GLSL}`,
+        )
+        .replace(
+          "#include <opaque_fragment>",
+          `{
+            // sombra fina dos anéis sobre o planeta: o raio de luz cruza o plano do anel
+            float sp_dn = dot(uLight, uRingN);
+            if (abs(sp_dn) > 1e-4) {
+              float sp_s = dot(uCenter - vSpWorld, uRingN) / sp_dn;
+              if (sp_s > 0.0) {
+                vec3 sp_q = vSpWorld + uLight * sp_s;
+                outgoingLight *= 1.0 - 0.7 * sp_ring(length(sp_q - uCenter) / uScale);
+              }
+            }
+          }
+          #include <opaque_fragment>`,
+        );
     };
     this.planet = new Mesh(new IcosahedronGeometry(1, detail), this.planetMat);
     this.planetGroup.add(this.planet);
 
-    const ringDefs = [
-      { r0: 1.34, r1: 1.47, n: light ? 700 : 2200, tilt: [1.22, 0.18], speed: 0.05, b: 0.6 },
-      { r0: 1.58, r1: 1.62, n: light ? 300 : 900, tilt: [1.3, -0.12], speed: -0.03, b: 0.75 },
-      { r0: 1.82, r1: 1.98, n: light ? 400 : 1300, tilt: [1.12, 0.32], speed: 0.018, b: 0.4 },
-    ];
-    ringDefs.forEach((d, ri) => {
-      const pos = new Float32Array(d.n * 3);
-      const size = new Float32Array(d.n);
-      const bright = new Float32Array(d.n);
-      const tw = new Float32Array(d.n);
-      const phase = new Float32Array(d.n);
-      for (let i = 0; i < d.n; i++) {
-        const a = rand() * Math.PI * 2;
-        const r = d.r0 + rand() * (d.r1 - d.r0);
-        pos[i * 3] = Math.cos(a) * r;
-        pos[i * 3 + 1] = Math.sin(a) * r;
-        pos[i * 3 + 2] = (rand() - 0.5) * 0.02;
-        size[i] = 0.7 + rand() * 1.1;
-        bright[i] = d.b * (0.4 + rand() * 0.6);
-        tw[i] = rand() < 0.1 ? 1 + rand() : 0;
-        phase[i] = rand() * 6.28;
-      }
-      const tilt = new Group();
-      tilt.rotation.set(d.tilt[0], 0, d.tilt[1]);
-      const spin = new Group();
-      const mat = starMaterial();
-      this.ringMats.push(mat);
-      spin.add(new Points(pointsGeometry(pos, size, bright, tw, phase), mat));
-      if (ri === 1) {
-        // um fio contínuo junto do anel do meio
-        const seg = 256;
-        const lp = new Float32Array(seg * 3);
-        for (let i = 0; i < seg; i++) {
-          const a = (i / seg) * Math.PI * 2;
-          lp[i * 3] = Math.cos(a) * 1.7;
-          lp[i * 3 + 1] = Math.sin(a) * 1.7;
+    // --- anéis: disco com faixas (shader) + partículas em órbita ---
+    this.ringMat = new ShaderMaterial({
+      vertexShader: RING_VERT,
+      fragmentShader: RING_FRAG,
+      uniforms: {
+        uLight: this.planetUniforms.uLight,
+        uCenter: this.planetUniforms.uCenter,
+        uRingN: this.planetUniforms.uRingN,
+        uRadius: this.planetUniforms.uScale,
+      },
+      transparent: true,
+      depthWrite: false,
+      side: DoubleSide,
+    });
+    this.ringTilt.add(new Mesh(new RingGeometry(RING_IN, RING_OUT, light ? 128 : 256, 1), this.ringMat));
+    {
+      const n = light ? 1800 : 7000;
+      const rr = new Float32Array(n);
+      const aa = new Float32Array(n);
+      const zz = new Float32Array(n);
+      const size = new Float32Array(n);
+      const bright = new Float32Array(n);
+      const tw = new Float32Array(n);
+      const phase = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        // raio sorteado pela densidade das faixas (rejeição): as partículas seguem as bandas
+        let r = RING_IN;
+        for (let k = 0; k < 24; k++) {
+          r = RING_IN + rand() * (RING_OUT - RING_IN);
+          if (rand() < ringDensity(r)) break;
         }
-        const lg = new BufferGeometry();
-        lg.setAttribute("position", new BufferAttribute(lp, 3));
-        spin.add(new LineLoop(lg, new LineBasicMaterial({ color: 0xc9cdd3, transparent: true, opacity: 0.18, depthWrite: false })));
+        rr[i] = r;
+        aa[i] = rand() * Math.PI * 2;
+        zz[i] = (rand() - 0.5) * 0.015;
+        size[i] = 0.6 + rand() * 1.1;
+        bright[i] = 0.25 + rand() * 0.55;
+        tw[i] = rand() < 0.08 ? 1 + rand() * 2 : 0;
+        phase[i] = rand() * Math.PI * 2;
       }
-      tilt.add(spin);
+      const g = new BufferGeometry();
+      g.setAttribute("position", new BufferAttribute(new Float32Array(n * 3), 3)); // a posição vem do shader
+      g.setAttribute("aR", new BufferAttribute(rr, 1));
+      g.setAttribute("aA", new BufferAttribute(aa, 1));
+      g.setAttribute("aZ", new BufferAttribute(zz, 1));
+      g.setAttribute("aSize", new BufferAttribute(size, 1));
+      g.setAttribute("aBright", new BufferAttribute(bright, 1));
+      g.setAttribute("aTw", new BufferAttribute(tw, 1));
+      g.setAttribute("aPhase", new BufferAttribute(phase, 1));
+      this.ringPtsMat = new ShaderMaterial({
+        vertexShader: RING_PTS_VERT,
+        fragmentShader: STAR_FRAG,
+        uniforms: {
+          uTime: { value: 0 },
+          uDpr: { value: 1 },
+          uK: { value: 0.22 },
+          uSoft: { value: 0 },
+          uOpacity: { value: 0.75 },
+          uLight: this.planetUniforms.uLight,
+          uCenter: this.planetUniforms.uCenter,
+          uRadius: this.planetUniforms.uScale,
+        },
+        transparent: true,
+        depthWrite: false,
+        blending: AdditiveBlending,
+      });
+      const pts = new Points(g, this.ringPtsMat);
+      pts.frustumCulled = false;
+      this.ringTilt.add(pts);
+    }
+    this.ringTilt.rotation.set(1.2, 0, 0.4); // ~21° de abertura, ~22° de inclinação lateral
+    this.planetGroup.add(this.ringTilt);
+
+    // --- luas metálicas em órbitas inclinadas (1 no modo leve) ---
+    this.moonMat = new MeshStandardMaterial({ color: 0x9fa3a8, metalness: 1, roughness: 0.32, envMapIntensity: 1 });
+    const moonDefs = [
+      // órbitas bem inclinadas (quase verticais na tela): as luas ficam ao lado do
+      // planeta, longe do título e dos botões
+      { r: 2.6, size: 0.05, incl: [0.25, 1.3], speed: 0.16, a0: 0.8 },
+      { r: 3.0, size: 0.034, incl: [-0.2, -1.4], speed: -0.1, a0: 3.6 },
+    ].slice(0, light ? 1 : 2);
+    moonDefs.forEach((d) => {
+      const tilt = new Group();
+      tilt.rotation.set(d.incl[0], d.incl[1], 0); // em Y: plano da órbita quase de perfil
+      const pivot = new Group();
+      pivot.rotation.z = d.a0;
+      const mesh = new Mesh(new IcosahedronGeometry(1, light ? 4 : 10), this.moonMat);
+      mesh.scale.setScalar(d.size);
+      mesh.position.set(d.r, 0, 0);
+      pivot.add(mesh);
+      tilt.add(pivot);
       this.planetGroup.add(tilt);
-      this.rings.push({ group: spin, speed: d.speed });
+      this.moons.push({ pivot, speed: d.speed });
     });
     this.root.add(this.planetGroup);
 
-    // luz fria de contorno, vinda do alto à esquerda (o lado do texto fica escuro)
-    const key = new DirectionalLight(0xe4eaf2, 1.1);
-    key.position.set(-6, 5, 3);
+    // --- estrela cadente (uma só, reaproveitada) ---
+    this.meteorMat = new ShaderMaterial({
+      vertexShader: METEOR_VERT,
+      fragmentShader: METEOR_FRAG,
+      uniforms: { uFade: { value: 0 } },
+      transparent: true,
+      depthWrite: false,
+      blending: AdditiveBlending,
+    });
+    this.meteor = new Mesh(new PlaneGeometry(1, 1), this.meteorMat);
+    this.meteor.visible = false;
+    this.root.add(this.meteor);
+
+    // luz fria vinda da esquerda, mais lateral: contorno, faixas dos anéis e sombras
+    const key = new DirectionalLight(0xe4eaf2, 1.15);
+    key.position.copy(this.planetUniforms.uLight.value).multiplyScalar(10);
     this.root.add(key);
     const rim = new DirectionalLight(0xcfd6e0, 0.9);
     rim.position.set(4, 2, -6);
     this.root.add(rim);
 
-    // --- poeira desfocada em primeiro plano ---
+    // --- poeira desfocada atravessando a cena em várias profundidades ---
     if (!light) {
-      const n = 22;
+      const n = 44;
       const pos = new Float32Array(n * 3);
       const size = new Float32Array(n);
       const bright = new Float32Array(n);
       const tw = new Float32Array(n);
       const phase = new Float32Array(n);
       this.dustVel = new Float32Array(n * 2);
+      this.dustBound = new Float32Array(n * 2);
       for (let i = 0; i < n; i++) {
-        pos[i * 3] = (rand() * 2 - 1) * 6;
-        pos[i * 3 + 1] = (rand() * 2 - 1) * 3.4;
-        pos[i * 3 + 2] = 4 + rand() * 7;
-        size[i] = 40 + rand() * 80;
-        bright[i] = 0.05 + rand() * 0.07;
-        this.dustVel[i * 2] = (rand() - 0.5) * 0.12;
-        this.dustVel[i * 2 + 1] = 0.02 + rand() * 0.05;
+        const z = -14 + rand() * 25; // do fundo até perto da câmera
+        const depth = 16 - z;
+        this.dustBound[i * 2] = depth * 0.8;
+        this.dustBound[i * 2 + 1] = depth * 0.45;
+        pos[i * 3] = (rand() * 2 - 1) * this.dustBound[i * 2];
+        pos[i * 3 + 1] = (rand() * 2 - 1) * this.dustBound[i * 2 + 1];
+        pos[i * 3 + 2] = z;
+        const near = 1 - depth / 30; // perto: maior, mais desfocada e mais rápida
+        size[i] = 14 + near * 110 + rand() * 20;
+        bright[i] = 0.035 + rand() * 0.06;
+        this.dustVel[i * 2] = (rand() < 0.5 ? -1 : 1) * (0.15 + rand() * 0.35) * (0.5 + near);
+        this.dustVel[i * 2 + 1] = (rand() - 0.5) * 0.08;
       }
       this.dustMat = starMaterial(1);
       this.dust = new Points(pointsGeometry(pos, size, bright, tw, phase), this.dustMat);
@@ -442,6 +672,8 @@ export class SpaceWorld {
     this.env = darkEnvironment(gl);
     this.planetMat.envMap = this.env;
     this.planetMat.needsUpdate = true;
+    this.moonMat.envMap = this.env;
+    this.moonMat.needsUpdate = true;
   }
 
   update(
@@ -473,30 +705,39 @@ export class SpaceWorld {
       m.uniforms.uWarp.value = warp;
       (this.layers[i].group.children[1] as LineSegments).visible = warp > 0.002;
     });
-    this.ringMats.forEach((m) => {
-      m.uniforms.uTime.value = t;
-      m.uniforms.uDpr.value = dpr;
-    });
     this.galaxyMat.uniforms.uDpr.value = dpr;
 
-    // planeta: ondulação e rotação lentas; anéis em velocidades diferentes
+    // planeta: rotação e ondulação um pouco mais visíveis
     this.planetUniforms.uTime.value = t;
-    this.planet.rotation.y = t * 0.035;
-    this.rings.forEach((r) => (r.group.rotation.z = t * r.speed));
-    this.galaxy.rotation.z = t * 0.006;
+    this.planet.rotation.y = t * 0.06;
+    // anéis: oscilação lenta, quase imperceptível; dados das sombras em coordenadas do mundo
+    this.ringTilt.rotation.z = 0.4 + Math.sin(t * 0.06) * 0.015;
+    this.ringTilt.rotation.x = 1.2 + Math.sin(t * 0.045 + 1.3) * 0.01;
+    this.planetGroup.updateMatrixWorld();
+    this.planetGroup.getWorldPosition(this.planetUniforms.uCenter.value);
+    this.planetUniforms.uScale.value = this.planetGroup.scale.x;
+    this.planetUniforms.uRingN.value.set(0, 0, 1).applyQuaternion(this.ringTilt.getWorldQuaternion(this.tmpQ));
+    this.ringPtsMat.uniforms.uTime.value = t;
+    this.ringPtsMat.uniforms.uDpr.value = dpr;
+    if (!still) this.moons.forEach((m) => (m.pivot.rotation.z += m.speed * dt));
+    this.galaxy.rotation.z = t * 0.03; // perceptível, mas lenta
+    this.updateMeteor(dt, still);
 
-    // poeira: deriva lenta, dá a volta pelas bordas
-    if (this.dust && this.dustVel && this.dustMat) {
+    // poeira: atravessa a cena e dá a volta pelas bordas (limites por profundidade)
+    if (this.dust && this.dustVel && this.dustBound && this.dustMat) {
       this.dustMat.uniforms.uDpr.value = dpr;
       const p = this.dust.geometry.getAttribute("position") as BufferAttribute;
       const a = p.array as Float32Array;
       if (!still) {
         for (let i = 0; i < a.length / 3; i++) {
+          const bx = this.dustBound[i * 2];
+          const by = this.dustBound[i * 2 + 1];
           a[i * 3] += this.dustVel[i * 2] * dt;
           a[i * 3 + 1] += this.dustVel[i * 2 + 1] * dt;
-          if (a[i * 3 + 1] > 4) a[i * 3 + 1] = -4;
-          if (a[i * 3] > 7) a[i * 3] = -7;
-          if (a[i * 3] < -7) a[i * 3] = 7;
+          if (a[i * 3] > bx) a[i * 3] = -bx;
+          else if (a[i * 3] < -bx) a[i * 3] = bx;
+          if (a[i * 3 + 1] > by) a[i * 3 + 1] = -by;
+          else if (a[i * 3 + 1] < -by) a[i * 3 + 1] = by;
         }
         p.needsUpdate = true;
       }
@@ -511,14 +752,55 @@ export class SpaceWorld {
     const target = new Vector3(px * 0.06 * e, py * 0.04 * e, 16 - 1.6 * e);
     if (still) this.cam.copy(target);
     else this.cam.lerp(target, 1 - Math.exp(-dt * 4));
-    camera.position.copy(this.cam);
+    // deriva orbital lenta em volta do planeta: câmera e alvo giram juntos em
+    // torno do centro dele (o planeta fica no lugar na tela; o fundo desliza)
+    const yaw = Math.sin(t * 0.05) * 0.1;
+    const pitch = Math.sin(t * 0.037 + 0.7) * 0.04;
+    const c = this.planetUniforms.uCenter.value;
+    const orbit = (v: Vector3) => v.sub(c).applyAxisAngle(this.axisY, yaw).applyAxisAngle(this.axisX, pitch).add(c);
+    camera.position.copy(orbit(this.tmp.copy(this.cam)));
     this.look.set(this.cam.x, this.cam.y, 0);
-    camera.lookAt(this.look);
+    camera.lookAt(orbit(this.look));
+  }
+
+  /** Estrela cadente ocasional (a cada 4 a 8 s), fina e rápida, na metade direita do fundo. */
+  private updateMeteor(dt: number, still: boolean) {
+    const m = this.meteorState;
+    if (still) {
+      this.meteor.visible = false;
+      return;
+    }
+    if (m.life <= 0) {
+      m.next -= dt;
+      if (m.next > 0) return;
+      const r = this.rand;
+      const z = -28;
+      const s = (16 - z) / 16; // escala da tela na profundidade do fundo
+      // nasce no alto, à direita do título, e cai em diagonal (para um dos lados)
+      const toLeft = r() < 0.5;
+      const ang = toLeft ? Math.PI + 0.35 + r() * 0.4 : -(0.35 + r() * 0.4);
+      const speed = 38 + r() * 20;
+      m.dx = Math.cos(ang) * speed;
+      m.dy = Math.sin(ang) * speed;
+      m.dur = 0.55 + r() * 0.35;
+      m.life = m.dur;
+      m.next = 4 + r() * 4;
+      this.meteor.position.set(this.halfW * s * (0.1 + r() * 0.8), this.halfH * s * (0.25 + r() * 0.6), z);
+      this.meteor.rotation.z = ang;
+      this.meteor.scale.set(4 + r() * 3, 0.035, 1);
+      this.meteor.visible = true;
+    }
+    m.life -= dt;
+    this.meteor.position.x += m.dx * dt;
+    this.meteor.position.y += m.dy * dt;
+    const p = Math.min(Math.max(1 - m.life / m.dur, 0), 1);
+    this.meteorMat.uniforms.uFade.value = Math.sin(Math.PI * p) * 0.8;
+    if (m.life <= 0) this.meteor.visible = false;
   }
 
   dispose() {
     this.root.traverse((o) => {
-      if (o instanceof Mesh || o instanceof Points || o instanceof LineSegments || o instanceof LineLoop) {
+      if (o instanceof Mesh || o instanceof Points || o instanceof LineSegments) {
         o.geometry.dispose();
         const m = o.material;
         (Array.isArray(m) ? m : [m]).forEach((mm) => mm.dispose());
