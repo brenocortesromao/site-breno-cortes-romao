@@ -186,6 +186,69 @@ body::before {
   }
 }
 
+/* Projetos pontuais: moldura cromada viva. Uma faixa de luz prateada percorre
+   a borda (conic-gradient girando via @property, volta de ~8 s), mascarada só
+   na borda de 1px; o ::after é o brilho sutil (anel mais largo, desfocado).
+   [data-paused] pausa (seção fora da tela); reduced motion: borda estática. */
+@property --frame-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes frameSpin {
+  to {
+    --frame-angle: 360deg;
+  }
+}
+.chrome-frame::before,
+.chrome-frame::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--frame-angle),
+    transparent 0deg,
+    transparent 290deg,
+    rgba(236, 234, 229, 0.15) 320deg,
+    #eceae5 348deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: frameSpin 8s linear infinite;
+}
+.chrome-frame::before {
+  inset: -1px;
+  padding: 1px;
+}
+.chrome-frame::after {
+  inset: -4px;
+  padding: 4px;
+  filter: blur(6px);
+  opacity: 0.25;
+}
+.chrome-frame[data-paused]::before,
+.chrome-frame[data-paused]::after {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chrome-frame::before,
+  .chrome-frame::after {
+    display: none;
+  }
+}
+/* item aceso pelo scanner: texto em gradiente cromado (prata → branco → prata) */
+.scan-on {
+  background-image: linear-gradient(100deg, #b9bcc0 0%, #ffffff 50%, #b9bcc0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* Cursor do site (CustomCursor): esconde o nativo só quando ele está ativo
    (mouse); no toque, a classe não é adicionada. */
 html.custom-cursor,

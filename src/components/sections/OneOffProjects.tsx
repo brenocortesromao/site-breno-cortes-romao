@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { whatsappUrl } from "@/content/contact";
 import BlurRevealTitle from "@/components/BlurRevealTitle";
+import ChromeButton from "@/components/ChromeButton";
 import ServiceColumns, { type ServiceColumn } from "./ServiceColumns";
 
 /**
@@ -34,15 +35,16 @@ export default async function OneOffProjects() {
         <ServiceColumns columns={columns} className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-10" />
 
         <div className="lg:col-start-1 lg:row-start-2">
-          <a
+          <ChromeButton
             href={whatsappUrl(t("whatsappMessage"))}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={t("buttonLabel")}
-            className="inline-flex min-h-[4rem] items-center gap-6 border border-foreground bg-foreground px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] text-background transition-colors hover:bg-transparent hover:text-foreground"
+            label={t("buttonLabel")}
+            className="inline-flex min-h-[4rem] items-center border border-foreground bg-foreground px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] text-background transition-colors hover:bg-transparent hover:text-foreground"
           >
-            {t("button")} <span aria-hidden="true">↗</span>
-          </a>
+            {t("button")}{" "}
+            <span aria-hidden="true" className="transition-transform duration-300 group-hover:-translate-y-[3px] group-hover:translate-x-[3px]">
+              ↗
+            </span>
+          </ChromeButton>
         </div>
       </div>
     </section>
