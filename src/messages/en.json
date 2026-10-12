@@ -326,7 +326,6 @@
     "reference": "I learned alongside people who helped build Nubank, XP Investimentos, Mercado Livre, Itaú Digital and many other giants.",
     "portrait": "Retrato",
     "timelineTitle": "Trajetória",
-    "more": "Conhecer a trajetória completa",
     "back": "Voltar ao início",
     "metaTitle": "Sobre",
     "metaDescription": "Quem vai cuidar da sua marca: trajetória, experiência e método de Breno Côrtes Romão, Fractional Brand & Creative Director."
@@ -479,7 +478,8 @@
   },
   "footer": {
     "rights": "© {year} {name}. Todos os direitos reservados.",
-    "tagline": "Estratégia de marca · Direção criativa · Execução"
+    "tagline": "Estratégia de marca · Direção criativa · Execução",
+    "bearCredit": "Bear 3D model: <model>''Realistic Grizzly Bear''</model> by 3Dima, <license>CC BY 4.0</license>"
   },
   "notFound": {
     "title": "Página não encontrada",

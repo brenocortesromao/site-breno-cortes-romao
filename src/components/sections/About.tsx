@@ -3,17 +3,18 @@ import { Link } from "@/i18n/navigation";
 import MediaSlot from "@/components/MediaSlot";
 import AboutStory from "@/components/sections/AboutStory";
 import ForestBackdrop from "@/components/graphics/ForestBackdrop";
+import { bearModel } from "@/content/bear";
 
 /** Retrato do Sobre (monocromático pelo MediaSlot). Ex.: "/media/retrato-sobre.jpg". */
 export const aboutPortraitSrc: string | undefined = undefined;
 
 /**
  * Sobre (§11) — tema GRADIENTE ESCURO (ritmo de cores do CONTEUDO-SITE.md).
- * - variant "summary" (home): retrato, título (h2), bio, trajetória e link para /sobre.
+ * - variant "summary" (home): retrato, título (h2), bio e trajetória.
  * - variant "page" (/sobre): o mesmo conteúdo, com o título como h1.
  * Bio, fecho e trajetória: AboutStory (client, animações de scroll).
- * Fundo: floresta 3D com urso (ForestBackdrop, sticky; seção em overflow-clip,
- * pois overflow-hidden anularia o sticky).
+ * Fundo: descida aérea até a cachoeira com o urso (ForestBackdrop, sticky;
+ * seção em overflow-clip, pois overflow-hidden anularia o sticky).
  */
 export default async function About({ variant }: { variant: "summary" | "page" }) {
   const t = await getTranslations("about");
@@ -27,7 +28,7 @@ export default async function About({ variant }: { variant: "summary" | "page" }
       aria-labelledby="sobre-title"
       className="relative z-10 min-h-svh overflow-clip"
     >
-      <ForestBackdrop />
+      <ForestBackdrop bearSrc={bearModel()} />
       <div
         className={`relative z-10 mx-auto grid w-full max-w-[1600px] gap-12 px-6 md:grid-cols-12 md:gap-8 md:px-12 ${
           isPage ? "pb-[clamp(6rem,16vh,12rem)] pt-40" : "py-[clamp(6rem,16vh,12rem)]"
@@ -64,14 +65,7 @@ export default async function About({ variant }: { variant: "summary" | "page" }
               <span aria-hidden="true">← </span>
               {t("back")}
             </Link>
-          ) : (
-            <Link
-              href="/sobre"
-              className="inline-flex items-center gap-3 border-b border-foreground/60 pb-1 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors hover:border-foreground"
-            >
-              {t("more")} <span aria-hidden="true">→</span>
-            </Link>
-          )}
+          ) : null}
         </AboutStory>
       </div>
     </section>

@@ -36,8 +36,8 @@ export default function AboutStory({
   copy: AboutStoryCopy;
   /** /sobre: título como h1 (e a trajetória como h2). */
   page: boolean;
-  /** Link no fim (para /sobre ou de volta ao início). */
-  children: ReactNode;
+  /** Link no fim (/sobre: de volta ao início). Sem ele, a seção termina na referência. */
+  children?: ReactNode;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const closing = useRef<HTMLParagraphElement>(null);
@@ -154,7 +154,7 @@ export default function AboutStory({
         <p className="mt-14 max-w-2xl font-mono text-[11px] uppercase leading-relaxed tracking-[0.2em] text-silver">
           {copy.reference}
         </p>
-        <div className="mt-14">{children}</div>
+        {children ? <div className="mt-14">{children}</div> : null}
       </div>
     </div>
   );

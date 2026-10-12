@@ -11,29 +11,28 @@ import { presetFor, useSceneMonitor, useTier, useWebglSlot } from "@/lib/quality
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const ForestScene = dynamic(() => import("./forest/ForestScene"), { ssr: false });
+const AerialScene = dynamic(() => import("./forest/AerialScene"), { ssr: false });
 
 type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
 
-/** Opacidade da cena (baixa: o texto do Sobre fica por cima). */
-const OPACITY = 0.38;
+/** Opacidade da cena (o texto do Sobre fica por cima). */
+const OPACITY = 0.5;
 
 /**
- * Fundo de floresta 3D do Sobre (mesmo espírito das montanhas, das nuvens e do
- * oceano). Deve ser o primeiro filho da seção (`relative`, `overflow-clip`):
- * ocupa a seção inteira e mantém o fundo FIXO na tela (sticky), atrás do
- * conteúdo (que fica em `relative z-10`).
- * Abetos altos estilo Alasca em camadas, névoa baixa entre os troncos, luz
- * fria de fim de tarde, neve leve; a câmera avança devagar com o scroll e um
- * urso-pardo atravessa a clareira ao fundo uma vez (ver forest/world.ts).
- * - Sem WebGL2: nada (fundo da seção).
- * - Toque / nível "low": versão leve (menos árvores, sem LOD detalhado, menos
- *   neve, resolução 0,6x).
- * - prefers-reduced-motion: quadro estático (urso parado na clareira).
- * A cena só existe com a seção a até ~1 tela e com vaga no orçamento de
- * contextos (useWebglSlot), e só renderiza com ela visível.
+ * Fundo 3D do Sobre: descida aérea sobre uma floresta nevada cortada por um
+ * rio, até a cachoeira, com o urso em pé numa pedra no alto da queda (ver
+ * forest/aerial.ts). Deve ser o primeiro filho da seção (`relative`,
+ * `overflow-clip`): ocupa a seção inteira e mantém o fundo FIXO na tela
+ * (sticky), atrás do conteúdo (que fica em `relative z-10`).
+ * - Scroll: a câmera percorre a descida do início ao fim da seção (o
+ *   amortecimento da câmera dá o scrub suave).
+ * - Sem WebGL2: nada (o gradiente escuro da seção).
+ * - Toque / nível "low": versão leve (menos árvores e partículas, sem sombras).
+ * - prefers-reduced-motion: enquadramento final parado.
+ * A cena e o modelo do urso só carregam com a seção a até ~1 tela e com vaga
+ * no orçamento de contextos (useWebglSlot); só renderiza com ela visível.
  */
-export default function ForestBackdrop() {
+export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
   const root = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
   /** Progresso da seção (0→1), lido pela câmera a cada quadro. */
@@ -47,10 +46,10 @@ export default function ForestBackdrop() {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const webgl = webglSupport().webgl2;
-    if (!webgl) console.info("[floresta] sem WebGL2 acelerado: sem fundo de floresta.");
+    if (!webgl) console.info("[floresta] sem WebGL2 acelerado: só o gradiente da seção.");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
     setEnv({ webgl, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
-    if (reduced) progress.current = 0.55;
+    if (reduced) progress.current = 1; // enquadramento final
   }, []);
 
   // renderiza só com a seção na tela (com margem para não piscar ao entrar)
@@ -84,11 +83,11 @@ export default function ForestBackdrop() {
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const section = root.current?.parentElement;
         if (!section) return;
-        // a câmera avança pela trilha ao longo da seção
+        // a câmera desce da vista aérea até a cachoeira ao longo da seção
         ScrollTrigger.create({
           trigger: section,
-          start: "top 70%",
-          end: "bottom 60%",
+          start: "top 60%",
+          end: "bottom bottom",
           refreshPriority: -1,
           onUpdate: (self) => {
             progress.current = self.progress;
@@ -104,7 +103,7 @@ export default function ForestBackdrop() {
           opacity: 0,
           ease: "none",
           immediateRender: false,
-          scrollTrigger: { trigger: section, start: "bottom 75%", end: "bottom 25%", scrub: true, refreshPriority: -1 },
+          scrollTrigger: { trigger: section, start: "bottom 60%", end: "bottom 10%", scrub: true, refreshPriority: -1 },
         });
       });
     },
@@ -118,13 +117,14 @@ export default function ForestBackdrop() {
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={layer} className="absolute inset-0">
           <div className="absolute inset-0" style={{ opacity: OPACITY }}>
-            {/* erro ou perda de contexto: remonta; desiste (sem floresta) se falhar de novo */}
+            {/* erro ou perda de contexto: remonta; desiste (só o gradiente) se falhar de novo */}
             <ResilientBoundary name="floresta" onGiveUp={handleFail}>
               {(onLost) =>
                 near && (
-                  <ForestScene
+                  <AerialScene
                     progressRef={progress}
                     pointerRef={pointer}
+                    bearSrc={bearSrc}
                     active={active}
                     light={env.coarse || tier === "low"}
                     maxDpr={presetFor(tier).maxDpr}
@@ -135,8 +135,9 @@ export default function ForestBackdrop() {
               }
             </ResilientBoundary>
           </div>
-          {/* vinheta e degradês para o fundo (entrada/saída sem corte, texto legível) */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--bg)_100%)]" />
+          {/* vinheta, degradês de entrada/saída e o degradê escuro atrás do texto (direita) */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,var(--bg)_100%)]" />
+          <div className="absolute inset-0 bg-background/35 md:bg-transparent md:bg-gradient-to-l md:from-background/80 md:via-background/45 md:via-40% md:to-transparent md:to-65%" />
           <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background to-transparent" />
         </div>
