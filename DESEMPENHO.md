@@ -85,6 +85,8 @@ Script: `scratchpad` da sessão (CDP), injeta um contador de contextos no `getCo
 
 **Medido depois:** rolagem do site inteiro (desktop, GPU real): **nenhum "[qualidade]" no console**. Parado 12 s em cada cena: hero, nuvens, curvas (Fractional), montanhas, gota, floresta, oceano, curvas (Parcerias) e espaço a **60 fps**, sem rebaixar. Curvas: a imagem muda mais com o mouse passando do que só com o tempo (Fractional 2,96 contra 2,25; Parcerias 1,68 contra 1,03, diferença média de pixels), ou seja, as ondulações respondem.
 
+**Floresta do Sobre (densa, 12/10):** ~4.600 árvores sem pesar: chunks de 60 m com culling por grupo, árvores 3D só perto da câmera e impostores (cartões com textura da árvore) no resto, sombras 1024 só perto do urso, mapa de sombra estático, matrizes congeladas, montagem em pedaços (sem tarefa longa). Medido (desktop, GPU real): 60 fps parado no fim da descida, máximo 2 contextos, nenhum "[qualidade]" na rolagem do site inteiro; com e sem a floresta o fps parado é o mesmo.
+
 **Engasgos de rolagem do DOM (continuam):** nas rolagens de "A distância", do Sobre e na entrada do Contato há quadros longos que já existiam antes das cenas (A/B com cada cena bloqueada: mesmo resultado). Não derrubam mais a qualidade das cenas; a causa (provável: trabalho de ScrollTrigger/estilos nessas seções) ainda não foi investigada.
 
 ## Testes

@@ -14,37 +14,50 @@ import {
   Group,
   HemisphereLight,
   IcosahedronGeometry,
+  InstancedBufferAttribute,
+  InstancedBufferGeometry,
   InstancedMesh,
   Matrix4,
   Mesh,
   MeshStandardMaterial,
+  OrthographicCamera,
   PCFShadowMap,
   PerspectiveCamera,
   PlaneGeometry,
   Points,
   Quaternion,
+  Scene,
+  LinearFilter,
   ShaderMaterial,
+  Sphere,
   Vector2,
   Vector3,
-  type Scene,
+  WebGLRenderTarget,
   type WebGLRenderer,
 } from "three";
-import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { mergeGeometries, mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 /*
- * Descida aérea do Sobre (monocromática: neve branca/gelo, pinheiros grafite,
- * água cinza-escura com brilhos frios, luz fria de inverno).
- * - Terreno: planalto nevado cortado por um rio que serpenteia até um penhasco;
- *   a cachoeira cai num poço e o rio segue abaixo. Altura em JS (height()),
- *   a mesma usada para pôr árvores, pedras e o urso.
+ * Descida aérea do Sobre: floresta densa (sem neve), monocromática com um
+ * toque de verde musgo (#1C221D, #2A332B, #3B463C), troncos escuros, água
+ * cinza-escura com brilhos frios.
+ * - Terreno: planalto de floresta cortado por um rio que serpenteia até um
+ *   penhasco; a cachoeira cai num poço e o rio segue abaixo. Altura em JS
+ *   (height()), a mesma usada para pôr árvores, plantas, pedras e o urso.
  * - Rio e poço: água escura reflexiva (normais por ruído animado correndo para
- *   a queda), brilho frio do sol, bordas congeladas.
+ *   a queda), brilhos frios do sol, espuma no pé da queda.
  * - Cachoeira: folha curva com fluxo vertical (UV animado com ruído, faixas de
  *   espuma); névoa subindo na base e respingos (partículas).
- * - Pinheiros nevados instanciados (3 variações, neve nas camadas de galhos),
- *   distribuídos por ruído; pedras nevadas na margem; a pedra do urso.
- * - Neve caindo na direção da câmera (mais densa no alto) e névoa de altitude
- *   que a câmera atravessa no meio da descida.
+ * - Floresta: 4 variações (2 coníferas, 2 de copa larga), copas se tocando.
+ *   Em chunks de 60 m (frustum culling por grupo): perto da câmera, árvores 3D
+ *   instanciadas; longe, IMPOSTORES (cartões com a textura da própria árvore
+ *   renderizada em vista lateral e de cima, misturadas pelo ângulo da câmera).
+ *   A troca acompanha a descida.
+ * - Chão perto da cachoeira: samambaias, tufos de musgo e folhas secas
+ *   (instanciados); pedras com limo na margem e sob o urso.
+ * - Luz: sol filtrado entre as copas, raios de luz falsos (planos aditivos) e
+ *   pólen flutuando (sem raios no modo leve); névoa leve na descida e na base
+ *   da queda.
  * - Câmera numa curva: do alto (~85° para baixo) seguindo o rio até a
  *   cachoeira (~45°), com o urso em pé numa pedra no alto da queda, de lado,
  *   olhando a água caindo.
@@ -53,6 +66,8 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
  *   vida vem do vertex shader (respiração no tronco, cabeça girando devagar,
  *   pelo das costas ondulando), com máscaras suaves no espaço do modelo
  *   (cabeça para +Z, Y para cima, comprimento 1; medido no arquivo).
+ * - Sombras (desktop): mapa de 1024, estático, só do urso, das pedras e das
+ *   árvores 3D perto dele.
  */
 
 // ------------------------------------------------------------------ geografia
@@ -143,6 +158,13 @@ const END_CAM = ROCK.clone().addScaledVector(SIDE, 13).add(new Vector3(0, 14, 0)
 /** Pé da cachoeira (impacto no poço): espuma e névoa. */
 const FALL_FOOT = new Vector2(FALL_X, 7.6);
 
+// paleta: verdes muito escuros e dessaturados, troncos escuros
+const CANOPY = [new Color(0x1c221d), new Color(0x2a332b), new Color(0x3b463c)];
+const TRUNK = new Color(0x13120f);
+const FOG = new Color(0x3a423c);
+/** A cor da névoa em sRGB: os shaders próprios (água, queda, partículas) escrevem a cor sem conversão. */
+const FOG_SRGB = FOG.clone().convertLinearToSRGB();
+
 // ------------------------------------------------------------------ shaders
 const NOISE_GLSL = /* glsl */ `
   float a_hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -182,22 +204,18 @@ const WATER_FRAG = /* glsl */ `
     vec3 nrm = normalize(vec3((n1 - 0.5) * 0.35 + (n2 - 0.5) * 0.18, 1.0, (n2 - 0.5) * 0.3));
     vec3 V = normalize(cameraPosition - vW);
     float fres = pow(1.0 - max(dot(nrm, V), 0.0), 4.0);
-    vec3 col = vec3(0.06, 0.065, 0.072);
-    col = mix(col, uSky, 0.12 + 0.55 * fres);
+    vec3 col = vec3(0.05, 0.056, 0.058);
+    col = mix(col, uSky, 0.05 + 0.32 * fres);
     // brilhos frios do sol
     vec3 R = reflect(-V, nrm);
-    col += vec3(0.85, 0.9, 0.95) * pow(max(dot(R, uSun), 0.0), 140.0) * 1.4;
-    // bordas congeladas (rio) / espuma perto da queda (poço)
-    float edge = uPool > 0.5 ? 0.0 : smoothstep(0.3, 0.48, abs(vUv.x - 0.5));
-    float ice = edge * smoothstep(0.35, 0.65, a_noise(vW.xz * 0.35));
+    col += vec3(0.85, 0.9, 0.95) * pow(max(dot(R, uSun), 0.0), 140.0) * 1.3;
+    // espuma perto da queda (poço)
     float foam = 0.0;
     if (uPool > 0.5) {
       float d = length(vW.xz - uFall);
       foam = (1.0 - smoothstep(1.5, 9.0, d)) * smoothstep(0.35, 0.8, a_noise(vW.xz * 0.9 + t * vec2(0.3, 0.6)));
-      ice = smoothstep(${(POOL_R - 2.5).toFixed(1)}, ${POOL_R.toFixed(1)}, d) * smoothstep(0.4, 0.7, a_noise(vW.xz * 0.4));
     }
-    col = mix(col, vec3(0.78, 0.81, 0.85), ice * 0.85);
-    col = mix(col, vec3(0.86, 0.88, 0.9), foam * 0.8);
+    col = mix(col, vec3(0.82, 0.85, 0.86), foam * 0.75);
     float fd = length(cameraPosition - vW) * uFogDensity;
     col = mix(col, uFogColor, 1.0 - exp(-fd * fd));
     gl_FragColor = vec4(col, 1.0);
@@ -217,7 +235,7 @@ const FALL_FRAG = /* glsl */ `
     float streak = a_noise(vec2(vUv.x * 26.0, vUv.y * 3.0 - t * 2.4));
     float fine = a_noise(vec2(vUv.x * 70.0, vUv.y * 9.0 - t * 4.0));
     float foam = smoothstep(0.45, 0.85, streak * 0.7 + fine * 0.4) + smoothstep(0.55, 1.0, vUv.y) * 0.6;
-    vec3 col = mix(vec3(0.16, 0.17, 0.185), vec3(0.88, 0.9, 0.92), clamp(foam, 0.0, 1.0));
+    vec3 col = mix(vec3(0.14, 0.15, 0.155), vec3(0.85, 0.87, 0.88), clamp(foam, 0.0, 1.0));
     float side = smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x);
     float a = (0.55 + 0.45 * foam) * side * smoothstep(0.0, 0.04, vUv.y);
     float fd = length(cameraPosition - vW) * uFogDensity;
@@ -226,29 +244,28 @@ const FALL_FRAG = /* glsl */ `
   }
 `;
 
+/** Partículas: 0 = pólen/poeira flutuando perto da cachoeira; 1 = névoa da queda. */
 const PARTICLE_VERT = /* glsl */ `
   attribute float aSize;
   attribute float aSeed;
   uniform float uTime;
   uniform float uDpr;
-  uniform vec3 uCam;
-  uniform vec3 uFwd;
-  uniform float uMode;   // 0: neve caindo (em volta da câmera); 1: névoa/respingos da queda
+  uniform float uMode;
   uniform vec3 uOrigin;
   varying float vA;
   void main() {
     vec3 p;
     if (uMode < 0.5) {
-      // neve: cai e vem na direção da câmera; caixa de 70 m que acompanha a câmera
-      vec3 box = vec3(70.0);
-      p = position + vec3(sin(uTime * 0.6 + aSeed * 6.28) * 0.8, -uTime * (1.6 + aSeed * 1.4), 0.0) - uFwd * uTime * 3.0;
-      p = mod(p - uCam + box * 0.5, box) - box * 0.5 + uCam;
-      vA = mix(0.35, 0.9, smoothstep(10.0, 120.0, uCam.y));
+      // pólen: deriva lenta numa caixa em volta da cachoeira, cintilando nos raios
+      vec3 box = vec3(80.0, 26.0, 80.0);
+      p = position + vec3(sin(uTime * 0.21 + aSeed * 6.28) * 1.5, uTime * (0.12 + aSeed * 0.15), cos(uTime * 0.17 + aSeed * 4.0) * 1.5);
+      p = mod(p + box * 0.5, box) - box * 0.5 + uOrigin;
+      vA = (0.35 + 0.65 * (0.5 + 0.5 * sin(uTime * 1.3 + aSeed * 30.0))) * 0.55;
     } else {
       // névoa: sobe e se abre a partir do pé da queda, em ciclos
       float life = fract(uTime * (0.07 + aSeed * 0.05) + aSeed);
       p = uOrigin + position * (0.6 + life * 1.4) + vec3(0.0, life * 7.0, life * 2.5);
-      vA = sin(3.14159 * life) * 0.5;
+      vA = sin(3.14159 * life) * 0.45;
     }
     vec4 mv = viewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -257,12 +274,111 @@ const PARTICLE_VERT = /* glsl */ `
 `;
 const PARTICLE_FRAG = /* glsl */ `
   uniform float uSoft;
+  uniform vec3 uTint;
   varying float vA;
   void main() {
     float d = length(gl_PointCoord - 0.5) * 2.0;
     float a = mix(smoothstep(1.0, 0.3, d), exp(-d * d * 3.0), uSoft) * vA;
     if (a < 0.004) discard;
-    gl_FragColor = vec4(vec3(0.9, 0.92, 0.95) * a, a);
+    gl_FragColor = vec4(uTint * a, a);
+  }
+`;
+
+/** Raios de luz falsos: faixas aditivas ao longo da direção do sol, de frente para a câmera. */
+const RAY_VERT = /* glsl */ `
+  attribute vec3 aCenter;
+  attribute vec2 aSize;
+  attribute float aSeed;
+  uniform vec3 uSun;
+  varying vec2 vUv;
+  varying float vSeed;
+  void main() {
+    vec3 axis = normalize(uSun);
+    vec3 toCam = normalize(cameraPosition - aCenter);
+    vec3 right = normalize(cross(axis, toCam));
+    vec3 p = aCenter + axis * position.y * aSize.y + right * position.x * aSize.x;
+    vUv = uv;
+    vSeed = aSeed;
+    gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
+  }
+`;
+const RAY_FRAG = /* glsl */ `
+  uniform float uTime;
+  varying vec2 vUv;
+  varying float vSeed;
+  void main() {
+    float along = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.55, vUv.y);
+    float across = exp(-pow((vUv.x - 0.5) * 3.4, 2.0));
+    float flick = 0.7 + 0.3 * sin(uTime * 0.35 + vSeed * 6.28);
+    float a = along * across * flick * 0.11;
+    gl_FragColor = vec4(vec3(0.86, 0.88, 0.8) * a, a);
+  }
+`;
+
+/** Impostores: cartão de frente para a câmera com a árvore em vista lateral ou de cima. */
+const IMPOSTOR_VERT = /* glsl */ `
+  attribute vec3 aPos;
+  attribute float aScale;
+  attribute float aVar;
+  attribute float aRot;
+  attribute float aShade;
+  uniform float uSide[4];
+  uniform float uTop[4];
+  uniform float uHeight[4];
+  varying vec2 vUv;
+  varying float vTop;
+  varying float vVar;
+  varying float vRot;
+  varying float vShade;
+  varying vec3 vW;
+  void main() {
+    int vi = int(aVar + 0.5);
+    float S = uSide[vi] * aScale;
+    float T = uTop[vi] * aScale;
+    float H = uHeight[vi] * aScale;
+    vec3 sideC = aPos + vec3(0.0, S * 0.5, 0.0);
+    vec3 d = normalize(sideC - cameraPosition);
+    float top = smoothstep(0.5, 0.85, -d.y); // olhando de cima: vista de cima
+    vec3 c = mix(sideC, aPos + vec3(0.0, H * 0.8, 0.0), top);
+    float size = mix(S, T, top);
+    vec3 right = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+    vec3 up = vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+    vec3 p = c + (right * position.x + up * position.y) * size;
+    vUv = uv;
+    vTop = top;
+    vVar = aVar;
+    vRot = aRot;
+    vShade = aShade;
+    vW = p;
+    gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
+  }
+`;
+const IMPOSTOR_FRAG = /* glsl */ `
+  uniform sampler2D uAtlas;
+  uniform float uPad;
+  uniform vec3 uFogColor;
+  uniform float uFogDensity;
+  varying vec2 vUv;
+  varying float vTop;
+  varying float vVar;
+  varying float vRot;
+  varying float vShade;
+  varying vec3 vW;
+  void main() {
+    // atlas: 4 colunas (variações); metade de cima = vista lateral, de baixo = de cima
+    // cada quadro tem margem (uPad): o cartão usa só a área interna
+    vec2 q = uPad + vUv * (1.0 - 2.0 * uPad);
+    vec2 uvS = vec2((vVar + q.x) / 4.0, 0.5 + q.y * 0.5);
+    vec2 r = vUv - 0.5;
+    float cs = cos(vRot), sn = sin(vRot);
+    vec2 rr = uPad + clamp(vec2(cs * r.x - sn * r.y, sn * r.x + cs * r.y) + 0.5, 0.0, 1.0) * (1.0 - 2.0 * uPad);
+    vec2 uvT = vec2((vVar + rr.x) / 4.0, rr.y * 0.5);
+    vec4 c = mix(texture2D(uAtlas, uvS), texture2D(uAtlas, uvT), vTop);
+    if (c.a < 0.45) discard;
+    vec3 col = c.rgb / max(c.a, 0.001) * vShade;
+    float fd = length(cameraPosition - vW) * uFogDensity;
+    col = mix(col, uFogColor, 1.0 - exp(-fd * fd));
+    gl_FragColor = linearToOutputTexel(vec4(col, 1.0));
   }
 `;
 
@@ -278,61 +394,90 @@ function seeded(seed: number): Rand {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+const paint = (g: BufferGeometry, fn: (y: number, ny: number, i: number) => Color) => {
+  const pos = g.getAttribute("position");
+  const nrm = g.getAttribute("normal");
+  const col = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const c = fn(pos.getY(i), nrm ? nrm.getY(i) : 0, i);
+    col.set([c.r, c.g, c.b], i * 3);
+  }
+  g.setAttribute("color", new BufferAttribute(col, 3));
+};
 
-/** Pinheiro nevado: camadas de cones (neve no alto de cada camada) + tronco. */
-function pineGeometry(variant: number, light: boolean) {
-  const rand = seeded(100 + variant);
-  const layers = [5, 4, 6][variant];
-  const H = [9, 7, 11.5][variant];
-  const R = [3.2, 2.7, 3.4][variant];
-  const seg = light ? 8 : 12;
+type TreeDef = { geo: BufferGeometry; h: number; r: number };
+
+/** Conífera: camadas de cones irregulares (sem neve) + tronco. */
+function conifer(seed: number, H: number, R: number, layers: number, seg: number): TreeDef {
+  const rand = seeded(seed);
   const parts: BufferGeometry[] = [];
-  const foliage = new Color(0.07, 0.08, 0.085);
-  const snow = new Color(0.82, 0.85, 0.88);
   for (let i = 0; i < layers; i++) {
     const f = i / layers;
-    const r = R * (1 - f * 0.78) * (0.92 + rand() * 0.16);
-    const h = (H * 0.42) * (1 - f * 0.35);
+    const r = R * (1 - f * 0.8) * (0.9 + rand() * 0.2);
+    const h = H * 0.36 * (1 - f * 0.35);
     const g = new ConeGeometry(r, h, seg, 2, true);
-    // borda dos galhos irregular (sem cone perfeito)
     const gp = g.getAttribute("position");
     for (let v = 0; v < gp.count; v++) {
       if (gp.getY(v) > -h / 2 + 0.01) continue;
-      const k = 0.8 + rand() * 0.4;
-      gp.setXYZ(v, gp.getX(v) * k, gp.getY(v) - rand() * 0.35, gp.getZ(v) * k);
+      const k = 0.78 + rand() * 0.44;
+      gp.setXYZ(v, gp.getX(v) * k, gp.getY(v) - rand() * 0.4, gp.getZ(v) * k);
     }
-    g.translate(0, H * 0.22 + f * H * 0.62 + h / 2, 0);
-    // cor: ponta da camada nevada, base grafite; um pouco de neve aleatória na borda
-    const pos = g.getAttribute("position");
-    const col = new Float32Array(pos.count * 3);
-    const top = H * 0.22 + f * H * 0.62 + h;
-    const amount = 0.5 + rand() * 0.3;
-    for (let v = 0; v < pos.count; v++) {
-      const y = pos.getY(v);
-      // neve acumulada no alto de cada camada; galhos de baixo quase sem neve
-      const k = y > top - 0.01 ? amount : y > top - h * 0.55 ? 0.22 + rand() * 0.12 : 0.03;
-      const c = foliage.clone().lerp(snow, k);
-      col.set([c.r, c.g, c.b], v * 3);
-    }
-    g.setAttribute("color", new BufferAttribute(col, 3));
+    g.translate(0, H * 0.24 + f * H * 0.62 + h / 2, 0);
+    g.computeVertexNormals();
+    const base = CANOPY[0].clone().lerp(CANOPY[1], rand() * 0.8);
+    const top = H * 0.24 + f * H * 0.62 + h;
+    paint(g, (y) => base.clone().lerp(CANOPY[2], smooth(top - h * 0.6, top, y) * 0.7));
     parts.push(g);
   }
-  const trunk = new CylinderGeometry(0.22, 0.34, H * 0.3, 6, 1, true);
-  trunk.translate(0, H * 0.15, 0);
-  const tc = new Float32Array(trunk.getAttribute("position").count * 3).fill(0.08);
-  trunk.setAttribute("color", new BufferAttribute(tc, 3));
+  const trunk = new CylinderGeometry(0.2, 0.34, H * 0.32, 6, 1, true);
+  trunk.translate(0, H * 0.16, 0);
+  paint(trunk, () => TRUNK);
   parts.push(trunk);
   parts.forEach((p) => p.deleteAttribute("uv"));
-  const merged = mergeGeometries(parts)!; // indexadas: normais suaves
-  merged.computeVertexNormals();
+  const geo = mergeGeometries(parts)!;
+  geo.computeVertexNormals();
   parts.forEach((p) => p.dispose());
-  return merged;
+  return { geo, h: H, r: R };
 }
 
-/** Pedra irregular com neve por cima. */
+/** Árvore de copa larga: tronco + blocos de folhagem fundidos. */
+function broadleaf(seed: number, H: number, R: number, blobs: number, detail: number, flat: number): TreeDef {
+  const rand = seeded(seed);
+  const parts: BufferGeometry[] = [];
+  const trunk = new CylinderGeometry(0.22, 0.42, H * 0.55, 6, 1, true).toNonIndexed();
+  trunk.translate(0, H * 0.27, 0);
+  paint(trunk, () => TRUNK);
+  parts.push(trunk);
+  for (let i = 0; i < blobs; i++) {
+    const a = (i / blobs) * Math.PI * 2 + rand() * 0.6;
+    const d = i === 0 ? 0 : R * (0.35 + rand() * 0.3);
+    const br = R * (0.42 + rand() * 0.2);
+    const g = new IcosahedronGeometry(1, detail);
+    const gp = g.getAttribute("position");
+    for (let v = 0; v < gp.count; v++) {
+      const k = 0.85 + hash(gp.getX(v) * 13 + i, gp.getZ(v) * 7 + gp.getY(v) * 5) * 0.3;
+      gp.setXYZ(v, gp.getX(v) * k, gp.getY(v) * k, gp.getZ(v) * k);
+    }
+    g.scale(br, br * flat, br);
+    g.translate(Math.cos(a) * d, H * (0.62 + rand() * 0.22), Math.sin(a) * d);
+    g.computeVertexNormals();
+    const base = CANOPY[1].clone().lerp(CANOPY[i % 2 ? 0 : 2], rand() * 0.6);
+    paint(g, (_y, ny) => base.clone().lerp(CANOPY[2], smooth(0.2, 0.9, ny) * 0.55));
+    parts.push(g);
+  }
+  parts.forEach((p) => p.deleteAttribute("uv"));
+  const merged = mergeGeometries(parts)!;
+  parts.forEach((p) => p.dispose());
+  const geo = mergeVertices(merged); // vértices compartilhados: sombreamento suave
+  merged.dispose();
+  geo.computeVertexNormals();
+  return { geo, h: H, r: R };
+}
+
+/** Pedra irregular com limo por cima. */
 function rockGeometry(seed: number, detail: number) {
   const rand = seeded(seed);
-  const g = new IcosahedronGeometry(1, detail); // já vem sem índice
+  const g = new IcosahedronGeometry(1, detail);
   const pos = g.getAttribute("position");
   const map = new Map<string, number>();
   for (let v = 0; v < pos.count; v++) {
@@ -342,14 +487,27 @@ function rockGeometry(seed: number, detail: number) {
     pos.setXYZ(v, pos.getX(v) * s, pos.getY(v) * s * 0.75, pos.getZ(v) * s);
   }
   g.computeVertexNormals();
-  const nrm = g.getAttribute("normal");
-  const col = new Float32Array(pos.count * 3);
-  for (let v = 0; v < pos.count; v++) {
-    const k = smooth(0.35, 0.7, nrm.getY(v));
-    col.set([0.2 + k * 0.66, 0.21 + k * 0.67, 0.225 + k * 0.67], v * 3);
-  }
-  g.setAttribute("color", new BufferAttribute(col, 3));
+  const stone = new Color(0.2, 0.205, 0.2);
+  const moss = new Color(0.13, 0.17, 0.13);
+  paint(g, (_y, ny) => stone.clone().lerp(moss, smooth(0.3, 0.75, ny)));
   return g;
+}
+
+/** Samambaia: folhas finas abertas em leque. */
+function fernGeometry() {
+  const parts: BufferGeometry[] = [];
+  for (let i = 0; i < 6; i++) {
+    const g = new PlaneGeometry(0.12, 0.8, 1, 2);
+    g.translate(0, 0.4, 0);
+    g.rotateX(-0.75 - (i % 2) * 0.25);
+    g.rotateY((i / 6) * Math.PI * 2 + (i % 3) * 0.2);
+    parts.push(g);
+  }
+  const geo = mergeGeometries(parts)!;
+  parts.forEach((p) => p.dispose());
+  geo.computeVertexNormals();
+  paint(geo, (y) => CANOPY[0].clone().lerp(CANOPY[1], smooth(0, 0.5, y)));
+  return geo;
 }
 
 // ------------------------------------------------------------------ mundo
@@ -357,35 +515,56 @@ const tmpM = new Matrix4();
 const tmpQ = new Quaternion();
 const tmpP = new Vector3();
 const tmpS = new Vector3();
+const tmpC = new Color();
 const UP = new Vector3(0, 1, 0);
+/** Tamanho do chunk (m). */
+const CHUNK = 60;
+/** Margem interna de cada quadro do atlas (fração): sem vazar o quadro vizinho. */
+const ATLAS_PAD = 0.06;
+
+type Chunk = { center: Vector3; meshes: InstancedMesh[]; impostor: Mesh; near: boolean; shadow: boolean };
 
 export class AerialWorld {
   readonly root = new Group();
   private uniforms = {
     uTime: { value: 0 },
-    uSun: { value: new Vector3(-0.62, 0.42, -0.66).normalize() },
-    uSky: { value: new Vector3(0.64, 0.68, 0.73) },
-    uFogColor: { value: new Vector3(0.58, 0.61, 0.65) },
+    uSun: { value: new Vector3(-0.55, 0.62, -0.55).normalize() },
+    uSky: { value: new Vector3(0.3, 0.34, 0.32) },
+    uFogColor: { value: new Vector3(FOG_SRGB.r, FOG_SRGB.g, FOG_SRGB.b) },
     uFogDensity: { value: 0.0025 },
   };
-  private fog = new FogExp2(0x949ca6, 0.0025);
+  private fog = new FogExp2(FOG.getHex(), 0.0025);
   private sun!: DirectionalLight;
   private mats: (ShaderMaterial | MeshStandardMaterial)[] = [];
   private geos: BufferGeometry[] = [];
-  private snowMat!: ShaderMaterial;
+  private pollenMat: ShaderMaterial | null = null;
   private mistMat: ShaderMaterial | null = null;
+  private atlas: WebGLRenderTarget | null = null;
+  private chunks: Chunk[] = [];
   private camPath!: CatmullRomCurve3;
   private lookPath!: CatmullRomCurve3;
   private cam = new Vector3();
   private look = new Vector3();
+  private camT = new Vector3();
+  private lookT = new Vector3();
   private time = 0;
   private bear: Group | null = null;
   private shadowFrames = 0;
   private disposed = false;
-
+  private gl: WebGLRenderer | null = null;
   private building: Promise<void> | null = null;
 
   constructor(private light: boolean) {}
+
+  attach(scene: Scene, gl: WebGLRenderer) {
+    this.gl = gl;
+    scene.fog = this.fog;
+    scene.background = FOG.clone();
+    gl.shadowMap.enabled = !this.light;
+    gl.shadowMap.type = PCFShadowMap;
+    gl.shadowMap.autoUpdate = false; // cena estática: o mapa só é refeito quando algo entra
+    gl.shadowMap.needsUpdate = true;
+  }
 
   /**
    * Monta o mundo em pedaços (cede a vez ao navegador entre eles), para não
@@ -407,31 +586,30 @@ export class AerialWorld {
     const light = this.light;
     const rand = seeded(42);
 
-    // luz fria de inverno: céu + sol baixo com sombras suaves (só no desktop)
-    this.root.add(new HemisphereLight(0xdfe6ef, 0x3a3e44, 1.05));
-    this.sun = new DirectionalLight(0xeef2f7, 1.7);
+    // luz: céu esverdeado-acinzentado + sol filtrado; sombras só no desktop
+    const hemi = new HemisphereLight(0xc4ccc4, 0x161b17, 1.0);
+    this.sun = new DirectionalLight(0xeeeee4, 1.55);
     this.sun.position.copy(ROCK).addScaledVector(this.uniforms.uSun.value, 80);
     this.sun.target.position.copy(ROCK);
-    this.root.add(this.sun, this.sun.target);
+    this.root.add(hemi, this.sun, this.sun.target);
     if (!light) {
       this.sun.castShadow = true;
-      this.sun.shadow.mapSize.set(2048, 2048);
+      this.sun.shadow.mapSize.set(1024, 1024);
       const c = this.sun.shadow.camera;
-      c.left = -40;
-      c.right = 40;
-      c.top = 40;
-      c.bottom = -40;
-      c.near = 10;
-      c.far = 180;
-      this.sun.shadow.bias = -0.0005;
-      this.sun.shadow.normalBias = 0.04;
-      this.sun.shadow.radius = 4;
+      c.left = -32;
+      c.right = 32;
+      c.top = 32;
+      c.bottom = -32;
+      c.near = 20;
+      c.far = 160;
+      this.sun.shadow.bias = -0.0006;
+      this.sun.shadow.normalBias = 0.05;
+      this.sun.shadow.radius = 3;
     }
 
-    // --- terreno ---
-    const seg = light ? 120 : 220;
+    // --- terreno: chão de floresta (musgo e folhas), rocha nas encostas ---
+    const seg = light ? 120 : 200;
     const grid = new Float32Array((seg + 1) * (seg + 1));
-    /** Altura pela grade já calculada (bilinear). */
     const hAt = (x: number, z: number) => {
       const gx = Math.min(Math.max(((x - X0) / (X1 - X0)) * seg, 0), seg - 1e-4);
       const gz = Math.min(Math.max(((z - Z0) / (Z1 - Z0)) * seg, 0), seg - 1e-4);
@@ -455,7 +633,6 @@ export class AerialWorld {
         if ((i & 511) === 0) await breathe();
         const y = height(pos.getX(i), pos.getZ(i));
         pos.setY(i, y);
-        // a PlaneGeometry vai de -Z a +Z depois do rotateX: linha = posição em Z
         const ix = Math.round(((pos.getX(i) - X0) / (X1 - X0)) * seg);
         const iz = Math.round(((pos.getZ(i) - Z0) / (Z1 - Z0)) * seg);
         grid[iz * (seg + 1) + ix] = y;
@@ -466,17 +643,21 @@ export class AerialWorld {
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i);
         const z = pos.getZ(i);
-        // neve nas áreas planas; rocha escura exposta nas encostas íngremes
-        const flat = smooth(0.62, 0.86, nrm.getY(i) + (vnoise(x * 0.25, z * 0.25) - 0.5) * 0.12);
-        const dx = Math.abs(x - riverX(z));
-        const wet = 1 - smooth(4, 7, dx); // margem úmida, mais escura
-        const s = 0.86 + vnoise(x * 0.6, z * 0.6) * 0.06;
-        const r = 0.17 + vnoise(x * 0.9, z * 0.9) * 0.06;
-        const k = flat * (1 - wet * 0.6);
-        col.set([r + (s - r) * k, r + 0.01 + (s + 0.02 - r - 0.01) * k, r + 0.02 + (s + 0.05 - r - 0.02) * k], i * 3);
+        const steep = 1 - smooth(0.6, 0.85, nrm.getY(i));
+        const leaves = smooth(0.45, 0.75, vnoise(x * 0.18, z * 0.18));
+        const wet = 1 - smooth(4, 7, Math.abs(x - riverX(z)));
+        // musgo escuro / folhas secas acinzentadas / rocha nas encostas / margem úmida
+        let r = 0.095 + leaves * 0.05;
+        let gg = 0.115 + leaves * 0.03;
+        let b = 0.098 + leaves * 0.015;
+        r += (0.19 - r) * steep;
+        gg += (0.195 - gg) * steep;
+        b += (0.19 - b) * steep;
+        const k = 1 - wet * 0.45;
+        col.set([r * k, gg * k, b * k], i * 3);
       }
       g.setAttribute("color", new BufferAttribute(col, 3));
-      const m = new MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0 });
+      const m = new MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
       const mesh = new Mesh(g, m);
       mesh.receiveShadow = !light;
       this.root.add(mesh);
@@ -558,84 +739,276 @@ export class AerialWorld {
       this.root.add(new Mesh(g, m));
     }
 
-    // --- névoa e respingos no pé da queda ---
-    {
-      const n = light ? 70 : 200;
+    // --- partículas: névoa no pé da queda; pólen nos raios ---
+    const particles = (n: number, mode: number, origin: Vector3, spread: (i: number) => [number, number, number], size: () => number, soft: number, tint: Color) => {
       const pos = new Float32Array(n * 3);
-      const size = new Float32Array(n);
+      const sz = new Float32Array(n);
       const seed = new Float32Array(n);
       for (let i = 0; i < n; i++) {
-        pos.set([(rand() - 0.5) * 9, rand() * 1.5, (rand() - 0.2) * 5], i * 3);
-        size[i] = 12 + rand() * 26;
+        pos.set(spread(i), i * 3);
+        sz[i] = size();
         seed[i] = rand();
       }
       const g = new BufferGeometry();
       g.setAttribute("position", new BufferAttribute(pos, 3));
-      g.setAttribute("aSize", new BufferAttribute(size, 1));
+      g.setAttribute("aSize", new BufferAttribute(sz, 1));
       g.setAttribute("aSeed", new BufferAttribute(seed, 1));
-      this.mistMat = new ShaderMaterial({
+      const m = new ShaderMaterial({
         vertexShader: PARTICLE_VERT,
         fragmentShader: PARTICLE_FRAG,
         uniforms: {
           uTime: this.uniforms.uTime,
           uDpr: { value: 1 },
-          uCam: { value: new Vector3() },
-          uFwd: { value: new Vector3() },
-          uMode: { value: 1 },
-          uOrigin: { value: new Vector3(FALL_FOOT.x, WATER_LOW, FALL_FOOT.y - 1.5) },
-          uSoft: { value: 1 },
+          uMode: { value: mode },
+          uOrigin: { value: origin },
+          uSoft: { value: soft },
+          uTint: { value: tint },
         },
         transparent: true,
         depthWrite: false,
         blending: AdditiveBlending,
       });
-      const pts = new Points(g, this.mistMat);
+      const pts = new Points(g, m);
       pts.frustumCulled = false;
       this.geos.push(g);
-      this.mats.push(this.mistMat);
+      this.mats.push(m);
       this.root.add(pts);
+      return m;
+    };
+    this.mistMat = particles(
+      light ? 70 : 200,
+      1,
+      new Vector3(FALL_FOOT.x, WATER_LOW, FALL_FOOT.y - 1.5),
+      () => [(rand() - 0.5) * 9, rand() * 1.5, (rand() - 0.2) * 5],
+      () => 12 + rand() * 26,
+      1,
+      new Color(0.86, 0.88, 0.88),
+    );
+    this.pollenMat = particles(
+      light ? 200 : 700,
+      0,
+      ROCK.clone().add(new Vector3(-4, 8, 6)),
+      () => [(rand() - 0.5) * 80, (rand() - 0.5) * 26, (rand() - 0.5) * 80],
+      () => 0.35 + rand() * 0.55,
+      0,
+      new Color(0.9, 0.9, 0.8),
+    );
+
+    // --- raios de sol entre as copas (só desktop) ---
+    if (!light) {
+      const n = 12;
+      const center = new Float32Array(n * 3);
+      const size = new Float32Array(n * 2);
+      const seed = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const a = rand() * Math.PI * 2;
+        const d = 6 + rand() * 30;
+        const x = ROCK.x - 4 + Math.cos(a) * d;
+        const z = ROCK.z + 6 + Math.sin(a) * d;
+        center.set([x, hAt(x, z) + 9 + rand() * 6, z], i * 3);
+        size.set([2.5 + rand() * 3.5, 34 + rand() * 18], i * 2);
+        seed[i] = rand();
+      }
+      const g = new InstancedBufferGeometry();
+      const quad = new PlaneGeometry(1, 1);
+      g.index = quad.index;
+      g.setAttribute("position", quad.getAttribute("position"));
+      g.setAttribute("uv", quad.getAttribute("uv"));
+      g.setAttribute("aCenter", new InstancedBufferAttribute(center, 3));
+      g.setAttribute("aSize", new InstancedBufferAttribute(size, 2));
+      g.setAttribute("aSeed", new InstancedBufferAttribute(seed, 1));
+      g.instanceCount = n;
+      g.boundingSphere = new Sphere(ROCK.clone(), 70);
+      const m = new ShaderMaterial({
+        vertexShader: RAY_VERT,
+        fragmentShader: RAY_FRAG,
+        uniforms: { uTime: this.uniforms.uTime, uSun: this.uniforms.uSun },
+        transparent: true,
+        depthWrite: false,
+        blending: AdditiveBlending,
+        side: DoubleSide,
+      });
+      this.geos.push(g, quad);
+      this.mats.push(m);
+      this.root.add(new Mesh(g, m));
     }
 
-    // --- pinheiros (3 variações instanciadas, distribuídos por ruído) ---
-    {
-      const total = light ? 900 : 2600;
-      const variants = [0, 1, 2].map((v) => pineGeometry(v, light));
-      const m = new MeshStandardMaterial({ vertexColors: true, roughness: 0.95 });
-      this.mats.push(m);
-      const buckets: Matrix4[][] = [[], [], []];
-      let tries = 0;
-      while (buckets[0].length + buckets[1].length + buckets[2].length < total && tries < total * 30) {
-        tries++;
-        if ((tries & 1023) === 0) await breathe();
-        const x = X0 + rand() * (X1 - X0);
-        const z = Z0 + rand() * (Z1 - Z0 - 10);
-        if (vnoise(x * 0.03 + 3, z * 0.03) * 0.65 + vnoise(x * 0.09, z * 0.09) * 0.35 < 0.4 + rand() * 0.12) continue; // bosques e clareiras
-        if (Math.abs(x - riverX(z)) < 10) continue; // margem do rio livre
-        if (Math.hypot(x - FALL_X, z - POOL_Z) < POOL_R + 6) continue; // poço
-        if (z > -4 && z < 9 && Math.abs(x - FALL_X) < 30) continue; // face do penhasco
-        if (Math.hypot(x - ROCK.x, z - ROCK.z) < 9) continue; // clareira do urso
-        if (Math.hypot(x - END_CAM.x, z - END_CAM.z) < 26) continue; // nada colado na câmera final
+    await breathe();
+
+    // --- floresta: 4 variações, 3D perto e impostores longe, em chunks ---
+    const defs: TreeDef[] = [
+      conifer(101, 13, 3.1, 6, light ? 8 : 11),
+      conifer(102, 10, 3.5, 5, light ? 8 : 11),
+      broadleaf(103, 11, 4.3, 7, light ? 1 : 2, 0.82),
+      broadleaf(104, 9, 4.9, 8, light ? 1 : 2, 0.68),
+    ];
+    defs.forEach((d) => this.geos.push(d.geo));
+    const treeMat = new MeshStandardMaterial({ vertexColors: true, roughness: 0.92 });
+    this.mats.push(treeMat);
+    // tamanho dos quadros do atlas pela caixa real de cada árvore (a folhagem
+    // das copas largas passa do raio nominal)
+    const half = defs.map((d) => {
+      d.geo.computeBoundingBox();
+      const b = d.geo.boundingBox!;
+      return Math.max(-b.min.x, b.max.x, -b.min.z, b.max.z);
+    });
+    const sideSize = defs.map((d, i) => Math.max(half[i] * 2, d.geo.boundingBox!.max.y) * 1.04);
+    const topSize = half.map((h) => h * 2 * 1.06);
+    this.atlas = this.bakeAtlas(defs, treeMat, sideSize, topSize);
+    await breathe();
+
+    const nx = Math.ceil((X1 - X0) / CHUNK);
+    const nz = Math.ceil((Z1 - Z0) / CHUNK);
+    type T = { x: number; y: number; z: number; v: number; s: number; rot: number; shade: number };
+    const lists: T[][] = Array.from({ length: nx * nz }, () => []);
+    const spacing = light ? 6 : 4.9;
+    for (let gz = Z0 + 2; gz < Z1; gz += spacing) {
+      await breathe();
+      for (let gx = X0 + 2; gx < X1; gx += spacing) {
+        const x = gx + (rand() - 0.5) * spacing * 0.9;
+        const z = gz + (rand() - 0.5) * spacing * 0.9;
+        if (Math.abs(x - riverX(z)) < 7.5) continue; // o rio abre caminho
+        if (Math.hypot(x - FALL_X, z - POOL_Z) < POOL_R + 3) continue; // poço
+        if (z > -3 && z < 8 && Math.abs(x - FALL_X) < 22) continue; // face do penhasco
+        if (Math.hypot(x - ROCK.x, z - ROCK.z) < 6) continue; // em volta do urso
+        if (Math.hypot(x - END_CAM.x, z - END_CAM.z) < 16) continue; // nada colado na câmera final
+        if (vnoise(x * 0.02 + 9, z * 0.02) < 0.12) continue; // raras clareiras
         const y = hAt(x, z);
         const slope = Math.hypot(hAt(x + 1, z) - y, hAt(x, z + 1) - y);
-        if (slope > 0.9) continue;
-        const v = Math.floor(rand() * 3);
-        const s = 0.7 + rand() * 0.7;
-        tmpQ.setFromAxisAngle(UP, rand() * Math.PI * 2);
-        buckets[v].push(new Matrix4().compose(tmpP.set(x, y - 0.3, z), tmpQ, tmpS.set(s, s * (0.85 + rand() * 0.3), s)));
+        if (slope > 1.1) continue;
+        // coníferas no alto, copas largas nas baixadas, misturadas
+        const zone = vnoise(x * 0.012, z * 0.012) + (y - 10) * 0.012;
+        const v = rand() < 0.5 + (zone - 0.5) * 0.9 ? (rand() < 0.5 ? 0 : 1) : rand() < 0.5 ? 2 : 3;
+        // a variação de posição pode passar da borda: índice sempre dentro da grade
+        const cx = Math.min(Math.max(Math.floor((x - X0) / CHUNK), 0), nx - 1);
+        const cz = Math.min(Math.max(Math.floor((z - Z0) / CHUNK), 0), nz - 1);
+        const ci = cx + cz * nx;
+        lists[ci].push({ x, y: y - 0.3, z, v, s: 0.78 + rand() * 0.5, rot: rand() * Math.PI * 2, shade: 0.82 + rand() * 0.3 });
       }
-      buckets.forEach((list, v) => {
-        const mesh = new InstancedMesh(variants[v], m, Math.max(list.length, 1));
-        list.forEach((mat, i) => mesh.setMatrixAt(i, mat));
-        mesh.count = list.length;
-        mesh.castShadow = !light;
-        mesh.receiveShadow = !light;
-        mesh.frustumCulled = false;
-        this.root.add(mesh);
-        this.geos.push(variants[v]);
-      });
     }
 
-    // --- pedras nevadas na margem + a pedra do urso ---
+    const impostorMat = new ShaderMaterial({
+      vertexShader: IMPOSTOR_VERT,
+      fragmentShader: IMPOSTOR_FRAG,
+      uniforms: {
+        uAtlas: { value: this.atlas.texture },
+        uPad: { value: ATLAS_PAD },
+        uSide: { value: sideSize },
+        uTop: { value: topSize },
+        uHeight: { value: defs.map((d) => d.h) },
+        // o impostor converte para a saída no fim: névoa em linear, como a da cena
+        uFogColor: { value: new Vector3(FOG.r, FOG.g, FOG.b) },
+        uFogDensity: this.uniforms.uFogDensity,
+      },
+    });
+    this.mats.push(impostorMat);
+    const quad = new PlaneGeometry(1, 1);
+    this.geos.push(quad);
+    for (let ci = 0; ci < lists.length; ci++) {
+      const list = lists[ci];
+      if (!list.length) continue;
+      if ((ci & 3) === 0) await breathe();
+      const center = new Vector3(X0 + ((ci % nx) + 0.5) * CHUNK, 0, Z0 + (Math.floor(ci / nx) + 0.5) * CHUNK);
+      center.y = list.reduce((a, t) => a + t.y, 0) / list.length;
+      // árvores 3D (uma malha instanciada por variação)
+      const meshes: InstancedMesh[] = [];
+      for (let v = 0; v < 4; v++) {
+        const own = list.filter((t) => t.v === v);
+        if (!own.length) continue;
+        const mesh = new InstancedMesh(defs[v].geo, treeMat, own.length);
+        own.forEach((t, i) => {
+          tmpQ.setFromAxisAngle(UP, t.rot);
+          mesh.setMatrixAt(i, tmpM.compose(tmpP.set(t.x, t.y, t.z), tmpQ, tmpS.setScalar(t.s)));
+          mesh.setColorAt(i, tmpC.setScalar(t.shade));
+        });
+        mesh.computeBoundingSphere();
+        mesh.visible = false;
+        meshes.push(mesh);
+        this.root.add(mesh);
+      }
+      // impostores (mesmas árvores, como cartões)
+      const n = list.length;
+      const g = new InstancedBufferGeometry();
+      g.index = quad.index;
+      g.setAttribute("position", quad.getAttribute("position"));
+      g.setAttribute("uv", quad.getAttribute("uv"));
+      const aPos = new Float32Array(n * 3);
+      const aScale = new Float32Array(n);
+      const aVar = new Float32Array(n);
+      const aRot = new Float32Array(n);
+      const aShade = new Float32Array(n);
+      list.forEach((t, i) => {
+        aPos.set([t.x, t.y, t.z], i * 3);
+        aScale[i] = t.s;
+        aVar[i] = t.v;
+        aRot[i] = t.rot;
+        aShade[i] = t.shade;
+      });
+      g.setAttribute("aPos", new InstancedBufferAttribute(aPos, 3));
+      g.setAttribute("aScale", new InstancedBufferAttribute(aScale, 1));
+      g.setAttribute("aVar", new InstancedBufferAttribute(aVar, 1));
+      g.setAttribute("aRot", new InstancedBufferAttribute(aRot, 1));
+      g.setAttribute("aShade", new InstancedBufferAttribute(aShade, 1));
+      g.instanceCount = n;
+      g.boundingSphere = new Sphere(center.clone().add(new Vector3(0, 6, 0)), CHUNK * 0.75 + 12);
+      this.geos.push(g);
+      const impostor = new Mesh(g, impostorMat);
+      this.root.add(impostor);
+      const shadow = !light && center.distanceTo(ROCK) < 55;
+      meshes.forEach((m) => (m.castShadow = shadow));
+      this.chunks.push({ center, meshes, impostor, near: false, shadow });
+    }
+
+    // --- chão perto da cachoeira: samambaias, musgo e folhas (instanciados) ---
+    {
+      const near = (n: number, cb: (i: number, x: number, z: number) => void) => {
+        let i = 0;
+        let tries = 0;
+        while (i < n && tries < n * 6) {
+          tries++;
+          const a = rand() * Math.PI * 2;
+          const d = Math.sqrt(rand()) * 62;
+          const x = ROCK.x - 2 + Math.cos(a) * d;
+          const z = ROCK.z + 8 + Math.sin(a) * d;
+          if (Math.abs(x - riverX(z)) < 5 || Math.hypot(x - FALL_X, z - POOL_Z) < POOL_R + 0.5) continue;
+          if (z > -2 && z < 7.5 && Math.abs(x - FALL_X) < 9) continue;
+          cb(i++, x, z);
+        }
+        return i;
+      };
+      const fern = fernGeometry();
+      const moss = new IcosahedronGeometry(1, 1);
+      moss.scale(0.7, 0.28, 0.7);
+      paint(moss, (_y, ny) => new Color(0.11, 0.14, 0.11).lerp(CANOPY[2], smooth(0.3, 0.9, ny) * 0.6));
+      const leaf = new PlaneGeometry(0.34, 0.2);
+      leaf.rotateX(-Math.PI / 2);
+      paint(leaf, () => new Color(0.17, 0.155, 0.13));
+      const vegMat = new MeshStandardMaterial({ vertexColors: true, roughness: 0.95, side: DoubleSide });
+      this.mats.push(vegMat);
+      this.geos.push(fern, moss, leaf);
+      const kinds: [BufferGeometry, number, number, number][] = [
+        // geometria, quantidade, escala mín., escala máx.
+        [fern, light ? 300 : 900, 0.5, 1.1],
+        [moss, light ? 200 : 600, 0.5, 1.6],
+        [leaf, light ? 700 : 2500, 0.7, 1.4],
+      ];
+      for (const [geo, n, s0, s1] of kinds) {
+        await breathe();
+        const mesh = new InstancedMesh(geo, vegMat, n);
+        const placed = near(n, (i, x, z) => {
+          const s = s0 + rand() * (s1 - s0);
+          tmpQ.setFromAxisAngle(UP, rand() * Math.PI * 2);
+          mesh.setMatrixAt(i, tmpM.compose(tmpP.set(x, hAt(x, z) + 0.02, z), tmpQ, tmpS.setScalar(s)));
+          mesh.setColorAt(i, tmpC.setScalar(0.75 + rand() * 0.45));
+        });
+        mesh.count = placed;
+        mesh.computeBoundingSphere();
+        mesh.receiveShadow = !light;
+        this.root.add(mesh);
+      }
+    }
+
+    // --- pedras com limo na margem + a pedra do urso ---
     {
       const g = rockGeometry(7, light ? 1 : 2);
       const m = new MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true });
@@ -663,51 +1036,14 @@ export class AerialWorld {
         tmpM.compose(tmpP.set(x, hAt(x, z) + s * 0.25, z), tmpQ, tmpS.set(s * (0.9 + rand() * 0.5), s, s * (0.9 + rand() * 0.5)));
         mesh.setMatrixAt(i, tmpM);
       }
-      // pedra do urso: larga e com topo plano o bastante para ele sentar
+      // pedra do urso
       tmpQ.setFromAxisAngle(UP, 0.6);
       tmpM.compose(tmpP.set(ROCK_BASE.x, ROCK_BASE.y + 0.15, ROCK_BASE.z), tmpQ, tmpS.set(2.4, 1.45, 2.1));
       mesh.setMatrixAt(n, tmpM);
+      mesh.computeBoundingSphere();
       mesh.castShadow = !light;
       mesh.receiveShadow = !light;
       this.root.add(mesh);
-    }
-
-    // --- neve caindo (em volta da câmera) ---
-    {
-      const n = light ? 800 : 2400;
-      const pos = new Float32Array(n * 3);
-      const size = new Float32Array(n);
-      const seed = new Float32Array(n);
-      for (let i = 0; i < n; i++) {
-        pos.set([(rand() - 0.5) * 70, (rand() - 0.5) * 70, (rand() - 0.5) * 70], i * 3);
-        size[i] = 0.5 + rand() * 1.1;
-        seed[i] = rand();
-      }
-      const g = new BufferGeometry();
-      g.setAttribute("position", new BufferAttribute(pos, 3));
-      g.setAttribute("aSize", new BufferAttribute(size, 1));
-      g.setAttribute("aSeed", new BufferAttribute(seed, 1));
-      this.snowMat = new ShaderMaterial({
-        vertexShader: PARTICLE_VERT,
-        fragmentShader: PARTICLE_FRAG,
-        uniforms: {
-          uTime: this.uniforms.uTime,
-          uDpr: { value: 1 },
-          uCam: { value: new Vector3() },
-          uFwd: { value: new Vector3() },
-          uMode: { value: 0 },
-          uOrigin: { value: new Vector3() },
-          uSoft: { value: 0 },
-        },
-        transparent: true,
-        depthWrite: false,
-        blending: AdditiveBlending,
-      });
-      const pts = new Points(g, this.snowMat);
-      pts.frustumCulled = false;
-      this.geos.push(g);
-      this.mats.push(this.snowMat);
-      this.root.add(pts);
     }
 
     // --- câmera: do alto seguindo o rio até a cachoeira e o urso ---
@@ -732,15 +1068,81 @@ export class AerialWorld {
       new Vector3(FALL_X + 3, 6, 6),
       endLook,
     ]);
+
+    // tudo é estático: matrizes congeladas (a câmera e o urso não estão aqui)
+    this.root.updateMatrixWorld(true);
+    this.root.traverse((o) => {
+      o.matrixAutoUpdate = false;
+    });
+    this.shadowFrames = 2;
   }
 
-  attach(scene: Scene, gl: WebGLRenderer) {
-    scene.fog = this.fog;
-    scene.background = new Color(0x949ca6);
-    gl.shadowMap.enabled = !this.light;
-    gl.shadowMap.type = PCFShadowMap; // PCF (o PCFSoft saiu do three); raio suaviza
-    gl.shadowMap.autoUpdate = false; // cena estática: refaz só quando o urso mexe (perto do fim)
-    gl.shadowMap.needsUpdate = true;
+  /**
+   * Atlas dos impostores: cada variação renderizada de lado (metade de cima) e
+   * de cima (metade de baixo), fundo transparente, com a mesma luz da cena.
+   */
+  private bakeAtlas(defs: TreeDef[], mat: MeshStandardMaterial, sideSize: number[], topSize: number[]) {
+    const gl = this.gl!;
+    const tile = this.light ? 128 : 256;
+    // sem mipmaps: os níveis menores misturariam o quadro vizinho na borda do cartão
+    const rt = new WebGLRenderTarget(tile * 4, tile * 2, {
+      depthBuffer: true,
+      generateMipmaps: false,
+      minFilter: LinearFilter,
+      magFilter: LinearFilter,
+    });
+    const m = Math.round(tile * ATLAS_PAD);
+    const scene = new Scene();
+    scene.add(new HemisphereLight(0xc4ccc4, 0x161b17, 1.0));
+    const sun = new DirectionalLight(0xeeeee4, 1.55);
+    sun.position.copy(this.uniforms.uSun.value).multiplyScalar(50);
+    scene.add(sun);
+    const cam = new OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
+    const prevTarget = gl.getRenderTarget();
+    const prevClear = gl.getClearAlpha();
+    const prevColor = new Color();
+    gl.getClearColor(prevColor);
+    gl.setRenderTarget(rt);
+    gl.setClearColor(0x000000, 0);
+    gl.clear(true, true, true);
+    rt.scissorTest = true;
+    defs.forEach((d, v) => {
+      const mesh = new Mesh(d.geo, mat);
+      scene.add(mesh);
+      // de lado (metade de cima do atlas)
+      const S = sideSize[v];
+      cam.left = -S / 2;
+      cam.right = S / 2;
+      cam.top = S;
+      cam.bottom = 0;
+      cam.position.set(0, 0, 60);
+      cam.up.set(0, 1, 0);
+      cam.lookAt(0, 0, 0);
+      cam.updateProjectionMatrix();
+      rt.viewport.set(v * tile + m, tile + m, tile - 2 * m, tile - 2 * m);
+      rt.scissor.set(v * tile, tile, tile, tile);
+      gl.setRenderTarget(rt); // o viewport/scissor do alvo só valem ao (re)aplicá-lo
+      gl.render(scene, cam);
+      // de cima (metade de baixo)
+      const T = topSize[v];
+      cam.left = -T / 2;
+      cam.right = T / 2;
+      cam.top = T / 2;
+      cam.bottom = -T / 2;
+      cam.position.set(0, d.h + 40, 0);
+      cam.up.set(0, 0, -1);
+      cam.lookAt(0, 0, 0);
+      cam.updateProjectionMatrix();
+      rt.viewport.set(v * tile + m, m, tile - 2 * m, tile - 2 * m);
+      rt.scissor.set(v * tile, 0, tile, tile);
+      gl.setRenderTarget(rt);
+      gl.render(scene, cam);
+      scene.remove(mesh);
+    });
+    rt.scissorTest = false;
+    gl.setRenderTarget(prevTarget);
+    gl.setClearColor(prevColor, prevClear);
+    return rt;
   }
 
   /**
@@ -796,6 +1198,8 @@ export class AerialWorld {
     // de lado para a câmera, olhando a água caindo (cabeça em +Z)
     const dir = new Vector3().subVectors(FALL_FOCUS, ROCK);
     bear.rotation.y = Math.atan2(dir.x, dir.z);
+    bear.updateMatrixWorld(true);
+    bear.traverse((o) => (o.matrixAutoUpdate = false));
     this.bear = bear;
     this.root.add(bear);
     this.shadowFrames = 2; // a sombra do urso entra no mapa (estático)
@@ -861,21 +1265,20 @@ export class AerialWorld {
 
   update(camera: PerspectiveCamera, gl: WebGLRenderer, dpr: number, progress: number, pointer: { x: number; y: number }, dt: number, still: boolean) {
     if (!still) this.time += dt;
-    const t = this.time;
-    this.uniforms.uTime.value = t;
+    this.uniforms.uTime.value = this.time;
 
     // câmera na curva, com amortecimento (scrub suave) e um leve parallax do mouse
     const p = Math.min(Math.max(progress, 0), 1);
     const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-    const target = this.camPath.getPoint(e);
-    const lookT = this.lookPath.getPoint(e);
+    this.camPath.getPoint(e, this.camT);
+    this.lookPath.getPoint(e, this.lookT);
     if (still || this.cam.lengthSq() === 0) {
-      this.cam.copy(target);
-      this.look.copy(lookT);
+      this.cam.copy(this.camT);
+      this.look.copy(this.lookT);
     } else {
       const k = 1 - Math.exp(-dt * 3.5);
-      this.cam.lerp(target, k);
-      this.look.lerp(lookT, k);
+      this.cam.lerp(this.camT, k);
+      this.look.lerp(this.lookT, k);
     }
     camera.position.copy(this.cam);
     camera.position.x += pointer.x * 0.8 * (1 - e * 0.6);
@@ -883,19 +1286,30 @@ export class AerialWorld {
     camera.lookAt(this.look);
 
     // névoa de altitude: a câmera atravessa uma camada fina no meio da descida
-    const y = this.cam.y;
-    const layer = Math.exp(-Math.pow((y - 52) / 9, 2));
-    const density = 0.0025 + layer * 0.02;
+    const layer = Math.exp(-Math.pow((this.cam.y - 52) / 9, 2));
+    const density = 0.0025 + layer * 0.018;
     this.fog.density = density;
     this.uniforms.uFogDensity.value = density;
 
-    const fwd = tmpP.set(0, 0, -1).applyQuaternion(camera.quaternion);
-    this.snowMat.uniforms.uCam.value.copy(this.cam);
-    this.snowMat.uniforms.uFwd.value.copy(fwd);
-    this.snowMat.uniforms.uDpr.value = dpr;
     if (this.mistMat) this.mistMat.uniforms.uDpr.value = dpr;
+    if (this.pollenMat) this.pollenMat.uniforms.uDpr.value = dpr;
 
-    // sombras: tudo é estático (o urso mexe só no shader); refaz o mapa só quando algo entra
+    // LOD por chunk: árvores 3D perto da câmera, impostores longe (com folga
+    // para não piscar na fronteira)
+    const r3d = this.light ? 50 : 85;
+    let shadowChanged = false;
+    for (const c of this.chunks) {
+      const d = c.center.distanceTo(this.cam);
+      const near = c.near ? d < r3d + 10 : d < r3d;
+      if (near === c.near) continue;
+      c.near = near;
+      c.impostor.visible = !near;
+      for (const m of c.meshes) m.visible = near;
+      if (c.shadow) shadowChanged = true;
+    }
+    // sombras: o mapa é estático; refaz só quando árvores 3D perto do urso
+    // entram/saem ou quando o urso chega
+    if (shadowChanged) this.shadowFrames = Math.max(this.shadowFrames, 1);
     if (this.shadowFrames > 0) {
       gl.shadowMap.needsUpdate = true;
       this.shadowFrames--;
@@ -906,6 +1320,7 @@ export class AerialWorld {
     this.disposed = true;
     this.geos.forEach((g) => g.dispose());
     this.mats.forEach((m) => m.dispose());
+    this.atlas?.dispose();
     this.bear?.traverse((o) => {
       if (o instanceof Mesh) {
         o.geometry.dispose();
