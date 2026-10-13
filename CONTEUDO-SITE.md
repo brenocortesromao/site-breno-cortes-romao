@@ -10,7 +10,7 @@ Regras:
 - Não inventar clientes, números de carreira, depoimentos ou resultados. [PENDENTE] = placeholder discreto. [CONFIRMAR] = decisão do Breno, deixar o texto como está até ele confirmar.
 - Tom: confiante, direto, frases curtas. Sensação de algo raro e seletivo, nunca arrogante. Nada de jargão de agência.
 - Gráficos da seção 3 ("A distância") são conceituais, sem números.
-- Ordem narrativa: Hero → Mensagem → A distância (problema) → Diagnóstico interativo (identificação) → O que é fractional (modelo) → O que eu faço → O que muda → Como funciona → Onde aparece → Trabalhos → Sobre → Poucas parcerias → FAQ → Contato.
+- Ordem narrativa: Hero → Mensagem → A distância (problema) → Diagnóstico interativo (identificação) → O que é fractional (modelo) → O que eu faço → O que muda → Como funciona → Onde aparece → Trabalhos → Sobre → Poucas parcerias → Projetos pontuais → FAQ → Contato.
 - Curvas de nível do off-white: movimento líquido LENTO e calmo.
 - RITMO DE CORES (decisão de 10/10, substitui a anterior): o site é TODO PRETO, exceto a seção "A distância" (os 3 blocos com gráficos), que é OFF-WHITE (#ECEAE5), com texto e gráficos em grafite.
 
@@ -120,11 +120,12 @@ Subtítulo: Estratégia sem execução vira PDF. Execução sem estratégia vira
 Título: **O valor que já existe, finalmente visível.**
 | Antes | Depois |
 |---|---|
+| A marca acompanhou o começo, mas não o crescimento. | Uma marca construída de verdade, feita para fazer o negócio crescer. |
+| A marca parece menor do que a empresa é. | A marca finalmente tem o tamanho do negócio. |
 | Ninguém entende de primeira o que vocês fazem. | Sua oferta é entendida em uma frase. |
-| Cada material conta uma história. | Site, vendas e campanhas falam a mesma língua. |
-| Refação sem fim. | Briefings claros, critérios de aprovação, menos retrabalho. |
+| Cada peça tem uma cara diferente. | Uma identidade sênior, reconhecida antes mesmo do logo aparecer. |
+| O cliente compara vocês pelo preço. | O cliente enxerga valor antes de perguntar o preço. |
 | O fundador aprova até o post. | O fundador volta a cuidar do negócio. |
-| Fornecedores sem rumo. | Fornecedores entregando na direção certa. |
 
 ## 8. Como funciona (OFF-WHITE, grade técnica — linha do tempo desenhada)
 
@@ -227,6 +228,24 @@ Linha final (pequena): A IA é a ferramenta mais poderosa que já existiu. Nas m
   - Botão: Quero conversar → WhatsApp (https://wa.me/5511975415501 com mensagem pré-preenchida "Olá, Breno! Vi seu site e quero conversar sobre uma parceria para a minha marca.")
   - EN: status "BOOKING NEW PARTNERSHIPS", frase "If your brand is ready to keep up with your growth, the next step starts with a conversation.", botão "Let's talk".
 
+## 12b. Projetos pontuais (PRETO, seção COMPACTA e pequena, lista em 3 colunas, SEM faixas gigantes, entre "Poucas parcerias" e "Perguntas frequentes")
+
+Rótulo: SOB DEMANDA
+Título (pequeno, um degrau abaixo dos títulos de seção): **Projetos pontuais.**
+Texto: Nem toda marca precisa começar com uma parceria. Para projetos com começo, meio e fim, assumo trabalhos da marca à tecnologia, com o mesmo nível de direção. Muitas parcerias começaram exatamente assim.
+Lista (3 colunas com título mono e itens pequenos, entrada animada; NÃO usar faixas/marquee grandes):
+- Coluna MARCA: Branding · Identidade visual · Logo · Rebranding · Naming · Posicionamento · Manual de marca · Tom de voz · Key visual
+- Coluna COMUNICAÇÃO: Site · Landing page · Mídia kit · Apresentações institucionais · Pitch deck · Campanhas · Direção de arte · Social media · Embalagem
+- Coluna TECNOLOGIA: Sistemas web · Plataformas sob medida · Dashboards · Automações · Agentes de IA · Integrações · Ferramentas internas · Portais de clientes · E-commerce · Experiências 3D
+Botão: **Falar sobre um projeto** → WhatsApp https://wa.me/5511975415501 com a mensagem "Oi Breno, tenho um projeto pontual e queria conversar."
+
+EN:
+Label: ON DEMAND
+Title: **One-off projects.**
+Text: Not every brand needs to start with a partnership. For projects with a clear beginning, middle and end, I take on work from brand to technology, with the same level of direction. Many partnerships started exactly this way.
+Columns BRAND / COMMUNICATION / TECHNOLOGY: Branding · Visual identity · Logo · Rebranding · Naming · Positioning · Brand guidelines · Tone of voice · Key visual / Website · Landing page · Media kit · Company presentations · Pitch deck · Campaigns · Art direction · Social media · Packaging / Web systems · Custom platforms · Dashboards · Automations · AI agents · Integrations · Internal tools · Client portals · E-commerce · 3D experiences
+Button: **Talk about a project** → WhatsApp with the message "Hi Breno, I have a one-off project and would like to talk."
+
 ## 13. Perguntas frequentes (preto — acordeão, uma aberta por vez)
 
 Título: **Perguntas frequentes.**
@@ -244,14 +263,29 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
 - **Você produz ou só dirige?**
   Os dois. Desenvolvo pessoalmente as peças prioritárias e dirijo o restante com a sua equipe ou fornecedores. Na proposta, fica claro o que eu produzo, o que eu dirijo e o que exige contratação à parte, para não existir surpresa no meio do caminho.
 
+- **Você faz projetos pontuais, sem parceria mensal?**
+  Sim. Além da parceria contínua, assumo projetos com começo, meio e fim, como branding, rebranding, identidade visual, site ou mídia kit, com o mesmo nível de direção. Muitas parcerias começaram assim: um projeto bem feito abre espaço para cuidar da marca no longo prazo.
+
+- **Você cria identidade visual e logo?**
+  Sim. Crio identidades visuais completas: logo, tipografia, cores, linguagem visual e manual de marca. Antes do desenho vem a estratégia, com posicionamento, narrativa e tom de voz, para que a identidade traduza o que a empresa realmente é, e não apenas fique bonita.
+
+- **Você faz mídia kit, apresentação institucional e pitch deck?**
+  Sim. São peças que decidem negócios: o mídia kit que convence um anunciante, a apresentação que abre uma reunião, o pitch deck que chega a um investidor. Cuido do roteiro, da narrativa e do design, para que cada página reforce o valor da empresa.
+
+- **Você cria sites, landing pages e campanhas?**
+  Sim. Defino a mensagem, a estrutura e o design, e desenvolvo sites, landing pages e experiências interativas, inclusive em 3D, como este site. Também crio campanhas, key visuals, direção de arte e conteúdo para redes sociais.
+
+- **E projetos de tecnologia, como sistemas e automações?**
+  Também. Uno marca e tecnologia em sistemas web, plataformas sob medida, dashboards, automações, integrações e agentes de inteligência artificial. A ferramenta precisa funcionar bem e, ao mesmo tempo, transmitir o padrão da sua marca.
+
 - **Preciso ter uma equipe de design?**
   Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção.
 
 - **Como funciona o começo?**
-  Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca: o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio. A partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]
+  Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido seguir juntos, a primeira etapa do trabalho é o diagnóstico da marca: o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio. A partir dele, definimos o plano, as prioridades e a dedicação mensal.
 
 - **Quanto tempo dura uma parceria?**
-  Marca é construção contínua, por isso o modelo funciona melhor em ciclos de alguns meses, com revisões mensais de prioridades. [CONFIRMAR: período mínimo sugerido, ex.: 3 ou 6 meses]
+  Não existe prazo mínimo. Marca é construção contínua, por isso a parceria segue mês a mês, com revisões de prioridades, e rende mais quanto mais tempo caminhamos juntos.
 
 - **Quanto custa?**
   O investimento é mensal e depende do escopo e da dedicação combinados. Em geral, fica bem abaixo do custo de um diretor de marca ou criação contratado em tempo integral, com a mesma senioridade. Os valores são apresentados na proposta, depois do diagnóstico.
@@ -270,5 +304,5 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
 - Título: **Vamos fechar essa distância?**
 - Texto: Toda grande marca começou com uma conversa. Me conta onde a sua empresa está e onde quer chegar.
 - Texto EN: Every great brand started with a conversation. Tell me where your company is and where it wants to go.
-- Botões: **Agendar conversa** (Cal.com, link provisório) · **WhatsApp** (wa.me/5511975415501, mensagem pré-preenchida: pt "Olá, Breno! Vi seu site e quero conversar sobre a marca da minha empresa." / en "Hi Breno! I saw your website and would like to talk about my company's brand.") · **E-mail** breno.romao@gmail.com (assunto: pt "Conversa sobre a minha marca" / en "About my brand"; endereço montado no navegador, fora do HTML, contra spam) · Baixar mídia kit (PDF) [PENDENTE]
+- Botões (SEM "Agendar conversa", removido a pedido do Breno): **WhatsApp** (botão principal, destaque off-white; wa.me/5511975415501, mensagem pré-preenchida: pt "Olá, Breno! Vi seu site e quero conversar sobre a marca da minha empresa." / en "Hi Breno! I saw your website and would like to talk about my company's brand.") · **E-mail** breno.romao@gmail.com (assunto: pt "Conversa sobre a minha marca" / en "About my brand"; endereço montado no navegador, fora do HTML, contra spam) · Baixar mídia kit (PDF) [PENDENTE]
 - Cabeçalho: ícones de WhatsApp e e-mail depois do seletor PT/EN (também no mobile) e, no mobile, botão flutuante de WhatsApp no canto inferior direito depois da hero.
