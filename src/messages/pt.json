@@ -12,8 +12,7 @@
     "remote": "Atendimento remoto, com encontros presenciais quando fizer sentido"
   },
   "common": {
-    "draft": "Provisório",
-    "cursorView": "Ver"
+    "draft": "Provisório"
   },
   "nav": {
     "label": "Principal",
@@ -292,21 +291,18 @@
     "eyebrow": "Trabalhos",
     "title": "Marcas com as quais trabalhei.",
     "logos": {
-      "title": "Empresas"
+      "title": "Empresas",
+      "more": "E diversas outras empresas e setores."
     },
     "gallery": {
       "title": "Projetos",
       "label": "Mural de projetos",
-      "prev": "Projeto anterior",
-      "next": "Próximo projeto",
-      "close": "Fechar",
-      "lightbox": "Projeto ampliado",
-      "open": "Ampliar {caption}",
-      "counter": "{current} de {total}",
-      "imageAlt": "Imagem do projeto {project}, {year}",
-      "imageAltNoYear": "Imagem do projeto {project}",
-      "placeholderProject": "Projeto {n}",
-      "placeholder": "Imagem pendente"
+      "imageAlt": "Projeto para {brand}",
+      "placeholder": "Imagem pendente",
+      "experience": {
+        "label": "Anos de experiência",
+        "full": "+12 anos de experiência"
+      }
     },
     "subtitle": "Ao longo da minha trajetória, em agências, estúdios, empresas e projetos independentes."
   },
@@ -503,9 +499,10 @@
   "footer": {
     "rights": "© {year} {name}. Todos os direitos reservados.",
     "tagline": "Estratégia de marca · Direção criativa · Execução",
-    "bearCredit": "Modelo 3D do urso: <model>''Realistic Grizzly Bear''</model> por 3Dima, <license>CC BY 4.0</license>",
-    "sharkCredit": "Tubarão: <model>''Realistic Shark''</model> por MotionStreamStudios, <license>CC BY 4.0</license>",
-    "turtleCredit": "Tartaruga: <model>''Sea Turtle''</model> por Eloi, <license>CC BY 4.0</license>"
+    "credits3d": "Créditos 3D",
+    "bearCredit": "Urso: <model>\"Realistic Grizzly Bear\"</model>, 3Dima, <license>CC BY 4.0</license>",
+    "sharkCredit": "Tubarão: <model>\"Realistic Shark\"</model>, MotionStreamStudios, <license>CC BY 4.0</license>",
+    "turtleCredit": "Tartaruga: <model>\"Sea Turtle\"</model>, Eloi, <license>CC BY 4.0</license>"
   },
   "notFound": {
     "title": "Página não encontrada",

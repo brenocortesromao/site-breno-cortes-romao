@@ -59,7 +59,6 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
   const locale = await rootParams.locale();
   if (!hasLocale(routing.locales, locale)) notFound();
   const site = await getTranslations({ locale, namespace: "site" });
-  const common = await getTranslations({ locale, namespace: "common" });
   const meta = await getTranslations({ locale, namespace: "meta" });
   const oneOff = await getTranslations({ locale, namespace: "oneOff" });
 
@@ -95,7 +94,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <SmoothScroll />
           <ThemeScroll />
           <AmbientGlow />
-          <CustomCursor viewLabel={common("cursorView")} />
+          <CustomCursor />
           <Header />
           {/* Proteção contra scroll horizontal: overflow-x CLIP (não hidden) não
               cria contêiner de rolagem, então sticky e pins continuam valendo, e

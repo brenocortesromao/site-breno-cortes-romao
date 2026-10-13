@@ -148,9 +148,8 @@ export default function OceanBackdrop() {
               }
             </ResilientBoundary>
           </div>
-          {/* vinheta e degradês para o fundo (entrada/saída sem corte, texto legível) */}
-          {/* celular: vinheta e degradês menores (a cena aparece mais) */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--bg)_100%)] max-md:bg-[radial-gradient(ellipse_at_center,transparent_60%,var(--bg)_100%)]" />
+          {/* degradês só nas bordas, para a entrada/saída sem corte (sem vinheta sobre a
+              cena: o escurecimento para a leitura fica atrás do texto, em Ai.tsx) */}
           <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background to-transparent max-md:h-[12%]" />
           <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background to-transparent max-md:h-[12%]" />
         </div>

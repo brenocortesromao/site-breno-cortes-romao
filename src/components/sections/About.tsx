@@ -1,12 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import MediaSlot from "@/components/MediaSlot";
+import AboutPortrait from "@/components/AboutPortrait";
 import AboutStory from "@/components/sections/AboutStory";
 import ForestBackdrop from "@/components/graphics/ForestBackdrop";
 import { bearModel } from "@/content/bear";
-
-/** Retrato do Sobre (monocromático pelo MediaSlot). Ex.: "/media/retrato-sobre.jpg". */
-export const aboutPortraitSrc: string | undefined = undefined;
 
 /**
  * Sobre (§11) — tema GRADIENTE ESCURO (ritmo de cores do CONTEUDO-SITE.md).
@@ -32,19 +29,13 @@ export default async function About({ variant }: { variant: "summary" | "page" }
       <ForestBackdrop bearSrc={bearModel()} />
       <div
         className={`m-sec relative z-10 mx-auto grid w-full max-w-[1600px] gap-12 px-6 md:grid-cols-12 md:gap-8 md:px-12 ${
-          isPage ? "pb-[clamp(6rem,16vh,12rem)] pt-40" : "py-[clamp(6rem,16vh,12rem)]"
+          isPage ? "pb-[clamp(6rem,16vh,12rem)] pt-40" : "m-sec-t-forest py-[clamp(6rem,16vh,12rem)]"
         }`}
       >
-        <div className="md:col-span-5">
-          <MediaSlot
-            src={aboutPortraitSrc}
-            alt={`${name}, ${site("role")}`}
-            label={t("portrait")}
-            ratio="aspect-[4/5]"
-            tone="mono"
-            sizes="(min-width: 768px) 38vw, 90vw"
-            priority={isPage}
-          />
+        {/* celular: retrato acima do rótulo e do nome, centralizado, com ~70% da largura */}
+        <div className="max-md:mx-auto max-md:w-[70%] md:col-span-5">
+          {/* foto com entrada (linha de luz + cor florescendo), vidro e parallax */}
+          <AboutPortrait alt={`${name}, ${site("role")}`} priority={isPage} />
         </div>
 
         <AboutStory

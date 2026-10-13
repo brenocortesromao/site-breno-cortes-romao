@@ -20,7 +20,7 @@ export const BED_LEVEL = -17;
 export const OCEAN_COMMON = /* glsl */ `
 uniform float uTime;
 uniform vec3 uCamPos;
-// celular (tela em pé): exposição, névoa e raios ajustados (1, 1, 1 no desktop)
+// exposição, névoa e raios (desktop 1,6 / 0,6 / 1; celular ajustado à tela em pé)
 uniform float uExpo;
 uniform float uFogK;
 uniform float uRays;
@@ -81,13 +81,21 @@ float depthLight(float y) { return exp(min(y, 0.0) * 0.028); }
 vec3 waterCol(vec3 rd) {
   float k = depthLight(uCamPos.y);
   float up = smoothstep(-0.7, 1.0, rd.y);
-  vec3 deep = vec3(0.045, 0.057, 0.068); // grafite azulado médio (não preto)
-  vec3 shallow = vec3(0.30, 0.34, 0.37);
-  vec3 c = mix(deep, shallow * k, up);
+  // cinza-azulado profundo e dessaturado: fundo #12181D, topo #3A4650,
+  // mais claro perto da superfície
+  vec3 deep = vec3(0.071, 0.094, 0.114);
+  vec3 shallow = vec3(0.227, 0.275, 0.314);
+  vec3 c = mix(deep, shallow * mix(0.8, 1.25, k), up);
   c += vec3(0.21, 0.23, 0.24) * pow(max(dot(rd, SUN), 0.0), 6.0) * k * 0.85;
   return c;
 }
 float fogF(float d) { return 1.0 - exp(-d * FOG_D * uFogK); }
+// exposição com "ombro": linear até 0,55 e comprime os tons altos (raios e
+// janela da superfície não estouram no branco nem apagam o texto por cima)
+vec3 expose(vec3 c) {
+  vec3 x = c * uExpo;
+  return x / (1.0 + max(x - 0.55, 0.0) * 1.2);
+}
 
 // cáusticas: linhas finas onde dois campos de ruído deformado cruzam o meio
 // (rede orgânica que se move); duas camadas em velocidades diferentes
@@ -163,11 +171,12 @@ float godRays(vec3 rd) {
   vec3 a = normalize(cross(SUN, vec3(0.0, 0.0, 1.0)));
   vec3 b = cross(SUN, a);
   float ang = atan(dot(rd, b), dot(rd, a));
-  float s = noise1(ang * 11.0 + uTime * 0.07) * noise1(ang * 27.0 - uTime * 0.12 + 4.0);
-  s = smoothstep(0.12, 0.75, s);
+  // feixes largos (frequência angular baixa) e abertos (queda suave com o ângulo)
+  float s = noise1(ang * 6.0 + uTime * 0.07) * noise1(ang * 14.0 - uTime * 0.12 + 4.0);
+  s = smoothstep(0.1, 0.7, s);
   float facing = max(dot(rd, SUN), 0.0);
   // mais forte perto da superfície; some ao descer
-  return s * pow(facing, 1.6) * depthLight(uCamPos.y * 0.6);
+  return 2.0 * s * pow(facing, 1.0) * depthLight(uCamPos.y * 0.6);
 }
 
 vec3 underWater(vec3 ro, vec3 rd) {
@@ -217,7 +226,7 @@ void main() {
   vec3 c = side > 0.0 ? aboveWater(ro, rd) : underWater(ro, rd);
   // menisco: fio claro onde a água corta a tela
   c += vec3(0.32, 0.34, 0.35) * exp(-abs(side) * 28.0) * step(abs(ro.y), 2.0);
-  gl_FragColor = vec4(c * uExpo, 1.0);
+  gl_FragColor = vec4(expose(c), 1.0);
 }`;
 
 // ------------------------------------------------------------------ silhuetas
@@ -269,14 +278,14 @@ void main() {
   float top = max(n.y, 0.0);
   // silhueta escura; o dorso pega a luz de cima e as cáusticas
   vec3 c = uTint * (0.35 + 0.65 * top) * k;
-  c += vec3(0.2, 0.21, 0.22) * caustic(vWorld.xz * 0.45) * top * k;
+  c += vec3(0.3, 0.31, 0.32) * caustic(vWorld.xz * 0.45) * top * k;
   // contorno prateado (fresnel), mais forte nas bordas viradas para cima:
   // destaca o animal do fundo sem iluminá-lo por inteiro
   float fres = pow(1.0 - abs(dot(n, -rd)), 2.5);
   c += vec3(0.62, 0.66, 0.7) * fres * smoothstep(-0.35, 0.7, n.y) * uLook.x * k;
   // animais: contorno mais forte no dorso e um brilho largo onde a luz de cima bate
   c += vec3(0.749, 0.769, 0.784) * (fres * smoothstep(0.05, 0.85, n.y) + 0.12 * pow(top, 3.0)) * uDorsal * k;
-  gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d * uLook.y)) * uExpo, 1.0);
+  gl_FragColor = vec4(expose(mix(c, waterCol(rd), fogF(d * uLook.y))), 1.0);
 }`;
 
 // ------------------------------------------------------------------ partículas

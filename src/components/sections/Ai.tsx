@@ -174,7 +174,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
 
         <div className="mt-[clamp(5rem,14vh,10rem)] grid gap-12 md:grid-cols-12 md:gap-8">
           {/* degradê escuro suave atrás do parágrafo: legível mesmo com um tubarão passando */}
-          <p className="relative max-w-xl text-base leading-relaxed text-silver before:pointer-events-none before:absolute before:-inset-x-16 before:-inset-y-14 before:-z-10 before:bg-[radial-gradient(ellipse_at_center,var(--bg)_25%,transparent_72%)] before:opacity-80 max-md:before:-inset-x-4 max-md:before:-inset-y-6 max-md:before:opacity-55 md:col-span-6 md:col-start-7 md:text-lg">
+          <p className="relative max-w-xl text-base leading-relaxed text-silver before:pointer-events-none before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(ellipse_at_center,var(--bg)_15%,transparent_70%)] before:opacity-65 max-md:before:-inset-x-4 max-md:before:-inset-y-5 max-md:before:opacity-50 md:col-span-6 md:col-start-7 md:text-lg">
             {copy.body}
           </p>
         </div>

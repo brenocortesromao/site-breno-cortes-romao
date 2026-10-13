@@ -97,6 +97,28 @@ export default function ThemeScroll() {
   return null;
 }
 
+/** Topo na página pelo layout (soma de offsetTop): ignora os transforms das animações de entrada. */
+function layoutTop(el: HTMLElement) {
+  let y = 0;
+  for (let e: HTMLElement | null = el; e; e = e.offsetParent as HTMLElement | null) y += e.offsetTop;
+  return y;
+}
+
+/** Primeiro (mais alto) ou último (mais baixo) elemento de texto visível da seção. */
+function textEdge(section: HTMLElement, edge: "first" | "last") {
+  let best: HTMLElement | null = null;
+  let bestY = 0;
+  section.querySelectorAll<HTMLElement>("h1, h2, h3, p, li, a, button").forEach((el) => {
+    if (!el.offsetHeight || el.closest("[aria-hidden='true'], .sr-only")) return;
+    const y = edge === "first" ? layoutTop(el) : layoutTop(el) + el.offsetHeight;
+    if (!best || (edge === "first" ? y < bestY : y > bestY)) {
+      best = el;
+      bestY = y;
+    }
+  });
+  return best as HTMLElement | null;
+}
+
 /** Um ScrollTrigger por troca de tema entre seções vizinhas; `apply` escreve as cores. */
 function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
   const palettes = new Map<ThemeName, Palette>();
@@ -150,17 +172,21 @@ function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
       t.p = self.progress;
       apply();
     };
-    const firstText = section.querySelector("h1, h2, h3, p, li, a, button");
-    if (mobile && lightSwap && prevSection && firstText) {
-      // celular, claro ↔ escuro: a troca acontece no vão entre as seções
-      // (espaçador .m-theme-gap): começa com o fim da seção anterior a 70% da
-      // tela e termina antes do primeiro texto da nova entrar; nenhum texto
-      // novo aparece sobre o cinza do meio da transição
+    const swapOnMobile = mobile && lightSwap && prevSection;
+    const firstText = swapOnMobile ? textEdge(section, "first") : null;
+    const lastText = swapOnMobile ? textEdge(prevSection, "last") : null;
+    if (firstText && lastText) {
+      // celular, claro ↔ escuro: troca curta (~10vh de scroll) no respiro entre
+      // as seções, enquanto o meio do vão (entre o último texto da anterior e o
+      // primeiro da nova) passa pelo meio da tela (55% → 45%)
+      const mid = () => {
+        const m = Math.round((layoutTop(lastText) + lastText.offsetHeight + layoutTop(firstText)) / 2 - layoutTop(section));
+        return `top${m < 0 ? "-=" : "+="}${Math.abs(m)}`;
+      };
       ScrollTrigger.create({
-        trigger: prevSection,
-        start: "bottom 70%",
-        endTrigger: firstText,
-        end: "top bottom",
+        trigger: section,
+        start: () => `${mid()} 55%`,
+        end: () => `${mid()} 45%`,
         refreshPriority: -1,
         onUpdate: sync,
         onRefresh: sync,

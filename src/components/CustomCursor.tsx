@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
 /** Tamanho do anel por estado (px). */
-const SIZE = { base: 36, link: 56, ver: 88 } as const;
+const SIZE = { base: 36, link: 56 } as const;
 type Mode = keyof typeof SIZE;
 /** Lerp do anel por quadro (a 60 fps). */
 const LERP = 0.15;
@@ -21,27 +21,23 @@ const LINKS = 'a[href], button:not([disabled]), [data-cursor="link"]';
  * - links e botões: anel de 56px, ponto some, e o elemento se desloca até 6px
  *   na direção do cursor (efeito magnético; usa a propriedade CSS `translate`,
  *   separada do `transform` que o GSAP e as utilidades de escala usam);
- * - artes de Trabalhos ([data-cursor="ver"]): círculo de 88px preenchido com
- *   "Ver" no centro;
  * - mix-blend-mode: difference no conjunto.
  * Sobre a bola da hero, que tem o próprio cursor (a seção fica com
  * cursor:none inline), este some. prefers-reduced-motion: sem esticar e sem
  * efeito magnético. Toque: nada (cursor nativo).
  */
-export default function CustomCursor({ viewLabel }: { viewLabel: string }) {
+export default function CustomCursor() {
   const root = useRef<HTMLDivElement>(null);
   const dot = useRef<HTMLDivElement>(null);
   const ringPos = useRef<HTMLDivElement>(null);
   const ring = useRef<HTMLDivElement>(null);
-  const label = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const el = root.current;
     const d = dot.current;
     const rp = ringPos.current;
     const r = ring.current;
-    const lb = label.current;
-    if (!el || !d || !rp || !r || !lb) return;
+    if (!el || !d || !rp || !r) return;
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const html = document.documentElement;
@@ -65,9 +61,6 @@ export default function CustomCursor({ viewLabel }: { viewLabel: string }) {
       if (m === mode) return;
       mode = m;
       r.style.width = r.style.height = `${SIZE[m]}px`;
-      r.style.background = m === "ver" ? "#ECEAE5" : "transparent";
-      r.style.borderColor = m === "ver" ? "transparent" : "rgba(217,217,217,0.6)";
-      lb.style.opacity = m === "ver" ? "1" : "0";
       d.style.opacity = m === "base" ? "1" : "0";
     };
     const updateVisibility = () => {
@@ -80,9 +73,8 @@ export default function CustomCursor({ viewLabel }: { viewLabel: string }) {
       const sec = target?.closest("section");
       hidden = !!sec && sec.style.cursor === "none";
       updateVisibility();
-      const ver = target?.closest<HTMLElement>('[data-cursor="ver"]');
-      const link = ver ? null : target?.closest<HTMLElement>(LINKS);
-      setMode(ver ? "ver" : link ? "link" : "base");
+      const link = target?.closest<HTMLElement>(LINKS);
+      setMode(link ? "link" : "base");
       const next = link && !reduced && magnetic(link) ? link : null;
       if (next !== active) {
         active = next;
@@ -189,16 +181,9 @@ export default function CustomCursor({ viewLabel }: { viewLabel: string }) {
       <div ref={ringPos} className="absolute left-0 top-0">
         <div
           ref={ring}
-          className="absolute left-0 top-0 rounded-full border transition-[width,height,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="absolute left-0 top-0 rounded-full border transition-[width,height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{ width: SIZE.base, height: SIZE.base, borderColor: "rgba(217,217,217,0.6)" }}
         />
-        <span
-          ref={label}
-          className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#0A0A0A] transition-opacity duration-200"
-          style={{ opacity: 0 }}
-        >
-          {viewLabel}
-        </span>
       </div>
     </div>
   );

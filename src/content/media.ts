@@ -13,6 +13,7 @@ import logosLista from "../../public/logos/logos.json";
 export type Logo = { src?: string; name: string };
 
 export const logos: Logo[] = logosLista.map((l) => ({
-  src: l.arquivo ? `/logos/${l.arquivo}` : undefined,
+  // "arquivo" pode vir com o caminho completo ("/logos/x.png") ou só o nome
+  src: l.arquivo ? (l.arquivo.startsWith("/") ? l.arquivo : `/logos/${l.arquivo}`) : undefined,
   name: l.nome,
 }));

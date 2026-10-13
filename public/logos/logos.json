@@ -1,12 +1,114 @@
 [
-  { "arquivo": "", "nome": "Logo 01" },
-  { "arquivo": "", "nome": "Logo 02" },
-  { "arquivo": "", "nome": "Logo 03" },
-  { "arquivo": "", "nome": "Logo 04" },
-  { "arquivo": "", "nome": "Logo 05" },
-  { "arquivo": "", "nome": "Logo 06" },
-  { "arquivo": "", "nome": "Logo 07" },
-  { "arquivo": "", "nome": "Logo 08" },
-  { "arquivo": "", "nome": "Logo 09" },
-  { "arquivo": "", "nome": "Logo 10" }
+  {
+    "arquivo": "/logos/record-news.png",
+    "nome": "Record News"
+  },
+  {
+    "arquivo": "/logos/bmc-news.png",
+    "nome": "BM&C News"
+  },
+  {
+    "arquivo": "/logos/rotary.png",
+    "nome": "Rotary"
+  },
+  {
+    "arquivo": "/logos/objetivo-moema.png",
+    "nome": "Colégio Objetivo Moema"
+  },
+  {
+    "arquivo": "/logos/orthomerica.png",
+    "nome": "Orthomerica"
+  },
+  {
+    "arquivo": "/logos/biglink.png",
+    "nome": "Biglink"
+  },
+  {
+    "arquivo": "/logos/fintalk.png",
+    "nome": "Fintalk"
+  },
+  {
+    "arquivo": "/logos/farmtech.png",
+    "nome": "Farmtech"
+  },
+  {
+    "arquivo": "/logos/payface.png",
+    "nome": "Payface"
+  },
+  {
+    "arquivo": "/logos/audionova.png",
+    "nome": "AudioNova"
+  },
+  {
+    "arquivo": "/logos/nagro.png",
+    "nome": "Nagro"
+  },
+  {
+    "arquivo": "/logos/peak-invest.png",
+    "nome": "Peak Invest"
+  },
+  {
+    "arquivo": "/logos/imobcoin.png",
+    "nome": "Imobcoin"
+  },
+  {
+    "arquivo": "/logos/in-brasil-woodless.png",
+    "nome": "IN.Brasil Woodless Tech"
+  },
+  {
+    "arquivo": "/logos/abseed.png",
+    "nome": "ABSeed"
+  },
+  {
+    "arquivo": "/logos/bloxs.png",
+    "nome": "Bloxs"
+  },
+  {
+    "arquivo": "/logos/seja-ap.png",
+    "nome": "Seja AP"
+  },
+  {
+    "arquivo": "/logos/doe-tempo.png",
+    "nome": "Doe Tempo"
+  },
+  {
+    "arquivo": "/logos/cesar-romao.png",
+    "nome": "Cesar Romão"
+  },
+  {
+    "arquivo": "/logos/colegio-octagon.png",
+    "nome": "Colégio Octagon"
+  },
+  {
+    "arquivo": "/logos/vigorito.png",
+    "nome": "Vigorito"
+  },
+  {
+    "arquivo": "/logos/soul-cycles.png",
+    "nome": "Soul Cycles"
+  },
+  {
+    "arquivo": "/logos/heads.png",
+    "nome": "Heads, Clínica Dr. Gerd Schreen"
+  },
+  {
+    "arquivo": "/logos/terras-altas.png",
+    "nome": "Terras Altas"
+  },
+  {
+    "arquivo": "/logos/tilt.png",
+    "nome": "Tilt"
+  },
+  {
+    "arquivo": "/logos/fb-producoes.png",
+    "nome": "FB Produções"
+  },
+  {
+    "arquivo": "/logos/01-suites.png",
+    "nome": "01 Suítes"
+  },
+  {
+    "arquivo": "/logos/ekvilibro.png",
+    "nome": "Ekvilibro"
+  }
 ]

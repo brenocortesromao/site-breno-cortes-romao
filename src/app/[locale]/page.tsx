@@ -145,7 +145,7 @@ export default async function Home() {
 
         {/* Trecho com fundo de montanhas (vista de cima → detalhe): O que eu faço + O que muda */}
         <Suspense>
-          <div className="m-theme-gap relative">
+          <div className="relative">
             <MountainBackdrop alt={t("backdrop.mountainsAlt")} />
             <Pillars
               copy={{

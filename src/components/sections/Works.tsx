@@ -4,27 +4,19 @@ import { loadTrabalhos } from "@/content/works";
 import LogoMarquee from "./LogoMarquee";
 import WorkWall from "./WorkWall";
 
-/** Placeholders enquanto public/trabalhos/ estiver vazia. */
+/** Peças placeholder do mural enquanto public/trabalhos/ estiver vazia. */
 const PLACEHOLDERS = 8;
 
 /**
  * Trabalhos (escura, pouco visual): faixa de logos e mural inclinado de projetos.
  * Sem lista de cases nem páginas /cases (decisão do dono).
- * Imagens: public/trabalhos/ (lidas no build, ver content/works.ts); logos:
- * public/logos (ver content/media.ts).
+ * Artes: public/trabalhos/trabalhos.json (lido no build, ver content/works.ts);
+ * sem o JSON o mural mostra placeholders. Logos: public/logos (ver
+ * content/media.ts).
  */
 export default async function Works() {
   const t = await getTranslations("works");
   const found = loadTrabalhos();
-  const works =
-    found.length > 0
-      ? found
-      : Array.from({ length: PLACEHOLDERS }, (_, i) => ({
-          src: undefined,
-          project: t("gallery.placeholderProject", { n: String(i + 1).padStart(2, "0") }),
-          year: undefined,
-        }));
-  const total = works.length;
 
   return (
     <section id="trabalhos" data-theme="dark" aria-labelledby="trabalhos-title" className="relative z-10">
@@ -40,31 +32,27 @@ export default async function Works() {
       </div>
 
       <div className="m-g40 mx-auto mt-16 w-full max-w-[1600px] md:mt-24">
-        <LogoMarquee logos={logos} title={t("logos.title")} />
+        <LogoMarquee logos={logos} title={t("logos.title")} note={t("logos.more")} />
       </div>
 
       <div className="m-sec-b mt-16 pb-[clamp(6rem,16vh,12rem)] md:mt-24">
         <WorkWall
-          items={works.map((w) => {
-            const caption = w.year ? `${w.project} · ${w.year}` : w.project;
-            return {
-              src: w.src,
-              caption,
-              alt: w.year
-                ? t("gallery.imageAlt", { project: w.project, year: w.year })
-                : t("gallery.imageAltNoYear", { project: w.project }),
-              open: t("gallery.open", { caption }),
-            };
-          })}
+          items={
+            found.length > 0
+              ? found.map((w) => ({
+                  src: w.src,
+                  alt: t("gallery.imageAlt", { brand: w.brand }),
+                  aspect: w.width / w.height,
+                  brand: w.brand,
+                }))
+              : // sem artes ainda: peças placeholder ("Imagem pendente")
+                Array.from({ length: PLACEHOLDERS }, () => ({ src: undefined, alt: "" }))
+          }
           labels={{
             title: t("gallery.title"),
             label: t("gallery.label"),
-            prev: t("gallery.prev"),
-            next: t("gallery.next"),
-            close: t("gallery.close"),
-            lightbox: t("gallery.lightbox"),
-            counters: works.map((_, i) => t("gallery.counter", { current: i + 1, total })),
             placeholder: t("gallery.placeholder"),
+            experience: { label: t("gallery.experience.label"), full: t("gallery.experience.full") },
           }}
         />
       </div>

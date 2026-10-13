@@ -18,6 +18,9 @@ import { useEffect, useRef, type CSSProperties, type ReactNode, type Ref } from 
  * cortariam `front`); o filho se recorta sozinho e o reflexo usa `shape` (a
  * mesma máscara do filho). `overlay` fica por cima do reflexo e abaixo de
  * `front` (ex.: a borda fina da moldura).
+ * `active={false}` desliga o efeito (ex.: durante a entrada da foto).
+ * `touchMode="glare"`: no toque, sem inclinação; o reflexo atravessa a foto
+ * acompanhando o scroll (retrato do Sobre).
  */
 
 const MAX_DEG = 7;
@@ -30,6 +33,8 @@ export default function TiltCard({
   className = "",
   shape,
   overlay,
+  active = true,
+  touchMode = "tilt",
 }: {
   ref?: Ref<HTMLDivElement>;
   children: ReactNode;
@@ -40,6 +45,10 @@ export default function TiltCard({
   shape?: CSSProperties;
   /** Camada sobre a foto e o reflexo, abaixo de `front`. */
   overlay?: ReactNode;
+  /** false: sem inclinação nem reflexo (até a entrada terminar). */
+  active?: boolean;
+  /** Toque: "tilt" (inclina com scroll/giroscópio) ou "glare" (só o reflexo passa com o scroll). */
+  touchMode?: "tilt" | "glare";
 }) {
   const card = useRef<HTMLDivElement>(null);
   const glare = useRef<HTMLDivElement>(null);
@@ -47,9 +56,10 @@ export default function TiltCard({
   useEffect(() => {
     const el = card.current;
     const shine = glare.current;
-    if (!el || !shine) return;
+    if (!el || !shine || !active) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const touch = window.matchMedia("(pointer: coarse)").matches;
+    const glareOnly = touch && touchMode === "glare";
 
     const target = { x: 0, y: 0 }; // -1..1 (x: direita, y: baixo)
     const cur = { x: 0, y: 0 };
@@ -57,6 +67,14 @@ export default function TiltCard({
     let last = performance.now();
 
     const render = () => {
+      if (glareOnly) {
+        // faixa de luz atravessando na diagonal: fora à esquerda (quadro embaixo
+        // da tela) até fora à direita (quadro no alto)
+        const p = 50 + cur.y * 60;
+        shine.style.backgroundPosition = `${p}% ${p}%`;
+        shine.style.opacity = "0.7";
+        return;
+      }
       el.style.transform = `rotateX(${(-cur.y * MAX_DEG).toFixed(3)}deg) rotateY(${(cur.x * MAX_DEG).toFixed(3)}deg)`;
       // o reflexo corre na direção oposta à inclinação, como luz fixa num vidro
       shine.style.backgroundPosition = `${50 - cur.x * 40}% ${50 - cur.y * 40}%`;
@@ -99,6 +117,17 @@ export default function TiltCard({
         el.removeEventListener("pointermove", onMove);
         el.removeEventListener("pointerleave", onLeave);
       });
+    } else if (glareOnly) {
+      const onScroll = () => {
+        const r = el.getBoundingClientRect();
+        const mid = (r.top + r.height / 2) / window.innerHeight - 0.5; // -0.5..0.5
+        target.y = Math.max(-1, Math.min(1, mid * 2));
+        kick();
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+      cur.y = target.y; // começa já na posição do scroll, sem deslizar do centro
+      off.push(() => window.removeEventListener("scroll", onScroll));
     } else {
       // toque: giroscópio se vier sem pedir permissão; senão, o scroll inclina
       let gyro = false;
@@ -132,7 +161,7 @@ export default function TiltCard({
       cancelAnimationFrame(raf);
       off.forEach((fn) => fn());
     };
-  }, []);
+  }, [active, touchMode]);
 
   return (
     <div ref={ref} className={`[perspective:1000px] ${className}`}>

@@ -186,22 +186,22 @@ body::before {
   }
   /* parágrafos centralizados logo abaixo dos títulos: linhas curtas (~34ch)
      e quebra "pretty" (sem palavra órfã), bloco centralizado */
-  /* vão entre seções claro ↔ escuro: a troca de cor acontece aqui (ThemeScroll),
-     antes do primeiro texto da seção nova entrar */
-  .m-theme-gap {
-    margin-top: 30vh;
-  }
-  /* ritmo vertical padronizado das seções no celular: padding de 96px e
-     rótulo → título 16px, título → texto 20px, texto → conteúdo 40px */
+  /* ritmo vertical padronizado das seções no celular: padding de 72px e
+     rótulo → título 16px, título → texto 20px, texto → conteúdo 40px. As trocas
+     claro ↔ escuro acontecem no próprio respiro entre as seções (ThemeScroll) */
   .m-sec {
-    padding-top: 96px;
-    padding-bottom: 96px;
+    padding-top: 72px;
+    padding-bottom: 72px;
   }
   .m-sec-t {
-    padding-top: 96px;
+    padding-top: 72px;
   }
   .m-sec-b {
-    padding-bottom: 96px;
+    padding-bottom: 72px;
+  }
+  /* Sobre (home): respiro maior no topo, para a floresta aparecer acima do texto */
+  .m-sec.m-sec-t-forest {
+    padding-top: 232px;
   }
   .m-g16 {
     margin-top: 16px;

@@ -5,61 +5,69 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { Logo } from "@/content/media";
+import { revealOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-/** Repetições da fileira em cada cópia (5 logos ≈ 1080px; ×3 cobre telas de até ~3200px). */
+/** Repetições da fileira em cada cópia (×3: a cópia fica bem mais larga que a tela, sem buraco no loop). */
 const REPS = 3;
 
-/** Um logo em prata monocromática: o arquivo vira MÁSCARA sobre um fundo prata. */
+/** Segundos para um logo atravessar a largura da tela (fileira mais rápida), em qualquer tela. */
+const CROSS_S = 16.7;
+/** Velocidade relativa de cada fileira (não andam sincronizadas). */
+const ROW_SPEED = [1, 0.85];
+/** Velocidade com o mouse em cima (desktop): 30% mais lenta. */
+const HOVER_SPEED = 0.7;
+
+/**
+ * Um logo (PNG branco, fundo transparente, canvas 480 × 200): altura fixa
+ * (40px no celular, 56px no desktop), centralizado no mesmo espaço de antes.
+ * Opacidade 60%; no desktop, 100% com o mouse em cima.
+ */
 function LogoMark({ logo }: { logo: Logo }) {
-  if (!logo.src) {
-    return (
-      <span className="flex h-12 w-36 shrink-0 items-center justify-center border border-dashed border-line font-mono text-[9px] uppercase tracking-[0.2em] text-silver md:w-44">
-        {logo.name}
-      </span>
-    );
-  }
-  const url = `url(${logo.src})`;
   return (
-    <span
-      role="img"
-      aria-label={logo.name}
-      className="block h-12 w-36 shrink-0 bg-silver md:w-44"
-      style={{
-        maskImage: url,
-        WebkitMaskImage: url,
-        maskSize: "contain",
-        WebkitMaskSize: "contain",
-        maskRepeat: "no-repeat",
-        WebkitMaskRepeat: "no-repeat",
-        maskPosition: "center",
-        WebkitMaskPosition: "center",
-      }}
-    />
+    <span className="flex h-12 w-36 shrink-0 items-center justify-center md:h-14 md:w-44">
+      {/* eslint-disable-next-line @next/next/no-img-element -- PNGs já otimizados em public/logos */}
+      <img
+        src={logo.src}
+        alt={logo.name}
+        width={480}
+        height={200}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        className="h-10 w-auto opacity-60 transition-opacity duration-500 ease-out md:h-14 [@media(hover:hover)]:hover:opacity-100"
+      />
+    </span>
   );
 }
 
 /**
  * Faixa de logos: 2 fileiras em loop infinito, direções opostas (cima ←,
- * baixo →), desacelerando no hover. Cada trilha tem duas CÓPIAS iguais e a
+ * baixo →), lentas (CROSS_S por tela, proporcional à largura) e desacelerando
+ * no hover do desktop. Cada trilha tem duas CÓPIAS iguais e a
  * animação desloca exatamente uma (xPercent 50) para o loop não "pular". Cada
  * cópia repete a fileira REPS vezes, para ser mais larga que a tela: senão a
  * borda da trilha aparece e abre um buraco no fim da fileira.
  * Pausa fora da tela. Modo animado ligado por data-mode="loop"; sem JS ou com
  * prefers-reduced-motion, os logos ficam numa grade estática (cópia oculta).
  * Logos: public/logos/ + logos.json (src/content/media.ts).
+ * Embaixo das fileiras, a linha `note` ("E diversas outras empresas e
+ * setores."), com entrada em fade (revealOnce).
  */
 export default function LogoMarquee({
   logos,
   title,
+  note,
 }: {
   logos: Logo[];
   title: string;
+  note: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const half = Math.ceil(logos.length / 2);
-  const rows = [logos.slice(0, half), logos.slice(half).concat(logos.slice(0, Math.max(0, half - (logos.length - half))))];
+  // fileiras alternando a ordem do logos.json (1ª, 3ª, 5ª... em cima; 2ª, 4ª... embaixo)
+  const shown = logos.filter((l) => l.src);
+  const rows = [shown.filter((_, i) => i % 2 === 0), shown.filter((_, i) => i % 2 === 1)];
 
   useGSAP(
     () => {
@@ -68,26 +76,45 @@ export default function LogoMarquee({
         const el = root.current!;
         el.dataset.mode = "loop";
         const tracks = gsap.utils.toArray<HTMLElement>("[data-logo-track]");
+        // duração de uma volta (uma cópia) para a velocidade de travessia da tela
+        const durationFor = (track: HTMLElement, i: number) =>
+          track.scrollWidth / 2 / ((window.innerWidth / CROSS_S) * ROW_SPEED[i]);
         const tweens = tracks.map((track, i) =>
           gsap.fromTo(
             track,
             { xPercent: i === 0 ? 0 : -50 },
-            { xPercent: i === 0 ? -50 : 0, duration: 38 + i * 6, ease: "none", repeat: -1, paused: true },
+            { xPercent: i === 0 ? -50 : 0, duration: durationFor(track, i), ease: "none", repeat: -1, paused: true },
           ),
         );
-        // desacelera no hover (cada fileira por si)
-        const rowsEls = gsap.utils.toArray<HTMLElement>("[data-logo-row]");
         const off: (() => void)[] = [];
-        rowsEls.forEach((row, i) => {
-          const slow = () => gsap.to(tweens[i], { timeScale: 0.2, duration: 0.8, ease: "power2.out" });
-          const fast = () => gsap.to(tweens[i], { timeScale: 1, duration: 0.8, ease: "power2.out" });
-          row.addEventListener("mouseenter", slow);
-          row.addEventListener("mouseleave", fast);
-          off.push(() => {
-            row.removeEventListener("mouseenter", slow);
-            row.removeEventListener("mouseleave", fast);
+        // a velocidade acompanha a largura da tela (mesma sensação no celular);
+        // a posição no loop se mantém ao recalcular
+        let width = window.innerWidth;
+        const onResize = () => {
+          if (window.innerWidth === width) return; // barra do navegador no celular muda só a altura
+          width = window.innerWidth;
+          tweens.forEach((t, i) => {
+            const p = t.progress();
+            t.duration(durationFor(tracks[i], i));
+            t.progress(p);
           });
-        });
+        };
+        window.addEventListener("resize", onResize);
+        off.push(() => window.removeEventListener("resize", onResize));
+        // desktop: desacelera um pouco no hover (cada fileira por si), sem parar
+        const rowsEls = gsap.utils.toArray<HTMLElement>("[data-logo-row]");
+        if (window.matchMedia("(hover: hover)").matches) {
+          rowsEls.forEach((row, i) => {
+            const slow = () => gsap.to(tweens[i], { timeScale: HOVER_SPEED, duration: 0.8, ease: "power2.out" });
+            const fast = () => gsap.to(tweens[i], { timeScale: 1, duration: 0.8, ease: "power2.out" });
+            row.addEventListener("mouseenter", slow);
+            row.addEventListener("mouseleave", fast);
+            off.push(() => {
+              row.removeEventListener("mouseenter", slow);
+              row.removeEventListener("mouseleave", fast);
+            });
+          });
+        }
         const visible = ScrollTrigger.create({
           trigger: el,
           start: "top bottom",
@@ -95,7 +122,17 @@ export default function LogoMarquee({
           onToggle: (self) => tweens.forEach((t) => (self.isActive ? t.play() : t.pause())),
         });
         if (visible.isActive) tweens.forEach((t) => t.play());
+        // linha de fecho: fade com leve subida, uma vez
+        const noteEl = el.querySelector("[data-logo-note]")!;
+        gsap.set(noteEl, { autoAlpha: 0, y: 16 });
+        const stopNote = revealOnce({
+          trigger: noteEl,
+          start: "top 90%",
+          play: () => gsap.to(noteEl, { autoAlpha: 1, y: 0, duration: 0.9, ease: "power3.out" }),
+          finish: () => gsap.set(noteEl, { autoAlpha: 1, y: 0 }),
+        });
         return () => {
+          stopNote();
           off.forEach((fn) => fn());
           delete el.dataset.mode;
         };
@@ -139,6 +176,9 @@ export default function LogoMarquee({
           </div>
         ))}
       </div>
+      <p data-logo-note className="mt-10 px-6 text-center text-xs leading-relaxed text-[#8a8a8a] md:mt-12 md:px-12 md:text-[13px]">
+        {note}
+      </p>
     </div>
   );
 }

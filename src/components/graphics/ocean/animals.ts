@@ -162,11 +162,11 @@ function skinMaterial(shared: Shared, light: boolean, look: { bright: number; ri
         vec3 tex = pow(max(diffuseColor.rgb, vec3(0.0)), vec3(1.0 / 2.2));
         vec3 alb = mix(tex, vec3(dot(tex, vec3(0.299, 0.587, 0.114))), 0.7);
         vec3 c = alb * uBright * (0.3 + 0.7 * top) * k;
-        c += vec3(0.2, 0.21, 0.22) * caustic(vOW.xz * 0.45) * top * k;
+        c += vec3(0.3, 0.31, 0.32) * caustic(vOW.xz * 0.45) * top * k;
         float fres = pow(1.0 - abs(dot(n, -rd)), 2.5);
         c += vec3(0.62, 0.66, 0.7) * fres * smoothstep(-0.35, 0.7, n.y) * uRim * k;
         c += vec3(0.749, 0.769, 0.784) * (fres * smoothstep(0.05, 0.85, n.y) + 0.12 * pow(top, 3.0)) * uDorsal * k;
-        gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d * uFogA)) * uExpo, 1.0);`,
+        gl_FragColor = vec4(expose(mix(c, waterCol(rd), fogF(d * uFogA))), 1.0);`,
       )
       // a cor já sai pronta para a tela, como nos outros shaders do oceano
       .replace("#include <tonemapping_fragment>", "")
@@ -205,7 +205,7 @@ function eyeMaterial(shared: Shared, light: boolean, fog: number) {
         float k = depthLight(vOW.y);
         float s = pow(max(dot(r, SUN), 0.0), 60.0) * 0.9 + pow(max(r.y, 0.0), 24.0) * 0.18;
         vec3 c = vec3(0.012) + vec3(0.92, 0.95, 1.0) * s * k;
-        gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d * uFogA)) * uExpo, 1.0);
+        gl_FragColor = vec4(expose(mix(c, waterCol(rd), fogF(d * uFogA))), 1.0);
       }`,
   });
 }
@@ -249,8 +249,8 @@ export class OceanAnimals {
     private readonly opts: { mobile: boolean; light: boolean; few: boolean },
   ) {
     const { mobile, light, few } = opts;
-    const sharkMat = skinMaterial(shared, light, { bright: 0.42, rim: mobile ? 1.8 : 1.0, dorsal: mobile ? 0.55 : 0.35, fog: 0.385 });
-    const turtleMat = skinMaterial(shared, light, { bright: 0.5, rim: mobile ? 1.5 : 1.1, dorsal: 0.2, fog: 0.47 });
+    const sharkMat = skinMaterial(shared, light, { bright: 0.42, rim: mobile ? 2.6 : 1.7, dorsal: mobile ? 0.75 : 0.55, fog: 0.385 });
+    const turtleMat = skinMaterial(shared, light, { bright: 0.5, rim: mobile ? 2.2 : 1.8, dorsal: 0.35, fog: 0.47 });
     const eyeMat = eyeMaterial(shared, light, 0.385);
     this.mats.push(sharkMat, turtleMat, eyeMat);
 

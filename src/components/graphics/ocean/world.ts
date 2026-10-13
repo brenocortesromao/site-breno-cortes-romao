@@ -124,9 +124,10 @@ export class OceanWorld {
   ) {
     this.defines = light ? { LIGHT: "" } : {};
     this.box = mobile ? BOX_TALL : BOX_WIDE;
-    this.shared.uExpo.value = mobile ? 1.4 : 1;
-    this.shared.uFogK.value = mobile ? 0.6 : 1;
-    this.shared.uRays.value = mobile ? 1.6 : 1;
+    // cena mais clara (+60% de exposição e -40% de névoa nos dois)
+    this.shared.uExpo.value = mobile ? 1.9 : 1.6;
+    this.shared.uFogK.value = mobile ? 0.36 : 0.6;
+    this.shared.uRays.value = mobile ? 1.2 : 1;
     this.back = new ShaderMaterial({
       vertexShader: BACKDROP_VERT,
       fragmentShader: BACKDROP_FRAG,
@@ -264,7 +265,7 @@ export class OceanWorld {
     // pré-aquece: o cardume já aparece organizado (inclusive no quadro parado)
     for (let k = 0; k < 90; k++) this.stepBoids(1 / 30, k / 30);
     fishGeo.setAttribute("aPhase", new InstancedBufferAttribute(phase, 1));
-    this.fish = new InstancedMesh(fishGeo, this.silhouette({ tint: 0.086, rim: 1.2, fog: 0.47, dorsal: 0.2, swim: [0.1, 11, 9] }), n);
+    this.fish = new InstancedMesh(fishGeo, this.silhouette({ tint: 0.086, rim: 1.8, fog: 0.47, dorsal: 0.3, swim: [0.1, 11, 9] }), n);
     this.fish.frustumCulled = false;
     this.geos.push(fishGeo);
     this.under.add(this.fish);
