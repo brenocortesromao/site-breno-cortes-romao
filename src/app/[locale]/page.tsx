@@ -89,7 +89,7 @@ export default async function Home() {
 
         <Suspense>
           <Distance
-            charts={loadDistanceCharts()}
+            charts={loadDistanceCharts(t.raw("distance.svg") as Record<string, string>)}
             copy={{
               eyebrow: t("distance.eyebrow"),
               charts: t.raw("distance.charts") as DistanceCopy["charts"],

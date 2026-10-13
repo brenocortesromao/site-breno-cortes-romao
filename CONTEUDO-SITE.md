@@ -168,9 +168,12 @@ Posicionamento e narrativa · Identidade visual · Apresentações comerciais ·
 Título: **Marcas com as quais trabalhei.**
 Subtítulo (pequeno, abaixo do título): Ao longo da minha trajetória, em agências, estúdios, empresas e projetos independentes.
 (Os logos representam a trajetória do Breno, não necessariamente trabalhos no modelo fractional. Nas legendas do carrossel, deixar claro o papel exato e o contexto: agência, equipe ou contratação direta.)
-- Faixa de logos em prata monocromática [PENDENTE: logos].
-- Mural compacto, 6 a 9 peças, grid irregular, legenda de projeto e ano [PENDENTE: imagens].
-- SEM lista de cases e SEM páginas de case (removidos por decisão do Breno). A seção fica só com logos + carrossel de imagens; cada imagem do carrossel tem legenda curta (projeto, ano e papel do Breno).
+- Faixa de logos: 28 logos brancos em public/logos/ (lista em public/logos/logos.json), 2 fileiras em direções opostas, movimento lento.
+- Logo abaixo das fileiras de logos, linha pequena: **E diversas outras empresas e setores.** (EN: **And many other companies and industries.**)
+- Mural inclinado: 43 peças em public/trabalhos/ (lista em public/trabalhos/trabalhos.json), fileiras passando sozinhas, SEM clique/expansão e SEM legendas.
+- Destaque no centro do mural, por cima das imagens que passam atrás: **+12** / **anos de experiência** (EN: **+12** / **years of experience**). Pequeno, com sombra suave e efeito animado.
+- Jeep e Netflix: as peças podem aparecer no mural (foram propostas/pitches), mas os logos dessas marcas NÃO entram na faixa de logos.
+- SEM lista de cases e SEM páginas de case (removidos por decisão do Breno).
 
 ## 11. Sobre (PRETO, com floresta 3D ao fundo)
 
@@ -263,20 +266,23 @@ Respostas de 2 a 4 frases. Termos de busca naturais no texto (diretor de criaç�
 - **Você produz ou só dirige?**
   Os dois. Desenvolvo pessoalmente as peças prioritárias e dirijo o restante com a sua equipe ou fornecedores. Na proposta, fica claro o que eu produzo, o que eu dirijo e o que exige contratação à parte, para não existir surpresa no meio do caminho.
 
+- **O que está incluso na parceria mensal?**
+  A parceria cobre a direção da marca: estratégia, posicionamento, direção criativa, acompanhamento das peças e as entregas prioritárias combinadas para cada mês. Projetos maiores, como identidade visual completa, site, mídia kit, campanhas ou sistemas, são orçados à parte, com escopo e proposta próprios. Para quem já é parceiro, eles nascem dentro da estratégia da marca, sem precisar começar do zero, e têm condições diferenciadas de investimento. Tudo fica claro na proposta antes de começar.
+
 - **Você faz projetos pontuais, sem parceria mensal?**
-  Sim. Além da parceria contínua, assumo projetos com começo, meio e fim, como branding, rebranding, identidade visual, site ou mídia kit, com o mesmo nível de direção. Muitas parcerias começaram assim: um projeto bem feito abre espaço para cuidar da marca no longo prazo.
+  Sim. Além da parceria contínua, assumo projetos com começo, meio e fim, como branding, rebranding, identidade visual, site ou mídia kit, com o mesmo nível de direção. Muitas parcerias começaram assim: um projeto bem feito abre espaço para cuidar da marca no longo prazo. Projetos pontuais são orçados à parte, com proposta própria, e parceiros têm condições diferenciadas.
 
 - **Você cria identidade visual e logo?**
-  Sim. Crio identidades visuais completas: logo, tipografia, cores, linguagem visual e manual de marca. Antes do desenho vem a estratégia, com posicionamento, narrativa e tom de voz, para que a identidade traduza o que a empresa realmente é, e não apenas fique bonita.
+  Sim. Crio identidades visuais completas: logo, tipografia, cores, linguagem visual e manual de marca. Antes do desenho vem a estratégia, com posicionamento, narrativa e tom de voz, para que a identidade traduza o que a empresa realmente é, e não apenas fique bonita. É um projeto com escopo e proposta próprios, também para quem já é parceiro.
 
 - **Você faz mídia kit, apresentação institucional e pitch deck?**
-  Sim. São peças que decidem negócios: o mídia kit que convence um anunciante, a apresentação que abre uma reunião, o pitch deck que chega a um investidor. Cuido do roteiro, da narrativa e do design, para que cada página reforce o valor da empresa.
+  Sim. São peças que decidem negócios: o mídia kit que convence um anunciante, a apresentação que abre uma reunião, o pitch deck que chega a um investidor. Cuido do roteiro, da narrativa e do design, para que cada página reforce o valor da empresa. Cada peça é orçada como projeto, à parte da parceria mensal.
 
 - **Você cria sites, landing pages e campanhas?**
-  Sim. Defino a mensagem, a estrutura e o design, e desenvolvo sites, landing pages e experiências interativas, inclusive em 3D, como este site. Também crio campanhas, key visuals, direção de arte e conteúdo para redes sociais.
+  Sim. Defino a mensagem, a estrutura e o design, e desenvolvo sites, landing pages e experiências interativas, inclusive em 3D, como este site. Também crio campanhas, key visuals, direção de arte e conteúdo para redes sociais. Sites e campanhas são projetos com proposta própria, fora da mensalidade.
 
 - **E projetos de tecnologia, como sistemas e automações?**
-  Também. Uno marca e tecnologia em sistemas web, plataformas sob medida, dashboards, automações, integrações e agentes de inteligência artificial. A ferramenta precisa funcionar bem e, ao mesmo tempo, transmitir o padrão da sua marca.
+  Também. Uno marca e tecnologia em sistemas web, plataformas sob medida, dashboards, automações, integrações e agentes de inteligência artificial. A ferramenta precisa funcionar bem e, ao mesmo tempo, transmitir o padrão da sua marca. Como todo projeto de tecnologia, tem escopo e orçamento próprios.
 
 - **Preciso ter uma equipe de design?**
   Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção.

@@ -15,10 +15,52 @@ import { join } from "node:path";
  */
 
 export type PointStart = { id: string; dx: number; dy: number; angle: number; cx: number; cy: number };
+/** Textos dos SVGs (messages: distance.svg), por chave. */
+export type SvgLabels = Record<string, string>;
 export type DistanceCharts = { a: string; b: string; c: string; cStart: PointStart[] };
 
 const dir = join(process.cwd(), "public", "graficos");
 const read = (file: string) => readFileSync(join(dir, file), "utf8");
+
+/** Texto (em português) de cada elemento dos arquivos → chave em messages: distance.svg. */
+const SOURCE_TEXT: Record<string, string> = {
+  "TEMPO →": "time",
+  "A DISTÂNCIA": "gap",
+  ILUSTRATIVO: "illustrative",
+  NEGÓCIO: "business",
+  MARCA: "brand",
+  "DIREÇÃO DE MARCA": "brandDirection",
+  "SEM DIREÇÃO": "noDirection",
+  "MESMA DIREÇÃO": "sameDirection",
+  SITE: "site",
+  APRESENTAÇÃO: "presentation",
+  CAMPANHAS: "campaigns",
+  REDES: "social",
+};
+/** Título e descrição de cada gráfico (a chave termina em A, B ou C). */
+const SOURCE_META: Record<string, string> = {
+  "A distância": "titleA",
+  "Duas curvas: o negócio cresce rápido; a marca cresce devagar e fica para trás. A área entre elas é a distância.": "descA",
+  "Fechando a distância": "titleB",
+  "A partir do ponto de direção de marca, a curva da marca acelera e alcança a do negócio.": "descB",
+  Consistência: "titleC",
+  "Site, apresentação, campanhas e redes começam apontando em direções diferentes e se alinham numa mesma direção.": "descC",
+};
+
+const TEXT_RE = /(<text[\s>][^>]*>)([^<]+)(<\/text>)/g;
+const META_RE = /(<(?:title|desc)[\s>][^>]*>)([^<]+)(<\/(?:title|desc)>)/g;
+/** Troca os textos dos arquivos (rótulos, <title>, <desc>) pelas traduções do idioma. */
+function translate(svg: string, labels: SvgLabels): string {
+  return svg
+    .replace(TEXT_RE, (m, a: string, txt: string, z: string) => {
+      const key = SOURCE_TEXT[txt.trim()];
+      return key && labels[key] ? a + labels[key] + z : m;
+    })
+    .replace(META_RE, (m, a: string, txt: string, z: string) => {
+      const key = SOURCE_META[txt.trim()];
+      return key && labels[key] ? a + labels[key] + z : m;
+    });
+}
 
 /** Remove metadados/declarações e prefixa ids e referências (url(#), aria-labelledby). */
 function inline(svg: string, prefix: string): string {
@@ -49,7 +91,7 @@ function poses(svg: string) {
   return out;
 }
 
-export function loadDistanceCharts(): DistanceCharts {
+export function loadDistanceCharts(labels: SvgLabels): DistanceCharts {
   const start = poses(read("grafico-c-consistencia-inicio.svg"));
   const endSvg = read("grafico-c-consistencia-fim.svg");
   const end = poses(endSvg);
@@ -58,9 +100,9 @@ export function loadDistanceCharts(): DistanceCharts {
     return { id: `gc-${id}`, dx: s.cx - e.cx, dy: s.cy - e.cy, angle: s.angle - e.angle, cx: e.cx, cy: e.cy };
   });
   return {
-    a: inline(read("grafico-a-distancia.svg"), "ga-"),
-    b: inline(read("grafico-b-fechando.svg"), "gb-"),
-    c: inline(endSvg, "gc-"),
+    a: inline(translate(read("grafico-a-distancia.svg"), labels), "ga-"),
+    b: inline(translate(read("grafico-b-fechando.svg"), labels), "gb-"),
+    c: inline(translate(endSvg, labels), "gc-"),
     cStart,
   };
 }

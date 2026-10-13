@@ -98,9 +98,41 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
     () => {
       const mm = gsap.matchMedia();
 
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      mm.add("(prefers-reduced-motion: no-preference)", (context) => {
         // a entrada da tipografia é CSS (globals.css: heroReveal/heroFade), para
-        // aparecer na primeira pintura, sem esperar a hidratação
+        // aparecer na primeira pintura, sem esperar a hidratação. ANTES do pin,
+        // o GSAP assume de onde a animação CSS estava (mesmos valores, tempos e
+        // curvas): o pin tira e recoloca a <section> no DOM (pin-spacer) na
+        // criação e a cada refresh, e cada reinserção reiniciaria a CSS.
+        // (ignore: fora do contexto, senão o revert do efeito em dev/remontagem
+        // desfaria a entrada no meio e ela recomeçaria)
+        context.ignore?.(() => section.current?.querySelectorAll<HTMLElement>("[data-reveal], [data-fade]").forEach((el) => {
+          const reveal = el.hasAttribute("data-reveal");
+          const css = el.getAnimations().find((a) => (a as CSSAnimation).animationName === (reveal ? "heroReveal" : "heroFade"));
+          const delay = reveal ? 0.2 + (Number(el.style.getPropertyValue("--i")) || 0) * 0.18 : 0.9;
+          const duration = reveal ? 1.5 : 1.1;
+          // segundos desde o início da CSS (inclui o atraso). Guardado no elemento:
+          // se este efeito rodar de novo (Strict Mode em dev, remontagem), a CSS já
+          // foi desligada e a entrada continua do ponto certo
+          if (css && css.currentTime !== null) el.dataset.heroT0 = String(performance.now() - Number(css.currentTime));
+          if (!el.dataset.heroT0) return; // já terminou: nada a animar
+          const t = (performance.now() - Number(el.dataset.heroT0)) / 1000;
+          if (t >= delay + duration) return;
+          gsap.killTweensOf(el); // efeito rodando de novo: só um tween por elemento
+          // CSS desligada ANTES de criar o tween (o traço do scroll mantém só o pulso):
+          // senão o GSAP leria o translate atual da animação como posição própria e
+          // somaria à dele. Tudo síncrono, sem pintura no meio.
+          el.style.animation = el.classList.contains("animate-pulse") ? "var(--animate-pulse)" : "none";
+          el.style.transform = "";
+          const tween = reveal
+            ? gsap.fromTo(el, { yPercent: 120 }, { yPercent: 0, ease: "expo.out", duration, delay: Math.max(0, delay - t), clearProps: "transform" })
+            : gsap.fromTo(
+                el,
+                { autoAlpha: 0, y: 14 },
+                { autoAlpha: 1, y: 0, ease: "power3.out", duration, delay: Math.max(0, delay - t), clearProps: "opacity,visibility,transform" },
+              );
+          if (t > delay) tween.time(t - delay);
+        }));
 
         // A hero fica fixa por 1 tela (pinSpacing: false) enquanto o manifesto sobe
         // por cima. Nesse trecho os textos saem, a bola recua e escurece (na cena 3D,

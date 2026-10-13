@@ -71,7 +71,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
       <head>
         {/* Rede de segurança: se a animação não assumir em 6s (JS lento ou com falha),
             o CSS que esconde o texto é removido e o título fica visível. */}
-        <InlineScript html="var d=document.documentElement;d.classList.add('js-motion');setTimeout(function(){d.classList.remove('js-motion')},6000)" />
+        <InlineScript html="try{history.scrollRestoration='manual'}catch(e){}var d=document.documentElement;d.classList.add('js-motion');setTimeout(function(){d.classList.remove('js-motion')},6000)" />
       </head>
       <body className="min-h-full flex flex-col">
         {/* Só o idioma vai para o cliente; os textos chegam como props, não o arquivo inteiro. */}

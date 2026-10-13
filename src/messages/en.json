@@ -12,39 +12,39 @@
     "remote": "Remote service, with in-person meetings when it makes sense"
   },
   "common": {
-    "draft": "Provisório"
+    "draft": "Draft"
   },
   "nav": {
-    "label": "Principal",
-    "home": "Início",
-    "manifesto": "Mensagem",
+    "label": "Main",
+    "home": "Home",
+    "manifesto": "Message",
     "fractional": "Fractional",
-    "services": "O que faço",
-    "projects": "Trabalhos",
-    "contact": "Contato",
-    "language": "Idioma",
-    "switchTo": "Ver o site em {language}",
-    "about": "Sobre",
-    "ai": "IA"
+    "services": "What I do",
+    "projects": "Work",
+    "contact": "Contact",
+    "language": "Language",
+    "switchTo": "View the site in {language}",
+    "about": "About",
+    "ai": "AI"
   },
   "languages": {
     "pt": "Português",
     "en": "English"
   },
   "hero": {
-    "left": "Sua marca à altura",
-    "right": "do seu crescimento.",
-    "support": "Direção de marca e criação sênior, dentro da sua empresa, sem o peso de uma contratação executiva.",
-    "scrollHint": "Role para entender"
+    "left": "Your brand, as big",
+    "right": "as your growth.",
+    "support": "Senior brand and creative direction, inside your company, without the weight of an executive hire.",
+    "scrollHint": "Scroll to understand"
   },
   "manifesto": {
-    "eyebrow": "Mensagem de {name}",
+    "eyebrow": "A message from {name}",
     "statement": [
       {
-        "text": "Uma marca não é o que a empresa diz sobre si."
+        "text": "A brand is not what a company says about itself."
       },
       {
-        "text": "É o que sobra na cabeça das pessoas quando você sai da sala.",
+        "text": "It is what stays in people's minds after you leave the room.",
         "soft": true
       }
     ],
@@ -53,54 +53,74 @@
       "I grew up between a writer and a journalist, learned alongside people who helped build Nubank, XP Investimentos, Mercado Livre and Itaú Digital, and sat in the key seats of a brand: design, marketing leadership, digital marketing and growth. Today I put all of that to work for companies that are already great at what they do, but still look small in what they show.",
       "I don't arrive with a ready-made formula, and I don't leave after delivery. I step in as your company's brand director: I define what it needs to say, create how it will say it, and follow every piece until the market sees the value you've already built, or the one you want to build."
     ],
-    "portrait": "Retrato",
+    "portrait": "Portrait",
     "portraitAlt": "{name}, Fractional Brand & Creative Director",
-    "signatureLabel": "Assinatura de {name}"
+    "signatureLabel": "Signature of {name}"
   },
   "distance": {
-    "eyebrow": "A distância",
+    "svg": {
+      "time": "TIME →",
+      "gap": "THE GAP",
+      "illustrative": "ILLUSTRATIVE",
+      "business": "BUSINESS",
+      "brand": "BRAND",
+      "brandDirection": "BRAND DIRECTION",
+      "noDirection": "NO DIRECTION",
+      "sameDirection": "SAME DIRECTION",
+      "site": "WEBSITE",
+      "presentation": "PRESENTATION",
+      "campaigns": "CAMPAIGNS",
+      "social": "SOCIAL",
+      "titleA": "The gap",
+      "descA": "Two curves: the business grows fast, the brand grows slowly and falls behind. The area between them is the gap.",
+      "titleB": "Closing the gap",
+      "descB": "From the brand direction point on, the brand curve accelerates and catches up with the business.",
+      "titleC": "Consistency",
+      "descC": "Website, presentation, campaigns and social start out pointing in different directions and align once there is direction."
+    },
+    "eyebrow": "The gap",
     "charts": [
       {
-        "text": "Toda empresa que cresce rápido cria uma distância entre o que ela é e o que ela parece.",
-        "highlight": "distância"
+        "text": "Every company that grows fast creates a gap between what it is and what it looks like.",
+        "highlight": "gap"
       },
       {
-        "text": "Essa distância custa vendas, talentos e preço. Meu trabalho é fechá-la.",
-        "highlight": "fechá-la"
+        "text": "That gap costs sales, talent and pricing power. My job is to close it.",
+        "highlight": "close it"
       },
       {
-        "text": "Consistência não é estética. É o que faz o mercado confiar em você.",
-        "highlight": "confiar"
+        "text": "Consistency is not aesthetics. It is what makes the market trust you.",
+        "highlight": "trust"
       }
     ]
   },
   "diagnostic": {
-    "eyebrow": "Diagnóstico",
-    "title": "Você já disse alguma dessas frases?",
-    "hintTouch": "Toque nas que soam familiares.",
-    "hintClick": "Clique nas que soam familiares.",
-    "cursorMark": "Marcar",
-    "cursorUnmark": "Desmarcar",
-    "counter": "{count} de {total}",
+    "eyebrow": "Diagnosis",
+    "title": "Have you ever said any of these?",
+    "hintTouch": "Tap the ones that sound familiar.",
+    "hintClick": "Click the ones that sound familiar.",
+    "cursorMark": "Mark",
+    "cursorUnmark": "Unmark",
+    "counter": "{count} of {total}",
     "items": [
-      "“A gente é maior do que parece.”",
-      "“Não sei que história a minha marca conta.”",
-      "“O cliente não entende de primeira o que a gente faz.”",
-      "“A concorrência parece mais profissional do que a gente. E não é.”",
-      "“Cada material nosso parece de uma empresa diferente.”",
-      "“Tenho designer e agência. Falta alguém decidindo.”",
-      "“Tudo passa por mim. Até o post.”",
-      "“Vamos lançar algo grande, e a marca não está pronta.”"
+      "“We are bigger than we look.”",
+      "“I don't know what story my brand tells.”",
+      "“Clients don't get what we do the first time.”",
+      "“Our competitors look more professional than us. And they aren't.”",
+      "“Every piece of ours looks like it came from a different company.”",
+      "“I have a designer and an agency. What's missing is someone deciding.”",
+      "“Everything goes through me. Even the posts.”",
+      "“We are about to launch something big, and the brand isn't ready.”"
     ],
-    "closing": "Nenhuma dessas frases se resolve com mais peças. Se resolve com direção.",
-    "closingOne": "Já é um sinal. Vale uma conversa.",
-    "closingMatched": "Isso não se resolve com mais peças. Se resolve com direção.",
-    "cta": "Vamos conversar"
+    "closing": "None of these is solved with more deliverables. They are solved with direction.",
+    "closingOne": "That is already a sign. It's worth a conversation.",
+    "closingMatched": "This is not solved with more deliverables. It is solved with direction.",
+    "cta": "Let's talk"
   },
   "fractional": {
-    "eyebrow": "O que é fractional",
-    "title": "Liderança de marca sênior, na medida do seu momento.",
-    "text": "Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada, sem o custo de uma contratação executiva fixa.",
+    "eyebrow": "What fractional means",
+    "title": "Senior brand leadership, sized to where you are now.",
+    "text": "An experienced brand and creative director is expensive and, for many companies, still doesn't make sense full time. In the fractional model, you get that leadership embedded in your team, taking part in decisions every month, with an agreed commitment and without the cost of a permanent executive hire.",
     "stats": {
       "title": "A model growing fast around the world.",
       "lead": "I was one of the first to bring it to Brazil, and I work with companies wherever they are.",
@@ -109,205 +129,205 @@
           "prefix": "+",
           "value": 313,
           "suffix": "%",
-          "caption": "profissionais fractional no mundo desde 2019"
+          "caption": "fractional professionals worldwide since 2019"
         },
         {
           "prefix": "",
           "value": 97,
           "suffix": "%",
-          "caption": "das vagas fractional nos EUA vêm de empresas pequenas e médias"
+          "caption": "of fractional roles in the US come from small and mid-sized companies"
         }
       ],
-      "support": "E não é coisa de multinacional. É o modelo de quem cresce e precisa de liderança sênior sem aumentar a equipe.",
-      "source": "Fonte: Lightcast, The Rise of Fractional Leadership (2026)."
+      "support": "And it's not just for multinationals. It's the model for companies that are growing and need senior leadership without growing the team.",
+      "source": "Source: Lightcast, The Rise of Fractional Leadership (2026)."
     },
     "compare": {
-      "caption": "Comparativo entre agência, contratação executiva e fractional",
-      "highlightLabel": "O modelo",
+      "caption": "Comparison between agency, executive hire and fractional",
+      "highlightLabel": "The model",
       "columns": [
-        "Agência",
-        "Contratação executiva",
+        "Agency",
+        "Executive hire",
         "Fractional"
       ],
       "rows": [
         {
-          "label": "Visão do negócio",
+          "label": "View of the business",
           "values": [
-            "De fora, um projeto por vez",
-            "De dentro, mas presa à rotina",
-            "Contínua, com o olhar de fora e o compromisso de dentro"
+            "From the outside, one project at a time",
+            "From the inside, but stuck in the routine",
+            "Continuous, with an outside eye and an inside commitment"
           ]
         },
         {
-          "label": "Quem decide a marca",
+          "label": "Who decides the brand",
           "values": [
-            "Você, entre uma entrega e outra",
-            "Um cargo fixo",
-            "Um diretor sênior, ao seu lado, todo mês"
+            "You, between one delivery and the next",
+            "A fixed position",
+            "A senior director by your side, every month"
           ]
         },
         {
-          "label": "Investimento",
+          "label": "Investment",
           "values": [
-            "Variável a cada job",
-            "Salário, encargos e benefícios",
-            "Mensal e previsível, sem custo de contratação"
+            "Varies with every job",
+            "Salary, taxes and benefits",
+            "Monthly and predictable, with no hiring cost"
           ]
         },
         {
-          "label": "Continuidade",
+          "label": "Continuity",
           "values": [
-            "Termina na entrega",
-            "Depende de quem fica",
-            "Cresce a cada mês de parceria"
+            "Ends at delivery",
+            "Depends on who stays",
+            "Grows with every month of partnership"
           ]
         },
         {
-          "label": "Senioridade",
+          "label": "Seniority",
           "values": [
-            "Varia conforme a equipe",
-            "Depende de quem você consegue atrair",
-            "Sênior desde o primeiro dia"
+            "Varies with the team",
+            "Depends on who you can attract",
+            "Senior from day one"
           ]
         },
         {
-          "label": "Começo",
+          "label": "Getting started",
           "values": [
-            "Novo briefing a cada projeto",
-            "Meses de recrutamento",
-            "Direto, a partir da primeira conversa"
+            "A new brief for every project",
+            "Months of recruiting",
+            "Straight away, from the first conversation"
           ]
         }
       ]
     },
-    "note": "Não sou um CMO. Não assumo mídia, canais ou aquisição. Cuido do que faz tudo isso funcionar: a marca."
+    "note": "I'm not a CMO. I don't run media, channels or acquisition. I take care of what makes all of that work: the brand."
   },
   "pillars": {
-    "eyebrow": "O que eu faço",
-    "title": "O nível de direção das grandes marcas. Na medida da sua empresa.",
-    "subtitle": "Estratégia sem execução vira PDF. Execução sem estratégia vira ruído. Eu faço as duas, e é isso que transforma uma boa ideia em uma marca de verdade.",
+    "eyebrow": "What I do",
+    "title": "The level of direction of the big brands. Sized to your company.",
+    "subtitle": "Strategy without execution becomes a PDF. Execution without strategy becomes noise. I do both, and that is what turns a good idea into a real brand.",
     "items": [
       {
-        "title": "Estratégia de marca",
-        "text": "O que a empresa representa, para quem ela existe, o que a torna difícil de substituir e como contar isso."
+        "title": "Brand strategy",
+        "text": "What the company stands for, who it exists for, what makes it hard to replace and how to tell that story."
       },
       {
-        "title": "Direção criativa",
-        "text": "Conceitos, linguagem visual e campanhas que traduzem a estratégia em algo que as pessoas veem e lembram."
+        "title": "Creative direction",
+        "text": "Concepts, visual language and campaigns that turn strategy into something people see and remember."
       },
       {
-        "title": "Execução",
-        "text": "Desenvolvo as peças prioritárias e dirijo equipes e fornecedores, do briefing à aprovação."
+        "title": "Execution",
+        "text": "I create the priority pieces and direct teams and suppliers, from brief to approval."
       },
       {
-        "title": "Acompanhamento",
-        "text": "Reviso, ajusto e reorganizo as prioridades conforme o negócio muda. A marca continua evoluindo mês após mês, junto com a empresa."
+        "title": "Ongoing guidance",
+        "text": "I review, adjust and reorder priorities as the business changes. The brand keeps evolving month after month, together with the company."
       }
     ]
   },
   "changes": {
-    "eyebrow": "O que muda",
-    "title": "O valor que já existe, finalmente visível.",
-    "before": "Antes",
-    "after": "Depois",
+    "eyebrow": "What changes",
+    "title": "The value that already exists, finally visible.",
+    "before": "Before",
+    "after": "After",
     "rows": [
       {
-        "before": "A marca acompanhou o começo, mas não o crescimento.",
-        "after": "Uma marca construída de verdade, feita para fazer o negócio crescer."
+        "before": "The brand kept up with the beginning, but not with the growth.",
+        "after": "A truly built brand, made to help the business grow."
       },
       {
-        "before": "A marca parece menor do que a empresa é.",
-        "after": "A marca finalmente tem o tamanho do negócio."
+        "before": "The brand looks smaller than the company is.",
+        "after": "The brand is finally the size of the business."
       },
       {
-        "before": "Ninguém entende de primeira o que vocês fazem.",
-        "after": "Sua oferta é entendida em uma frase."
+        "before": "Nobody gets what you do the first time.",
+        "after": "Your offer is understood in one sentence."
       },
       {
-        "before": "Cada peça tem uma cara diferente.",
-        "after": "Uma identidade sênior, reconhecida antes mesmo do logo aparecer."
+        "before": "Every piece looks different.",
+        "after": "A senior identity, recognized before the logo even shows up."
       },
       {
-        "before": "O cliente compara vocês pelo preço.",
-        "after": "O cliente enxerga valor antes de perguntar o preço."
+        "before": "Clients compare you on price.",
+        "after": "Clients see the value before they ask the price."
       },
       {
-        "before": "O fundador aprova até o post.",
-        "after": "O fundador volta a cuidar do negócio."
+        "before": "The founder approves even the posts.",
+        "after": "The founder gets back to running the business."
       }
     ]
   },
   "process": {
-    "eyebrow": "Como funciona",
-    "title": "Um método próprio. Feito para quem não tem tempo a perder.",
-    "note": "Desenvolvi um método próprio para levar a marca do que ela é hoje ao que ela precisa parecer, sem desperdício. Você não precisa preparar nada: eu conduzo cada etapa, e na proposta fica claro o que eu produzo, o que eu dirijo e o que fica com a sua equipe.",
+    "eyebrow": "How it works",
+    "title": "A method of my own. Made for those who have no time to waste.",
+    "note": "I developed my own method to take the brand from what it is today to what it needs to look like, with no waste. You don't need to prepare anything: I lead every step, and the proposal makes clear what I produce, what I direct and what stays with your team.",
     "steps": [
       {
-        "phase": "ESCUTA",
-        "title": "Conversa",
-        "text": "Você me conta onde a empresa está e onde quer chegar. Eu escuto o que está dito e, principalmente, o que não está. Na primeira conversa, a gente já sabe se faz sentido seguir juntos, e eu digo com sinceridade se não fizer."
+        "phase": "LISTENING",
+        "title": "Conversation",
+        "text": "You tell me where the company is and where it wants to go. I listen to what is said and, above all, to what isn't. In the first conversation we already know whether it makes sense to move forward together, and I'll tell you honestly if it doesn't."
       },
       {
-        "phase": "DESCOBERTA",
-        "title": "Diagnóstico",
-        "text": "Mergulho no seu negócio como se fosse meu. Converso com quem vende, olho o que os concorrentes fazem e reviro tudo o que a marca já comunicou. Quase sempre aparece a mesma coisa: uma empresa melhor do que a história que ela conta."
+        "phase": "DISCOVERY",
+        "title": "Diagnosis",
+        "text": "I dive into your business as if it were mine. I talk to the people who sell, look at what competitors are doing and go through everything the brand has ever said. Almost always the same thing shows up: a company that is better than the story it tells."
       },
       {
-        "phase": "DECISÃO",
-        "title": "Plano",
-        "text": "Com o diagnóstico na mesa, decidimos juntos o que vem primeiro. Nada de lista infinita: poucas prioridades, bem escolhidas, com começo, meio e fim. Você sabe exatamente o que vai acontecer e por quê."
+        "phase": "DECISION",
+        "title": "Plan",
+        "text": "With the diagnosis on the table, we decide together what comes first. No endless lists: a few well-chosen priorities, with a beginning, a middle and an end. You know exactly what is going to happen and why."
       },
       {
-        "phase": "CONSTRUÇÃO",
-        "title": "Direção contínua",
-        "text": "É aqui que a marca começa a mudar de verdade. Participo das decisões, produzo o que é essencial e dirijo quem produz o resto. Cada peça que sai passa pelo mesmo critério, e aos poucos tudo começa a falar a mesma língua."
+        "phase": "BUILDING",
+        "title": "Ongoing direction",
+        "text": "This is where the brand really starts to change. I take part in decisions, produce what is essential and direct whoever produces the rest. Every piece that goes out meets the same standard, and little by little everything starts speaking the same language."
       },
       {
-        "phase": "CICLO",
-        "title": "Evolução",
-        "text": "A marca não fica pronta, ela amadurece junto com a empresa. A cada ciclo, olhamos juntos o que avançou, o que funcionou e qual é o próximo passo. Você deixa de ser o gargalo das decisões criativas e ganha alguém que conhece o seu negócio cada vez melhor."
+        "phase": "CYCLE",
+        "title": "Evolution",
+        "text": "A brand is never finished, it matures along with the company. Every cycle, we look together at what moved forward, what worked and what comes next. You stop being the bottleneck for creative decisions and gain someone who knows your business better and better."
       },
       {
-        "phase": "PARCERIA",
-        "title": "Quanto mais tempo juntos,\nmais forte a sua marca.",
-        "text": "Não é um projeto que termina na entrega. É uma parceria que cresce com a empresa: novos produtos, novos mercados, novas fases. Quanto mais tempo juntos, mais rápido e mais certeiro fica o trabalho, porque eu já conheço o seu negócio por dentro."
+        "phase": "PARTNERSHIP",
+        "title": "The longer we work together,\nthe stronger your brand.",
+        "text": "It's not a project that ends at delivery. It's a partnership that grows with the company: new products, new markets, new phases. The longer we work together, the faster and sharper the work gets, because I already know your business from the inside."
       }
     ]
   },
   "touchpoints": {
-    "eyebrow": "Onde o trabalho aparece",
-    "title": "Onde você vai ver a diferença.",
+    "eyebrow": "Where the work shows",
+    "title": "Where you will see the difference.",
     "items": [
-      "Posicionamento e narrativa",
-      "Identidade visual",
-      "Apresentações comerciais",
-      "Sites e landing pages",
-      "Campanhas",
-      "Lançamentos",
-      "Direção de designers e fornecedores"
+      "Positioning and narrative",
+      "Visual identity",
+      "Sales presentations",
+      "Websites and landing pages",
+      "Campaigns",
+      "Launches",
+      "Directing designers and suppliers"
     ]
   },
   "works": {
-    "eyebrow": "Trabalhos",
-    "title": "Marcas com as quais trabalhei.",
+    "eyebrow": "Work",
+    "title": "Brands I have worked with.",
     "logos": {
-      "title": "Empresas",
+      "title": "Companies",
       "more": "And many other companies and industries."
     },
     "gallery": {
-      "title": "Projetos",
-      "label": "Mural de projetos",
+      "title": "Projects",
+      "label": "Project wall",
       "imageAlt": "Project for {brand}",
-      "placeholder": "Imagem pendente",
+      "placeholder": "Image pending",
       "experience": {
         "label": "Years of experience",
         "full": "+12 years of experience"
       }
     },
-    "subtitle": "Ao longo da minha trajetória, em agências, estúdios, empresas e projetos independentes."
+    "subtitle": "Throughout my career, in agencies, studios, companies and independent projects."
   },
   "about": {
-    "eyebrow": "Sobre",
+    "eyebrow": "About",
     "subtitle": "The one who will take care of your brand.",
     "opening": "I grew up surrounded by words and stories.",
     "paragraphs": [
@@ -324,31 +344,31 @@
       "Fractional Brand & Creative Director"
     ],
     "reference": "I learned alongside people who helped build Nubank, XP Investimentos, Mercado Livre, Itaú Digital and many other giants.",
-    "portrait": "Retrato",
-    "timelineTitle": "Trajetória",
-    "back": "Voltar ao início",
-    "metaTitle": "Sobre",
-    "metaDescription": "Quem vai cuidar da sua marca: trajetória, experiência e método de Breno Côrtes Romão, Fractional Brand & Creative Director."
+    "portrait": "Portrait",
+    "timelineTitle": "Career",
+    "back": "Back to home",
+    "metaTitle": "About",
+    "metaDescription": "Who will take care of your brand: the career, experience and method of Breno Côrtes Romão, Fractional Brand & Creative Director."
   },
   "ai": {
-    "eyebrow": "E a inteligência artificial?",
-    "prompt": "“Mas hoje eu consigo fazer isso com IA.”",
-    "title": "Consegue gerar. Não consegue decidir.",
+    "eyebrow": "What about artificial intelligence?",
+    "prompt": "“But today I can do this with AI.”",
+    "title": "It can generate. It can't decide.",
     "lines": [
-      "A IA nunca pagou uma conta no fim do mês.",
-      "Nunca abraçou alguém depois de um dia difícil.",
-      "Nunca sentiu o silêncio do alto de uma montanha.",
-      "Nunca viu uma marca ganhar, ou perder, a confiança das pessoas."
+      "AI has never paid a bill at the end of the month.",
+      "Never hugged someone after a hard day.",
+      "Never felt the silence at the top of a mountain.",
+      "Never watched a brand win, or lose, people's trust."
     ],
-    "body": "Ela cria mil opções em segundos. Mas não sabe o que a sua empresa não pode dizer, nem qual dessas mil opções vai fazer alguém escolher você. Eu uso IA todos os dias: ela pesquisa, explora e acelera o trabalho. Aprendo com ela, mas não terceirizo o julgamento. As decisões vêm da minha experiência, do meu repertório e de tudo o que eu vivi, coisas que nenhum modelo aprende.",
-    "closing": "Com IA, todo mundo produz mais. Por isso, o que vale agora é saber o que não produzir.",
-    "closingHighlight": "o que não produzir",
-    "footnote": "A IA é a ferramenta mais poderosa que já existiu. Nas mãos certas."
+    "body": "It creates a thousand options in seconds. But it doesn't know what your company can't say, or which of those thousand options will make someone choose you. I use AI every day: it researches, explores and speeds up the work. I learn from it, but I don't outsource judgment. Decisions come from my experience, my repertoire and everything I have lived, things no model can learn.",
+    "closing": "With AI, everyone produces more. That's why what matters now is knowing what not to produce.",
+    "closingHighlight": "what not to produce",
+    "footnote": "AI is the most powerful tool that has ever existed. In the right hands."
   },
   "partnerships": {
-    "eyebrow": "Poucas parcerias por vez",
-    "title": "Trabalho com poucas empresas por vez.",
-    "text": "Direção de verdade exige presença. Por isso, mantenho um número limitado de parcerias ativas. Quando uma vaga abre, ela é preenchida por conversa, não por proposta enviada em massa.",
+    "eyebrow": "Few partnerships at a time",
+    "title": "I work with only a few companies at a time.",
+    "text": "Real direction requires presence. That's why I keep a limited number of active partnerships. When a spot opens, it is filled through conversation, not through mass-sent proposals.",
     "indicator": "Booking new partnerships",
     "cta": "If your brand is ready to keep up with your growth, the next step starts with a conversation.",
     "button": "Let's talk",
@@ -409,24 +429,24 @@
     "buttonLabel": "Talk about a project (opens WhatsApp)"
   },
   "faq": {
-    "eyebrow": "Perguntas frequentes",
-    "title": "Perguntas frequentes.",
+    "eyebrow": "Frequently asked questions",
+    "title": "Frequently asked questions.",
     "items": [
       {
-        "q": "O que é um Fractional Brand & Creative Director?",
-        "a": "É um diretor de marca e criação sênior que trabalha dentro da sua empresa de forma contínua, mas com uma dedicação mensal acordada, em vez de tempo integral. Na prática, você tem alguém pensando a marca, decidindo a direção criativa e acompanhando a execução todos os meses, sem o custo e o compromisso de uma contratação executiva. O modelo já é comum lá fora e está chegando com força ao Brasil."
+        "q": "What is a Fractional Brand & Creative Director?",
+        "a": "A senior brand and creative director who works inside your company on an ongoing basis, with an agreed monthly commitment instead of full time. In practice, you have someone thinking about the brand, deciding the creative direction and overseeing execution every month, without the cost and commitment of an executive hire. The model is already common abroad and is quickly arriving in Brazil."
       },
       {
-        "q": "Qual a diferença para uma agência ou uma consultoria de branding?",
-        "a": "A agência e a consultoria entregam projetos: um rebranding, uma campanha, um site. Quando o projeto termina, a marca volta para as mãos de quem não tem tempo para cuidar dela. Eu fico. Participo das decisões ao longo do tempo, garanto que agência, designers e fornecedores trabalhem na mesma direção e que a estratégia não morra num PDF. Inclusive, posso trabalhar junto com a agência que você já tem."
+        "q": "How is it different from an agency or a branding consultancy?",
+        "a": "Agencies and consultancies deliver projects: a rebrand, a campaign, a website. When the project ends, the brand goes back into the hands of people who have no time to take care of it. I stay. I take part in decisions over time and make sure the agency, designers and suppliers all work in the same direction, so the strategy doesn't die in a PDF. I can even work alongside the agency you already have."
       },
       {
-        "q": "É o mesmo que um CMO?",
-        "a": "Não. Um CMO responde por marketing como um todo: mídia, canais, aquisição de clientes e orçamento. Eu cuido da marca e de tudo o que ela comunica: posicionamento, narrativa, identidade e qualidade criativa. Se a sua empresa tem alguém de marketing, eu fortaleço o trabalho dessa pessoa em vez de substituir."
+        "q": "Is it the same as a CMO?",
+        "a": "No. A CMO is responsible for marketing as a whole: media, channels, customer acquisition and budget. I take care of the brand and everything it communicates: positioning, narrative, identity and creative quality. If your company has someone in marketing, I strengthen that person's work instead of replacing it."
       },
       {
-        "q": "Você produz ou só dirige?",
-        "a": "Os dois. Desenvolvo pessoalmente as peças prioritárias e dirijo o restante com a sua equipe ou fornecedores. Na proposta, fica claro o que eu produzo, o que eu dirijo e o que exige contratação à parte, para não existir surpresa no meio do caminho."
+        "q": "Do you produce or just direct?",
+        "a": "Both. I personally create the priority pieces and direct the rest with your team or suppliers. The proposal makes clear what I produce, what I direct and what requires a separate hire, so there are no surprises along the way."
       },
       {
         "q": "What is included in the monthly partnership?",
@@ -453,8 +473,8 @@
         "a": "Those too. I bring brand and technology together in web systems, custom platforms, dashboards, automations, integrations and AI agents. The tool has to work well and, at the same time, live up to your brand's standard. Like any technology project, it has its own scope and budget."
       },
       {
-        "q": "Preciso ter uma equipe de design?",
-        "a": "Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção."
+        "q": "Do I need a design team?",
+        "a": "No. If you already have designers or an agency, I give them direction, criteria and priorities. If you don't, I produce the essentials and bring in the right specialists when the project calls for it, always under my direction."
       },
       {
         "q": "How does it start?",
@@ -465,31 +485,31 @@
         "a": "There is no minimum term. A brand is built continuously, so the partnership runs month to month, with regular priority reviews, and pays off more the longer we work together."
       },
       {
-        "q": "Quanto custa?",
-        "a": "O investimento é mensal e depende do escopo e da dedicação combinados. Em geral, fica bem abaixo do custo de um diretor de marca ou criação contratado em tempo integral, com a mesma senioridade. Os valores são apresentados na proposta, depois do diagnóstico."
+        "q": "How much does it cost?",
+        "a": "The investment is monthly and depends on the agreed scope and commitment. In general, it is well below the cost of a full-time brand or creative director with the same seniority. Pricing is presented in the proposal, after the diagnosis."
       },
       {
-        "q": "Como a inteligência artificial entra no trabalho?",
-        "a": "Como ferramenta de método: pesquisa, exploração de caminhos, prototipagem e produção, sempre com revisão e critério humano. A IA acelera o processo; as decisões de marca continuam sendo minhas e suas."
+        "q": "Where does artificial intelligence come in?",
+        "a": "As a tool within the method: research, exploring directions, prototyping and production, always with human review and judgment. AI speeds up the process; brand decisions are still mine and yours."
       },
       {
-        "q": "Para que tipo de empresa é?",
-        "a": "Para empresas que já têm produto, clientes e ambição de crescer, mas cuja marca não acompanha o negócio, especialmente startups B2B e empresas de serviços. Se a sua empresa é maior do que parece, provavelmente é para você."
+        "q": "What kind of company is it for?",
+        "a": "For companies that already have a product, clients and the ambition to grow, but whose brand hasn't kept up with the business, especially B2B startups and service companies. If your company is bigger than it looks, it's probably for you."
       },
       {
-        "q": "Você atende empresas de outras cidades ou de fora do Brasil?",
-        "a": "Sim. O trabalho é pensado para funcionar remotamente, com reuniões online e encontros presenciais quando fizer sentido."
+        "q": "Do you work with companies in other cities or outside Brazil?",
+        "a": "Yes. The work is designed to run remotely, with online meetings and in-person meetings when it makes sense."
       }
     ]
   },
   "contact": {
-    "eyebrow": "Contato",
-    "titleLight": "Vamos fechar",
-    "titleStrong": "essa distância?",
+    "eyebrow": "Contact",
+    "titleLight": "Shall we close",
+    "titleStrong": "that gap?",
     "text": "Every great brand started with a conversation. Tell me where your company is and where it wants to go.",
-    "email": "E-mail",
-    "mediaKit": "Baixar mídia kit (PDF)",
-    "pending": "[PENDENTE]",
+    "email": "Email",
+    "mediaKit": "Download media kit (PDF)",
+    "pending": "[PENDING]",
     "whatsapp": "WhatsApp",
     "whatsappLabel": "Chat on WhatsApp",
     "whatsappMessage": "Hi Breno! I saw your website and would like to talk about my company's brand.",
@@ -501,18 +521,18 @@
     "emailCopied": "Copied ✓"
   },
   "footer": {
-    "rights": "© {year} {name}. Todos os direitos reservados.",
-    "tagline": "Estratégia de marca · Direção criativa · Execução",
+    "rights": "© {year} {name}. All rights reserved.",
+    "tagline": "Brand strategy · Creative direction · Execution",
     "credits3d": "3D credits",
     "bearCredit": "Bear: <model>\"Realistic Grizzly Bear\"</model>, 3Dima, <license>CC BY 4.0</license>",
     "sharkCredit": "Shark: <model>\"Realistic Shark\"</model>, MotionStreamStudios, <license>CC BY 4.0</license>",
     "turtleCredit": "Turtle: <model>\"Sea Turtle\"</model>, Eloi, <license>CC BY 4.0</license>"
   },
   "notFound": {
-    "title": "Página não encontrada",
-    "back": "Voltar ao início"
+    "title": "Page not found",
+    "back": "Back to home"
   },
   "backdrop": {
-    "mountainsAlt": "Montanhas vistas de cima, em preto e branco"
+    "mountainsAlt": "Mountains seen from above, in black and white"
   }
 }

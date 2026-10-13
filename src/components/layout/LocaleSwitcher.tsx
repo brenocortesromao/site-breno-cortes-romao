@@ -1,12 +1,15 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 /**
  * Seletor PT/EN. Mantém a página atual ao trocar de idioma
  * (/pt/sobre → /en/sobre); o next-intl grava a escolha em cookie.
+ * <a> comum (navegação completa), não o Link: a navegação client-side deixava
+ * ThemeScroll, pins e cenas WebGL presos à página anterior. A página nova
+ * abre no topo.
  */
 export default function LocaleSwitcher({
   label,
@@ -31,15 +34,14 @@ export default function LocaleSwitcher({
                 {locale}
               </span>
             ) : (
-              <Link
-                href={pathname}
-                locale={locale}
+              <a
+                href={`/${locale}${pathname === "/" ? "" : pathname}`}
                 hrefLang={locale}
                 aria-label={switchTo[locale]}
                 className="px-1 text-silver transition-colors hover:text-foreground"
               >
                 {locale}
-              </Link>
+              </a>
             )}
           </li>
         ))}

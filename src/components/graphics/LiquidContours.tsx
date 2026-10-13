@@ -262,26 +262,20 @@ export default function LiquidContours({
       };
       // toque (sem preventDefault, ouvintes passivos: nunca atrapalha a rolagem):
       // - tap (dedo parado): onda forte onde tocou, com vibração leve no Android;
-      // - arrastar devagar: rastro de ondas menores a cada ~60 px;
-      // - gesto de rolar (mais de 12 px na vertical em menos de 120 ms): nada.
-      let touch: { x: number; y: number; px: number; py: number; moved: boolean; scroll: boolean; trace: [number, number][] } | null = null;
+      // - dedo andando (também enquanto a página rola): rastro de ondas menores a
+      //   cada ~60 px percorridos, como o mouse no desktop.
+      let touch: { x: number; y: number; px: number; py: number; moved: boolean } | null = null;
       const onTouchStart = (e: TouchEvent) => {
         const t = e.touches[0];
         if (!t || e.touches.length > 1) {
           touch = null;
           return;
         }
-        touch = { x: t.clientX, y: t.clientY, px: t.clientX, py: t.clientY, moved: false, scroll: false, trace: [[e.timeStamp, t.clientY]] };
+        touch = { x: t.clientX, y: t.clientY, px: t.clientX, py: t.clientY, moved: false };
       };
       const onTouchMove = (e: TouchEvent) => {
         const t = e.touches[0];
-        if (!touch || !t || touch.scroll) return;
-        touch.trace.push([e.timeStamp, t.clientY]);
-        while (touch.trace.length > 1 && e.timeStamp - touch.trace[0][0] > 120) touch.trace.shift();
-        if (Math.abs(t.clientY - touch.trace[0][1]) > 12) {
-          touch.scroll = true; // rolando a página: cancela o rastro
-          return;
-        }
+        if (!touch || !t) return;
         if (Math.hypot(t.clientX - touch.x, t.clientY - touch.y) > 10) touch.moved = true;
         if (touch.moved && Math.hypot(t.clientX - touch.px, t.clientY - touch.py) >= 60) {
           touch.px = t.clientX;
@@ -290,7 +284,7 @@ export default function LiquidContours({
         }
       };
       const onTouchEnd = () => {
-        if (touch && !touch.moved && !touch.scroll && addRipple(touch.x, touch.y, 2, 0)) {
+        if (touch && !touch.moved && addRipple(touch.x, touch.y, 2, 0)) {
           try {
             navigator.vibrate?.(8);
           } catch {

@@ -449,6 +449,32 @@ export default function FaqAscii({ text }: { text: string }) {
       window.addEventListener("pointermove", onMove, { passive: true });
       document.documentElement.addEventListener("mouseleave", onLeave);
     }
+    // toque: o 1º dedo empurra as letras como o mouse (mesma conta, raio, força e
+    // mola); ao soltar, elas voltam. Passivo e sem preventDefault: nunca trava a rolagem
+    const onTouch = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      const r = wrap.getBoundingClientRect();
+      const x = t.clientX - r.left;
+      const y = t.clientY - r.top;
+      if (x < -RADIUS || y < -RADIUS || x > r.width + RADIUS || y > r.height + RADIUS) {
+        mouse.x = mouse.y = -9999;
+        return;
+      }
+      mouse.x = x;
+      mouse.y = y;
+      kick(); // animação parada: acorda
+    };
+    const onTouchEnd = () => {
+      mouse.x = mouse.y = -9999;
+      kick(); // as letras voltam com a mola
+    };
+    if (!reduced) {
+      window.addEventListener("touchstart", onTouch, { passive: true });
+      window.addEventListener("touchmove", onTouch, { passive: true });
+      window.addEventListener("touchend", onTouchEnd, { passive: true });
+      window.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    }
 
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
@@ -486,6 +512,10 @@ export default function FaqAscii({ text }: { text: string }) {
       section?.removeEventListener("toggle", onToggle, true);
       window.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("touchstart", onTouch);
+      window.removeEventListener("touchmove", onTouch);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
       if (section) delete section.dataset.faqLive;
     };
   }, [text]);

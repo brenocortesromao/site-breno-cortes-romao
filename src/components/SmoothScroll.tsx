@@ -29,9 +29,60 @@ export function scrollToY(y: number) {
   }
 }
 
+/** Salto imediato (sem suavização), pelo Lenis quando ativo. */
+function jumpTo(y: number) {
+  window.scrollTo(0, y);
+  instance?.scrollTo(y, { immediate: true });
+}
+
+/**
+ * Carregamento/recarga: sempre começa no topo (o navegador não restaura a
+ * posição: scrollRestoration "manual", ver layout). Com âncora na URL
+ * (#contato...), vai à seção quando o layout estabiliza (fontes, load e
+ * refresh do ScrollTrigger), sem pulo.
+ */
+function startPosition() {
+  try {
+    history.scrollRestoration = "manual";
+  } catch {
+    /* navegador sem suporte */
+  }
+  const id = decodeURIComponent(window.location.hash.slice(1));
+  jumpTo(0);
+  if (!id) {
+    ScrollTrigger.refresh();
+    return () => {};
+  }
+  let alive = true;
+  const go = () => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    jumpTo(Math.max(0, el.getBoundingClientRect().top + window.scrollY));
+  };
+  const settle = async () => {
+    await document.fonts?.ready;
+    if (document.readyState !== "complete") await new Promise((r) => window.addEventListener("load", r, { once: true }));
+    if (!alive) return;
+    ScrollTrigger.refresh();
+    go();
+    // as posições dos pins podem mudar depois do refresh: confere de novo
+    window.setTimeout(() => {
+      if (!alive) return;
+      ScrollTrigger.refresh();
+      const el = document.getElementById(id);
+      if (el && Math.abs(el.getBoundingClientRect().top) > 4) go();
+    }, 600);
+  };
+  settle();
+  return () => {
+    alive = false;
+  };
+}
+
 export default function SmoothScroll() {
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const stopStart = startPosition();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return stopStart;
 
     const lenis = new Lenis({
       lerp: 0.085,
@@ -47,6 +98,7 @@ export default function SmoothScroll() {
     gsap.ticker.lagSmoothing(0);
 
     return () => {
+      stopStart();
       gsap.ticker.remove(tick);
       gsap.ticker.lagSmoothing(500, 33);
       lenis.destroy();

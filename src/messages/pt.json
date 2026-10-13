@@ -58,6 +58,26 @@
     "signatureLabel": "Assinatura de {name}"
   },
   "distance": {
+    "svg": {
+      "time": "TEMPO →",
+      "gap": "A DISTÂNCIA",
+      "illustrative": "ILUSTRATIVO",
+      "business": "NEGÓCIO",
+      "brand": "MARCA",
+      "brandDirection": "DIREÇÃO DE MARCA",
+      "noDirection": "SEM DIREÇÃO",
+      "sameDirection": "MESMA DIREÇÃO",
+      "site": "SITE",
+      "presentation": "APRESENTAÇÃO",
+      "campaigns": "CAMPANHAS",
+      "social": "REDES",
+      "titleA": "A distância",
+      "descA": "Duas curvas: o negócio cresce rápido; a marca cresce devagar e fica para trás. A área entre elas é a distância.",
+      "titleB": "Fechando a distância",
+      "descB": "A partir do ponto de direção de marca, a curva da marca acelera e alcança a do negócio.",
+      "titleC": "Consistência",
+      "descC": "Site, apresentação, campanhas e redes começam apontando em direções diferentes e se alinham numa mesma direção."
+    },
     "eyebrow": "A distância",
     "charts": [
       {
