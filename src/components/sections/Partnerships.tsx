@@ -18,7 +18,7 @@ export default async function Partnerships() {
       id="parcerias"
       data-theme="light"
       aria-labelledby="parcerias-title"
-      className="relative z-10 overflow-hidden"
+      className="m-theme-gap relative z-10 overflow-hidden"
     >
       <GraphicLayer variant="contours-b" />
       <div className="relative mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">

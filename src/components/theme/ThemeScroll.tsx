@@ -11,6 +11,9 @@ gsap.registerPlugin(ScrollTrigger);
 type Role = (typeof THEME_ROLES)[number];
 type Palette = Record<Role, string>;
 
+/** Celular (mesmo corte do Tailwind max-md e do .m-center). */
+const MOBILE = "(max-width: 767.98px)";
+
 /** Texto troca numa janela de ~16% no meio da transição: nunca fica cinza sobre cinza por muito tempo. */
 const textEase = (t: number) => Math.min(Math.max((t - 0.42) / 0.16, 0), 1);
 
@@ -61,6 +64,14 @@ export default function ThemeScroll() {
 
     setup();
 
+    // celular ↔ desktop: as janelas claro/escuro são outras (ver buildTransitions)
+    const mq = window.matchMedia(MOBILE);
+    const onMq = () => {
+      teardown();
+      setup();
+    };
+    mq.addEventListener("change", onMq);
+
     // só refaz se as seções realmente mudaram (mesmos nós = nada a fazer)
     let raf = 0;
     const mo = new MutationObserver(() => {
@@ -76,6 +87,7 @@ export default function ThemeScroll() {
     mo.observe(document.body, { childList: true, subtree: true });
 
     return () => {
+      mq.removeEventListener("change", onMq);
       mo.disconnect();
       cancelAnimationFrame(raf);
       teardown();
@@ -113,10 +125,13 @@ function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
     THEME_ROLES.forEach((role, k) => root.style.setProperty(`--${role}`, values[k]));
   };
 
+  const mobile = window.matchMedia(MOBILE).matches;
   let previous: ThemeName = "dark";
-  sections.forEach((section) => {
+  sections.forEach((section, i) => {
     const theme = section.dataset.theme as ThemeName;
     if (theme === previous) return;
+    const prevSection = sections[i - 1];
+    const lightSwap = (theme === "light") !== (previous === "light");
     const from = pal(previous);
     const to = pal(theme);
     const mix = Object.fromEntries(
@@ -135,17 +150,34 @@ function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
       t.p = self.progress;
       apply();
     };
-    ScrollTrigger.create({
-      trigger: section,
-      // a cor só começa a mudar com a nova seção já bem visível (30% da tela)
-      // e termina quando ela ocupa 80%: a seção anterior fica estável mais tempo
-      start: "top 70%",
-      end: "top 20%",
-      // recalculado depois dos pins das seções (que mudam as posições)
-      refreshPriority: -1,
-      onUpdate: sync,
-      onRefresh: sync,
-    });
+    const firstText = section.querySelector("h1, h2, h3, p, li, a, button");
+    if (mobile && lightSwap && prevSection && firstText) {
+      // celular, claro ↔ escuro: a troca acontece no vão entre as seções
+      // (espaçador .m-theme-gap): começa com o fim da seção anterior a 70% da
+      // tela e termina antes do primeiro texto da nova entrar; nenhum texto
+      // novo aparece sobre o cinza do meio da transição
+      ScrollTrigger.create({
+        trigger: prevSection,
+        start: "bottom 70%",
+        endTrigger: firstText,
+        end: "top bottom",
+        refreshPriority: -1,
+        onUpdate: sync,
+        onRefresh: sync,
+      });
+    } else {
+      ScrollTrigger.create({
+        trigger: section,
+        // a cor só começa a mudar com a nova seção já bem visível (30% da tela)
+        // e termina quando ela ocupa 80%: a seção anterior fica estável mais tempo
+        start: "top 70%",
+        end: "top 20%",
+        // recalculado depois dos pins das seções (que mudam as posições)
+        refreshPriority: -1,
+        onUpdate: sync,
+        onRefresh: sync,
+      });
+    }
     previous = theme;
   });
   apply();

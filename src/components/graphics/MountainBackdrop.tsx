@@ -119,11 +119,18 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   }, [env]);
 
   const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
-  // toque: a foto com parallax/zoom (garante a seção preenchida no celular e
-  // libera um contexto WebGL); o terreno 3D aprovado fica no desktop
-  const scene = env?.webgl === true && !env.coarse;
+  // o nível vem do monitor global de qualidade (a cena se registra ao montar)
+  const [mounted, setMounted] = useState(false);
+  const tier = useSceneTier("montanhas", root, mounted);
+  // toque: terreno 3D na versão leve; a foto fica só como reserva (sem WebGL2,
+  // prefers-reduced-motion, nível "low" ou perda de contexto repetida).
+  // Desktop: sem mudança (3D sempre que houver WebGL2).
+  const scene = env?.webgl === true && (!env.coarse || (!env.reduced && tier !== "low"));
   const mountScene = scene && near;
-  const tier = useSceneTier("montanhas", root, mountScene);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- espelha a montagem da cena para o monitor de qualidade
+    setMounted(mountScene);
+  }, [mountScene]);
 
   useGSAP(
     () => {
@@ -184,7 +191,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
                       pointerRef={pointer}
                       active={active}
                       light={env.coarse || tier === "low"}
-                      maxDpr={presetFor(tier).maxDpr}
+                      maxDpr={env.coarse ? Math.min(1.5, presetFor(tier).maxDpr) : presetFor(tier).maxDpr}
                       reducedMotion={env.reduced}
                       onContextLost={onLost}
                     />

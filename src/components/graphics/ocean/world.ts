@@ -74,12 +74,14 @@ const bedH = (x: number, z: number) =>
   BED_LEVEL + 1.3 * Math.sin(x * 0.08 + 1.0) * Math.sin(z * 0.06) + 0.5 * Math.sin(x * 0.21 + z * 0.17);
 
 /** Região do cardume (centro e tamanho): à frente da câmera no fim da descida. */
-const BOX = { x0: 0, y0: -6.6, z0: -31, w: 22, h: 4.5, d: 10 };
+const BOX_WIDE = { x0: 0, y0: -6.6, z0: -31, w: 22, h: 4.5, d: 10 };
+/** Celular (tela em pé): mais estreita e mais perto, para o cardume passar pelo meio. */
+const BOX_TALL = { x0: 0, y0: -7.2, z0: -29, w: 8, h: 4, d: 6 };
 
 // UMA tartaruga: volta lenta numa elipse inclinada à frente da câmera no meio
 // do mergulho (p ~0,6 a 0,8, a 8 a 13 unidades): a metade da frente da volta é
 // a travessia em diagonal, bem visível; a de trás fica mais longe, na névoa
-const TURTLE = {
+const TURTLE_WIDE = {
   center: new Vector3(1, -6, -19),
   a: new Vector3(0.8, 0, -0.6), // eixo maior (diagonal)
   b: new Vector3(0.6, 0, 0.8), // eixo menor (para perto / para longe)
@@ -89,6 +91,12 @@ const TURTLE = {
   phase: -1.13, // passa mais perto por volta dos 15 s depois de a cena montar
   len: 1.9,
 };
+/** Celular: volta menor e mais perto do centro (sempre dentro da tela estreita). */
+const TURTLE_TALL = { ...TURTLE_WIDE, center: new Vector3(0, -7, -17), ra: 3.6, rb: 2.4, w: 0.09 };
+
+/** Campo de visão vertical: maior na tela em pé (senão a cena vira uma fresta). */
+const FOV_WIDE = 50;
+const FOV_TALL = 68;
 
 type Boids = { pos: Float32Array; vel: Float32Array; size: Float32Array; goal: Vector3; next: number; rand: () => number };
 
@@ -101,7 +109,13 @@ const tmpS = new Vector3();
 
 export class OceanWorld {
   readonly root = new Group();
-  private readonly shared = { uTime: { value: 0 }, uCamPos: { value: new Vector3() } };
+  private readonly shared = {
+    uTime: { value: 0 },
+    uCamPos: { value: new Vector3() },
+    uExpo: { value: 1 },
+    uFogK: { value: 1 },
+    uRays: { value: 1 },
+  };
   private readonly back: ShaderMaterial;
   private readonly backGeo = new PlaneGeometry(2, 2);
   private readonly under = new Group();
@@ -119,9 +133,20 @@ export class OceanWorld {
   private time = 0;
   private prog = -1;
   private tilt = new Vector2();
+  private readonly box: typeof BOX_WIDE;
+  private readonly turtle: typeof TURTLE_WIDE;
 
-  constructor(private readonly light: boolean) {
+  constructor(
+    private readonly light: boolean,
+    /** Celular (até 767px): exposição maior, menos névoa, raios mais fortes e tudo mais perto do centro. */
+    private readonly mobile = false,
+  ) {
     this.defines = light ? { LIGHT: "" } : {};
+    this.box = mobile ? BOX_TALL : BOX_WIDE;
+    this.turtle = mobile ? TURTLE_TALL : TURTLE_WIDE;
+    this.shared.uExpo.value = mobile ? 1.4 : 1;
+    this.shared.uFogK.value = mobile ? 0.6 : 1;
+    this.shared.uRays.value = mobile ? 1.6 : 1;
     this.back = new ShaderMaterial({
       vertexShader: BACKDROP_VERT,
       fragmentShader: BACKDROP_FRAG,
@@ -190,8 +215,9 @@ export class OceanWorld {
       const mesh = new InstancedMesh(geo, this.silhouette({ tint, rim: 0.4, fog: 0.85 }), count);
       for (let i = 0; i < count; i++) {
         const side = rand() < 0.5 ? -1 : 1;
-        const x = side * Math.pow(rand(), 1.25) * 42;
-        const z = -27 - Math.pow(rand(), 1.4) * 50;
+        // celular: recife mais estreito e mais perto (aparece na parte de baixo da tela)
+        const x = side * Math.pow(rand(), 1.25) * (this.mobile ? 13 : 42);
+        const z = (this.mobile ? -25 : -27) - Math.pow(rand(), 1.4) * (this.mobile ? 26 : 50);
         const s = s0 + (s1 - s0) * rand();
         // leques quase de frente para a câmera (silhueta inteira)
         const yaw = ti === 1 ? (rand() - 0.5) * 1.2 : rand() * Math.PI * 2;
@@ -260,14 +286,14 @@ export class OceanWorld {
     for (let i = 0; i < n; i++) {
       phase[i] = rand() * Math.PI * 2;
       size[i] = 0.34 + rand() * 0.14;
-      pos[i * 3] = BOX.x0 + (rand() - 0.5) * 6;
-      pos[i * 3 + 1] = BOX.y0 + (rand() - 0.5) * 2;
-      pos[i * 3 + 2] = BOX.z0 + (rand() - 0.5) * 4;
+      pos[i * 3] = this.box.x0 + (rand() - 0.5) * 6;
+      pos[i * 3 + 1] = this.box.y0 + (rand() - 0.5) * 2;
+      pos[i * 3 + 2] = this.box.z0 + (rand() - 0.5) * 4;
       vel[i * 3] = 1.6 + rand() * 0.3;
       vel[i * 3 + 1] = (rand() - 0.5) * 0.2;
       vel[i * 3 + 2] = (rand() - 0.5) * 0.4;
     }
-    this.boids = { pos, vel, size, goal: new Vector3(BOX.x0 + 6, BOX.y0, BOX.z0), next: 0, rand };
+    this.boids = { pos, vel, size, goal: new Vector3(this.box.x0 + (this.mobile ? 2 : 6), this.box.y0, this.box.z0), next: 0, rand };
     // pré-aquece: o cardume já aparece organizado (inclusive no quadro parado)
     for (let k = 0; k < 90; k++) this.stepBoids(1 / 30, k / 30);
     fishGeo.setAttribute("aPhase", new InstancedBufferAttribute(phase, 1));
@@ -293,7 +319,7 @@ export class OceanWorld {
   private stepBoids(dt: number, t: number) {
     const b = this.boids!;
     if (t >= b.next) {
-      b.goal.set(BOX.x0 + (b.rand() - 0.5) * BOX.w, BOX.y0 + (b.rand() - 0.5) * BOX.h, BOX.z0 + (b.rand() - 0.5) * BOX.d);
+      b.goal.set(this.box.x0 + (b.rand() - 0.5) * this.box.w, this.box.y0 + (b.rand() - 0.5) * this.box.h, this.box.z0 + (b.rand() - 0.5) * this.box.d);
       b.next = t + 7 + b.rand() * 6;
     }
     const { pos, vel } = b;
@@ -378,7 +404,7 @@ export class OceanWorld {
     // tartaruga: diagonal lenta, subindo e descendo devagar (o corpo inclina
     // junto com a subida)
     {
-      const T = TURTLE;
+      const T = this.turtle;
       const ang = t * T.w + T.phase;
       const ca = Math.cos(ang);
       const sa = Math.sin(ang);
@@ -396,10 +422,16 @@ export class OceanWorld {
     if (this.sharks) {
       // ao longe, cruzando devagar em sentidos opostos
       // (as fases deixam um deles em cena logo nos primeiros segundos)
-      const paths: [number, number, number, number, number][] = [
-        [-30 + ((t * 0.95 + 47) % 60), -8.6 + 0.5 * Math.sin(t * 0.11), -42, 1, 4.6],
-        [40 - ((t * 0.75 + 78) % 80), -12 + 0.4 * Math.sin(t * 0.09 + 1), -54, -1, 4.0],
-      ];
+      // celular: travessias mais curtas e mais perto (passam pelo meio da tela estreita)
+      const paths: [number, number, number, number, number][] = this.mobile
+        ? [
+            [-13 + ((t * 0.8 + 20) % 26), -9.6 + 0.4 * Math.sin(t * 0.11), -36, 1, 4.2],
+            [13 - ((t * 0.6 + 9) % 26), -12.2 + 0.4 * Math.sin(t * 0.09 + 1), -44, -1, 3.8],
+          ]
+        : [
+            [-30 + ((t * 0.95 + 47) % 60), -8.6 + 0.5 * Math.sin(t * 0.11), -42, 1, 4.6],
+            [40 - ((t * 0.75 + 78) % 80), -12 + 0.4 * Math.sin(t * 0.09 + 1), -54, -1, 4.0],
+          ];
       const far = this.sharks.count - 1;
       for (let i = 0; i < far; i++) {
         const [x, y, z, dir, len] = paths[i];
@@ -413,7 +445,9 @@ export class OceanWorld {
       const u = still ? 0.55 : this.passStart < 0 ? -1 : (t - this.passStart) / 11;
       if (u >= 0 && u <= 1) {
         tmpQ.setFromUnitVectors(Z, tmpD.set(1, 0.04, -0.12).normalize());
-        tmpM.compose(tmpP.set(cam.x - 17 + 34 * u, cam.y - 1.7 + 0.25 * Math.sin(t * 0.4), cam.z - 9 - 1.2 * u), tmpQ, tmpS.set(4.8, 4.8, 4.8));
+        // celular: atravessa uma faixa menor, mais perto (fica mais tempo na tela estreita)
+        const [span, dist] = this.mobile ? [11, 7.5] : [17, 9];
+        tmpM.compose(tmpP.set(cam.x - span + 2 * span * u, cam.y - 1.7 + 0.25 * Math.sin(t * 0.4), cam.z - dist - 1.2 * u), tmpQ, tmpS.set(4.8, 4.8, 4.8));
       } else tmpM.makeScale(0, 0, 0);
       this.sharks.setMatrixAt(far, tmpM);
       this.sharks.instanceMatrix.needsUpdate = true;
@@ -434,6 +468,11 @@ export class OceanWorld {
     const sway = still ? 0 : y > 0.3 ? 0.07 * Math.sin(t * 0.7) : 0.12 * Math.sin(t * 0.23);
     camera.position.set(this.tilt.x * 0.35 + (still ? 0 : 0.3 * Math.sin(t * 0.05)), y + sway, z);
     camera.rotation.set(pitch - this.tilt.y * 0.03, -this.tilt.x * 0.05 + (still ? 0 : 0.03 * Math.sin(t * 0.07)), 0, "YXZ");
+    const fov = this.mobile ? FOV_TALL : FOV_WIDE;
+    if (camera.fov !== fov) {
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+    }
     camera.updateMatrixWorld();
 
     this.shared.uTime.value = t;

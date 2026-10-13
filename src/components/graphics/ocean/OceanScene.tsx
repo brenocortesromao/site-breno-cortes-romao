@@ -17,14 +17,16 @@ function Ocean({
   progressRef,
   pointerRef,
   light,
+  mobile,
   still,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
   light: boolean;
+  mobile: boolean;
   still: boolean;
 }) {
-  const [world] = useState(() => new OceanWorld(light));
+  const [world] = useState(() => new OceanWorld(light, mobile));
   const invalidate = useThree((s) => s.invalidate);
   useEffect(() => () => world.dispose(), [world]);
 
@@ -55,6 +57,7 @@ export default function OceanScene({
   pointerRef,
   active,
   light,
+  mobile = false,
   maxDpr,
   reducedMotion,
   onContextLost,
@@ -63,6 +66,8 @@ export default function OceanScene({
   pointerRef: RefObject<{ x: number; y: number }>;
   active: boolean;
   light: boolean;
+  /** Celular (até 767px): enquadramento em pé, mais claro e com menos névoa (ver OceanWorld). */
+  mobile?: boolean;
   maxDpr: number;
   reducedMotion: boolean;
   /** Perda do contexto WebGL (o pai remonta a cena). */
@@ -79,7 +84,7 @@ export default function OceanScene({
       gl={{ antialias: !light, alpha: false, powerPreference: "default" }}
     >
       <ContextLossWatcher onLost={onContextLost} />
-      <Ocean progressRef={progressRef} pointerRef={pointerRef} light={light} still={reducedMotion} />
+      <Ocean progressRef={progressRef} pointerRef={pointerRef} light={light} mobile={mobile} still={reducedMotion} />
     </Canvas>
   );
 }

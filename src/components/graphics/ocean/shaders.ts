@@ -20,6 +20,10 @@ export const BED_LEVEL = -17;
 const COMMON = /* glsl */ `
 uniform float uTime;
 uniform vec3 uCamPos;
+// celular (tela em pé): exposição, névoa e raios ajustados (1, 1, 1 no desktop)
+uniform float uExpo;
+uniform float uFogK;
+uniform float uRays;
 
 #define FOG_D 0.05
 // distância do "ponto logo à frente da câmera" usado no teste acima/abaixo
@@ -83,7 +87,7 @@ vec3 waterCol(vec3 rd) {
   c += vec3(0.21, 0.23, 0.24) * pow(max(dot(rd, SUN), 0.0), 6.0) * k * 0.85;
   return c;
 }
-float fogF(float d) { return 1.0 - exp(-d * FOG_D); }
+float fogF(float d) { return 1.0 - exp(-d * FOG_D * uFogK); }
 
 // cáusticas: linhas finas onde dois campos de ruído deformado cruzam o meio
 // (rede orgânica que se move); duas camadas em velocidades diferentes
@@ -201,7 +205,7 @@ vec3 underWater(vec3 ro, vec3 rd) {
       c = mix(bed, base, fogF(t));
     }
   }
-  c += vec3(0.6, 0.64, 0.67) * godRays(rd);
+  c += vec3(0.6, 0.64, 0.67) * godRays(rd) * uRays;
   return c;
 }
 
@@ -213,7 +217,7 @@ void main() {
   vec3 c = side > 0.0 ? aboveWater(ro, rd) : underWater(ro, rd);
   // menisco: fio claro onde a água corta a tela
   c += vec3(0.32, 0.34, 0.35) * exp(-abs(side) * 28.0) * step(abs(ro.y), 2.0);
-  gl_FragColor = vec4(c, 1.0);
+  gl_FragColor = vec4(c * uExpo, 1.0);
 }`;
 
 // ------------------------------------------------------------------ silhuetas
@@ -285,7 +289,7 @@ void main() {
   c += vec3(0.62, 0.66, 0.7) * fres * smoothstep(-0.35, 0.7, n.y) * uLook.x * k;
   // animais: contorno mais forte no dorso e um brilho largo onde a luz de cima bate
   c += vec3(0.749, 0.769, 0.784) * (fres * smoothstep(0.05, 0.85, n.y) + 0.12 * pow(top, 3.0)) * uDorsal * k;
-  gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d * uLook.y)), 1.0);
+  gl_FragColor = vec4(mix(c, waterCol(rd), fogF(d * uLook.y)) * uExpo, 1.0);
 }`;
 
 // ------------------------------------------------------------------ partículas
@@ -310,9 +314,10 @@ void main() {
 }`;
 
 export const SNOW_FRAG = /* glsl */ `
+uniform float uExpo;
 varying float vA;
 void main() {
   vec2 q = gl_PointCoord * 2.0 - 1.0;
-  float a = smoothstep(1.0, 0.0, dot(q, q)) * vA;
+  float a = smoothstep(1.0, 0.0, dot(q, q)) * vA * uExpo;
   gl_FragColor = vec4(0.62, 0.66, 0.68, a); // mistura aditiva (cor × alfa)
 }`;

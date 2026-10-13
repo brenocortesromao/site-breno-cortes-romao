@@ -277,7 +277,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
       id="fractional"
       data-theme="light"
       aria-labelledby="fractional-title"
-      className="relative z-10 min-h-svh overflow-hidden"
+      className="m-theme-gap relative z-10 min-h-svh overflow-hidden"
     >
       <GraphicLayer variant="contours-a" />
       <div className="relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">

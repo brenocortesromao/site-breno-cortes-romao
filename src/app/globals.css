@@ -186,6 +186,11 @@ body::before {
   }
   /* parágrafos centralizados logo abaixo dos títulos: linhas curtas (~34ch)
      e quebra "pretty" (sem palavra órfã), bloco centralizado */
+  /* vão entre seções claro ↔ escuro: a troca de cor acontece aqui (ThemeScroll),
+     antes do primeiro texto da seção nova entrar */
+  .m-theme-gap {
+    margin-top: 30vh;
+  }
   .m-center-p {
     text-align: center;
     text-wrap: pretty;

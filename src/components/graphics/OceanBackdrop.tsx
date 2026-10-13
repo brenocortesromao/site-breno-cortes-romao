@@ -13,7 +13,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const OceanScene = dynamic(() => import("./ocean/OceanScene"), { ssr: false });
 
-type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
+type Env = { webgl: boolean; reduced: boolean; coarse: boolean; mobile: boolean };
 
 /**
  * Fundo de oceano 3D de "E a inteligência artificial?" (mesmo espírito das
@@ -49,7 +49,12 @@ export default function OceanBackdrop() {
     const webgl = webglSupport().webgl2;
     if (!webgl) console.info("[oceano] sem WebGL2 acelerado: sem fundo de oceano.");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única de capacidades do navegador
-    setEnv({ webgl, reduced, coarse: window.matchMedia("(pointer: coarse)").matches });
+    setEnv({
+      webgl,
+      reduced,
+      coarse: window.matchMedia("(pointer: coarse)").matches,
+      mobile: window.matchMedia("(max-width: 767.98px)").matches,
+    });
     if (reduced) progress.current = 0.92;
   }, []);
 
@@ -133,6 +138,7 @@ export default function OceanBackdrop() {
                     pointerRef={pointer}
                     active={active}
                     light={env.coarse || tier === "low"}
+                    mobile={env.mobile}
                     maxDpr={presetFor(tier).maxDpr}
                     reducedMotion={env.reduced}
                     onContextLost={onLost}
@@ -142,9 +148,10 @@ export default function OceanBackdrop() {
             </ResilientBoundary>
           </div>
           {/* vinheta e degradês para o fundo (entrada/saída sem corte, texto legível) */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--bg)_100%)]" />
-          <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background to-transparent" />
+          {/* celular: vinheta e degradês menores (a cena aparece mais) */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--bg)_100%)] max-md:bg-[radial-gradient(ellipse_at_center,transparent_60%,var(--bg)_100%)]" />
+          <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background to-transparent max-md:h-[12%]" />
+          <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background to-transparent max-md:h-[12%]" />
         </div>
       </div>
     </div>
