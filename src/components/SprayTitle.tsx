@@ -65,7 +65,8 @@ export default function SprayTitle({
         const ms = mist.current!;
         const cx = cv.getContext("2d")!;
         const mx = ms.getContext("2d")!;
-        const css = getComputedStyle(document.documentElement);
+        // cores do próprio título (herdadas do contêiner: certas também numa troca de tema)
+        const css = getComputedStyle(h);
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         let W = 0;
         let H = 0;

@@ -16,6 +16,7 @@ import {
   Vector3,
   type PerspectiveCamera,
   type WebGLRenderer,
+  type Object3D,
 } from "three";
 import { branchCoral, fanCoral, moundCoral, seeded } from "./coral";
 import type { OceanModels } from "./models";
@@ -241,9 +242,9 @@ export class OceanWorld {
     return mat;
   }
 
-  /** Recebe o tubarão e o peixe do glb (assim que o Draco termina). */
-  setModels(m: OceanModels) {
-    if (this.fish) return;
+  /** Recebe o tubarão e o peixe do glb (assim que o Draco termina); devolve o que entrou na cena. */
+  setModels(m: OceanModels): Object3D | null {
+    if (this.fish) return null;
     const rand = seeded(13);
     const n = this.light ? 45 : 130;
     const fishGeo = m.fish.clone();
@@ -270,13 +271,15 @@ export class OceanWorld {
     this.geos.push(fishGeo);
     this.under.add(this.fish);
     this.writeFish();
+    return this.fish;
   }
 
   /** Recebe os tubarões e a tartaruga realistas; "few" (nível low): 1 tubarão, sem "circling". */
-  setAnimals(src: Awaited<ReturnType<typeof loadOceanAnimals>>, few: boolean) {
-    if (this.animals) return;
+  setAnimals(src: Awaited<ReturnType<typeof loadOceanAnimals>>, few: boolean): Object3D | null {
+    if (this.animals) return null;
     this.animals = new OceanAnimals(src, this.shared, { mobile: this.mobile, light: this.light, few });
     this.under.add(this.animals.group);
+    return this.animals.group;
   }
 
   /**

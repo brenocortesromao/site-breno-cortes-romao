@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import type { PerspectiveCamera } from "three";
+import { Group, Mesh, type PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
+import { warmup } from "@/lib/warmup";
 import { AerialWorld } from "./aerial";
 import { CloseDof } from "./dof";
 
@@ -24,6 +25,9 @@ function Aerial({
   onCompiled: () => void;
 }) {
   const [world] = useState(() => new AerialWorld(light));
+  // profundidade de campo do close (só desktop; no modo leve, só névoa)
+  const [dof] = useState(() => (light ? null : new CloseDof()));
+  useEffect(() => () => dof?.dispose(), [dof]);
   const get = useThree((s) => s.get);
   useEffect(() => {
     const { gl, scene, camera } = get();
@@ -33,27 +37,35 @@ function Aerial({
     // paralelo, tudo antes do 1º quadro
     world
       .build()
-      .then(() => (alive ? gl.compileAsync(scene, camera).catch(() => undefined) : undefined))
+      .then(() => (alive ? Promise.all([warmup(gl, scene, camera), dof?.warm(gl, camera)]) : undefined))
       .then(() => {
         if (!alive) return;
         onCompiled();
         get().invalidate();
       });
-    // urso: só quando o modelo existe (e a cena já está perto da seção)
+    // urso: só quando o modelo existe (os bytes já vieram na pré-carga). Entra
+    // na cena só com os shaders (inclusive os da sombra) compilados e as
+    // texturas na GPU: nada compila no quadro em que ele aparece
     if (bearSrc)
       world
         .loadBear(bearSrc)
-        .then(() => get().invalidate())
+        .then(async (bear) => {
+          if (!bear || !alive) return;
+          const shadows = new Group();
+          bear.traverse((o) => {
+            if (o instanceof Mesh && o.customDepthMaterial) shadows.add(new Mesh(o.geometry, o.customDepthMaterial));
+          });
+          await Promise.all([warmup(gl, bear, camera, scene), warmup(gl, shadows, camera, scene)]);
+          if (!alive) return;
+          world.addBear(bear);
+          get().invalidate();
+        })
         .catch((e) => console.warn("[urso] não carregou:", e));
     return () => {
       alive = false;
       world.dispose();
     };
-  }, [world, get, onCompiled, bearSrc]);
-
-  // profundidade de campo do close (só desktop; no modo leve, só névoa)
-  const [dof] = useState(() => (light ? null : new CloseDof()));
-  useEffect(() => () => dof?.dispose(), [dof]);
+  }, [world, dof, get, onCompiled, bearSrc]);
 
   // prioridade 1: este quadro renderiza a cena (e, no close, o desfoque do fundo)
   useFrame(({ camera, gl, scene, viewport }, delta) => {

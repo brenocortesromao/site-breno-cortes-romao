@@ -168,11 +168,15 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
         const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
         const cols = gsap.utils.toArray<HTMLElement>("[data-col]", el).map((c) => [...c.querySelectorAll<HTMLElement>("[data-col-item]")]);
 
-        // pontos em volta do cursor (lerp suave via quickTo)
+        // pontos em volta do cursor (lerp suave via quickTo). As variáveis vão
+        // direto na camada que as usa: gravadas na moldura, cada quadro
+        // recalculava o estilo de todos os itens (variável CSS é herdada)
+        const glow = el.querySelector<HTMLElement>("[data-dots-hover]");
+        const waveLayer = el.querySelector<HTMLElement>("[data-wave]");
         const spot = { x: -999, y: -999 };
         const writeSpot = () => {
-          frame.style.setProperty("--mx", `${spot.x}px`);
-          frame.style.setProperty("--my", `${spot.y}px`);
+          glow?.style.setProperty("--mx", `${spot.x}px`);
+          glow?.style.setProperty("--my", `${spot.y}px`);
         };
         const qx = gsap.quickTo(spot, "x", { duration: 0.35, ease: "power3.out", onUpdate: writeSpot });
         const qy = gsap.quickTo(spot, "y", { duration: 0.35, ease: "power3.out", onUpdate: writeSpot });
@@ -182,7 +186,6 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
           qx(e.clientX - r.left);
           qy(e.clientY - r.top);
         };
-        const glow = el.querySelector<HTMLElement>("[data-dots-hover]");
         const showSpot = () => glow && (glow.style.opacity = "1");
         const hideSpot = () => glow && (glow.style.opacity = "0");
         if (finePointer) {
@@ -202,7 +205,7 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
         wtl.fromTo(
           wave,
           { v: -30 },
-          { v: 130, duration: 1.5, ease: "power1.inOut", onUpdate: () => frame.style.setProperty("--wx", `${wave.v}%`) },
+          { v: 130, duration: 1.5, ease: "power1.inOut", onUpdate: () => waveLayer?.style.setProperty("--wx", `${wave.v}%`) },
         );
 
         // scanner
@@ -339,6 +342,7 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
             }}
           />
           <div
+            data-wave
             className="absolute inset-0 bg-[radial-gradient(circle,#4a4a4a_1.2px,transparent_1.8px)] [background-size:24px_24px] motion-reduce:hidden"
             style={{
               maskImage: "linear-gradient(90deg, transparent calc(var(--wx, -30%) - 14%), #000 var(--wx, -30%), transparent calc(var(--wx, -30%) + 14%))",

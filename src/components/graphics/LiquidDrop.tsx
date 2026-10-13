@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
+import { enableParallelCompile, programReady } from "@/lib/warmup";
 
 /**
  * Gota de metal líquido cromado (WebGL2, sem bibliotecas), para "Como funciona".
@@ -149,8 +150,7 @@ const TARGETS: Target[] = [
 function compile(gl: WebGL2RenderingContext, type: number, src: string) {
   const s = gl.createShader(type)!;
   gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? "shader");
+  gl.compileShader(s); // sem consultar o status aqui: ver programReady + LINK_STATUS
   return s;
 }
 
@@ -186,162 +186,193 @@ export default function LiquidDrop({
       el.remove();
       return;
     }
+    // link em segundo plano: as consultas de status não esperam o compilador (lib/warmup)
+    enableParallelCompile(gl);
     let program: WebGLProgram;
     try {
       program = gl.createProgram()!;
       gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, VERT));
       gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, FRAG(light ? 48 : 80)));
       gl.linkProgram(program);
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error("link");
     } catch {
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();
       return;
     }
-    gl.useProgram(program);
-    const handleLost = (e: Event) => {
-      e.preventDefault();
-      onLost?.();
+    // consultar o status agora travaria a thread principal pela compilação
+    // inteira: espera o link em segundo plano (programReady, lib/warmup) e só
+    // então confere o resultado e monta o resto.
+    const abandon = () => {
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      el.remove();
     };
-    el.addEventListener("webglcontextlost", handleLost);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(program, "aPos");
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const u = (n: string) => gl.getUniformLocation(program, n);
-    const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt") };
+    const start = (): (() => void) => {
+      gl.useProgram(program);
+      const handleLost = (e: Event) => {
+        e.preventDefault();
+        onLost?.();
+      };
+      el.addEventListener("webglcontextlost", handleLost);
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(program, "aPos");
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const u = (n: string) => gl.getUniformLocation(program, n);
+      const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt") };
 
-    const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5, maxDpr);
-    const resize = () => {
-      const r = el.getBoundingClientRect();
-      el.width = Math.max(1, Math.round(r.width * dpr));
-      el.height = Math.max(1, Math.round(r.height * dpr));
-      gl.viewport(0, 0, el.width, el.height);
-    };
-    resize();
-
-    // estado atual (interpolado) — começa com as duas gotas afastadas
-    const s = { sep: 1.1, ripple: 0, noise: 0.03, spin: 0.15, torus: 0 };
-    let angle = 0;
-    let time = 0;
-    let lastStage = -1;
-    /** Entrada profunda: 0 = no fundo, 1 = no lugar. */
-    let emerge = 0;
-    let emerging = false;
-    const tilt = { x: 0, y: 0 };
-    const pointer = { x: 0, y: 0 };
-    /** Desfoque + opacidade do canvas acompanham a subida. */
-    const styleEmerge = (e: number) => {
-      el.style.filter = e >= 1 ? "" : `blur(${((1 - e) * 16).toFixed(2)}px)`;
-      el.style.opacity = String(Math.min(1, e * 2.2));
-    };
-
-    const draw = () => {
-      gl.uniform2f(U.res, el.width, el.height);
-      gl.uniform1f(U.time, time);
-      gl.uniform1f(U.angle, angle);
-      gl.uniform1f(U.sep, s.sep);
-      gl.uniform1f(U.ripple, s.ripple);
-      gl.uniform1f(U.noise, s.noise);
-      gl.uniform1f(U.torus, s.torus);
-      gl.uniform1f(U.emerge, easeOut(emerge));
-      gl.uniform2f(U.tilt, tilt.x, tilt.y);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    };
-
-    const ro = new ResizeObserver(() => {
+      const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5, maxDpr);
+      const resize = () => {
+        const r = el.getBoundingClientRect();
+        el.width = Math.max(1, Math.round(r.width * dpr));
+        el.height = Math.max(1, Math.round(r.height * dpr));
+        gl.viewport(0, 0, el.width, el.height);
+      };
       resize();
-      if (reduceMotion) draw();
-    });
-    ro.observe(el);
 
-    if (reduceMotion) {
-      // forma estática do anel
-      Object.assign(s, { sep: 0, ripple: 0, noise: 0, torus: 1 });
-      angle = 0.4;
-      emerge = 1;
-      draw();
+      // estado atual (interpolado) — começa com as duas gotas afastadas
+      const s = { sep: 1.1, ripple: 0, noise: 0.03, spin: 0.15, torus: 0 };
+      let angle = 0;
+      let time = 0;
+      let lastStage = -1;
+      /** Entrada profunda: 0 = no fundo, 1 = no lugar. */
+      let emerge = 0;
+      let emerging = false;
+      const tilt = { x: 0, y: 0 };
+      const pointer = { x: 0, y: 0 };
+      /** Desfoque + opacidade do canvas acompanham a subida. */
+      const styleEmerge = (e: number) => {
+        el.style.filter = e >= 1 ? "" : `blur(${((1 - e) * 16).toFixed(2)}px)`;
+        el.style.opacity = String(Math.min(1, e * 2.2));
+      };
+
+      const draw = () => {
+        gl.uniform2f(U.res, el.width, el.height);
+        gl.uniform1f(U.time, time);
+        gl.uniform1f(U.angle, angle);
+        gl.uniform1f(U.sep, s.sep);
+        gl.uniform1f(U.ripple, s.ripple);
+        gl.uniform1f(U.noise, s.noise);
+        gl.uniform1f(U.torus, s.torus);
+        gl.uniform1f(U.emerge, easeOut(emerge));
+        gl.uniform2f(U.tilt, tilt.x, tilt.y);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      };
+
+      const ro = new ResizeObserver(() => {
+        resize();
+        if (reduceMotion) draw();
+      });
+      ro.observe(el);
+
+      if (reduceMotion) {
+        // forma estática do anel
+        Object.assign(s, { sep: 0, ripple: 0, noise: 0, torus: 1 });
+        angle = 0.4;
+        emerge = 1;
+        draw();
+        return () => {
+          ro.disconnect();
+          el.removeEventListener("webglcontextlost", handleLost);
+          gl.getExtension("WEBGL_lose_context")?.loseContext();
+          el.remove();
+        };
+      }
+
+      let raf = 0;
+      let last = performance.now();
+      const frame = (now: number) => {
+        raf = requestAnimationFrame(frame);
+        const dt = Math.min((now - last) / 1000, 0.05);
+        last = now;
+        const stage = Math.min(Math.max(stageRef.current ?? 0, 0), TARGETS.length - 1);
+        if (stage !== lastStage) {
+          // ao (re)entrar na Conversa, as duas gotas recomeçam afastadas
+          if (stage === 0 && lastStage !== -1) s.sep = 1.1;
+          lastStage = stage;
+        }
+        const tgt = TARGETS[stage];
+        const k = 1 - Math.exp(-dt * 2.2);
+        const kSep = 1 - Math.exp(-dt * 0.9); // aproximação lenta das gotas
+        s.sep += (tgt.sep - s.sep) * kSep;
+        s.ripple += (tgt.ripple - s.ripple) * k;
+        s.noise += (tgt.noise - s.noise) * k;
+        s.spin += (tgt.spin - s.spin) * k;
+        s.torus += (tgt.torus - s.torus) * (1 - Math.exp(-dt * 1.6));
+        angle += s.spin * dt;
+        time += dt;
+        if (emerging && emerge < 1) {
+          emerge = Math.min(1, emerge + dt / 2.8);
+          // ease-out na subida (o shader recebe o valor já suavizado)
+          styleEmerge(easeOut(emerge));
+        }
+        const kt = 1 - Math.exp(-dt * 2.5);
+        tilt.x += (pointer.x * 0.35 - tilt.x) * kt;
+        tilt.y += (pointer.y * 0.25 - tilt.y) * kt;
+        draw();
+      };
+
+      // mouse: inclinação leve na direção do cursor (só ponteiro fino)
+      const onPointer = (ev: PointerEvent) => {
+        const r = el.getBoundingClientRect();
+        pointer.x = Math.max(-1, Math.min(1, (ev.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+        pointer.y = Math.max(-1, Math.min(1, (ev.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+      };
+      if (!light) window.addEventListener("pointermove", onPointer, { passive: true });
+      styleEmerge(0);
+
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          cancelAnimationFrame(raf);
+          if (!entry.isIntersecting) {
+            // saiu da tela: a próxima entrada emerge do fundo de novo
+            emerging = false;
+            emerge = 0;
+            styleEmerge(0);
+            return;
+          }
+          // emerge quando boa parte da gota está visível
+          if (entry.intersectionRatio >= 0.4) emerging = true;
+          last = performance.now();
+          raf = requestAnimationFrame(frame);
+        },
+        { threshold: [0, 0.4] },
+      );
+      io.observe(el);
+
       return () => {
-        ro.disconnect();
+        cancelAnimationFrame(raf);
+        window.removeEventListener("pointermove", onPointer);
         el.removeEventListener("webglcontextlost", handleLost);
+        io.disconnect();
+        ro.disconnect();
         gl.getExtension("WEBGL_lose_context")?.loseContext();
         el.remove();
       };
-    }
-
-    let raf = 0;
-    let last = performance.now();
-    const frame = (now: number) => {
-      raf = requestAnimationFrame(frame);
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
-      const stage = Math.min(Math.max(stageRef.current ?? 0, 0), TARGETS.length - 1);
-      if (stage !== lastStage) {
-        // ao (re)entrar na Conversa, as duas gotas recomeçam afastadas
-        if (stage === 0 && lastStage !== -1) s.sep = 1.1;
-        lastStage = stage;
-      }
-      const tgt = TARGETS[stage];
-      const k = 1 - Math.exp(-dt * 2.2);
-      const kSep = 1 - Math.exp(-dt * 0.9); // aproximação lenta das gotas
-      s.sep += (tgt.sep - s.sep) * kSep;
-      s.ripple += (tgt.ripple - s.ripple) * k;
-      s.noise += (tgt.noise - s.noise) * k;
-      s.spin += (tgt.spin - s.spin) * k;
-      s.torus += (tgt.torus - s.torus) * (1 - Math.exp(-dt * 1.6));
-      angle += s.spin * dt;
-      time += dt;
-      if (emerging && emerge < 1) {
-        emerge = Math.min(1, emerge + dt / 2.8);
-        // ease-out na subida (o shader recebe o valor já suavizado)
-        styleEmerge(easeOut(emerge));
-      }
-      const kt = 1 - Math.exp(-dt * 2.5);
-      tilt.x += (pointer.x * 0.35 - tilt.x) * kt;
-      tilt.y += (pointer.y * 0.25 - tilt.y) * kt;
-      draw();
     };
-
-    // mouse: inclinação leve na direção do cursor (só ponteiro fino)
-    const onPointer = (ev: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      pointer.x = Math.max(-1, Math.min(1, (ev.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
-      pointer.y = Math.max(-1, Math.min(1, (ev.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
-    };
-    if (!light) window.addEventListener("pointermove", onPointer, { passive: true });
-    styleEmerge(0);
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        cancelAnimationFrame(raf);
-        if (!entry.isIntersecting) {
-          // saiu da tela: a próxima entrada emerge do fundo de novo
-          emerging = false;
-          emerge = 0;
-          styleEmerge(0);
-          return;
-        }
-        // emerge quando boa parte da gota está visível
-        if (entry.intersectionRatio >= 0.4) emerging = true;
-        last = performance.now();
-        raf = requestAnimationFrame(frame);
-      },
-      { threshold: [0, 0.4] },
-    );
-    io.observe(el);
-
+    let alive = true;
+    let stop: (() => void) | null = null;
+    programReady(gl, program).then(() => {
+      if (!alive) return;
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        abandon();
+        return;
+      }
+      stop = start();
+    });
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", onPointer);
-      el.removeEventListener("webglcontextlost", handleLost);
-      io.disconnect();
-      ro.disconnect();
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-      el.remove();
+      alive = false;
+      if (stop) stop();
+      else {
+        // desmontou antes de ficar pronto (ex.: Strict Mode em dev): o canvas
+        // sai já, e o contexto só é liberado com o link pronto; liberar agora
+        // esperaria a compilação pendente na thread principal (~170 ms)
+        el.remove();
+        programReady(gl, program).then(() => gl.getExtension("WEBGL_lose_context")?.loseContext());
+      }
     };
   }, [stageRef, light, maxDpr, reduceMotion, onLost]);
 

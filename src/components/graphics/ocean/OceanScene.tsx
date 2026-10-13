@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, type RefObject } from "react";
+import { useCallback, useEffect, useState, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import type { PerspectiveCamera } from "three";
+import type { Object3D, PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
+import { warmup } from "@/lib/warmup";
 import { loadOceanModels } from "./models";
 import { loadOceanAnimals } from "./animals";
 import { OceanWorld } from "./world";
@@ -21,6 +22,7 @@ function Ocean({
   mobile,
   few,
   still,
+  onReady,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
@@ -28,33 +30,51 @@ function Ocean({
   mobile: boolean;
   few: boolean;
   still: boolean;
+  /** Shaders compilados e texturas na GPU: o canvas pode começar a desenhar. */
+  onReady: () => void;
 }) {
   const [world] = useState(() => new OceanWorld(light, mobile));
-  const invalidate = useThree((s) => s.invalidate);
+  const get = useThree((s) => s.get);
   useEffect(() => () => world.dispose(), [world]);
 
-  // tubarão e cardume chegam depois (glb + Draco num worker); até lá, só água e recife
+  // água e recife: tudo compilado (inclusive o que só aparece no mergulho)
+  // antes do 1º quadro
   useEffect(() => {
     let alive = true;
+    const { gl, scene, camera } = get();
+    warmup(gl, scene, camera).then(() => {
+      if (!alive) return;
+      onReady();
+      get().invalidate();
+    });
+    return () => {
+      alive = false;
+    };
+  }, [get, onReady]);
+
+  // cardume, tubarões e tartaruga (pré-carregados quando o "Sobre" apareceu):
+  // entram escondidos, ficam visíveis só com os shaders e as texturas prontos
+  useEffect(() => {
+    let alive = true;
+    const show = async (obj: Object3D | null) => {
+      if (!obj || !alive) return;
+      obj.visible = false;
+      const { gl, scene, camera } = get();
+      await warmup(gl, obj, camera, scene);
+      if (!alive) return;
+      obj.visible = true;
+      get().invalidate(); // quadro parado (reduced motion): redesenha com eles
+    };
     loadOceanModels()
-      .then((m) => {
-        if (!alive) return;
-        world.setModels(m);
-        invalidate(); // quadro parado (reduced motion): redesenha com eles
-      })
+      .then((m) => (alive ? show(world.setModels(m)) : undefined))
       .catch((e) => console.warn("[oceano] modelos não carregaram:", e));
-    // tubarões e tartaruga realistas (só com a cena montada, isto é, perto da seção)
     loadOceanAnimals()
-      .then((src) => {
-        if (!alive) return;
-        world.setAnimals(src, few);
-        invalidate();
-      })
+      .then((src) => (alive ? show(world.setAnimals(src, few)) : undefined))
       .catch((e) => console.warn("[oceano] animais não carregaram:", e));
     return () => {
       alive = false;
     };
-  }, [world, invalidate, few]);
+  }, [world, get, few]);
 
   useFrame(({ gl, camera }, delta) => {
     world.update(gl, camera as PerspectiveCamera, progressRef.current ?? 0, pointerRef.current ?? { x: 0, y: 0 }, Math.min(delta, 0.05), still);
@@ -87,18 +107,21 @@ export default function OceanScene({
   /** Perda do contexto WebGL (o pai remonta a cena). */
   onContextLost?: () => void;
 }) {
+  const [ready, setReady] = useState(false);
+  const handleReady = useCallback(() => setReady(true), []);
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={reducedMotion ? "demand" : active ? "always" : "never"}
+      // nenhum quadro antes do aquecimento (ver lib/warmup); o canvas fica vazio até lá
+      frameloop={!ready ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
       // o fundo é suave e fica a ~40% de opacidade: resolução 1x basta
       dpr={Math.min(maxDpr, light ? 0.6 : 1)}
       camera={{ fov: 50, near: 0.1, far: 220, position: [0, 8, 14] }}
       gl={{ antialias: !light, alpha: false, powerPreference: "default" }}
     >
       <ContextLossWatcher onLost={onContextLost} />
-      <Ocean progressRef={progressRef} pointerRef={pointerRef} light={light} mobile={mobile} few={few} still={reducedMotion} />
+      <Ocean progressRef={progressRef} pointerRef={pointerRef} light={light} mobile={mobile} few={few} still={reducedMotion} onReady={handleReady} />
     </Canvas>
   );
 }

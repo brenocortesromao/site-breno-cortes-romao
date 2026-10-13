@@ -26,3 +26,10 @@ export const THEME_ROLES = [
 
 /** Papéis de texto: trocam numa janela curta no meio da transição (contraste). */
 export const TEXT_ROLES = new Set(["fg", "muted", "grad-from", "grad-to"]);
+
+/**
+ * Cores vivas atuais (papel → valor), mantidas pelo ThemeScroll. Para quem
+ * precisa da cor em JS (canvas, WebGL) sem ler estilo computado: durante uma
+ * troca de tema elas ficam nos contêineres, não no <html> (ver ThemeScroll).
+ */
+export const liveTheme = new Map<string, string>();

@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { usePreloadBeforeSection } from "@/lib/preload";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -39,6 +40,10 @@ export default function CloudBackdrop() {
     typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches ? "150% 0px" : "100% 0px",
   );
   const near = useWebglSlot(root, slotMargin);
+  // pré-carga quando "A distância" aparece: código da cena
+  usePreloadBeforeSection(root, () => {
+    if (webglSupport().webgl2) import("./clouds/CloudScene").catch(() => undefined);
+  });
   /**
    * Toque: se o WebGL falhar de vez (contexto perdido logo ao criar, comum no
    * celular quando a GPU ainda não soltou a cena anterior), não desiste para

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   CanvasTexture,
@@ -17,6 +17,7 @@ import {
   type PerspectiveCamera,
 } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
+import { warmup } from "@/lib/warmup";
 
 /**
  * Diagnóstico: voo de avião em primeira pessoa atravessando as nuvens
@@ -485,6 +486,28 @@ function Sprites({ progressRef, still, count }: { progressRef: RefObject<number>
   );
 }
 
+/**
+ * Aquecimento antes do 1º quadro: o raymarching é um shader pesado de compilar
+ * (laços desenrolados); compilado em paralelo aqui, quando a cena monta (~1
+ * tela antes da seção), e não no quadro em que a seção entra.
+ */
+function Warm({ onReady }: { onReady: () => void }) {
+  const get = useThree((s) => s.get);
+  useEffect(() => {
+    let alive = true;
+    const { gl, scene, camera } = get();
+    warmup(gl, scene, camera).then(() => {
+      if (!alive) return;
+      onReady();
+      get().invalidate();
+    });
+    return () => {
+      alive = false;
+    };
+  }, [get, onReady]);
+  return null;
+}
+
 export default function CloudScene({
   progressRef,
   pointerRef,
@@ -506,11 +529,14 @@ export default function CloudScene({
   onContextLost?: () => void;
 }) {
   const dpr = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, maxDpr, 1.5);
+  const [ready, setReady] = useState(false);
+  const handleReady = useCallback(() => setReady(true), []);
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={reducedMotion ? "demand" : active ? "always" : "never"}
+      // nenhum quadro antes do aquecimento (canvas transparente até lá)
+      frameloop={!ready ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
       // raymarching em meia resolução (o CSS reescala); billboards na resolução da tela
       dpr={light ? dpr : dpr * 0.5}
       camera={{ fov: 50, near: 0.1, far: 80, position: [0, 2.45, 0] }}
@@ -522,6 +548,7 @@ export default function CloudScene({
       ) : (
         <Volume progressRef={progressRef} pointerRef={pointerRef} still={reducedMotion} steps={40} />
       )}
+      <Warm onReady={handleReady} />
     </Canvas>
   );
 }

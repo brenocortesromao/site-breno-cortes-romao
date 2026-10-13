@@ -179,14 +179,24 @@ export default function FlowField({
     let t = 0;
     let frame = 0;
     let tg = target();
+    // animação: a leitura das posições vai para uma tarefa logo depois do
+    // quadro (layout já limpo); dentro do quadro ela forçava recálculo de
+    // layout no meio da rolagem. Quadro parado (reduced motion): leitura direta.
+    let deferReads = false;
+    let readTimer = 0;
+    const readLayout = () => {
+      readTimer = 0;
+      tg = target();
+      readDims();
+    };
     readDims();
     const step = (dt: number) => {
       t += dt;
       // posições dos blocos e das áreas apagadas: lidas a cada 4 quadros (sem
       // forçar recálculo de layout em todo quadro)
       if (frame++ % 4 === 0) {
-        tg = target();
-        readDims();
+        if (!deferReads) readLayout();
+        else if (!readTimer) readTimer = window.setTimeout(readLayout, 0);
       }
       const k = 1 - Math.exp(-dt * 1.5);
       cur.sep += (tg.separation - cur.sep) * k;
@@ -251,6 +261,7 @@ export default function FlowField({
       return () => ro.disconnect();
     }
 
+    deferReads = true;
     const tick = (_time: number, deltaTime: number) => {
       const dt = Math.min(deltaTime / 1000, 0.05);
       if (dt <= 0) return;
@@ -287,6 +298,7 @@ export default function FlowField({
       io.disconnect();
       ro.disconnect();
       gsap.ticker.remove(tick);
+      window.clearTimeout(readTimer);
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("mouseleave", onLeave);

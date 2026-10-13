@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { usePreloadBeforeSection } from "@/lib/preload";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -43,6 +44,14 @@ export default function OceanBackdrop() {
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
   const near = useWebglSlot(root);
+  // pré-carga quando o "Sobre" aparece: código da cena, cardume e tubarões/tartaruga
+  // (bytes, Meshopt em workers, texturas como ImageBitmap); na montagem já está tudo aqui
+  usePreloadBeforeSection(root, () => {
+    if (!webglSupport().webgl2) return;
+    import("./ocean/OceanScene").catch(() => undefined);
+    import("./ocean/models").then((m) => m.loadOceanModels()).catch(() => undefined);
+    import("./ocean/animals").then((m) => m.loadOceanAnimals()).catch(() => undefined);
+  });
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

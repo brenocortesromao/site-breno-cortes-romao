@@ -1,13 +1,18 @@
 import {
   FramebufferTexture,
+  Group,
   LinearFilter,
+  Mesh,
+  PlaneGeometry,
   ShaderMaterial,
   Vector2,
   WebGLRenderTarget,
+  type Camera,
   type Texture,
   type WebGLRenderer,
 } from "three";
 import { FullScreenQuad } from "three/examples/jsm/postprocessing/Pass.js";
+import { warmup } from "@/lib/warmup";
 
 /*
  * Profundidade de campo barata do close do urso (só desktop): o quadro já
@@ -92,6 +97,13 @@ export class CloseDof {
     const opts = { minFilter: LinearFilter, magFilter: LinearFilter, depthBuffer: false };
     this.a = new WebGLRenderTarget(Math.max(1, w >> 1), Math.max(1, h >> 1), opts);
     this.b = new WebGLRenderTarget(Math.max(1, w >> 1), Math.max(1, h >> 1), opts);
+  }
+
+  /** Compila os 2 shaders antes do close (sem compilar no meio da rolagem). */
+  warm(gl: WebGLRenderer, camera: Camera) {
+    const geo = new PlaneGeometry(2, 2);
+    const proxy = new Group().add(new Mesh(geo, this.blur), new Mesh(geo, this.mix));
+    return warmup(gl, proxy, camera).finally(() => geo.dispose());
   }
 
   /** Depois do render normal na tela: desfoca o fundo fora do foco. */

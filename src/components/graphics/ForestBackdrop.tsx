@@ -8,6 +8,8 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { prefetchGltf } from "@/lib/gltf";
+import { usePreloadBeforeSection } from "@/lib/preload";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -41,6 +43,12 @@ export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
   const near = useWebglSlot(root);
+  // pré-carga quando "Trabalhos" aparece: código da cena e o urso (bytes)
+  usePreloadBeforeSection(root, () => {
+    if (!webglSupport().webgl2) return;
+    import("./forest/AerialScene").catch(() => undefined);
+    if (bearSrc) prefetchGltf(bearSrc).catch(() => undefined);
+  });
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

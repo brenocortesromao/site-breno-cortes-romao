@@ -38,6 +38,7 @@ import {
   type WebGLRenderer,
 } from "three";
 import { mergeGeometries, mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { loadGltf } from "@/lib/gltf";
 
 /*
  * Descida aérea do Sobre: floresta densa (sem neve), monocromática com um
@@ -1217,13 +1218,10 @@ export class AerialWorld {
    * Carrega o urso (glTF com Meshopt; o mesmo decodificador do useGLTF) e o põe
    * em pé na pedra, olhando a queda. A vida vem do shader (ver bearShader).
    */
-  async loadBear(url: string) {
-    const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
-      import("three/examples/jsm/loaders/GLTFLoader.js"),
-      import("three/examples/jsm/libs/meshopt_decoder.module.js"),
-    ]);
-    const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(url);
-    if (this.disposed) return;
+  async loadBear(url: string): Promise<Group | null> {
+    // bytes pré-carregados quando "Trabalhos" aparece (lib/gltf); Meshopt em workers
+    const gltf = await loadGltf(url);
+    if (this.disposed) return null;
     gltf.scene.updateMatrixWorld(true);
     const bear = new Group();
     const geos: BufferGeometry[] = [];
@@ -1289,6 +1287,12 @@ export class AerialWorld {
     bear.updateMatrixWorld(true);
     bear.traverse((o) => (o.matrixAutoUpdate = false));
     this.head.copy(this.headLocal).applyMatrix4(bear.matrixWorld);
+    return bear;
+  }
+
+  /** Põe na cena o urso de loadBear (depois de os shaders dele estarem prontos, ver AerialScene). */
+  addBear(bear: Group) {
+    if (this.disposed || this.bear) return;
     this.bear = bear;
     this.root.add(bear);
     this.shadowFrames = 2; // a sombra do urso entra no mapa (estático)

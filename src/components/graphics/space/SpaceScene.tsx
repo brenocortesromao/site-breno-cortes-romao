@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
+import { warmup } from "@/lib/warmup";
 import { SpaceWorld } from "./world";
 
 /** Espaço do Contato (ver space/world.ts). Um canvas transparente: o gradiente da seção fica por trás. */
@@ -28,14 +29,13 @@ function Space({
     const { gl, scene, camera } = get();
     world.setEnvironment(gl);
     let alive = true;
-    // shaders compilados em paralelo antes do 1º quadro (sem travar a entrada da seção)
-    gl.compileAsync(scene, camera)
-      .catch(() => undefined)
-      .then(() => {
-        if (!alive) return;
-        onCompiled();
-        get().invalidate(); // modo "demand" (reduced motion): primeiro quadro
-      });
+    // shaders compilados e texturas na GPU antes do 1º quadro, sem a thread
+    // principal esperar o compilador (ver lib/warmup)
+    warmup(gl, scene, camera).then(() => {
+      if (!alive) return;
+      onCompiled();
+      get().invalidate(); // modo "demand" (reduced motion): primeiro quadro
+    });
     return () => {
       alive = false;
       world.dispose();

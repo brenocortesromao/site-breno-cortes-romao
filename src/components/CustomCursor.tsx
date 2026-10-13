@@ -112,6 +112,13 @@ export default function CustomCursor() {
     const onUp = () => gsap.to(d, { scale: 1, duration: 0.25 });
 
     let frame = 0;
+    // hit-test numa tarefa própria depois do quadro (layout já limpo): dentro do
+    // quadro, com a rolagem mexendo na página, forçaria um recálculo de layout
+    let hitTimer = 0;
+    const hitTest = () => {
+      hitTimer = 0;
+      inspect(document.elementFromPoint(mx, my));
+    };
     const tick = (_t: number, deltaTime: number) => {
       const dt = Math.min(deltaTime / 1000, 0.05);
       const k = 1 - Math.pow(1 - LERP, dt * 60);
@@ -128,7 +135,7 @@ export default function CustomCursor() {
       if (dist > 0.5) angle = Math.atan2(dy, dx);
       r.style.transform = `translate(-50%, -50%) rotate(${angle}rad) scale(${1 + stretch}, ${1 - stretch * 0.3})`;
       // com a página rolando, o elemento sob o cursor parado muda
-      if (seen && ++frame % 6 === 0) inspect(document.elementFromPoint(mx, my));
+      if (seen && ++frame % 6 === 0 && !hitTimer) hitTimer = window.setTimeout(hitTest, 0);
       // efeito magnético (até 6px na direção do cursor; volta com ease ao sair)
       magnets.forEach((m, node) => {
         let tx = 0;
@@ -157,6 +164,7 @@ export default function CustomCursor() {
 
     return () => {
       gsap.ticker.remove(tick);
+      window.clearTimeout(hitTimer);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);

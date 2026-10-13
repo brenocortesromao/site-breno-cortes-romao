@@ -222,19 +222,26 @@ let allowed = new Set<symbol>();
 let version = 0;
 const slotListeners = new Set<() => void>();
 let pending = 0;
+/** Rolagem: reavalia no máximo a cada SCROLL_MS (não a cada quadro). */
+const SCROLL_MS = 120;
 
 function recompute() {
+  window.clearTimeout(pending);
   pending = 0;
   const vh = window.innerHeight;
-  const ranked = [...slots.entries()]
-    .filter(([, s]) => s.near)
-    .map(([id, s]) => {
-      const r = s.el.getBoundingClientRect();
-      const dist = r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0;
-      const area = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0)) * r.width;
-      return { id, dist, area };
-    })
-    .sort((a, b) => a.dist - b.dist || b.area - a.area);
+  const near = [...slots.entries()].filter(([, s]) => s.near);
+  // até MAX_CONTEXTS cenas perto: todas ganham, sem medir nada (o caso comum)
+  const ranked =
+    near.length <= MAX_CONTEXTS
+      ? near.map(([id]) => ({ id }))
+      : near
+          .map(([id, s]) => {
+            const r = s.el.getBoundingClientRect();
+            const dist = r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0;
+            const area = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0)) * r.width;
+            return { id, dist, area };
+          })
+          .sort((a, b) => a.dist - b.dist || b.area - a.area);
   const next = new Set(ranked.slice(0, MAX_CONTEXTS).map((x) => x.id));
   const same = next.size === allowed.size && [...next].every((id) => allowed.has(id));
   if (same) return;
@@ -242,15 +249,20 @@ function recompute() {
   version++;
   slotListeners.forEach((l) => l());
 }
-const schedule = () => {
-  if (!pending) pending = requestAnimationFrame(recompute);
+/**
+ * Reavaliação numa tarefa própria, fora do quadro de animação: ali o layout já
+ * está limpo e ler posições não força um recálculo no meio da rolagem.
+ */
+const schedule = (delay = 0) => {
+  if (!pending) pending = window.setTimeout(recompute, delay);
 };
+const onScroll = () => schedule(SCROLL_MS);
 let scrollBound = false;
 function bindScroll() {
   if (scrollBound) return;
   scrollBound = true;
-  window.addEventListener("scroll", schedule, { passive: true });
-  window.addEventListener("resize", schedule);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", () => schedule());
 }
 
 /**

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { THEME_ROLES, TEXT_ROLES, type ThemeName } from "./themes";
+import { liveTheme, THEME_ROLES, TEXT_ROLES, type ThemeName } from "./themes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -46,11 +46,14 @@ export default function ThemeScroll() {
   useEffect(() => {
     const root = document.documentElement;
     let ctx: gsap.Context | null = null;
+    let disposeLive: (() => void) | null = null;
     let current: HTMLElement[] = [];
 
     const teardown = () => {
       ctx?.revert();
       ctx = null;
+      disposeLive?.();
+      disposeLive = null;
       root.classList.remove("theme-js");
       THEME_ROLES.forEach((r) => root.style.removeProperty(`--${r}`));
     };
@@ -59,7 +62,9 @@ export default function ThemeScroll() {
       current = [...document.querySelectorAll<HTMLElement>("[data-theme]")];
       if (!current.length) return;
       root.classList.add("theme-js");
-      ctx = gsap.context(() => buildTransitions(root, current));
+      ctx = gsap.context(() => {
+        disposeLive = buildTransitions(root, current);
+      });
     };
 
     setup();
@@ -130,7 +135,7 @@ function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
   type Transition = { p: number; mix: Record<Role, (p: number) => string> };
   const transitions: Transition[] = [];
   const base = pal("dark");
-  let written = "";
+  const live = liveWriter(root);
 
   // a transição ativa é a última que já começou (progresso > 0)
   const apply = () => {
@@ -141,10 +146,7 @@ function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
       const t = transitions[i];
       return t.mix[role](TEXT_ROLES.has(role) ? textEase(t.p) : t.p);
     });
-    const key = values.join("|");
-    if (key === written) return;
-    written = key;
-    THEME_ROLES.forEach((role, k) => root.style.setProperty(`--${role}`, values[k]));
+    live.write(values);
   };
 
   const mobile = window.matchMedia(MOBILE).matches;
@@ -207,4 +209,144 @@ function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
     previous = theme;
   });
   apply();
+  live.commit(); // estado inicial direto no <html>
+  return live.dispose;
+}
+
+/** Normaliza a cor (canais inteiros, alfa com 3 casas): variações menores que isso são imperceptíveis. */
+function normalize(v: string) {
+  const m = v.match(/^rgba?\(([^)]+)\)$/);
+  if (!m) return /^-?[\d.]+$/.test(v) ? String(Math.round(parseFloat(v) * 1000) / 1000) : v;
+  const [r, g, b, a = "1"] = m[1].split(",").map((x) => x.trim());
+  return `rgba(${Math.round(+r)},${Math.round(+g)},${Math.round(+b)},${Math.round(+a * 1000) / 1000})`;
+}
+
+/** Quanto tempo sem mudança de cor até gravar no <html> (a rolagem parou). */
+const COMMIT_MS = 250;
+
+/**
+ * Onde as cores "vivas" são gravadas. Gravar variáveis no <html> recalcula o
+ * estilo da página INTEIRA (variável CSS é herdada: ~25-30 ms por quadro, os
+ * trancos das transições de tema). Então, enquanto as cores mudam:
+ * - as variáveis vão para contêineres menores: os blocos da página perto da
+ *   tela (filhos do <main>, rodapé) e os elementos fixos do <body> (cabeçalho,
+ *   cursor, brilho, botões flutuantes, menus em portal);
+ * - o fundo do <html> e do <body> recebe a cor direto (background-color não é
+ *   herdado: escrita barata);
+ * - quem herda a cor do texto do <body> recebe `color: var(--fg)` no próprio
+ *   contêiner (mesmo valor; o <body> só é atualizado no fim).
+ * Quando as cores param de mudar por COMMIT_MS, tudo vai para o <html> (uma vez)
+ * e os contêineres voltam a herdar. Os valores são exatamente os mesmos em
+ * todos os quadros: só muda ONDE eles ficam. Só grava o que mudou (normalize).
+ */
+function liveWriter(root: HTMLElement) {
+  const body = document.body;
+  const main = document.querySelector("main");
+  const wrapper = main?.parentElement && main.parentElement !== body ? main.parentElement : null;
+  /** Blocos grandes da página (só os perto da tela recebem as cores). */
+  const blocks = [
+    ...(main ? [...main.children] : []),
+    ...(wrapper ? [...wrapper.children].filter((c) => c !== main) : []),
+  ].filter((e): e is HTMLElement => e instanceof HTMLElement);
+  /** Elementos do <body> fora da página (pequenos; inclui portais abertos depois). */
+  const fixed = () =>
+    [...body.children].filter(
+      (e): e is HTMLElement =>
+        e instanceof HTMLElement && e !== wrapper && e !== main && !(e instanceof HTMLScriptElement) && e.tagName !== "NEXT-ROUTE-ANNOUNCER",
+    );
+
+  const committed = new Map<Role, string>();
+  let current: string[] | null = null;
+  let dirty = false;
+  const painted = new Map<HTMLElement, string>(); // contêiner → valores gravados nele
+  /** Contêiner herda a cor do texto do <body>? (então precisa de color: var(--fg)) */
+  const inherits = new Map<HTMLElement, boolean>();
+  const near = new Set<HTMLElement>();
+
+  const inheritsColor = (el: HTMLElement) => {
+    let v = inherits.get(el);
+    if (v === undefined) {
+      // lido ANTES da 1ª escrita no contêiner: se ele herda, a cor dele é a do
+      // <body> (mesmo no meio de uma troca, os dois ainda têm o valor antigo)
+      v = getComputedStyle(el).color === getComputedStyle(body).color && !/(^|\s)text-(foreground|silver|background|line|graphic|surface|\[#|white|black)/.test(el.className);
+      inherits.set(el, v);
+    }
+    return v;
+  };
+  const paint = (el: HTMLElement) => {
+    if (!current) return;
+    const key = current.join("|");
+    if (painted.get(el) === key) return;
+    const inheritsFg = inheritsColor(el);
+    painted.set(el, key);
+    THEME_ROLES.forEach((role, k) => el.style.setProperty(`--${role}`, current![k]));
+    if (inheritsFg) el.style.setProperty("color", "var(--fg)");
+  };
+  const unpaint = (el: HTMLElement) => {
+    THEME_ROLES.forEach((role) => el.style.removeProperty(`--${role}`));
+    if (inherits.get(el)) el.style.removeProperty("color");
+  };
+
+  // blocos perto da tela (meia tela de margem): só eles recebem as cores ao vivo
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        const el = e.target as HTMLElement;
+        if (e.isIntersecting) {
+          near.add(el);
+          if (dirty) paint(el); // entrou com a página no meio de uma troca
+        } else near.delete(el);
+      });
+    },
+    { rootMargin: "50% 0px" },
+  );
+  blocks.forEach((b) => io.observe(b));
+  // decide quem herda a cor com tudo ainda sincronizado
+  [...blocks, ...fixed()].forEach(inheritsColor);
+
+  let timer = 0;
+  const commit = () => {
+    window.clearTimeout(timer);
+    timer = 0;
+    if (!current) return;
+    THEME_ROLES.forEach((role, k) => {
+      if (committed.get(role) === current![k]) return;
+      committed.set(role, current![k]);
+      root.style.setProperty(`--${role}`, current![k]);
+    });
+    root.style.removeProperty("background-color");
+    body.style.removeProperty("background-color");
+    painted.forEach((_, el) => unpaint(el));
+    painted.clear();
+    dirty = false;
+  };
+
+  const write = (raw: string[]) => {
+    const values = raw.map(normalize);
+    if (current && values.every((v, k) => v === current![k])) return; // nada perceptível mudou
+    current = values;
+    liveTheme.clear();
+    THEME_ROLES.forEach((role, k) => liveTheme.set(role, values[k]));
+    if (!committed.size) return; // 1ª chamada: vai direto para o <html> (commit)
+    dirty = true;
+    const bg = values[THEME_ROLES.indexOf("bg")];
+    root.style.setProperty("background-color", bg);
+    body.style.setProperty("background-color", bg);
+    near.forEach(paint);
+    fixed().forEach(paint);
+    window.clearTimeout(timer);
+    timer = window.setTimeout(commit, COMMIT_MS);
+  };
+
+  const dispose = () => {
+    window.clearTimeout(timer);
+    io.disconnect();
+    painted.forEach((_, el) => unpaint(el));
+    painted.clear();
+    root.style.removeProperty("background-color");
+    body.style.removeProperty("background-color");
+    liveTheme.clear();
+  };
+
+  return { write, commit, dispose };
 }

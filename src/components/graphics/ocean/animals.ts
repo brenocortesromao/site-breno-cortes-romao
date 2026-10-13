@@ -18,6 +18,7 @@ import {
   type PerspectiveCamera,
 } from "three";
 import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.js";
+import { loadGltf, prefetchGltf } from "@/lib/gltf";
 import { OCEAN_COMMON } from "./shaders";
 
 /*
@@ -70,17 +71,18 @@ function normalize(scene: Group, headName: RegExp): Group {
   return norm;
 }
 
+const SHARK = "/modelos/oceano/tubarao.glb";
+const TURTLE = "/modelos/oceano/tartaruga.glb";
+
+/** Só baixa os arquivos (pré-carga quando a seção anterior aparece). */
+export function prefetchOceanAnimals() {
+  [SHARK, TURTLE].forEach((u) => prefetchGltf(u).catch(() => undefined));
+}
+
 export function loadOceanAnimals(): Promise<Sources> {
   pending ??= (async () => {
-    const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
-      import("three/examples/jsm/loaders/GLTFLoader.js"),
-      import("three/examples/jsm/libs/meshopt_decoder.module.js"),
-    ]);
-    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-    const [shark, turtle] = await Promise.all([
-      loader.loadAsync("/modelos/oceano/tubarao.glb"),
-      loader.loadAsync("/modelos/oceano/tartaruga.glb"),
-    ]);
+    // bytes pré-carregados (lib/gltf), Meshopt em workers, texturas como ImageBitmap
+    const [shark, turtle] = await Promise.all([loadGltf(SHARK), loadGltf(TURTLE)]);
     const sharkRoot = normalize(shark.scene, /^Head/);
     // olhos: esferas nas órbitas, presas aos ossos dos olhos (raio ~1,1% do corpo)
     const eyeGeo = new SphereGeometry(1, 16, 12);

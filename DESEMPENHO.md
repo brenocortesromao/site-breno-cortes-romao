@@ -105,3 +105,72 @@ Script: `scratchpad` da sessão (CDP), injeta um contador de contextos no `getCo
 3. Medir vazamento de memória com várias idas e voltas (heap): os contextos são liberados (verificado pelo contador), mas o heap não foi medido formalmente.
 4. Medir INP e tarefas longas durante a rolagem (só o TBT da carga foi medido).
 5. Conferir dependências não usadas com uma ferramenta (o código morto conhecido já foi removido: `useNearViewport`, cena 3D dos números).
+
+## Otimização final (13/10, tags `antes-otimizacao-final` → commit "otimização final de desempenho")
+
+Sem mudança visual (conferido com capturas no meio das trocas de tema: idênticas pixel a pixel no desktop; no celular, 1 pixel com diferença de 1/255).
+
+**Causas encontradas (trace do Chromium, GPU real):**
+1. **Trocas de tema (ThemeScroll):** cada quadro de uma transição gravava as cores no `<html>`; como variável CSS é herdada, o navegador recalculava o estilo da página inteira (~6.000 elementos, 25 a 31 ms por quadro). Rolando por "Poucas parcerias": 33,8 fps; com as escritas neutralizadas, 60 fps (as curvas de nível não pesavam).
+2. **Trancos de entrada (~150 a 300 ms):** a thread principal esperando o processo da GPU compilar shaders. Nos canvases WebGL próprios (curvas, gota) a extensão KHR_parallel_shader_compile não era ativada antes de compilar: a 1ª consulta de status (e até o `loseContext`) esperava o link inteiro. No modo dev, o Strict Mode desmontava a camada no meio da compilação e o `loseContext` travava ~170 ms.
+3. Leituras de layout dentro do quadro (orçamento de contextos a cada quadro de rolagem, hit-test do cursor, posições do FlowField) e variáveis CSS gravadas na moldura inteira dos Projetos pontuais.
+
+**O que mudou:**
+- `ThemeScroll`: durante a troca, as cores vão para os blocos da página perto da tela e para os elementos fixos do `<body>`; o fundo do `<html>`/`<body>` recebe a cor direto; o `<html>` só é atualizado quando as cores param de mudar (250 ms). Mesmos valores em todos os quadros; só grava o que mudou. Valores atuais também em `liveTheme` (themes.ts) para quem desenha em JS.
+- `lib/warmup.ts`: shaders compilados e texturas enviadas à GPU antes do 1º quadro (nuvens, oceano, urso e a sombra dele, profundidade de campo da floresta, espaço); canvas sem desenhar até lá. Curvas e gota: extensão ativada antes de compilar e espera por `COMPLETION_STATUS_KHR` (não bloqueia).
+- `lib/gltf.ts` + `lib/preload.ts`: modelos baixados quando a seção ANTERIOR aparece (urso com "Trabalhos", tubarão e tartaruga com "Sobre", código das nuvens com "A distância"); Meshopt em Web Workers; texturas já vinham como ImageBitmap.
+- Curvas de nível: resolução interna 0,75 × DPR com escala e espessura compensadas, uma instância desenhando por vez, cor lida da memória (sem estilo computado), pausa fora da tela mantida.
+- `quality.ts` (orçamento de contextos): só mede posições quando há mais de 2 cenas perto, fora do quadro, no máximo a cada 120 ms. Cursor e FlowField: leituras de layout numa tarefa logo depois do quadro. Projetos pontuais: `--mx`/`--my`/`--wx` só nas camadas que os usam.
+
+**Medido (dev, Chromium com GPU real, rolagem constante da página inteira):**
+
+#### Desktop 1440 × 900 (rolando a página inteira; dev, GPU real)
+
+| Seção | fps médio antes | fps médio depois | pior quadro antes | pior quadro depois |
+|---|---:|---:|---:|---:|
+| Manifesto | 52 | 57 | 50 ms | 67 ms |
+| A distância | 50 | 57 | 50 ms | 34 ms |
+| Diagnóstico (nuvens) | 46 | 58 | 183 ms | 33 ms |
+| O que é fractional | 50 | 59 | 67 ms | 33 ms |
+| O que eu faço | 54 | 60 | 50 ms | 33 ms |
+| O que muda | 48 | 60 | 67 ms | 33 ms |
+| Como funciona | 52 | 59 | 200 ms | 33 ms |
+| Onde aparece | 60 | 60 | 17 ms | 17 ms |
+| Trabalhos | 56 | 60 | 50 ms | 33 ms |
+| Sobre (urso) | 48 | 60 | 67 ms | 33 ms |
+| E a IA? (oceano) | 51 | 60 | 50 ms | 33 ms |
+| Poucas parcerias | 40 | 52 | 50 ms | 33 ms |
+| Projetos pontuais | 36 | 49 | 83 ms | 50 ms |
+| Perguntas | 57 | 60 | 34 ms | 17 ms |
+| Contato | 52 | 57 | 200 ms | 200 ms |
+
+Parado 6 s (fps, pior quadro): antes {"parcerias":[60,19],"fractional":[60,21]} · depois {"parcerias":[59.9,52],"fractional":[60,18]} · contextos WebGL máx: antes 2, depois 2
+
+#### Celular 375 × 812 (rolando a página inteira; dev, GPU real)
+
+| Seção | fps médio antes | fps médio depois | pior quadro antes | pior quadro depois |
+|---|---:|---:|---:|---:|
+| Manifesto | 50 | 51 | 67 ms | 83 ms |
+| A distância | 50 | 57 | 67 ms | 50 ms |
+| Diagnóstico (nuvens) | 49 | 59 | 183 ms | 33 ms |
+| O que é fractional | 48 | 49 | 317 ms | 317 ms |
+| O que eu faço | 58 | 60 | 50 ms | 33 ms |
+| O que muda | 53 | 59 | 50 ms | 33 ms |
+| Como funciona | 54 | 60 | 200 ms | 33 ms |
+| Onde aparece | 60 | 60 | 17 ms | 17 ms |
+| Trabalhos | 54 | 55 | 67 ms | 67 ms |
+| Sobre (urso) | 49 | 59 | 200 ms | 34 ms |
+| E a IA? (oceano) | 46 | 57 | 300 ms | 66 ms |
+| Poucas parcerias | 54 | 58 | 50 ms | 33 ms |
+| Projetos pontuais | 59 | 59 | 33 ms | 34 ms |
+| Perguntas | 57 | 58 | 83 ms | 83 ms |
+| Contato | 58 | 60 | 50 ms | 17 ms |
+
+Parado 6 s (fps, pior quadro): antes {"parcerias":[60,18],"fractional":[60,18]} · depois {"parcerias":[60,18],"fractional":[60,18]} · contextos WebGL máx: antes 2, depois 2
+
+**Pendências:**
+- "O que é fractional" no celular (~300 ms): é o 1º quadro das **montanhas** (compilam no primeiro render). Correção igual às outras cenas, mas as montanhas só mudam com pedido explícito.
+- "Poucas parcerias" no desktop rolando: 52 a 54 fps (meta 55); parado, 60 fps. O que sobra é o recálculo dos blocos visíveis durante a troca.
+- Contato (~200 ms, só no desktop em dev): renderização React da montagem da cena do espaço em modo dev (o React de produção é bem mais rápido; não medido em produção).
+- "Não renderizar as curvas durante a troca de cor se a cena não mudar": as linhas se movem o tempo todo e a cor muda na própria troca, então a condição nunca acontece; não houve o que pausar além do que já pausa fora da tela.
+
