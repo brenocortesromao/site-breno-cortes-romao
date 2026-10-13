@@ -50,8 +50,15 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
   const [env, setEnv] = useState<Env | null>(null);
   const [inView, setInView] = useState(true);
   const [sceneReady, setSceneReady] = useState(false);
-  /** A cena 3D só existe com a hero perto da tela e com vaga no orçamento de contextos. */
-  const near = useWebglSlot(section);
+  /**
+   * A cena 3D só existe com a hero perto da tela e com vaga no orçamento de
+   * contextos. Toque: libera a vaga assim que a hero sai da tela (a GPU do
+   * celular demora a soltar o contexto; as nuvens do Diagnóstico precisam dela).
+   */
+  const [slotMargin] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches ? "0px" : "100% 0px",
+  );
+  const near = useWebglSlot(section, slotMargin);
 
   // Detecta capacidades do dispositivo (só existe no cliente).
   useEffect(() => {

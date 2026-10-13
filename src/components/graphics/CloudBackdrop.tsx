@@ -34,7 +34,24 @@ export default function CloudBackdrop() {
   const pointer = useRef({ x: 0, y: 0 });
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  const near = useWebglSlot(root);
+  /** Toque: pede a vaga um pouco antes (a cena compila antes de a seção chegar). */
+  const [slotMargin] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches ? "150% 0px" : "100% 0px",
+  );
+  const near = useWebglSlot(root, slotMargin);
+  /**
+   * Toque: se o WebGL falhar de vez (contexto perdido logo ao criar, comum no
+   * celular quando a GPU ainda não soltou a cena anterior), não desiste para
+   * sempre: tenta de novo quando a seção sair e voltar (nova geração).
+   */
+  const [gaveUp, setGaveUp] = useState(false);
+  const [generation, setGeneration] = useState(0);
+  useEffect(() => {
+    if (near || !gaveUp) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- nova tentativa ao reentrar
+    setGaveUp(false);
+    setGeneration((g) => g + 1);
+  }, [near, gaveUp]);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -65,7 +82,10 @@ export default function CloudBackdrop() {
     return () => window.removeEventListener("pointermove", onMove);
   }, [env]);
 
-  const handleFail = useCallback(() => setEnv((e) => (e ? { ...e, webgl: false } : e)), []);
+  const handleFail = useCallback(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) setGaveUp(true);
+    else setEnv((e) => (e ? { ...e, webgl: false } : e));
+  }, []);
   const scene = env?.webgl === true;
   const tier = useSceneTier("nuvens", root, scene && near);
 
@@ -110,9 +130,10 @@ export default function CloudBackdrop() {
         <div ref={layer} className="absolute inset-0">
           <div className="absolute inset-0 opacity-[0.34]">
             {/* erro ou perda de contexto: remonta; desiste (sem nuvens) se falhar de novo */}
-            <ResilientBoundary name="nuvens" onGiveUp={handleFail}>
+            <ResilientBoundary key={generation} name="nuvens" onGiveUp={handleFail}>
               {(onLost) =>
-                near && (
+                near &&
+                !gaveUp && (
                   <CloudScene
                     progressRef={progress}
                     pointerRef={pointer}

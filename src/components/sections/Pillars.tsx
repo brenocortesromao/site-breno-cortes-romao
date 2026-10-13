@@ -88,6 +88,15 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
           // barra de endereço do celular aparecendo/sumindo não recalcula o pin
           ScrollTrigger.config({ ignoreMobileResize: true });
           section.dataset.mode = "pin-m";
+          // palco preso acima de tudo o que vem depois ("O que muda" é z-10, depois no DOM)
+          section.style.zIndex = "20";
+          // altura do palco em px, medida a cada refresh (não muda com a barra de endereço)
+          const box = pinBox.current!;
+          const fitBox = () => {
+            box.style.height = `${window.innerHeight}px`;
+          };
+          fitBox();
+          ScrollTrigger.addEventListener("refreshInit", fitBox);
           gsap.set(titles.slice(1), { yPercent: 110 });
           gsap.set([...texts.slice(1), ...indexes.slice(1)], { autoAlpha: 0, y: 24 });
           const tl = gsap.timeline({
@@ -97,9 +106,13 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
               start: "top top",
               end: `+=${(n - 1) * 80}%`,
               pin: true,
+              pinType: "fixed",
               // o pai (palco) é flex: sem isto o GSAP desliga o espaço do pin e
               // "O que muda" subiria por cima dos pilares
               pinSpacing: true,
+              invalidateOnRefresh: true,
+              // calculado antes dos gatilhos das seções de baixo (que dependem do espaço do pin)
+              refreshPriority: 1,
               scrub: 0.8,
               anticipatePin: 1,
             },
@@ -113,6 +126,9 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
               .to([texts[i], indexes[i]], { autoAlpha: 1, y: 0, duration: 0.5 }, at + 0.2);
           }
           return () => {
+            ScrollTrigger.removeEventListener("refreshInit", fitBox);
+            box.style.height = "";
+            section.style.zIndex = "";
             delete section.dataset.mode;
           };
         }
