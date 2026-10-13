@@ -358,7 +358,7 @@
   "oneOff": {
     "eyebrow": "On demand",
     "title": "One-off projects.",
-    "text": "For projects with a clear beginning, middle and end, I also take on one-off work, from brand to technology, with the same level of direction. Many partnerships started exactly this way.",
+    "text": "Not every brand needs to start with a partnership. For projects with a clear beginning, middle and end, I take on work from brand to technology, with the same level of direction. Many partnerships started exactly this way.",
     "columns": [
       {
         "title": "Brand",
@@ -429,16 +429,36 @@
         "a": "Os dois. Desenvolvo pessoalmente as peças prioritárias e dirijo o restante com a sua equipe ou fornecedores. Na proposta, fica claro o que eu produzo, o que eu dirijo e o que exige contratação à parte, para não existir surpresa no meio do caminho."
       },
       {
+        "q": "Do you take on one-off projects, without a monthly partnership?",
+        "a": "Yes. Besides the ongoing partnership, I take on projects with a clear beginning, middle and end, such as branding, rebranding, visual identity, a website or a media kit, with the same level of direction. Many partnerships started this way: a well-done project opens the door to looking after the brand in the long run."
+      },
+      {
+        "q": "Do you create visual identities and logos?",
+        "a": "Yes. I create complete visual identities: logo, typography, colors, visual language and brand guidelines. Strategy comes before design, with positioning, narrative and tone of voice, so the identity expresses what the company really is, and doesn't just look good."
+      },
+      {
+        "q": "Do you make media kits, company presentations and pitch decks?",
+        "a": "Yes. These are the pieces that close deals: the media kit that wins over an advertiser, the presentation that opens a meeting, the pitch deck that reaches an investor. I take care of the storyline, the narrative and the design, so every page reinforces the company's value."
+      },
+      {
+        "q": "Do you create websites, landing pages and campaigns?",
+        "a": "Yes. I define the message, the structure and the design, and I build websites, landing pages and interactive experiences, including 3D ones, like this website. I also create campaigns, key visuals, art direction and social media content."
+      },
+      {
+        "q": "What about technology projects, like systems and automations?",
+        "a": "Those too. I bring brand and technology together in web systems, custom platforms, dashboards, automations, integrations and AI agents. The tool has to work well and, at the same time, live up to your brand's standard."
+      },
+      {
         "q": "Preciso ter uma equipe de design?",
         "a": "Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção."
       },
       {
-        "q": "Como funciona o começo?",
-        "a": "Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca: o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio. A partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]"
+        "q": "How does it start?",
+        "a": "It all starts with a 30-minute conversation to understand where the company is right now. If it makes sense to move forward together, the first stage of the work is the brand diagnosis: what the brand communicates today, where the inconsistencies are and what weighs most on the business. From there, we define the plan, the priorities and the monthly commitment."
       },
       {
-        "q": "Quanto tempo dura uma parceria?",
-        "a": "Marca é construção contínua, por isso o modelo funciona melhor em ciclos de alguns meses, com revisões mensais de prioridades. [CONFIRMAR: período mínimo sugerido, ex.: 3 ou 6 meses]"
+        "q": "How long does a partnership last?",
+        "a": "There is no minimum term. A brand is built continuously, so the partnership runs month to month, with regular priority reviews, and pays off more the longer we work together."
       },
       {
         "q": "Quanto custa?",

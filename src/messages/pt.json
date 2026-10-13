@@ -358,7 +358,7 @@
   "oneOff": {
     "eyebrow": "Sob demanda",
     "title": "Projetos pontuais.",
-    "text": "Para projetos com começo, meio e fim, também assumo trabalhos pontuais, da marca à tecnologia, com o mesmo nível de direção. Muitas parcerias começaram exatamente assim.",
+    "text": "Nem toda marca precisa começar com uma parceria. Para projetos com começo, meio e fim, assumo trabalhos da marca à tecnologia, com o mesmo nível de direção. Muitas parcerias começaram exatamente assim.",
     "columns": [
       {
         "title": "Marca",
@@ -429,16 +429,36 @@
         "a": "Os dois. Desenvolvo pessoalmente as peças prioritárias e dirijo o restante com a sua equipe ou fornecedores. Na proposta, fica claro o que eu produzo, o que eu dirijo e o que exige contratação à parte, para não existir surpresa no meio do caminho."
       },
       {
+        "q": "Você faz projetos pontuais, sem parceria mensal?",
+        "a": "Sim. Além da parceria contínua, assumo projetos com começo, meio e fim, como branding, rebranding, identidade visual, site ou mídia kit, com o mesmo nível de direção. Muitas parcerias começaram assim: um projeto bem feito abre espaço para cuidar da marca no longo prazo."
+      },
+      {
+        "q": "Você cria identidade visual e logo?",
+        "a": "Sim. Crio identidades visuais completas: logo, tipografia, cores, linguagem visual e manual de marca. Antes do desenho vem a estratégia, com posicionamento, narrativa e tom de voz, para que a identidade traduza o que a empresa realmente é, e não apenas fique bonita."
+      },
+      {
+        "q": "Você faz mídia kit, apresentação institucional e pitch deck?",
+        "a": "Sim. São peças que decidem negócios: o mídia kit que convence um anunciante, a apresentação que abre uma reunião, o pitch deck que chega a um investidor. Cuido do roteiro, da narrativa e do design, para que cada página reforce o valor da empresa."
+      },
+      {
+        "q": "Você cria sites, landing pages e campanhas?",
+        "a": "Sim. Defino a mensagem, a estrutura e o design, e desenvolvo sites, landing pages e experiências interativas, inclusive em 3D, como este site. Também crio campanhas, key visuals, direção de arte e conteúdo para redes sociais."
+      },
+      {
+        "q": "E projetos de tecnologia, como sistemas e automações?",
+        "a": "Também. Uno marca e tecnologia em sistemas web, plataformas sob medida, dashboards, automações, integrações e agentes de inteligência artificial. A ferramenta precisa funcionar bem e, ao mesmo tempo, transmitir o padrão da sua marca."
+      },
+      {
         "q": "Preciso ter uma equipe de design?",
         "a": "Não. Se você já tem designers ou agência, eu dou direção, critérios e prioridades para eles. Se não tem, eu produzo o essencial e indico os especialistas certos quando o projeto pedir, sempre sob a minha direção."
       },
       {
         "q": "Como funciona o começo?",
-        "a": "Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido, faço um diagnóstico da marca: o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio. A partir dele, definimos o plano, as prioridades e a dedicação mensal. [CONFIRMAR: diagnóstico gratuito ou pago]"
+        "a": "Tudo começa com uma conversa de 30 minutos para entender o momento da empresa. Se fizer sentido seguir juntos, a primeira etapa do trabalho é o diagnóstico da marca: o que ela comunica hoje, onde estão as inconsistências e o que mais pesa no negócio. A partir dele, definimos o plano, as prioridades e a dedicação mensal."
       },
       {
         "q": "Quanto tempo dura uma parceria?",
-        "a": "Marca é construção contínua, por isso o modelo funciona melhor em ciclos de alguns meses, com revisões mensais de prioridades. [CONFIRMAR: período mínimo sugerido, ex.: 3 ou 6 meses]"
+        "a": "Não existe prazo mínimo. Marca é construção contínua, por isso a parceria segue mês a mês, com revisões de prioridades, e rende mais quanto mais tempo caminhamos juntos."
       },
       {
         "q": "Quanto custa?",
