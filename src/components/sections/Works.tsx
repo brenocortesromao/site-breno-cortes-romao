@@ -28,22 +28,22 @@ export default async function Works() {
 
   return (
     <section id="trabalhos" data-theme="dark" aria-labelledby="trabalhos-title" className="relative z-10">
-      <div className="mx-auto w-full max-w-[1600px] px-6 pt-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec-t mx-auto w-full max-w-[1600px] px-6 pt-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
         <h2
           id="trabalhos-title"
-          className="m-center mt-6 max-w-4xl text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
+          className="m-center m-g16 mt-6 max-w-4xl text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
         >
           {t("title")}
         </h2>
-        <p className="m-center-p mt-6 max-w-xl text-sm leading-relaxed text-silver md:text-[15px]">{t("subtitle")}</p>
+        <p className="m-center-p m-g20 mt-6 max-w-xl text-sm leading-relaxed text-silver md:text-[15px]">{t("subtitle")}</p>
       </div>
 
-      <div className="mx-auto mt-16 w-full max-w-[1600px] md:mt-24">
+      <div className="m-g40 mx-auto mt-16 w-full max-w-[1600px] md:mt-24">
         <LogoMarquee logos={logos} title={t("logos.title")} />
       </div>
 
-      <div className="mt-16 pb-[clamp(6rem,16vh,12rem)] md:mt-24">
+      <div className="m-sec-b mt-16 pb-[clamp(6rem,16vh,12rem)] md:mt-24">
         <WorkWall
           items={works.map((w) => {
             const caption = w.year ? `${w.project} · ${w.year}` : w.project;

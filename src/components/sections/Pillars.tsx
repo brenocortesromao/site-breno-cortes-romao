@@ -166,7 +166,7 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
     <section ref={root} id="o-que-faco" data-theme="dark" aria-labelledby="o-que-faco-title" className="group relative z-10">
       <div
         ref={stage}
-        className="mx-auto flex w-full max-w-[1600px] flex-col px-6 py-[clamp(6rem,16vh,12rem)] md:px-12 group-data-[mode=pin]:h-svh group-data-[mode=pin]:py-[clamp(5rem,12vh,9rem)]"
+        className="m-sec mx-auto flex w-full max-w-[1600px] flex-col px-6 py-[clamp(6rem,16vh,12rem)] md:px-12 group-data-[mode=pin]:h-svh group-data-[mode=pin]:py-[clamp(5rem,12vh,9rem)]"
       >
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -175,10 +175,10 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
             </p>
             <BlurRevealTitle
               id="o-que-faco-title"
-              className="m-center mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
+              className="m-center m-g16 mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
               text={copy.title}
             />
-            <p className="m-center-p mt-5 max-w-xl text-base leading-relaxed text-silver md:text-lg">{copy.subtitle}</p>
+            <p className="m-center-p m-g20 mt-5 max-w-xl text-base leading-relaxed text-silver md:text-lg">{copy.subtitle}</p>
           </div>
           {/* Progresso (só no modo fixo) */}
           <div aria-hidden="true" className="hidden w-48 group-data-[mode=pin]:block">

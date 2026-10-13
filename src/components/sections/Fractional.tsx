@@ -280,11 +280,11 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
       className="m-theme-gap relative z-10 min-h-svh overflow-hidden"
     >
       <GraphicLayer variant="contours-a" />
-      <div className="relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">
           {protectTerms(copy.eyebrow)}
         </p>
-        <div className="mt-6 grid gap-10 md:grid-cols-12 md:gap-8">
+        <div className="m-g16 m-rg20 mt-6 grid gap-10 md:grid-cols-12 md:gap-8">
           <TechnicalText
             id="fractional-title"
             className="m-center text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8"
@@ -296,7 +296,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
         </div>
 
         {/* Dados verificados: dois números gigantes (empilhados no mobile) */}
-        <figure data-stats className="mt-16 md:mt-24">
+        <figure data-stats className="m-g40 mt-16 md:mt-24">
           <h3 className="m-center text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
             {protectTerms(copy.stats.title)}
           </h3>

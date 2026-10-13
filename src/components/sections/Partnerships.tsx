@@ -21,16 +21,16 @@ export default async function Partnerships() {
       className="m-theme-gap relative z-10 overflow-hidden"
     >
       <GraphicLayer variant="contours-b" />
-      <div className="relative mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
         <h2
           id="parcerias-title"
-          className="m-center mt-8 max-w-5xl text-[clamp(2.6rem,7vw,7.5rem)] font-semibold leading-[0.95] tracking-[-0.06em] text-silver-gradient"
+          className="m-center m-g16 mt-8 max-w-5xl text-[clamp(2.6rem,7vw,7.5rem)] font-semibold leading-[0.95] tracking-[-0.06em] text-silver-gradient"
         >
           {t("title")}
         </h2>
-        <p className="m-center-p mt-10 max-w-xl text-base leading-relaxed text-silver md:ml-[33%] md:text-lg">{t("text")}</p>
-        <div className="mt-10 max-md:text-center md:ml-[33%]">
+        <p className="m-center-p m-g20 mt-10 max-w-xl text-base leading-relaxed text-silver md:ml-[33%] md:text-lg">{t("text")}</p>
+        <div className="m-g40 mt-10 max-md:text-center md:ml-[33%]">
           <p className="inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em]">
             <span aria-hidden="true" className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground opacity-40 motion-reduce:animate-none" />

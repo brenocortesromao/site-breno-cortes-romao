@@ -146,12 +146,12 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
       className="relative z-10 overflow-x-clip"
     >
       <FlowField stagesSelector="[data-step]" stages={FLOW_STAGES} dimSelector="[data-step] h3, [data-chart]" />
-      <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 pb-[clamp(6rem,16vh,12rem)] pt-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 pb-[clamp(6rem,16vh,12rem)] pt-[clamp(6rem,16vh,12rem)] md:px-12">
         <h2 id="distancia-title" className="font-mono text-[11px] font-normal uppercase tracking-[0.28em] text-silver m-center">
           {copy.eyebrow}
         </h2>
 
-        <div className="mt-12 grid gap-[clamp(6rem,22vh,14rem)] md:mt-16">
+        <div className="m-g16 mt-12 grid gap-[clamp(6rem,22vh,14rem)] md:mt-16">
           {copy.charts.map((chart, i) => {
             const step = STEPS[i];
             return (

@@ -65,17 +65,17 @@ export default function Touchpoints({ copy }: { copy: TouchpointsCopy }) {
 
   return (
     <section ref={root} id="onde-aparece" data-theme="dark" aria-labelledby="onde-aparece-title" className="relative z-10 min-h-svh">
-      <div className="mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
         <SprayTitle
           id="onde-aparece-title"
-          wrapClassName="mt-6 max-w-4xl"
+          wrapClassName="m-g16 mt-6 max-w-4xl"
           className="m-center text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
         >
           {copy.title}
         </SprayTitle>
 
-        <ul className="group/list mt-16 border-t border-line md:mt-24">
+        <ul className="group/list m-g40 mt-16 border-t border-line md:mt-24">
           {copy.items.map((item, i) => (
             <li key={item} data-tp-item className="group/item border-b border-line">
               <div className="grid grid-cols-[2.5rem_1fr] items-baseline gap-4 py-5 md:grid-cols-[4rem_1fr] md:py-7">

@@ -19,16 +19,16 @@ export default async function Contact() {
   return (
     <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 overflow-clip border-t border-line">
       <SpaceBackdrop />
-      <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative z-10 mx-auto flex min-h-svh w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
-        <h2 id="contato-title" className="m-center mt-10 text-[clamp(2.75rem,10vw,10.5rem)] leading-[0.9] tracking-[-0.06em]">
+        <h2 id="contato-title" className="m-center m-g16 mt-10 text-[clamp(2.75rem,10vw,10.5rem)] leading-[0.9] tracking-[-0.06em]">
           <span className="block font-light">{t("titleLight")}</span>
           <span className="block font-semibold text-silver-gradient md:pl-[12vw]">{t("titleStrong")}</span>
         </h2>
-        <p className="m-center-p mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
+        <p className="m-center-p m-g20 mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
 
         {/* WhatsApp (principal) na linha inteira; E-mail e Mídia kit lado a lado */}
-        <ul className="mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2">
+        <ul className="m-g40 mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2">
           <li className="md:col-span-2">
             <a
               href={whatsappUrl(t("whatsappMessage"))}

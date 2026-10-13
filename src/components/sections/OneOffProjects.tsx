@@ -20,16 +20,16 @@ export default async function OneOffProjects() {
 
   return (
     <section id="projetos-pontuais" data-theme="dark" aria-labelledby="projetos-pontuais-title" className="m-theme-gap relative z-10">
-      <div className="mx-auto grid w-full max-w-[1600px] gap-y-12 px-6 py-[clamp(3.6rem,9.6vh,7.2rem)] md:px-12 lg:grid-cols-[2fr_3fr] lg:gap-x-16">
+      <div className="m-sec m-rg40 mx-auto grid w-full max-w-[1600px] gap-y-12 px-6 py-[clamp(3.6rem,9.6vh,7.2rem)] md:px-12 lg:grid-cols-[2fr_3fr] lg:gap-x-16">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
           <BlurRevealTitle
             id="projetos-pontuais-title"
-            className="m-center mt-6 text-[clamp(32px,3.2vw,48px)] font-semibold leading-[1] tracking-[-0.05em]"
+            className="m-center m-g16 mt-6 text-[clamp(32px,3.2vw,48px)] font-semibold leading-[1] tracking-[-0.05em]"
             text={t("title")}
             stagger={0.035}
           />
-          <p className="m-center-p mt-6 max-w-md text-base leading-relaxed text-silver md:text-lg">{t("text")}</p>
+          <p className="m-center-p m-g20 mt-6 max-w-md text-base leading-relaxed text-silver md:text-lg">{t("text")}</p>
         </div>
 
         <ServiceColumns columns={columns} className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-10" />

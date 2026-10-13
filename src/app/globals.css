@@ -191,6 +191,33 @@ body::before {
   .m-theme-gap {
     margin-top: 30vh;
   }
+  /* ritmo vertical padronizado das seções no celular: padding de 96px e
+     rótulo → título 16px, título → texto 20px, texto → conteúdo 40px */
+  .m-sec {
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
+  .m-sec-t {
+    padding-top: 96px;
+  }
+  .m-sec-b {
+    padding-bottom: 96px;
+  }
+  .m-g16 {
+    margin-top: 16px;
+  }
+  .m-g20 {
+    margin-top: 20px;
+  }
+  .m-g40 {
+    margin-top: 40px;
+  }
+  .m-rg20 {
+    row-gap: 20px;
+  }
+  .m-rg40 {
+    row-gap: 40px;
+  }
   .m-center-p {
     text-align: center;
     text-wrap: pretty;

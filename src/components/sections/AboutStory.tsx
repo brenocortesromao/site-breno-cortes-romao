@@ -78,15 +78,15 @@ export default function AboutStory({
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
         <Title
           id="sobre-title"
-          className="m-center mt-6 text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] lg:whitespace-nowrap lg:text-[length:clamp(2.75rem,4.6vw,5rem)]"
+          className="m-center m-g16 mt-6 text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] lg:whitespace-nowrap lg:text-[length:clamp(2.75rem,4.6vw,5rem)]"
         >
           {copy.title}
         </Title>
-        <p className="m-center mt-4 text-[clamp(1.25rem,2vw,1.9rem)] font-light leading-[1.15] tracking-[-0.03em] text-silver">
+        <p className="m-center m-g20 mt-4 text-[clamp(1.25rem,2vw,1.9rem)] font-light leading-[1.15] tracking-[-0.03em] text-silver">
           {copy.subtitle}
         </p>
 
-        <p className="m-center mt-12 text-[clamp(1.6rem,2.6vw,2.5rem)] font-semibold leading-[1.1] tracking-[-0.04em]">
+        <p className="m-center m-g40 mt-12 text-[clamp(1.6rem,2.6vw,2.5rem)] font-semibold leading-[1.1] tracking-[-0.04em]">
           {copy.opening}
         </p>
 

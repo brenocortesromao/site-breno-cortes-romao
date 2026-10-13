@@ -115,21 +115,21 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
       className="relative z-10 min-h-svh overflow-clip"
     >
       <GraphicLayer variant="grid" />
-      <div className="relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-5 md:flex md:flex-col">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
               <BlurRevealTitle
                 id="como-funciona-title"
-                className="m-center mt-6 text-[clamp(2.3rem,4.6vw,5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
+                className="m-center m-g16 mt-6 text-[clamp(2.3rem,4.6vw,5rem)] font-semibold leading-[0.98] tracking-[-0.055em]"
                 text={copy.title}
               />
-              <p className="m-center-p mt-8 max-w-md text-sm leading-relaxed text-silver md:text-[15px]">{copy.note}</p>
+              <p className="m-center-p m-g20 mt-8 max-w-md text-sm leading-relaxed text-silver md:text-[15px]">{copy.note}</p>
             </div>
             {/* gota de metal líquido: fixa nesta coluna enquanto as etapas passam
                 (desktop); menor, acima da linha do tempo (mobile) */}
-            <div className="mt-8 md:sticky md:top-32 md:mt-12">
+            <div className="m-g40 mt-8 md:sticky md:top-32 md:mt-12">
               {/* o espaço da gota fica reservado mesmo sem o canvas montado */}
               <div className="mx-auto aspect-square w-40 md:mx-0 md:w-[min(100%,40svh,24rem)]">
                 {drop?.webgl && !dropFailed && (

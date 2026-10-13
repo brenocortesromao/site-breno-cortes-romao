@@ -120,11 +120,11 @@ export default function Ai({ copy }: { copy: AiCopy }) {
     <section ref={root} id="ia" data-theme="dark" aria-labelledby="ia-title" className="relative z-10 min-h-svh overflow-clip">
       {/* oceano 3D fixo atrás do conteúdo (alto-mar → linha d'água → recife) */}
       <OceanBackdrop />
-      <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
 
         {/* caixa de prompt (estilo chat de IA) */}
-        <div data-ai-prompt className="mt-10 max-w-2xl rounded-2xl border border-line bg-surface px-5 py-5 md:mt-12 md:px-7 md:py-6">
+        <div data-ai-prompt className="m-g16 mt-10 max-w-2xl rounded-2xl border border-line bg-surface px-5 py-5 md:mt-12 md:px-7 md:py-6">
           <div className="grid font-mono text-[clamp(1rem,1.5vw,1.3rem)] leading-snug">
             {/* frase real (leitores de tela, buscadores) e reserva do tamanho final */}
             <p className="opacity-0 [grid-area:1/1]">{copy.prompt}</p>
@@ -155,12 +155,12 @@ export default function Ai({ copy }: { copy: AiCopy }) {
           aria-label={copy.title}
           translate="no"
           data-decode
-          className="m-center mt-16 max-w-5xl text-[clamp(2.4rem,5.6vw,6rem)] font-semibold leading-[1.02] tracking-[-0.055em] md:mt-24"
+          className="m-center m-g40 mt-16 max-w-5xl text-[clamp(2.4rem,5.6vw,6rem)] font-semibold leading-[1.02] tracking-[-0.055em] md:mt-24"
         >
           <DecodeLetters text={copy.title} />
         </h2>
 
-        <ul className="mt-[clamp(5rem,14vh,10rem)] grid gap-6 md:gap-8">
+        <ul className="m-g40 mt-[clamp(5rem,14vh,10rem)] grid gap-6 md:gap-8">
           {copy.lines.map((line) => (
             <li
               key={line}
