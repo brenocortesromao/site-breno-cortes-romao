@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
-import { useSceneTier, useWebglSlot } from "@/lib/quality";
+import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -139,6 +139,7 @@ export default function CloudBackdrop() {
                     pointerRef={pointer}
                     active={active}
                     light={env.coarse || tier === "low"}
+                    maxDpr={presetFor(tier).maxDpr}
                     reducedMotion={env.reduced}
                     onContextLost={onLost}
                   />
