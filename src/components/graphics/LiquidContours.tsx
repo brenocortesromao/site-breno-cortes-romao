@@ -31,7 +31,7 @@ uniform float uScale;
 uniform float uSeed;
 uniform float uLineW;
 uniform vec4 uColor;
-uniform vec3 uRipples[${MAX_RIPPLES}];
+uniform vec4 uRipples[${MAX_RIPPLES}]; // x, y (px), idade (s; < 0 = livre), tipo (1 mouse, 2 toque, 3 rastro do dedo)
 out vec4 outColor;
 
 // Simplex noise 3D (Ashima Arts / Stefan Gustavson, MIT)
@@ -76,15 +76,19 @@ void main(){
   vec2 frag = gl_FragCoord.xy;
   vec2 p = frag / uScale;
 
-  // ondulações do cursor: anel senoidal que se expande e se dissipa devagar
+  // ondulações do cursor: anel senoidal que se expande e se dissipa devagar.
+  // Toque: ~1,8x mais forte e mais larga, some em ~2,5 s (pedra caindo na
+  // água); rastro do dedo: ondas menores
   float rip = 0.0;
   for (int i = 0; i < ${MAX_RIPPLES}; i++) {
-    vec3 r = uRipples[i];
+    vec4 r = uRipples[i];
     if (r.z < 0.0) continue;
-    float d = distance(frag, r.xy) / uScale;
     float age = r.z;
-    float env = exp(-age * 0.75) * exp(-d * d / (0.02 + age * 0.06));
-    rip += env * 0.09 * sin(d * 26.0 - age * 4.0);
+    float tap = step(1.5, r.w) * (1.0 - step(2.5, r.w));
+    float trail = step(2.5, r.w);
+    float d = distance(frag, r.xy) / uScale / mix(1.0, 1.8, tap);
+    float env = exp(-age * mix(0.75, 1.2, tap)) * exp(-d * d / (0.02 + age * 0.06));
+    rip += env * 0.09 * mix(1.0, 1.8, tap) * mix(1.0, 0.55, trail) * sin(d * 26.0 - age * 4.0);
   }
 
   float v = (field(p) + rip) * uLevels;
@@ -199,35 +203,77 @@ export default function LiquidContours({
     gl.uniform1f(uSeed, seed * 13.7);
     gl.uniform1f(uLineW, 0.55 * dpr);
 
-    // ondulações do cursor (x, y em px do canvas; z = idade em s; -1 = livre)
-    const ripples = new Float32Array(MAX_RIPPLES * 3).fill(-1);
+    // ondulações (x, y em px do canvas; z = idade em s, -1 = livre; w = tipo)
+    const ripples = new Float32Array(MAX_RIPPLES * 4).fill(-1);
     let next = 0;
     let lastX = -1e4, lastY = -1e4;
-    const addRipple = (x: number, y: number) => {
+    const addRipple = (x: number, y: number, kind = 1, gap = 70) => {
       const r = el.getBoundingClientRect();
-      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return;
-      if (Math.hypot(x - lastX, y - lastY) < 70) return;
+      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return false;
+      if (Math.hypot(x - lastX, y - lastY) < gap) return false;
       lastX = x;
       lastY = y;
-      ripples[next * 3] = (x - r.left) * dpr;
-      ripples[next * 3 + 1] = (r.bottom - y) * dpr; // origem do GL é embaixo
-      ripples[next * 3 + 2] = 0;
+      ripples[next * 4] = (x - r.left) * dpr;
+      ripples[next * 4 + 1] = (r.bottom - y) * dpr; // origem do GL é embaixo
+      ripples[next * 4 + 2] = 0;
+      ripples[next * 4 + 3] = kind;
       next = (next + 1) % MAX_RIPPLES;
+      return true;
     };
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === "mouse") addRipple(e.clientX, e.clientY);
     };
-    // toque: onda onde o dedo encosta e enquanto ele desliza
-    const onTouch = (e: TouchEvent) => {
+    // toque (sem preventDefault, ouvintes passivos: nunca atrapalha a rolagem):
+    // - tap (dedo parado): onda forte onde tocou, com vibração leve no Android;
+    // - arrastar devagar: rastro de ondas menores a cada ~60 px;
+    // - gesto de rolar (mais de 12 px na vertical em menos de 120 ms): nada.
+    let touch: { x: number; y: number; px: number; py: number; moved: boolean; scroll: boolean; trace: [number, number][] } | null = null;
+    const onTouchStart = (e: TouchEvent) => {
       const t = e.touches[0];
-      if (t) addRipple(t.clientX, t.clientY);
+      if (!t || e.touches.length > 1) {
+        touch = null;
+        return;
+      }
+      touch = { x: t.clientX, y: t.clientY, px: t.clientX, py: t.clientY, moved: false, scroll: false, trace: [[e.timeStamp, t.clientY]] };
     };
-    // ondulações sempre que houver mouse (também no modo leve: são só uniforms)
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!touch || !t || touch.scroll) return;
+      touch.trace.push([e.timeStamp, t.clientY]);
+      while (touch.trace.length > 1 && e.timeStamp - touch.trace[0][0] > 120) touch.trace.shift();
+      if (Math.abs(t.clientY - touch.trace[0][1]) > 12) {
+        touch.scroll = true; // rolando a página: cancela o rastro
+        return;
+      }
+      if (Math.hypot(t.clientX - touch.x, t.clientY - touch.y) > 10) touch.moved = true;
+      if (touch.moved && Math.hypot(t.clientX - touch.px, t.clientY - touch.py) >= 60) {
+        touch.px = t.clientX;
+        touch.py = t.clientY;
+        addRipple(t.clientX, t.clientY, 3, 0);
+      }
+    };
+    const onTouchEnd = () => {
+      if (touch && !touch.moved && !touch.scroll && addRipple(touch.x, touch.y, 2, 0)) {
+        try {
+          navigator.vibrate?.(8);
+        } catch {
+          /* sem suporte (iPhone): ignora */
+        }
+      }
+      touch = null;
+    };
+    // ondulações sempre que houver mouse ou toque (também no modo leve: são só
+    // uniforms); nada com prefers-reduced-motion
     const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (hasMouse) window.addEventListener("pointermove", onMove, { passive: true });
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      /* sem ondulações nem vibração */
+    } else if (hasMouse) window.addEventListener("pointermove", onMove, { passive: true });
     else {
-      window.addEventListener("touchstart", onTouch, { passive: true });
-      window.addEventListener("touchmove", onTouch, { passive: true });
+      window.addEventListener("touchstart", onTouchStart, { passive: true });
+      window.addEventListener("touchmove", onTouchMove, { passive: true });
+      window.addEventListener("touchend", onTouchEnd, { passive: true });
+      window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     }
 
     let visible = false;
@@ -247,9 +293,9 @@ export default function LiquidContours({
       if (acc < 1 / 30) return; // ~30 fps: movimento lento não precisa de 60
       time += acc / 3; // ~3x mais lento que o tempo real: calmo, quase hipnótico
       for (let i = 0; i < MAX_RIPPLES; i++) {
-        if (ripples[i * 3 + 2] >= 0) {
-          ripples[i * 3 + 2] += acc;
-          if (ripples[i * 3 + 2] > 6) ripples[i * 3 + 2] = -1;
+        if (ripples[i * 4 + 2] >= 0) {
+          ripples[i * 4 + 2] += acc;
+          if (ripples[i * 4 + 2] > 6) ripples[i * 4 + 2] = -1;
         }
       }
       acc = 0;
@@ -258,7 +304,7 @@ export default function LiquidContours({
       gl.uniform2f(uRes, el.width, el.height);
       gl.uniform1f(uTime, time);
       gl.uniform4f(uColor, color[0], color[1], color[2], color[3] * 0.8); // mais suave que o token
-      gl.uniform3fv(uRipples, ripples);
+      gl.uniform4fv(uRipples, ripples);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -283,8 +329,10 @@ export default function LiquidContours({
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("touchstart", onTouch);
-      window.removeEventListener("touchmove", onTouch);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
       el.removeEventListener("webglcontextlost", onLost);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       el.remove();
