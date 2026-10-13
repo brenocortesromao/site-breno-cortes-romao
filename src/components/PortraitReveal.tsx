@@ -5,6 +5,7 @@ import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { revealOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -121,7 +122,8 @@ export default function PortraitReveal({
         .to(s, { exp: 0, duration: 0.5, ease: "power2.out", onUpdate: apply }, 1.6);
       if (outline) tl.to(outline, { opacity: 1, duration: 0.6, ease: "power1.out" }, 1.5);
 
-      ScrollTrigger.create({ trigger: root.current, start: "top 78%", once: true, onEnter: () => tl.play() });
+      // revealOnce: gatilho + rede de segurança (a foto nunca fica presa no escuro)
+      return revealOnce({ trigger: root.current!, start: "top 78%", play: () => tl.play(), finish: () => tl.progress(1) });
     },
     { scope: root, dependencies: [mode, report], revertOnUpdate: true },
   );

@@ -68,6 +68,11 @@ export function hideLetters(phrase: HTMLElement) {
   gsap.set(phrase.querySelectorAll("[data-ch]"), { opacity: 0 });
 }
 
+/** Mostra as letras prontas, sem decodificação (página já abaixo da frase). */
+export function showLetters(phrase: HTMLElement) {
+  gsap.set(phrase.querySelectorAll("[data-ch]"), { opacity: 1 });
+}
+
 /**
  * Decodifica uma frase (~1,6 s). Chama `onDone` quando a última letra termina
  * de acender. Retorna a limpeza (para o ticker e esvazia as camadas).

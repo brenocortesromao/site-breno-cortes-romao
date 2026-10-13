@@ -4,6 +4,7 @@ import { Fragment, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { revealOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -55,12 +56,11 @@ export default function BlurRevealTitle({
           fixedStagger ??
           Math.min(STAGGER_MAX, Math.max(STAGGER_MIN, (TOTAL - DURATION) / Math.max(chars.length - 1, 1)));
         gsap.set(chars, { opacity: 0, filter: "blur(10px)" });
-        ScrollTrigger.create({
-          trigger: root.current,
+        // revealOnce: gatilho + rede de segurança (nunca fica preso invisível)
+        return revealOnce({
+          trigger: root.current!,
           start,
-          once: true,
-          refreshPriority: -1, // depois dos pins das seções acima
-          onEnter: () => {
+          play: () => {
             gsap.set(chars, { willChange: "filter, opacity" });
             gsap.to(chars, {
               opacity: 1,
@@ -72,6 +72,7 @@ export default function BlurRevealTitle({
               onComplete: () => gsap.set(chars, { clearProps: "willChange,filter" }),
             });
           },
+          finish: () => gsap.set(chars, { opacity: 1, clearProps: "willChange,filter" }),
         });
       });
     },

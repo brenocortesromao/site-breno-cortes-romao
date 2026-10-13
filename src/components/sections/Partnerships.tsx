@@ -29,7 +29,7 @@ export default async function Partnerships() {
         >
           {t("title")}
         </h2>
-        <p className="mt-10 max-w-xl text-base leading-relaxed text-silver md:ml-[33%] md:text-lg">{t("text")}</p>
+        <p className="m-center-p mt-10 max-w-xl text-base leading-relaxed text-silver md:ml-[33%] md:text-lg">{t("text")}</p>
         <div className="mt-10 max-md:text-center md:ml-[33%]">
           <p className="inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em]">
             <span aria-hidden="true" className="relative flex h-2 w-2">
@@ -38,7 +38,7 @@ export default async function Partnerships() {
             </span>
             {t("indicator")}
           </p>
-          <p className="m-center mt-6 max-w-xl text-base leading-relaxed max-md:mx-auto md:text-lg">{t("cta")}</p>
+          <p className="m-center-p mt-6 max-w-xl text-base leading-relaxed md:text-lg">{t("cta")}</p>
           <a
             href={whatsappUrl(t("whatsappMessage"))}
             target="_blank"

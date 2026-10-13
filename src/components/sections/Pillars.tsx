@@ -85,7 +85,7 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
               className="m-center mt-6 max-w-3xl text-[clamp(2rem,3.6vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.05em]"
               text={copy.title}
             />
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-silver md:text-lg">{copy.subtitle}</p>
+            <p className="m-center-p mt-5 max-w-xl text-base leading-relaxed text-silver md:text-lg">{copy.subtitle}</p>
           </div>
           {/* Progresso (só no modo fixo) */}
           <div aria-hidden="true" className="hidden w-48 group-data-[mode=pin]:block">

@@ -4,7 +4,8 @@ import { Fragment, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { DecodeLetters, decode, hideLetters, shine } from "@/components/decode";
+import { revealOnce } from "@/lib/reveal";
+import { DecodeLetters, decode, hideLetters, shine, showLetters } from "@/components/decode";
 import OceanBackdrop from "@/components/graphics/OceanBackdrop";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -74,11 +75,15 @@ export default function Ai({ copy }: { copy: AiCopy }) {
             stopDecode = decode(h);
           }
         };
-        ScrollTrigger.create({
-          trigger: "[data-ai-prompt]",
+        // revealOnce: gatilho + rede de segurança (prompt e título nunca ficam presos)
+        const stopReveal = revealOnce({
+          trigger: root.current!.querySelector("[data-ai-prompt]")!,
           start: "top 75%",
-          once: true,
-          onEnter: () => gsap.ticker.add(tick),
+          play: () => gsap.ticker.add(tick),
+          finish: () => {
+            setTyped(null);
+            showLetters(h);
+          },
         });
 
         gsap.utils.toArray<HTMLElement>("[data-ai-line]").forEach((line) => {
@@ -97,6 +102,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
         });
 
         return () => {
+          stopReveal();
           gsap.ticker.remove(tick);
           stopDecode?.();
           setTyped(null);
@@ -193,7 +199,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
             ))}
           {after}
         </p>
-        <p className="m-center mt-8 text-sm text-silver md:text-base">{copy.footnote}</p>
+        <p className="m-center-p mt-8 text-sm text-silver md:text-base">{copy.footnote}</p>
       </div>
     </section>
   );

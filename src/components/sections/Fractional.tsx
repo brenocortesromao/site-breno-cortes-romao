@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { revealOnce } from "@/lib/reveal";
 import GraphicLayer from "@/components/graphics/GraphicLayer";
 import { protectTerms } from "@/components/Term";
 import TechnicalText from "@/components/TechnicalText";
@@ -215,7 +216,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
         // terminar, um reflexo prata atravessa os dígitos uma vez. O HTML já traz
         // o valor final: sem JS / reduced motion, números estáticos e sem reflexo.
         const counts = gsap.utils.toArray<HTMLElement>("[data-count]");
-        const numbers = gsap.timeline({ scrollTrigger: { trigger: "[data-stats]", start: "top 75%", once: true } });
+        const numbers = gsap.timeline({ paused: true });
         numbers.from("[data-stat]", { autoAlpha: 0, y: 30, duration: 1, ease: "power3.out", stagger: 0.25 }, 0);
         counts.forEach((el, i) => {
           const n = { v: 0 };
@@ -240,11 +241,16 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             { backgroundPosition: "0% 0", duration: 1.5, ease: "power2.inOut", stagger: 0.2 },
           )
           .to("[data-num-shine]", { opacity: 0, duration: 0.3 });
+        // revealOnce: gatilho + rede de segurança (os números nunca ficam presos invisíveis)
+        return revealOnce({
+          trigger: root.current!.querySelector("[data-stats]")!,
+          start: "top 75%",
+          play: () => numbers.play(),
+          finish: () => numbers.progress(1),
+        });
       });
       mm.add("(prefers-reduced-motion: no-preference) and (min-width: 768px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: board.current, start: "top 72%" },
-        });
+        const tl = gsap.timeline({ paused: true });
         copy.compare.columns.forEach((_, c) => {
           tl.from(
             `[data-col="${c}"]`,
@@ -256,6 +262,8 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
         tl.set("[data-fx-shine]", { opacity: 1 })
           .fromTo("[data-fx-shine]", { xPercent: -110 }, { xPercent: 160, duration: 1.2, ease: "power2.inOut" })
           .to("[data-fx-shine]", { opacity: 0, duration: 0.2 });
+        // revealOnce: gatilho + rede de segurança (as colunas nunca ficam presas invisíveis)
+        return revealOnce({ trigger: board.current!, start: "top 72%", play: () => tl.play(), finish: () => tl.progress(1) });
       });
     },
     { scope: root },
@@ -282,7 +290,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             className="m-center text-[clamp(2.3rem,5vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em] md:col-span-8"
             text={copy.title}
           />
-          <p className="max-w-md self-end text-base leading-relaxed text-silver md:col-span-4 md:text-[17px]">
+          <p className="m-center-p max-w-md self-end text-base leading-relaxed text-silver md:col-span-4 md:text-[17px]">
             {protectTerms(copy.text)}
           </p>
         </div>
@@ -292,14 +300,14 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           <h3 className="m-center text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
             {protectTerms(copy.stats.title)}
           </h3>
-          <p className="m-center mt-3 max-w-2xl text-base leading-relaxed text-silver max-md:mx-auto md:text-[17px]">
+          <p className="m-center-p mt-3 max-w-2xl text-base leading-relaxed text-silver md:text-[17px]">
             {protectTerms(copy.stats.lead)}
           </p>
           <div className="mt-8 grid gap-10 border-t border-line pt-8 md:grid-cols-2 md:gap-8">
             {copy.stats.items.map((stat) => (
               <div key={stat.caption} data-stat>
                 {/* número primeiro, legenda depois: mesma linha de base nos dois */}
-                <p className="relative w-fit text-[clamp(4.5rem,11vw,10rem)] font-semibold leading-[0.9] tracking-[-0.06em] tabular-nums">
+                <p className="relative w-fit text-[clamp(4.5rem,11vw,10rem)] max-md:mx-auto font-semibold leading-[0.9] tracking-[-0.06em] tabular-nums">
                   <span className="black-chrome">
                     {stat.prefix}
                     <span data-count={stat.value}>{stat.value}</span>
@@ -312,13 +320,13 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
                     {stat.suffix}
                   </span>
                 </p>
-                <p className="mt-3 max-w-sm text-sm leading-relaxed text-silver md:text-base">
+                <p className="m-center-p mt-3 max-w-sm text-sm leading-relaxed text-silver md:text-base">
                   {protectTerms(stat.caption)}
                 </p>
               </div>
             ))}
           </div>
-          <figcaption className="m-center mt-10 max-w-2xl max-md:mx-auto">
+          <figcaption className="m-center-p mt-10 max-w-2xl">
             <span className="block text-base leading-relaxed md:text-lg">{protectTerms(copy.stats.support)}</span>
             <span className="mt-3 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
               {protectTerms(copy.stats.source)}
@@ -398,7 +406,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           {/* Mobile: um cartão por critério, em carrossel */}
           <CriteriaCarousel columns={columns} rows={rows} />
 
-          <p className="m-center mt-10 max-w-xl text-sm leading-relaxed text-silver max-md:mx-auto">{protectTerms(copy.note)}</p>
+          <p className="m-center-p mt-10 max-w-xl text-sm leading-relaxed text-silver">{protectTerms(copy.note)}</p>
         </div>
       </div>
     </section>

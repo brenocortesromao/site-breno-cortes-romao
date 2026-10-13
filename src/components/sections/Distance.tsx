@@ -4,8 +4,9 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { revealOnce } from "@/lib/reveal";
 import type { DistanceCharts } from "@/content/charts";
-import { DecodeLetters, decode, hideLetters, shine } from "@/components/decode";
+import { DecodeLetters, decode, hideLetters, shine, showLetters } from "@/components/decode";
 import FlowField, { type FlowStage } from "@/components/graphics/FlowField";
 
 /**
@@ -119,12 +120,14 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
         const cleanups: (() => void)[] = [];
         section.querySelectorAll<HTMLElement>("[data-decode]").forEach((phrase) => {
           hideLetters(phrase);
-          ScrollTrigger.create({
-            trigger: phrase,
-            start: "top 85%",
-            once: true,
-            onEnter: () => cleanups.push(decode(phrase, () => shine(phrase))),
-          });
+          cleanups.push(
+            revealOnce({
+              trigger: phrase,
+              start: "top 85%",
+              play: () => cleanups.push(decode(phrase, () => shine(phrase))),
+              finish: () => showLetters(phrase),
+            }),
+          );
         });
         return () => cleanups.forEach((fn) => fn());
       });

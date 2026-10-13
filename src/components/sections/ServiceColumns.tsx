@@ -4,6 +4,7 @@ import { Fragment, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { revealOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -110,11 +111,6 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
           running(true);
         };
 
-        // --- estado inicial ---
-        gsap.set(lines, { scaleX: 0, transformOrigin: "left center" });
-        gsap.set(titles, { opacity: 0 });
-        items.forEach((item) => gsap.set(partsOf(item).letters, { opacity: 0 }));
-        counters.forEach((c) => (c.textContent = "[00]"));
         if (scan) gsap.set(scan, { opacity: 0 });
 
         const tl = gsap.timeline({ paused: true });
@@ -153,14 +149,6 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
           index += total;
         });
         tl.call(() => items.forEach((item, i) => scramble(item, i * STAGGER, ENTER)), [], ITEMS_AT);
-
-        ScrollTrigger.create({
-          trigger: el.closest("section") ?? el,
-          start: "top 75%",
-          once: true,
-          refreshPriority: -1,
-          onEnter: () => tl.play(),
-        });
 
         // --- hover (só mouse) ---
         const off: (() => void)[] = [];
@@ -287,7 +275,27 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
         });
         io.observe(el);
         document.addEventListener("visibilitychange", sync);
+
+        // --- entrada: estado inicial só agora, com a animação registrada; a
+        // rede de segurança (revealOnce) roda a entrada se o gatilho falhar e
+        // mostra tudo direto se a página já estiver abaixo da seção ---
+        gsap.set(lines, { scaleX: 0, transformOrigin: "left center" });
+        gsap.set(titles, { opacity: 0 });
+        items.forEach((item) => gsap.set(partsOf(item).letters, { opacity: 0 }));
+        counters.forEach((c) => (c.textContent = "[00]"));
+        const stopReveal = revealOnce({
+          trigger: el.closest("section") ?? el,
+          start: "top 75%",
+          play: () => tl.play(),
+          finish: () => {
+            tl.progress(1, true);
+            items.forEach((item) => gsap.set(partsOf(item).letters, { opacity: 1 }));
+            counters.forEach((c, i) => (c.textContent = `[${String(columns[i]?.items.length ?? 0).padStart(2, "0")}]`));
+            sync();
+          },
+        });
         off.push(() => {
+          stopReveal();
           io.disconnect();
           document.removeEventListener("visibilitychange", sync);
           wtl.kill();

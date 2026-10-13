@@ -200,7 +200,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
           <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-silver">
             {protectTerms(copy.label)}
           </p>
-          <p className="text-sm leading-relaxed text-silver md:text-[15px]">{copy.support}</p>
+          <p className="m-center-p text-sm leading-relaxed text-silver md:text-[15px]">{copy.support}</p>
         </div>
       </div>
 

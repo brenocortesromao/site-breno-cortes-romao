@@ -184,6 +184,14 @@ body::before {
     text-align: center;
     text-wrap: balance;
   }
+  /* parágrafos centralizados logo abaixo dos títulos: linhas curtas (~34ch)
+     e quebra "pretty" (sem palavra órfã), bloco centralizado */
+  .m-center-p {
+    text-align: center;
+    text-wrap: pretty;
+    max-width: 34ch;
+    margin-inline: auto;
+  }
 }
 
 /* Projetos pontuais: moldura cromada viva. Uma faixa de luz prateada percorre

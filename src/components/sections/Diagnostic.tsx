@@ -228,7 +228,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
           </ul>
         </div>
 
-        <div aria-live="polite" className="mt-16 md:ml-[calc(41.666%+1rem)] md:mt-24">
+        <div aria-live="polite" className="mt-16 max-md:text-center md:ml-[calc(41.666%+1rem)] md:mt-24">
           <p
             key={count >= 2 ? "m" : count === 1 ? "o" : "d"}
             className="m-center max-w-2xl max-md:mx-auto animate-[fadeIn_0.6s_ease] text-[clamp(1.5rem,2.6vw,2.6rem)] font-semibold leading-[1.1] tracking-[-0.04em]"

@@ -4,6 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { revealOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -196,17 +197,23 @@ export default function SprayTitle({
           }
         };
 
-        ScrollTrigger.create({
+        // revealOnce: gatilho + rede de segurança (a cobertura nunca fica presa)
+        const stopReveal = revealOnce({
           trigger: h,
           start: "top 80%",
-          once: true,
-          onEnter: () => {
+          play: () => {
             started = true;
             gsap.ticker.add(tick);
+          },
+          finish: () => {
+            started = true;
+            cv.style.display = "none";
+            ms.style.display = "none";
           },
         });
 
         return () => {
+          stopReveal();
           gsap.ticker.remove(tick);
           ro.disconnect();
           cv.style.display = "none";

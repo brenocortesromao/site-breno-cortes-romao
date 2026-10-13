@@ -4,6 +4,7 @@ import { useCallback, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { revealOnce } from "@/lib/reveal";
 import MediaSlot from "./MediaSlot";
 import PortraitReveal from "./PortraitReveal";
 import TiltCard from "./TiltCard";
@@ -151,16 +152,24 @@ export default function Manifesto({
           },
         });
 
-        gsap.from("[data-follow]", {
+        const follow = gsap.from("[data-follow]", {
           autoAlpha: 0,
           y: 24,
           duration: 1.1,
           ease: "power3.out",
           stagger: 0.12,
-          scrollTrigger: { trigger: phrase.current, start: "bottom 75%" },
+          paused: true,
+        });
+        // revealOnce: gatilho + rede de segurança (o texto nunca fica preso invisível)
+        const stopFollow = revealOnce({
+          trigger: phrase.current!,
+          start: "bottom 75%",
+          play: () => follow.play(),
+          finish: () => follow.progress(1),
         });
 
         return () => {
+          stopFollow();
           playSignature.current = null;
         };
       });
@@ -173,7 +182,7 @@ export default function Manifesto({
       <div className="mx-auto grid w-full max-w-[1600px] gap-14 px-6 py-[clamp(6rem,16vh,12rem)] md:grid-cols-12 md:gap-8 md:px-12">
         {/* Retrato + assinatura */}
         <div className="md:col-span-5">
-          <div className="mb-8 flex flex-wrap items-center gap-4 md:mb-10">
+          <div className="mb-8 flex flex-wrap items-center gap-4 max-md:justify-center md:mb-10">
             <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">
               {copy.eyebrow}
             </p>

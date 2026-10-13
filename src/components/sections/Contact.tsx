@@ -5,7 +5,7 @@ import SpaceBackdrop from "@/components/graphics/SpaceBackdrop";
 import { protectTerms } from "@/components/Term";
 
 const button =
-  "inline-flex h-full min-h-[4.5rem] items-center justify-between gap-6 border px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors";
+  "inline-flex h-full min-h-[4.5rem] items-center justify-between gap-6 max-md:justify-center max-md:text-center border px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors";
 
 /**
  * Contato (§14). Botões: WhatsApp (principal, mensagem pré-preenchida), E-mail (menu com Gmail, app de e-mail e
@@ -25,7 +25,7 @@ export default async function Contact() {
           <span className="block font-light">{t("titleLight")}</span>
           <span className="block font-semibold text-silver-gradient md:pl-[12vw]">{t("titleStrong")}</span>
         </h2>
-        <p className="mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
+        <p className="m-center-p mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
 
         {/* WhatsApp (principal) na linha inteira; E-mail e Mídia kit lado a lado */}
         <ul className="mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2">

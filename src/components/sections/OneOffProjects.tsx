@@ -29,12 +29,12 @@ export default async function OneOffProjects() {
             text={t("title")}
             stagger={0.035}
           />
-          <p className="mt-6 max-w-md text-base leading-relaxed text-silver md:text-lg">{t("text")}</p>
+          <p className="m-center-p mt-6 max-w-md text-base leading-relaxed text-silver md:text-lg">{t("text")}</p>
         </div>
 
         <ServiceColumns columns={columns} className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-10" />
 
-        <div className="lg:col-start-1 lg:row-start-2">
+        <div className="max-md:text-center lg:col-start-1 lg:row-start-2">
           <ChromeButton
             href={whatsappUrl(t("whatsappMessage"))}
             label={t("buttonLabel")}
