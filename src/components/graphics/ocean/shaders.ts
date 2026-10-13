@@ -17,7 +17,7 @@
 /** Altura média da superfície e do fundo (unidades do mundo). */
 export const BED_LEVEL = -17;
 
-const COMMON = /* glsl */ `
+export const OCEAN_COMMON = /* glsl */ `
 uniform float uTime;
 uniform vec3 uCamPos;
 // celular (tela em pé): exposição, névoa e raios ajustados (1, 1, 1 no desktop)
@@ -114,7 +114,7 @@ export const BACKDROP_FRAG = /* glsl */ `
 uniform vec2 uRes;
 uniform mat3 uCamRot;
 uniform float uTan;
-${COMMON}
+${OCEAN_COMMON}
 
 vec3 sky(vec3 rd) {
   float y = max(rd.y, 0.0);
@@ -223,15 +223,11 @@ void main() {
 // ------------------------------------------------------------------ silhuetas
 export const SILHOUETTE_VERT = /* glsl */ `
 uniform float uTime;
-#if defined(SWIM) || defined(FLAP)
+#ifdef SWIM
 attribute float aPhase;
 #endif
 #ifdef SWIM
 uniform vec3 uSwim; // amplitude, frequência, número de onda ao longo do corpo
-#endif
-#ifdef FLAP
-// tartaruga: peso da nadadeira (0 = casco) e 1 = dianteira / 0 = traseira
-attribute vec2 aFlap;
 #endif
 varying vec3 vWorld;
 varying vec3 vNormal;
@@ -242,15 +238,6 @@ void main() {
   // nado: onda lateral que cresce da cabeça (+Z) para a cauda (-Z)
   float tail = clamp(0.45 - p.z, 0.0, 1.0);
   p.x += sin(uTime * uSwim.y + aPhase - p.z * uSwim.z) * uSwim.x * tail * tail;
-#endif
-#ifdef FLAP
-  // batida lenta das nadadeiras (dianteiras amplas, traseiras defasadas e curtas);
-  // a ponta sobe/desce e recua um pouco, como um voo debaixo d'água
-  float beat = sin(uTime * 1.3 + aPhase + (1.0 - aFlap.y) * 1.3);
-  float amp = mix(0.12, 0.42, aFlap.y) * aFlap.x;
-  p.y += beat * amp;
-  p.z -= abs(beat) * amp * 0.35 * aFlap.y;
-  nrm = normalize(nrm + vec3(-sign(p.x) * beat * amp * 1.5, 0.0, 0.0));
 #endif
   mat4 m = modelMatrix;
 #ifdef USE_INSTANCING
@@ -269,7 +256,7 @@ uniform vec2 uLook;
 // luz de dorso dos animais (contorno prateado #BFC4C8 vindo de cima + brilho
 // suave no lombo); 0 = sem (corais)
 uniform float uDorsal;
-${COMMON}
+${OCEAN_COMMON}
 varying vec3 vWorld;
 varying vec3 vNormal;
 void main() {
@@ -296,7 +283,7 @@ void main() {
 export const SNOW_VERT = /* glsl */ `
 uniform float uBox;
 uniform float uPx;
-${COMMON}
+${OCEAN_COMMON}
 attribute float aSize;
 varying float vA;
 void main() {

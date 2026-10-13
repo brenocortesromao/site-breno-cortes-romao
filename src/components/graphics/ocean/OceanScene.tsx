@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { loadOceanModels } from "./models";
+import { loadOceanAnimals } from "./animals";
 import { OceanWorld } from "./world";
 
 /**
@@ -18,12 +19,14 @@ function Ocean({
   pointerRef,
   light,
   mobile,
+  few,
   still,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
   light: boolean;
   mobile: boolean;
+  few: boolean;
   still: boolean;
 }) {
   const [world] = useState(() => new OceanWorld(light, mobile));
@@ -40,10 +43,18 @@ function Ocean({
         invalidate(); // quadro parado (reduced motion): redesenha com eles
       })
       .catch((e) => console.warn("[oceano] modelos não carregaram:", e));
+    // tubarões e tartaruga realistas (só com a cena montada, isto é, perto da seção)
+    loadOceanAnimals()
+      .then((src) => {
+        if (!alive) return;
+        world.setAnimals(src, few);
+        invalidate();
+      })
+      .catch((e) => console.warn("[oceano] animais não carregaram:", e));
     return () => {
       alive = false;
     };
-  }, [world, invalidate]);
+  }, [world, invalidate, few]);
 
   useFrame(({ gl, camera }, delta) => {
     world.update(gl, camera as PerspectiveCamera, progressRef.current ?? 0, pointerRef.current ?? { x: 0, y: 0 }, Math.min(delta, 0.05), still);
@@ -58,6 +69,7 @@ export default function OceanScene({
   active,
   light,
   mobile = false,
+  few = false,
   maxDpr,
   reducedMotion,
   onContextLost,
@@ -68,6 +80,8 @@ export default function OceanScene({
   light: boolean;
   /** Celular (até 767px): enquadramento em pé, mais claro e com menos névoa (ver OceanWorld). */
   mobile?: boolean;
+  /** Nível "low": 1 tubarão e sem "circling". */
+  few?: boolean;
   maxDpr: number;
   reducedMotion: boolean;
   /** Perda do contexto WebGL (o pai remonta a cena). */
@@ -84,7 +98,7 @@ export default function OceanScene({
       gl={{ antialias: !light, alpha: false, powerPreference: "default" }}
     >
       <ContextLossWatcher onLost={onContextLost} />
-      <Ocean progressRef={progressRef} pointerRef={pointerRef} light={light} mobile={mobile} still={reducedMotion} />
+      <Ocean progressRef={progressRef} pointerRef={pointerRef} light={light} mobile={mobile} few={few} still={reducedMotion} />
     </Canvas>
   );
 }

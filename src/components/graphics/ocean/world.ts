@@ -18,8 +18,8 @@ import {
   type WebGLRenderer,
 } from "three";
 import { branchCoral, fanCoral, moundCoral, seeded } from "./coral";
-import { turtleGeometry } from "./turtle";
 import type { OceanModels } from "./models";
+import { OceanAnimals, type loadOceanAnimals } from "./animals";
 import {
   BACKDROP_FRAG,
   BACKDROP_VERT,
@@ -78,22 +78,6 @@ const BOX_WIDE = { x0: 0, y0: -6.6, z0: -31, w: 22, h: 4.5, d: 10 };
 /** Celular (tela em pé): mais estreita e mais perto, para o cardume passar pelo meio. */
 const BOX_TALL = { x0: 0, y0: -7.2, z0: -29, w: 8, h: 4, d: 6 };
 
-// UMA tartaruga: volta lenta numa elipse inclinada à frente da câmera no meio
-// do mergulho (p ~0,6 a 0,8, a 8 a 13 unidades): a metade da frente da volta é
-// a travessia em diagonal, bem visível; a de trás fica mais longe, na névoa
-const TURTLE_WIDE = {
-  center: new Vector3(1, -6, -19),
-  a: new Vector3(0.8, 0, -0.6), // eixo maior (diagonal)
-  b: new Vector3(0.6, 0, 0.8), // eixo menor (para perto / para longe)
-  ra: 8,
-  rb: 4,
-  w: 0.06, // ~0,5 unidade/s; volta em ~105 s
-  phase: -1.13, // passa mais perto por volta dos 15 s depois de a cena montar
-  len: 1.9,
-};
-/** Celular: volta menor e mais perto do centro (sempre dentro da tela estreita). */
-const TURTLE_TALL = { ...TURTLE_WIDE, center: new Vector3(0, -7, -17), ra: 3.6, rb: 2.4, w: 0.09 };
-
 /** Campo de visão vertical: maior na tela em pé (senão a cena vira uma fresta). */
 const FOV_WIDE = 50;
 const FOV_TALL = 68;
@@ -124,17 +108,14 @@ export class OceanWorld {
   private readonly defines: Record<string, string>;
   private snow: ShaderMaterial;
   private fish: InstancedMesh | null = null;
-  private sharks: InstancedMesh | null = null;
   private boids: Boids | null = null;
-  private turtles: InstancedMesh;
+  /** Tubarões e tartaruga realistas (ver animals.ts), assim que os modelos carregam. */
+  private animals: OceanAnimals | null = null;
   /** Início (tempo) da passagem do tubarão perto da câmera; -1 = parado. */
-  private passStart = -1;
-  private passArmed = true;
   private time = 0;
   private prog = -1;
   private tilt = new Vector2();
   private readonly box: typeof BOX_WIDE;
-  private readonly turtle: typeof TURTLE_WIDE;
 
   constructor(
     private readonly light: boolean,
@@ -143,7 +124,6 @@ export class OceanWorld {
   ) {
     this.defines = light ? { LIGHT: "" } : {};
     this.box = mobile ? BOX_TALL : BOX_WIDE;
-    this.turtle = mobile ? TURTLE_TALL : TURTLE_WIDE;
     this.shared.uExpo.value = mobile ? 1.4 : 1;
     this.shared.uFogK.value = mobile ? 0.6 : 1;
     this.shared.uRays.value = mobile ? 1.6 : 1;
@@ -167,7 +147,6 @@ export class OceanWorld {
 
     this.buildReef();
     this.snow = this.buildSnow();
-    this.turtles = this.buildTurtles();
   }
 
   /**
@@ -181,11 +160,9 @@ export class OceanWorld {
     /** Luz de dorso (só nos animais). */
     dorsal?: number;
     swim?: [number, number, number];
-    flap?: boolean;
   }) {
     const defines: Record<string, string> = { ...this.defines };
     if (o.swim) defines.SWIM = "";
-    if (o.flap) defines.FLAP = "";
     const m = new ShaderMaterial({
       vertexShader: SILHOUETTE_VERT,
       fragmentShader: SILHOUETTE_FRAG,
@@ -229,16 +206,6 @@ export class OceanWorld {
       mesh.frustumCulled = false;
       this.under.add(mesh);
     });
-  }
-
-  private buildTurtles() {
-    const geo = turtleGeometry(this.light);
-    geo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0]), 1));
-    this.geos.push(geo);
-    const mesh = new InstancedMesh(geo, this.silhouette({ tint: 0.075, rim: 1.1, fog: 0.47, dorsal: 0.2, flap: true }), 1);
-    mesh.frustumCulled = false;
-    this.under.add(mesh);
-    return mesh;
   }
 
   private buildSnow() {
@@ -299,16 +266,16 @@ export class OceanWorld {
     fishGeo.setAttribute("aPhase", new InstancedBufferAttribute(phase, 1));
     this.fish = new InstancedMesh(fishGeo, this.silhouette({ tint: 0.086, rim: 1.2, fog: 0.47, dorsal: 0.2, swim: [0.1, 11, 9] }), n);
     this.fish.frustumCulled = false;
-
-    // tubarões ao longe (1 ou 2) + 1 que passa perto da câmera (ver passStart)
-    const far = this.light ? 1 : 2;
-    const sharkGeo = m.shark.clone();
-    sharkGeo.setAttribute("aPhase", new InstancedBufferAttribute(new Float32Array([0, 2.1, 4.4].slice(0, far + 1)), 1));
-    this.sharks = new InstancedMesh(sharkGeo, this.silhouette({ tint: 0.056, rim: 1.0, fog: 0.385, dorsal: 0.35, swim: [0.07, 2.2, 5] }), far + 1);
-    this.sharks.frustumCulled = false;
-    this.geos.push(fishGeo, sharkGeo);
-    this.under.add(this.fish, this.sharks);
+    this.geos.push(fishGeo);
+    this.under.add(this.fish);
     this.writeFish();
+  }
+
+  /** Recebe os tubarões e a tartaruga realistas; "few" (nível low): 1 tubarão, sem "circling". */
+  setAnimals(src: Awaited<ReturnType<typeof loadOceanAnimals>>, few: boolean) {
+    if (this.animals) return;
+    this.animals = new OceanAnimals(src, this.shared, { mobile: this.mobile, light: this.light, few });
+    this.under.add(this.animals.group);
   }
 
   /**
@@ -396,62 +363,12 @@ export class OceanWorld {
     this.fish.instanceMatrix.needsUpdate = true;
   }
 
-  private animateLife(t: number, dt: number, cam: Vector3, still: boolean) {
+  private animateLife(t: number, dt: number, camera: PerspectiveCamera, still: boolean) {
     if (this.boids && dt > 0) {
       this.stepBoids(dt, t);
       this.writeFish();
     }
-    // tartaruga: diagonal lenta, subindo e descendo devagar (o corpo inclina
-    // junto com a subida)
-    {
-      const T = this.turtle;
-      const ang = t * T.w + T.phase;
-      const ca = Math.cos(ang);
-      const sa = Math.sin(ang);
-      tmpP.copy(T.center).addScaledVector(T.a, T.ra * ca).addScaledVector(T.b, T.rb * sa);
-      tmpP.y += 1.1 * Math.sin(t * 0.16);
-      // rumo = derivada da elipse; subida/descida em proporção à velocidade
-      tmpD.copy(T.a).multiplyScalar(-T.ra * sa * T.w).addScaledVector(T.b, T.rb * ca * T.w);
-      tmpD.y = 1.1 * 0.16 * Math.cos(t * 0.16);
-      tmpQ.setFromUnitVectors(Z, tmpD.normalize());
-      tmpM.compose(tmpP, tmpQ, tmpS.set(T.len, T.len, T.len));
-      this.turtles.setMatrixAt(0, tmpM);
-      this.turtles.instanceMatrix.needsUpdate = true;
-    }
-
-    if (this.sharks) {
-      // ao longe, cruzando devagar em sentidos opostos
-      // (as fases deixam um deles em cena logo nos primeiros segundos)
-      // celular: travessias mais curtas e mais perto (passam pelo meio da tela estreita)
-      const paths: [number, number, number, number, number][] = this.mobile
-        ? [
-            [-13 + ((t * 0.8 + 20) % 26), -9.6 + 0.4 * Math.sin(t * 0.11), -36, 1, 4.2],
-            [13 - ((t * 0.6 + 9) % 26), -12.2 + 0.4 * Math.sin(t * 0.09 + 1), -44, -1, 3.8],
-          ]
-        : [
-            [-30 + ((t * 0.95 + 47) % 60), -8.6 + 0.5 * Math.sin(t * 0.11), -42, 1, 4.6],
-            [40 - ((t * 0.75 + 78) % 80), -12 + 0.4 * Math.sin(t * 0.09 + 1), -54, -1, 4.0],
-          ];
-      const far = this.sharks.count - 1;
-      for (let i = 0; i < far; i++) {
-        const [x, y, z, dir, len] = paths[i];
-        tmpQ.setFromUnitVectors(Z, tmpD.set(dir, 0.02 * Math.sin(t * 0.2 + i), 0.1 * Math.sin(t * 0.17 + i * 2)).normalize());
-        tmpM.compose(tmpP.set(x, y, z), tmpQ, tmpS.set(len, len, len));
-        this.sharks.setMatrixAt(i, tmpM);
-      }
-      // o que passa PERTO: disparado uma vez quando a descida passa de ~60%
-      // (de novo se a pessoa voltar para cima e descer outra vez); atravessa
-      // a tela em ~11 s, a ~9 unidades da câmera e um pouco abaixo dela
-      const u = still ? 0.55 : this.passStart < 0 ? -1 : (t - this.passStart) / 11;
-      if (u >= 0 && u <= 1) {
-        tmpQ.setFromUnitVectors(Z, tmpD.set(1, 0.04, -0.12).normalize());
-        // celular: atravessa uma faixa menor, mais perto (fica mais tempo na tela estreita)
-        const [span, dist] = this.mobile ? [11, 7.5] : [17, 9];
-        tmpM.compose(tmpP.set(cam.x - span + 2 * span * u, cam.y - 1.7 + 0.25 * Math.sin(t * 0.4), cam.z - dist - 1.2 * u), tmpQ, tmpS.set(4.8, 4.8, 4.8));
-      } else tmpM.makeScale(0, 0, 0);
-      this.sharks.setMatrixAt(far, tmpM);
-      this.sharks.instanceMatrix.needsUpdate = true;
-    }
+    this.animals?.update(t, dt, camera, still);
   }
 
   update(gl: WebGLRenderer, camera: PerspectiveCamera, progress: number, pointer: { x: number; y: number }, dt: number, still: boolean) {
@@ -483,16 +400,9 @@ export class OceanWorld {
     u.uTan.value = Math.tan((camera.fov * Math.PI) / 360);
     this.snow.uniforms.uPx.value = u.uRes.value.y * 0.011;
 
-    // passagem do tubarão perto: dispara ao passar de 60% da descida; rearma
-    // ao voltar acima da linha d'água
-    if (this.passArmed && this.prog > 0.6) {
-      this.passArmed = false;
-      this.passStart = t;
-    } else if (this.prog < 0.4) this.passArmed = true;
-
     // acima da superfície nada embaixo aparece: nem desenha
     this.under.visible = camera.position.y < 1.2;
-    if (this.under.visible) this.animateLife(t, still ? 0 : dt, camera.position, still);
+    if (this.under.visible) this.animateLife(t, still ? 0 : dt, camera, still);
   }
 
   dispose() {
@@ -500,5 +410,6 @@ export class OceanWorld {
     this.back.dispose();
     this.geos.forEach((g) => g.dispose());
     this.mats.forEach((m) => m.dispose());
+    this.animals?.dispose();
   }
 }

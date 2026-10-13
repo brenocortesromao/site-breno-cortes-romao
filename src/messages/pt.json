@@ -479,7 +479,9 @@
   "footer": {
     "rights": "© {year} {name}. Todos os direitos reservados.",
     "tagline": "Estratégia de marca · Direção criativa · Execução",
-    "bearCredit": "Modelo 3D do urso: <model>''Realistic Grizzly Bear''</model> por 3Dima, <license>CC BY 4.0</license>"
+    "bearCredit": "Modelo 3D do urso: <model>''Realistic Grizzly Bear''</model> por 3Dima, <license>CC BY 4.0</license>",
+    "sharkCredit": "Tubarão: <model>''Realistic Shark''</model> por MotionStreamStudios, <license>CC BY 4.0</license>",
+    "turtleCredit": "Tartaruga: <model>''Sea Turtle''</model> por Eloi, <license>CC BY 4.0</license>"
   },
   "notFound": {
     "title": "Página não encontrada",

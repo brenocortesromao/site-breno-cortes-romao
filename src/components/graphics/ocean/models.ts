@@ -3,14 +3,15 @@ import { Mesh, type BufferGeometry } from "three";
 /**
  * Modelos do oceano: public/oceano/oceano.glb (3,5 KB, glTF com Draco), gerado
  * por scripts/build-ocean-models.mjs a partir do "Animated Fish Pack" de
- * Quaternius (CC0). Contém só a forma do tubarão e do peixe do cardume
- * (comprimento 1, cabeça para +Z); o nado é feito no shader.
+ * Quaternius (CC0). Daqui só se usa o peixe do cardume (comprimento 1, cabeça
+ * para +Z; o nado é feito no shader). Tubarões e tartaruga são os modelos
+ * realistas de public/modelos/oceano/ (ver animals.ts).
  * O decodificador Draco (public/draco/, wasm) roda num Web Worker e só é
  * baixado quando o oceano monta pela primeira vez. As geometrias ficam em
  * cache: remontar a cena (vaga de contexto, perda de contexto) não baixa nem
  * decodifica de novo.
  */
-export type OceanModels = { shark: BufferGeometry; fish: BufferGeometry };
+export type OceanModels = { fish: BufferGeometry };
 
 let pending: Promise<OceanModels> | null = null;
 
@@ -31,7 +32,7 @@ export function loadOceanModels(): Promise<OceanModels> {
         g.computeVertexNormals(); // normais suaves (o arquivo só traz posições)
         return g;
       };
-      return { shark: geo("shark"), fish: geo("fish") };
+      return { fish: geo("fish") };
     } finally {
       draco.dispose(); // encerra o worker
     }

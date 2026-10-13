@@ -139,6 +139,7 @@ export default function OceanBackdrop() {
                     active={active}
                     light={env.coarse || tier === "low"}
                     mobile={env.mobile}
+                    few={tier === "low"}
                     maxDpr={presetFor(tier).maxDpr}
                     reducedMotion={env.reduced}
                     onContextLost={onLost}
