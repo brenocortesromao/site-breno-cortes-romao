@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { AerialWorld } from "./aerial";
+import { CloseDof } from "./dof";
 
 /** Descida aérea do Sobre (ver forest/aerial.ts). */
 function Aerial({
@@ -50,7 +51,12 @@ function Aerial({
     };
   }, [world, get, onCompiled, bearSrc]);
 
-  useFrame(({ camera, gl, viewport }, delta) => {
+  // profundidade de campo do close (só desktop; no modo leve, só névoa)
+  const [dof] = useState(() => (light ? null : new CloseDof()));
+  useEffect(() => () => dof?.dispose(), [dof]);
+
+  // prioridade 1: este quadro renderiza a cena (e, no close, o desfoque do fundo)
+  useFrame(({ camera, gl, scene, viewport }, delta) => {
     world.update(
       camera as PerspectiveCamera,
       gl,
@@ -60,7 +66,9 @@ function Aerial({
       Math.min(delta, 0.05),
       still,
     );
-  });
+    gl.render(scene, camera);
+    if (dof && world.dof.amount > 0.01) dof.apply(gl, world.dof.amount, world.dof.focus);
+  }, 1);
 
   return <primitive object={world.root} dispose={null} />;
 }

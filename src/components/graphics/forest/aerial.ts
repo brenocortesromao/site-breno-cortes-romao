@@ -19,6 +19,7 @@ import {
   InstancedMesh,
   Matrix4,
   Mesh,
+  MeshDepthMaterial,
   MeshStandardMaterial,
   OrthographicCamera,
   PCFShadowMap,
@@ -26,6 +27,7 @@ import {
   PlaneGeometry,
   Points,
   Quaternion,
+  RGBADepthPacking,
   Scene,
   LinearFilter,
   ShaderMaterial,
@@ -155,6 +157,26 @@ const TO_FALL = new Vector3().subVectors(FALL_FOCUS, ROCK).setY(0).normalize();
 const SIDE = new Vector3(TO_FALL.z, 0, -TO_FALL.x);
 if (SIDE.z < 0) SIDE.negate(); // do lado de baixo do rio: a queda aparece de frente
 const END_CAM = ROCK.clone().addScaledVector(SIDE, 13).add(new Vector3(0, 14, 0));
+// close final (últimos ~30% da seção): a câmera continua se aproximando e faz
+// um arco em volta do urso, da vista lateral (90° do focinho) até 3/4 de frente
+// (~40°), um pouco abaixo dos olhos, olhando levemente para cima
+/** Início do trecho do close no progresso da seção. */
+const CLOSE_AT = 0.7;
+const CLOSE_ANGLE = (40 * Math.PI) / 180;
+/** Distância final até a cabeça (m): cabeça e ombros com ~45% da altura da tela (fov 45°). */
+const CLOSE_DIST = 2.5;
+/** Cabeça estimada (antes do modelo carregar): à frente e no alto do corpo. */
+const HEAD_GUESS = ROCK.clone().addScaledVector(TO_FALL, 0.9).add(new Vector3(0, 0.95, 0));
+/** Giro máximo da cabeça para a câmera (rad), para a máscara não deformar o pescoço. */
+const LOOK_YAW_MAX = 0.3;
+const LOOK_PITCH_MAX = 0.12;
+/** Ciclo do olhar (s): vira em 1,2, olha 2, volta em 1,4; repete a cada 10. */
+const LOOK_TURN = 1.2;
+const LOOK_HOLD = 2;
+const LOOK_BACK = 1.4;
+const LOOK_EVERY = 10;
+const easeInOut = (x: number) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+
 /** Pé da cachoeira (impacto no poço): espuma e névoa. */
 const FALL_FOOT = new Vector2(FALL_X, 7.6);
 
@@ -292,8 +314,11 @@ const RAY_VERT = /* glsl */ `
   uniform vec3 uSun;
   varying vec2 vUv;
   varying float vSeed;
+  varying float vNear;
   void main() {
     vec3 axis = normalize(uSun);
+    // some quando a câmera chega perto (o close do urso passa entre os raios)
+    vNear = smoothstep(4.0, 12.0, length(cameraPosition - aCenter));
     vec3 toCam = normalize(cameraPosition - aCenter);
     vec3 right = normalize(cross(axis, toCam));
     vec3 p = aCenter + axis * position.y * aSize.y + right * position.x * aSize.x;
@@ -306,13 +331,37 @@ const RAY_FRAG = /* glsl */ `
   uniform float uTime;
   varying vec2 vUv;
   varying float vSeed;
+  varying float vNear;
   void main() {
     float along = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.55, vUv.y);
     float across = exp(-pow((vUv.x - 0.5) * 3.4, 2.0));
     float flick = 0.7 + 0.3 * sin(uTime * 0.35 + vSeed * 6.28);
-    float a = along * across * flick * 0.11;
+    float a = along * across * flick * 0.11 * vNear;
     gl_FragColor = vec4(vec3(0.86, 0.88, 0.8) * a, a);
   }
+`;
+
+/** Cabeça do urso (material e sombra): máscara no espaço do modelo e giro em volta do pescoço. */
+const BEAR_HEAD_GLSL = /* glsl */ `
+  uniform float uTime;
+  uniform float uLookYaw;
+  uniform float uLookPitch;
+  uniform float uLookAmt;
+  mat3 bear_rotY(float a) { float c = cos(a), s = sin(a); return mat3(c, 0.0, -s, 0.0, 1.0, 0.0, s, 0.0, c); }
+  mat3 bear_rotX(float a) { float c = cos(a), s = sin(a); return mat3(1.0, 0.0, 0.0, 0.0, c, s, 0.0, -s, c); }
+  // cabeça e pescoço: à frente das patas dianteiras e acima delas
+  float bear_headMask(vec3 p) { return smoothstep(0.13, 0.26, p.z) * smoothstep(-0.05, 0.06, p.y); }
+  mat3 bear_headRot() {
+    float yaw = (sin(uTime * 0.23) * 0.6 + sin(uTime * 0.097 + 1.7) * 0.4) * 0.105;
+    float pitch = (sin(uTime * 0.17 + 0.4) * 0.55 + sin(uTime * 0.061 + 2.0) * 0.45) * 0.052;
+    return bear_rotY(yaw * (1.0 - uLookAmt)) * bear_rotX(pitch * (1.0 - uLookAmt));
+  }
+  // olhar para a câmera (close): o giro se distribui pelo pescoço inteiro, dos
+  // ombros à cabeça (transição longa, sem esticar a malha); patas de fora
+  float bear_lookMask(vec3 p) { return smoothstep(0.0, 0.3, p.z) * smoothstep(-0.1, 0.06, p.y); }
+  mat3 bear_lookRot() { return bear_rotY(uLookYaw * uLookAmt) * bear_rotX(uLookPitch * uLookAmt); }
+  const vec3 bear_lookPivot = vec3(0.0, 0.08, 0.04);
+  vec3 bear_look(vec3 p, vec3 rest) { return mix(p, bear_lookRot() * (p - bear_lookPivot) + bear_lookPivot, bear_lookMask(rest)); }
 `;
 
 /** Impostores: cartão de frente para a câmera com a árvore em vista lateral ou de cima. */
@@ -535,7 +584,7 @@ export class AerialWorld {
   };
   private fog = new FogExp2(FOG.getHex(), 0.0025);
   private sun!: DirectionalLight;
-  private mats: (ShaderMaterial | MeshStandardMaterial)[] = [];
+  private mats: (ShaderMaterial | MeshStandardMaterial | MeshDepthMaterial)[] = [];
   private geos: BufferGeometry[] = [];
   private pollenMat: ShaderMaterial | null = null;
   private mistMat: ShaderMaterial | null = null;
@@ -549,6 +598,25 @@ export class AerialWorld {
   private lookT = new Vector3();
   private time = 0;
   private bear: Group | null = null;
+  /** Centro da cabeça no espaço do modelo normalizado e no mundo. */
+  private headLocal = new Vector3(0, 0.1, 0.4);
+  private head = HEAD_GUESS.clone();
+  /** Uniforms do urso no close: olhar para a câmera e luz do close. */
+  private bearU = {
+    uLookYaw: { value: 0 },
+    uLookPitch: { value: 0 },
+    uLookAmt: { value: 0 },
+    uClose: { value: 0 },
+  };
+  /** Relógio do ciclo do olhar (< 0: esperando o enquadramento final). */
+  private lookClock = -1;
+  private closeV = { dir: new Vector3(), arc: new Vector3(), right: new Vector3(), look: new Vector3() };
+  /** Cabeça usada no enquadramento: meio do caminho entre parada e virada para a câmera. */
+  private frameHead = HEAD_GUESS.clone();
+  private rotM = new Matrix4();
+  private lookAmt = 0;
+  /** Profundidade de campo do close (0..1) e o foco na tela (uv): lidos pela cena. */
+  readonly dof = { amount: 0, focus: new Vector2(0.3, 0.55) };
   private shadowFrames = 0;
   private disposed = false;
   private gl: WebGLRenderer | null = null;
@@ -1176,6 +1244,8 @@ export class AerialWorld {
       const mats = (Array.isArray(o.material) ? o.material : [o.material]).map((m) => this.bearShader(m.clone()));
       const mesh = new Mesh(g, Array.isArray(o.material) ? mats : mats[0]);
       mesh.castShadow = !this.light;
+      // sombra com a mesma cabeça girada (senão a sombra da cabeça parada cai sobre a girada)
+      if (!this.light) mesh.customDepthMaterial = this.bearDepth();
       mesh.receiveShadow = !this.light;
       bear.add(mesh);
     });
@@ -1192,6 +1262,24 @@ export class AerialWorld {
       g.scale(1 / len, 1 / len, 1 / len);
       g.computeBoundingSphere();
     });
+    // cabeça: média dos vértices da frente e do alto (mesma região da máscara do shader)
+    {
+      const sum = new Vector3();
+      let n = 0;
+      for (const g of geos) {
+        const pos = g.getAttribute("position");
+        for (let i = 0; i < pos.count; i++) {
+          const z = pos.getZ(i);
+          const y = pos.getY(i);
+          if (z < 0.3 || y < -0.02) continue;
+          sum.x += pos.getX(i);
+          sum.y += y;
+          sum.z += z;
+          n++;
+        }
+      }
+      if (n > 0) this.headLocal.copy(sum.divideScalar(n));
+    }
     const feet = (box.min.y - c.y) / len; // patas (≈ -0,31)
     bear.scale.setScalar(BEAR_LENGTH);
     bear.position.set(ROCK.x, ROCK.y - feet * BEAR_LENGTH, ROCK.z);
@@ -1200,9 +1288,31 @@ export class AerialWorld {
     bear.rotation.y = Math.atan2(dir.x, dir.z);
     bear.updateMatrixWorld(true);
     bear.traverse((o) => (o.matrixAutoUpdate = false));
+    this.head.copy(this.headLocal).applyMatrix4(bear.matrixWorld);
     this.bear = bear;
     this.root.add(bear);
     this.shadowFrames = 2; // a sombra do urso entra no mapa (estático)
+  }
+
+  /** Material de sombra do urso: só o giro da cabeça (mesma máscara e pivô do bearShader). */
+  private bearDepth() {
+    const m = new MeshDepthMaterial({ depthPacking: RGBADepthPacking });
+    m.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = this.uniforms.uTime;
+      Object.assign(shader.uniforms, this.bearU);
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", `#include <common>
+${BEAR_HEAD_GLSL}`)
+        .replace(
+          "#include <begin_vertex>",
+          `#include <begin_vertex>
+          vec3 bear_pivot = vec3(0.0, 0.1, 0.16);
+          transformed = mix(transformed, bear_headRot() * (transformed - bear_pivot) + bear_pivot, bear_headMask(position));
+          transformed = bear_look(transformed, position);`,
+        );
+    };
+    this.mats.push(m);
+    return m;
   }
 
   /**
@@ -1214,34 +1324,30 @@ export class AerialWorld {
   private bearShader(m: MeshStandardMaterial) {
     m.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = this.uniforms.uTime;
+      Object.assign(shader.uniforms, this.bearU);
       shader.vertexShader = shader.vertexShader
         .replace(
           "#include <common>",
           `#include <common>
-          uniform float uTime;
-          mat3 bear_rotY(float a) { float c = cos(a), s = sin(a); return mat3(c, 0.0, -s, 0.0, 1.0, 0.0, s, 0.0, c); }
-          mat3 bear_rotX(float a) { float c = cos(a), s = sin(a); return mat3(1.0, 0.0, 0.0, 0.0, c, s, 0.0, -s, c); }
-          // cabeça e pescoço: à frente das patas dianteiras e acima delas
-          float bear_headMask(vec3 p) { return smoothstep(0.13, 0.26, p.z) * smoothstep(-0.05, 0.06, p.y); }
-          mat3 bear_headRot() {
-            float yaw = (sin(uTime * 0.23) * 0.6 + sin(uTime * 0.097 + 1.7) * 0.4) * 0.105;
-            float pitch = (sin(uTime * 0.17 + 0.4) * 0.55 + sin(uTime * 0.061 + 2.0) * 0.45) * 0.052;
-            return bear_rotY(yaw) * bear_rotX(pitch);
-          }`,
+          ${BEAR_HEAD_GLSL}
+          varying vec3 vBearP;`,
         )
         .replace(
           "#include <beginnormal_vertex>",
           `#include <beginnormal_vertex>
           float bear_hm = bear_headMask(position);
           mat3 bear_R = bear_headRot();
-          objectNormal = normalize(mix(objectNormal, bear_R * objectNormal, bear_hm));`,
+          objectNormal = normalize(mix(objectNormal, bear_R * objectNormal, bear_hm));
+          objectNormal = normalize(mix(objectNormal, bear_lookRot() * objectNormal, bear_lookMask(position)));`,
         )
         .replace(
           "#include <begin_vertex>",
           `#include <begin_vertex>
+          vBearP = position;
           // cabeça: gira em torno do pescoço
           vec3 bear_pivot = vec3(0.0, 0.1, 0.16);
           transformed = mix(transformed, bear_R * (transformed - bear_pivot) + bear_pivot, bear_hm);
+          transformed = bear_look(transformed, position);
           // respiração: tórax e barriga (sem as pernas), ~0,6% do tamanho, ciclo de 3,5 s
           float bear_torso = smoothstep(-0.34, -0.22, position.z) * (1.0 - smoothstep(0.1, 0.2, position.z))
             * smoothstep(-0.14, -0.02, position.y);
@@ -1251,12 +1357,37 @@ export class AerialWorld {
             * (1.0 - smoothstep(0.12, 0.22, position.z));
           transformed += normalize(objectNormal) * sin(position.z * 45.0 + uTime * 2.3) * sin(position.x * 31.0 - uTime * 1.4) * 0.0015 * bear_back;`,
         );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <map_fragment>",
-        `#include <map_fragment>
-        // pelo: dessatura ~35% e escurece um pouco, mantendo os detalhes da textura
-        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114))), 0.35) * 0.85;`,
-      );
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          `#include <common>
+          uniform float uClose;
+          varying vec3 vBearP;`,
+        )
+        .replace(
+          "#include <map_fragment>",
+          `#include <map_fragment>
+          // pelo: dessatura ~35% e escurece um pouco, mantendo os detalhes da textura
+          float bear_lum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
+          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(bear_lum), 0.35) * mix(0.85, 1.0, uClose);`,
+        )
+        .replace(
+          "#include <opaque_fragment>",
+          `// close: cabeça e ombros (frente e alto do corpo)
+          float bear_front = smoothstep(-0.05, 0.2, vBearP.z) * smoothstep(-0.08, 0.1, vBearP.y);
+          vec3 bear_V = normalize(vViewPosition);
+          float bear_nv = clamp(dot(normal, bear_V), 0.0, 1.0);
+          // luz de preenchimento suave vinda da câmera: rosto legível, com o relevo do pelo
+          outgoingLight += diffuseColor.rgb * bear_nv * 0.55 * uClose * bear_front;
+          // luz de contorno fria no pelo da cabeça e dos ombros (mais forte nas bordas de cima)
+          float bear_rim = pow(1.0 - bear_nv, 3.0) * (0.55 + 0.45 * normal.y);
+          outgoingLight += vec3(0.62, 0.72, 0.86) * bear_rim * 0.5 * uClose * bear_front;
+          // catchlight: brilho especular pequeno nas partes escuras e lisas da cara (olhos)
+          float bear_eye = smoothstep(0.34, 0.4, vBearP.z) * (1.0 - smoothstep(0.02, 0.05, bear_lum));
+          float bear_spec = pow(clamp(dot(normal, normalize(bear_V + vec3(0.3, 0.4, 0.0))), 0.0, 1.0), 90.0);
+          outgoingLight += vec3(0.9, 0.95, 1.0) * bear_spec * bear_eye * 0.7 * uClose;
+          #include <opaque_fragment>`,
+        );
     };
     m.needsUpdate = true;
     this.mats.push(m);
@@ -1272,6 +1403,10 @@ export class AerialWorld {
     const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
     this.camPath.getPoint(e, this.camT);
     this.lookPath.getPoint(e, this.lookT);
+    // close: a partir de CLOSE_AT, mistura a descida com o arco em volta do urso
+    const t = Math.min(Math.max((p - CLOSE_AT) / (1 - CLOSE_AT), 0), 1);
+    const w = easeInOut(t);
+    if (w > 0) this.closeTarget(camera, t, w);
     if (still || this.cam.lengthSq() === 0) {
       this.cam.copy(this.camT);
       this.look.copy(this.lookT);
@@ -1280,14 +1415,27 @@ export class AerialWorld {
       this.cam.lerp(this.camT, k);
       this.look.lerp(this.lookT, k);
     }
+    // parallax do mouse: some no close (a câmera está a ~2,5 m do urso)
+    const par = (1 - e * 0.6) * (1 - w * 0.9);
     camera.position.copy(this.cam);
-    camera.position.x += pointer.x * 0.8 * (1 - e * 0.6);
-    camera.position.y += -pointer.y * 0.5 * (1 - e * 0.6);
+    camera.position.x += pointer.x * 0.8 * par;
+    camera.position.y += -pointer.y * 0.5 * par;
     camera.lookAt(this.look);
 
-    // névoa de altitude: a câmera atravessa uma camada fina no meio da descida
+    // no close: luz do urso, olhar para a câmera e profundidade de campo
+    this.bearU.uClose.value = w;
+    this.lookAtCamera(camera, w, dt, still);
+    this.dof.amount = this.light ? 0 : smooth(0.55, 1, t);
+    if (this.dof.amount > 0) {
+      // foco: cabeça e ombros na tela (uv)
+      tmpP.copy(this.frameHead).addScaledVector(UP, -0.25).project(camera);
+      this.dof.focus.set(tmpP.x * 0.5 + 0.5, tmpP.y * 0.5 + 0.5);
+    }
+
+    // névoa de altitude: a câmera atravessa uma camada fina no meio da descida;
+    // no close do celular (sem profundidade de campo), um pouco mais densa ao fundo
     const layer = Math.exp(-Math.pow((this.cam.y - 52) / 9, 2));
-    const density = 0.0025 + layer * 0.018;
+    const density = 0.0025 + layer * 0.018 + (this.light ? w * 0.003 : 0);
     this.fog.density = density;
     this.uniforms.uFogDensity.value = density;
 
@@ -1314,6 +1462,80 @@ export class AerialWorld {
       gl.shadowMap.needsUpdate = true;
       this.shadowFrames--;
     }
+  }
+
+  /**
+   * Alvo da câmera no close (mistura com a descida pelo peso w): arco de 90° a
+   * ~40° do focinho, do lado de baixo do rio, aproximando-se até CLOSE_DIST e
+   * descendo até um pouco abaixo dos olhos. Em telas largas o urso fica à
+   * esquerda (lado do retrato; o texto ocupa a direita); em telas em pé, no centro.
+   */
+  private closeTarget(camera: PerspectiveCamera, t: number, w: number) {
+    const a = easeInOut(t);
+    const angle = Math.PI / 2 + (CLOSE_ANGLE - Math.PI / 2) * a;
+    // em pé (celular) a tela é estreita: um pouco mais longe, para a cabeça caber parada e virada
+    const dist = 13 + ((camera.aspect < 1 ? 3 : CLOSE_DIST) - 13) * a;
+    const { dir, arc, right, look } = this.closeV;
+    const head = this.updateFrameHead();
+    dir.copy(TO_FALL).multiplyScalar(Math.cos(angle)).addScaledVector(SIDE, Math.sin(angle));
+    arc.copy(head).addScaledVector(dir, dist);
+    arc.y = head.y + 13 * (1 - a) - 0.18 * a;
+    this.camT.lerp(arc, w);
+    // olhar: cabeça e ombros, deslocado para pôr o urso à esquerda em telas largas
+    const half = Math.tan((camera.fov * Math.PI) / 360) * dist;
+    const side = camera.aspect > 1.2 ? 0.42 * half * camera.aspect : 0;
+    right.crossVectors(UP, dir).normalize(); // direita de quem olha da câmera para o urso
+    look.copy(head).addScaledVector(UP, -0.22).addScaledVector(right, side);
+    // longe do close, o olhar segue a descida; perto, a cabeça
+    this.lookT.lerp(look, w);
+  }
+
+  /**
+   * Cabeça para o enquadramento: o giro do olhar (shader) desloca a cabeça para
+   * o lado; o close mira o meio do caminho, para ela caber parada e virada.
+   */
+  private updateFrameHead() {
+    if (!this.bear) return this.frameHead.copy(this.head);
+    const pivot = tmpS.set(0, 0.08, 0.04);
+    const yaw = this.bearU.uLookYaw.value * 0.5;
+    const pitch = this.bearU.uLookPitch.value * 0.5;
+    this.rotM.makeRotationY(yaw).multiply(tmpM.makeRotationX(pitch));
+    return this.frameHead.copy(this.headLocal).sub(pivot).applyMatrix4(this.rotM).add(pivot).applyMatrix4(this.bear.matrixWorld);
+  }
+
+  /** Ciclo do olhar: com o enquadramento final na tela, vira a cabeça para a câmera a cada ~10 s. */
+  private lookAtCamera(camera: PerspectiveCamera, w: number, dt: number, still: boolean) {
+    if (!this.bear || still) {
+      this.bearU.uLookAmt.value = 0;
+      return;
+    }
+    if (w > 0.97) {
+      if (this.lookClock < 0) this.lookClock = LOOK_EVERY - 1; // 1ª vez ~1 s depois de chegar
+      this.lookClock += dt;
+      const c = this.lookClock % LOOK_EVERY;
+      this.lookAmt =
+        c < LOOK_TURN
+          ? easeInOut(c / LOOK_TURN)
+          : c < LOOK_TURN + LOOK_HOLD
+            ? 1
+            : c < LOOK_TURN + LOOK_HOLD + LOOK_BACK
+              ? 1 - easeInOut((c - LOOK_TURN - LOOK_HOLD) / LOOK_BACK)
+              : 0;
+    } else {
+      // saiu do enquadramento: volta devagar a observar a água
+      this.lookClock = -1;
+      this.lookAmt = Math.max(0, this.lookAmt - dt / LOOK_BACK);
+    }
+    // direção da câmera no espaço do modelo, a partir da base do pescoço (pivô do olhar no shader)
+    const local = tmpP.copy(camera.position).applyMatrix4(tmpM.copy(this.bear.matrixWorld).invert());
+    local.sub(tmpS.set(0, 0.08, 0.04));
+    const yaw = Math.atan2(local.x, local.z);
+    const pitch = -Math.atan2(local.y, Math.hypot(local.x, local.z));
+    this.bearU.uLookYaw.value = Math.min(Math.max(yaw, -LOOK_YAW_MAX), LOOK_YAW_MAX);
+    this.bearU.uLookPitch.value = Math.min(Math.max(pitch, -LOOK_PITCH_MAX), LOOK_PITCH_MAX);
+    // sombra estática: refeita só enquanto a cabeça gira para a câmera e volta
+    if (this.lookAmt > 0 || this.bearU.uLookAmt.value > 0) this.shadowFrames = Math.max(this.shadowFrames, 1);
+    this.bearU.uLookAmt.value = this.lookAmt;
   }
 
   dispose() {
