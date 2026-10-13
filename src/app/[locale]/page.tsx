@@ -42,7 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await rootParams.locale();
   if (!hasLocale(routing.locales, locale)) return {};
   const t = await getTranslations({ locale, namespace: "meta" });
-  return pageMetadata({ locale, path: "", title: t("title"), description: t("description") });
+  const site = await getTranslations({ locale, namespace: "site" });
+  return pageMetadata({ locale, path: "", title: t("title"), description: t("description"), siteName: site("name"), imageAlt: t("ogAlt") });
 }
 
 export default async function Home() {

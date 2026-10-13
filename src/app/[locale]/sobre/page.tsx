@@ -11,7 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await rootParams.locale();
   if (!hasLocale(routing.locales, locale)) return {};
   const t = await getTranslations({ locale, namespace: "about" });
-  return pageMetadata({ locale, path: "/sobre", title: t("metaTitle"), description: t("metaDescription") });
+  const site = await getTranslations({ locale, namespace: "site" });
+  const meta = await getTranslations({ locale, namespace: "meta" });
+  return pageMetadata({ locale, path: "/sobre", title: t("metaTitle"), description: t("metaDescription"), siteName: site("name"), imageAlt: meta("ogAlt") });
 }
 
 /** /sobre — trajetória completa (h1 no título do Sobre) + contato. */

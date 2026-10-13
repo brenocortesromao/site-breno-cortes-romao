@@ -43,7 +43,8 @@ export default async function Faq() {
           {items.map((item) => (
             <details key={item.q} name="faq" className="faq-item group border-b border-line">
               <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-7 text-[clamp(1.15rem,1.8vw,1.7rem)] font-medium leading-snug tracking-[-0.025em] outline-none focus-visible:ring-1 focus-visible:ring-foreground md:py-9 [&::-webkit-details-marker]:hidden">
-                <span>{protectTerms(item.q)}</span>
+                {/* h3: cada pergunta é um item da seção (h2); inline, sem mudar o visual */}
+                <h3 className="inline font-[inherit]">{protectTerms(item.q)}</h3>
                 {/* + que vira × ao abrir */}
                 <span
                   aria-hidden="true"

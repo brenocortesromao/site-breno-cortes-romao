@@ -18,7 +18,8 @@ export const aboutPortraitSrc: string | undefined = undefined;
  */
 export default async function About({ variant }: { variant: "summary" | "page" }) {
   const t = await getTranslations("about");
-  const name = (await getTranslations("site"))("name");
+  const site = await getTranslations("site");
+  const name = site("name");
   const isPage = variant === "page";
 
   return (
@@ -37,7 +38,7 @@ export default async function About({ variant }: { variant: "summary" | "page" }
         <div className="md:col-span-5">
           <MediaSlot
             src={aboutPortraitSrc}
-            alt={name}
+            alt={`${name}, ${site("role")}`}
             label={t("portrait")}
             ratio="aspect-[4/5]"
             tone="mono"

@@ -1,12 +1,11 @@
-import { routing } from "@/i18n/routing";
+import { htmlLang, routing } from "@/i18n/routing";
 
 /**
  * Rotas indexáveis do site (sem o prefixo de idioma). Fonte única para o
  * sitemap.xml e para os alternates/hreflang.
  *
- * PREPARADO para o lançamento: criar então `src/app/sitemap.ts` (convenção de
- * metadata do Next) usando `sitemapEntries()` e `src/app/robots.ts` apontando
- * para o sitemap — com o domínio final em NEXT_PUBLIC_SITE_URL.
+ * Usada por src/app/sitemap.ts (e o robots.txt aponta para ele), com o domínio
+ * final em NEXT_PUBLIC_SITE_URL.
  */
 export function indexablePaths(): string[] {
   return ["", "/sobre"];
@@ -18,7 +17,11 @@ export function sitemapEntries(baseUrl: string) {
     routing.locales.map((locale) => ({
       url: `${baseUrl}/${locale}${path}`,
       alternates: {
-        languages: Object.fromEntries(routing.locales.map((l) => [l, `${baseUrl}/${l}${path}`])),
+        // mesmos códigos do hreflang das páginas (pt-BR, en, x-default)
+        languages: {
+          ...Object.fromEntries(routing.locales.map((l) => [htmlLang[l], `${baseUrl}/${l}${path}`])),
+          "x-default": `${baseUrl}/${routing.defaultLocale}${path}`,
+        },
       },
     })),
   );

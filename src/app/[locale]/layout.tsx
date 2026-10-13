@@ -11,7 +11,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JsonLdScript from "@/components/seo/JsonLdScript";
-import { personJsonLd, professionalServiceJsonLd } from "@/lib/seo/structured-data";
+import { personJsonLd, professionalServiceJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
 import ThemeScroll from "@/components/theme/ThemeScroll";
 import AmbientGlow from "@/components/theme/AmbientGlow";
 import CustomCursor from "@/components/CustomCursor";
@@ -60,6 +60,8 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
   if (!hasLocale(routing.locales, locale)) notFound();
   const site = await getTranslations({ locale, namespace: "site" });
   const common = await getTranslations({ locale, namespace: "common" });
+  const meta = await getTranslations({ locale, namespace: "meta" });
+  const oneOff = await getTranslations({ locale, namespace: "oneOff" });
 
   return (
     <html
@@ -74,9 +76,21 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
       </head>
       <body className="min-h-full flex flex-col">
         {/* Só o idioma vai para o cliente; os textos chegam como props, não o arquivo inteiro. */}
-        {/* Dados estruturados: preparados, vazios até o lançamento (ver lib/seo/structured-data.ts) */}
-        <JsonLdScript data={personJsonLd({ locale, name: site("name"), role: site("role") })} />
-        <JsonLdScript data={professionalServiceJsonLd({ locale, name: site("name") })} />
+        {/* Dados estruturados (ver lib/seo/structured-data.ts); o FAQPage fica na seção de perguntas */}
+        <JsonLdScript data={personJsonLd({ locale, name: site("name"), role: site("role"), description: meta("description") })} />
+        <JsonLdScript
+          data={professionalServiceJsonLd({
+            locale,
+            name: site("name"),
+            role: site("role"),
+            description: meta("description"),
+            partnership: meta("partnership"),
+            catalogName: meta("catalogName"),
+            remote: meta("remote"),
+            columns: oneOff.raw("columns") as { title: string; items: string[] }[],
+          })}
+        />
+        <JsonLdScript data={websiteJsonLd({ locale, name: site("name"), description: meta("description") })} />
         <NextIntlClientProvider messages={null}>
           <SmoothScroll />
           <ThemeScroll />

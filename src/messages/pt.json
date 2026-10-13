@@ -4,8 +4,12 @@
     "role": "Fractional Brand & Creative Director"
   },
   "meta": {
-    "title": "Breno Côrtes Romão | Fractional Brand & Creative Director",
-    "description": "Breno Côrtes Romão, Fractional Brand & Creative Director. Direção de marca e criação sênior, dentro da sua empresa, sem o peso de uma contratação executiva."
+    "title": "Breno Côrtes Romão | Diretor Criativo e de Marca, Fractional Brand & Creative Director",
+    "description": "Direção de marca e criação sênior para empresas que cresceram: branding, identidade visual, campanhas, sites e mídia kit, como Fractional Brand & Creative Director.",
+    "ogAlt": "Breno Côrtes Romão, Fractional Brand & Creative Director",
+    "partnership": "Parceria contínua de Fractional Brand & Creative Director (direção de marca e criação)",
+    "catalogName": "Serviços de marca, comunicação e tecnologia",
+    "remote": "Atendimento remoto, com encontros presenciais quando fizer sentido"
   },
   "common": {
     "draft": "Provisório",
@@ -51,7 +55,7 @@
       "Não chego com fórmula pronta nem vou embora depois da entrega. Entro como diretor de marca da sua empresa: defino o que ela precisa dizer, crio como ela vai dizer e acompanho cada peça até o mercado enxergar o valor que você já construiu, ou o que você quer construir."
     ],
     "portrait": "Retrato",
-    "portraitAlt": "Retrato de {name}",
+    "portraitAlt": "{name}, Fractional Brand & Creative Director",
     "signatureLabel": "Assinatura de {name}"
   },
   "distance": {
