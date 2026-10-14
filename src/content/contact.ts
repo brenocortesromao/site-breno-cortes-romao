@@ -7,8 +7,11 @@ export const contactConfig = {
    *  components/contact/EmailMenu.tsx (proteção contra spam). */
   /** WhatsApp (DDI + DDD + número, só dígitos). */
   whatsapp: "5511975415501",
-  /** Mídia kit em /public (ex.: "/midia-kit.pdf"). [PENDENTE] */
-  mediaKit: "",
+  /** Mídia kit em /public/midia-kit: versão wide (desktop) e 4:5 (celular e toque). */
+  mediaKit: {
+    desktop: "/midia-kit/midia-kit-breno-cortes-romao.pdf",
+    mobile: "/midia-kit/midia-kit-breno-cortes-romao-mobile.pdf",
+  },
 };
 
 /** Link do WhatsApp com a mensagem pré-preenchida. */

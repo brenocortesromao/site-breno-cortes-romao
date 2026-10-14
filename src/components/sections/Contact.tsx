@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import { contactConfig, whatsappUrl } from "@/content/contact";
+import { whatsappUrl } from "@/content/contact";
 import EmailMenu from "@/components/contact/EmailMenu";
+import MediaKitLink from "@/components/contact/MediaKitLink";
 import SpaceBackdrop from "@/components/graphics/SpaceBackdrop";
 import { protectTerms } from "@/components/Term";
 
@@ -14,7 +15,6 @@ const button =
  */
 export default async function Contact() {
   const t = await getTranslations("contact");
-  const { mediaKit } = contactConfig;
 
   return (
     <section id="contato" data-theme="gradient" aria-labelledby="contato-title" className="relative z-10 overflow-clip border-t border-line">
@@ -59,15 +59,12 @@ export default async function Contact() {
             </EmailMenu>
           </li>
           <li>
-            {mediaKit ? (
-              <a href={mediaKit} download className={`${button} w-full border-line hover:border-foreground`}>
-                {t("mediaKit")} <span aria-hidden="true">↓</span>
-              </a>
-            ) : (
-              <span aria-disabled="true" className={`${button} w-full cursor-not-allowed border-dashed border-line text-silver`}>
-                {t("mediaKit")} <span>{t("pending")}</span>
-              </span>
-            )}
+            <MediaKitLink className={`${button} w-full border-line hover:border-foreground`}>
+              {t("mediaKit")}
+              <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.4">
+                <path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M2.5 13.5h11" />
+              </svg>
+            </MediaKitLink>
           </li>
         </ul>
       </div>

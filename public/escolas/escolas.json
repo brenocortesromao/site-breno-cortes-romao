@@ -1,0 +1,30 @@
+[
+  {
+    "arquivo": "/escolas/porto-seguro.png",
+    "nome": "Colégio Visconde de Porto Seguro"
+  },
+  {
+    "arquivo": "/escolas/octagon-objetivo.png",
+    "nome": "Colégio Octagon e Objetivo Moema"
+  },
+  {
+    "arquivo": "/escolas/anhembi-morumbi.png",
+    "nome": "Universidade Anhembi Morumbi"
+  },
+  {
+    "arquivo": "/escolas/ebac.png",
+    "nome": "EBAC, Escola Britânica de Artes Criativas"
+  },
+  {
+    "arquivo": "/escolas/digital-house.png",
+    "nome": "Digital House"
+  },
+  {
+    "arquivo": "/escolas/saint-paul.png",
+    "nome": "Escola de Negócios Saint Paul"
+  },
+  {
+    "arquivo": "/escolas/mba-usp-esalq.png",
+    "nome": "MBA USP ESALQ"
+  }
+]

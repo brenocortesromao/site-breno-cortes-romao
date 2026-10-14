@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import AboutPortrait from "@/components/AboutPortrait";
+import AboutEducation from "@/components/AboutEducation";
+import schools from "../../../public/escolas/escolas.json";
 import AboutStory from "@/components/sections/AboutStory";
 import ForestBackdrop from "@/components/graphics/ForestBackdrop";
 import { bearModel } from "@/content/bear";
@@ -36,6 +38,7 @@ export default async function About({ variant }: { variant: "summary" | "page" }
         <div className="max-md:mx-auto max-md:w-[70%] md:col-span-5">
           {/* foto com entrada (linha de luz + cor florescendo), vidro e parallax */}
           <AboutPortrait alt={`${name}, ${site("role")}`} priority={isPage} />
+          <AboutEducation label={t("education")} schools={schools} />
         </div>
 
         <AboutStory
