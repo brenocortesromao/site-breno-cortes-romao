@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, ty
 
 // O endereço NÃO vai para o HTML nem para o payload do servidor: fica só
 // neste módulo do cliente, em pedaços, e é montado na hora de usar.
-const PARTS = [["breno", "romao"], ["gmail", "com"]] as const;
+const PARTS = [["breno"], ["brenocortesromao", "com", "br"]] as const;
 const address = () => `${PARTS[0].join(".")}${String.fromCharCode(64)}${PARTS[1].join(".")}`;
 
 export type EmailMenuCopy = {
