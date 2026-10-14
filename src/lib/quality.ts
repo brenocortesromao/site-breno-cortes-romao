@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore, type RefObject } from "react";
 import { webglSupport } from "./webgl";
-import { displayHz, isMobileUI, MOBILE_MAX_DPR, onStableResize } from "./mobile";
+import { displayHz, isMobileUI, isTouchScrolling, MOBILE_MAX_DPR, onStableResize } from "./mobile";
 
 /**
  * Qualidade adaptativa e orçamento de contextos WebGL (um ponto central para
@@ -27,11 +27,18 @@ import { displayHz, isMobileUI, MOBILE_MAX_DPR, onStableResize } from "./mobile"
  * oscilar). As cenas pedem o nível com `useSceneTier(nome, ref, montada)`.
  *
  * CELULAR (lib/mobile.ts): DPR máximo 1,25 e 1 contexto WebGL por vez. Os
- * limites são relativos à taxa real da tela (displayHz: 60, 90, 120 Hz):
- * "lento" abaixo de 75% dela, "estável" acima de 92%. As janelas COM rolagem
- * também contam: 2 janelas seguidas de rolagem lenta mandam a cena de fundo
- * para o pôster estático (nível "none" só dela, sem volta na sessão); a bola
- * da hero nunca cai para o pôster. Aparelhos fortes seguem com o 3D ao vivo.
+ * limites valem sobre min(taxa da tela, 60): "lento" abaixo de 70% (~42 fps),
+ * "estável" acima de 90% (~54 fps); telas de 90/120 Hz não exigem mais que
+ * 60 fps. Janelas com rolagem (ou com as cenas congeladas pela rolagem) não
+ * contam: durante a rolagem as cenas estão pausadas e a medida não reflete o
+ * custo delas. O rebaixamento é o mesmo do desktop (high → medium → low). O
+ * pôster (nível "none" só da cena, sem volta na sessão) é o último recurso:
+ * abaixo de 30 fps em 4 janelas seguidas sem rolagem, com a cena na tela e
+ * animando (sem prefers-reduced-motion); a bola da hero e a gota nunca caem
+ * para o pôster.
+ *
+ * DIAGNÓSTICO: com ?debug=quality na URL, um painel no canto mostra a taxa da
+ * tela, o nível de cada cena e o fps (components/QualityDebug.tsx).
  *
  * DESKTOP: limites fixos de 50/55 fps e janelas com rolagem ignoradas, como
  * antes.
@@ -104,14 +111,23 @@ type SceneEntry = { name: string; el: Element | null };
 const sceneEntries = new Map<symbol, SceneEntry>();
 /** Nível de cada cena (por nome: vale também quando ela remonta). */
 const sceneTier = new Map<string, Tier>();
-const sceneState = new Map<string, { slow: number; good: number; upgraded: boolean; locked: boolean; scrollSlow: number }>();
-/** Cenas que nunca caem para o pôster pela rolagem (a bola da hero é o centro do site). */
+const sceneState = new Map<string, { slow: number; good: number; upgraded: boolean; locked: boolean; critical: number }>();
+/** Cenas que nunca caem para o pôster (a bola da hero é o centro do site). */
 const NO_POSTER = new Set(["bola da hero", "gota"]);
-/** Limites de fps: celular relativo à taxa da tela; desktop fixo (50/55). */
-const slowFps = () => (isMobileUI() ? displayHz() * 0.75 : 50);
-const goodFps = () => (isMobileUI() ? displayHz() * 0.92 : 55);
+/** Celular: referência de fps = taxa da tela limitada a 60 (90/120 Hz não exigem mais). */
+const mobileBase = () => Math.min(displayHz(), 60);
+/** Limites de fps: celular sobre min(taxa da tela, 60); desktop fixo (50/55). */
+const slowFps = () => (isMobileUI() ? mobileBase() * 0.7 : 50);
+const goodFps = () => (isMobileUI() ? mobileBase() * 0.9 : 55);
+/** Celular, último recurso: abaixo de POSTER_FPS em POSTER_WINDOWS janelas seguidas sem rolagem. */
+const POSTER_FPS = 30;
+const POSTER_WINDOWS = 4;
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let activeScenes = 0;
 let raf = 0;
+/** Última janela do monitor (só para o painel ?debug=quality). */
+let debugFps: number | null = null;
+let debugWindow = "";
 let lastScroll = 0;
 let scrollWatch = false;
 
@@ -122,7 +138,7 @@ const tierOf = (name: string) => {
 };
 const stateOf = (name: string) => {
   let st = sceneState.get(name);
-  if (!st) sceneState.set(name, (st = { slow: 0, good: 0, upgraded: false, locked: false, scrollSlow: 0 }));
+  if (!st) sceneState.set(name, (st = { slow: 0, good: 0, upgraded: false, locked: false, critical: 0 }));
   return st;
 };
 /** Cena com mais área visível agora (a "dona" da janela medida). */
@@ -151,23 +167,6 @@ function setSceneTier(name: string, next: Tier, why: string) {
   emit();
 }
 
-/** Celular: janela de 1 s com rolagem. Rolagem lenta 2 vezes seguidas: pôster. */
-function judgeScroll(fps: number) {
-  const name = foreground();
-  if (!name || NO_POSTER.has(name)) return;
-  const st = stateOf(name);
-  if (tierOf(name) === "none") return;
-  if (fps >= slowFps()) {
-    st.scrollSlow = 0;
-    return;
-  }
-  st.scrollSlow++;
-  if (st.scrollSlow >= 2) {
-    st.locked = true;
-    setSceneTier(name, "none", `rolagem abaixo de ${Math.round(slowFps())} fps (tela de ${displayHz()} Hz)`);
-  }
-}
-
 function judge(fps: number) {
   const name = foreground();
   if (!name) return;
@@ -175,6 +174,16 @@ function judge(fps: number) {
   const t = tierOf(name);
   const i = ORDER.indexOf(t);
   if (t === "none") return; // pôster: fica
+  // celular, último recurso: muito lento por várias janelas seguidas (cena na
+  // tela e animando, sem rolagem): pôster só desta cena
+  if (isMobileUI() && !NO_POSTER.has(name) && !reducedMotion()) {
+    st.critical = fps < POSTER_FPS ? st.critical + 1 : 0;
+    if (st.critical >= POSTER_WINDOWS) {
+      st.locked = true;
+      setSceneTier(name, "none", `FPS abaixo de ${POSTER_FPS} em ${POSTER_WINDOWS} janelas seguidas sem rolagem`);
+      return;
+    }
+  }
   if (fps < slowFps()) {
     st.good = 0;
     st.slow++;
@@ -201,12 +210,13 @@ function startMonitor() {
     scrollWatch = true;
     window.addEventListener("scroll", () => (lastScroll = performance.now()), { passive: true });
   }
-  const mobile = isMobileUI();
-  if (mobile) displayHz(); // começa a medir a taxa da tela
+  if (isMobileUI()) displayHz(); // começa a medir a taxa da tela
   const started = performance.now();
   let last = started;
   let windowStart = started;
   let frames = 0;
+  /** Celular: a janela teve cenas congeladas pela rolagem (dedo ou inércia). */
+  let frozen = false;
   const loop = (now: number) => {
     raf = activeScenes > 0 ? requestAnimationFrame(loop) : 0;
     const dt = now - last;
@@ -215,18 +225,27 @@ function startMonitor() {
     if (document.visibilityState !== "visible" || dt > 250) {
       windowStart = now;
       frames = 0;
+      frozen = false;
       return;
     }
     if (now - started < 4000) return; // carga, compilação de shaders
     frames++;
+    if (isTouchScrolling()) frozen = true;
     if (now - windowStart >= 1000) {
       const fps = (frames * 1000) / (now - windowStart);
-      // desktop: janela com rolagem não conta (engasgo de rolagem não é da cena);
-      // celular: conta, para decidir entre 3D ao vivo e pôster
-      if (lastScroll < windowStart) judge(fps);
-      else if (mobile) judgeScroll(fps);
+      debugFps = fps;
+      // janela com rolagem não conta (engasgo de rolagem não é da cena; no
+      // celular, as cenas estão congeladas durante a rolagem)
+      if (lastScroll < windowStart && !frozen) {
+        debugWindow = "medida";
+        judge(fps);
+      } else {
+        debugWindow = "rolagem (ignorada)";
+        sceneState.forEach((st) => (st.critical = 0)); // "seguidas": a rolagem interrompe
+      }
       windowStart = now;
       frames = 0;
+      frozen = false;
     }
   };
   raf = requestAnimationFrame(loop);
@@ -257,6 +276,24 @@ export function useSceneTier(name: string, ref: RefObject<Element | null>, mount
     () => tierOf(name),
     () => "high" as Tier,
   );
+}
+
+/** Retrato do monitor para o painel ?debug=quality (components/QualityDebug.tsx). */
+export function qualityDebugInfo() {
+  const mounted = new Set([...sceneEntries.values()].map((e) => e.name));
+  const names = [...new Set([...mounted, ...sceneTier.keys()])];
+  return {
+    hz: displayHz(),
+    mobile: isMobileUI(),
+    reduced: reducedMotion(),
+    device: getTier(),
+    slow: slowFps(),
+    good: goodFps(),
+    fps: debugFps,
+    window: debugWindow,
+    foreground: foreground(),
+    scenes: names.map((name) => ({ name, tier: tierOf(name), mounted: mounted.has(name) })),
+  };
 }
 
 // ---------------------------------------------------------------- orçamento de contextos

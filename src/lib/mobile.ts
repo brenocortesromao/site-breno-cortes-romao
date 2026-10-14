@@ -22,12 +22,15 @@ export const MOBILE_MAX_DPR = 1.25;
  * continua na tela) e retomam ao parar: durante o arrasto, só o compositor
  * trabalha. O <html> recebe data-scrolling (para pausar animações CSS).
  * Só liga no celular (MOBILE_QUERY); no desktop é sempre false.
+ * Garantia de retomada: com o dedo na tela e sem rolagem há STUCK_MS (dedo
+ * parado, ou um touchend que não chegou à janela), as cenas voltam a animar.
  */
 let touching = false;
 let scrolling = false;
 let idle = 0;
 const listeners = new Set<() => void>();
 const SETTLE_MS = 120;
+const STUCK_MS = 800;
 
 const set = (v: boolean) => {
   if (v === scrolling) return;
@@ -39,6 +42,8 @@ const settle = () => {
   window.clearTimeout(idle);
   idle = window.setTimeout(() => {
     if (!touching) set(false);
+    // dedo ainda na tela sem rolar (ou touchend perdido): retoma mesmo assim
+    else idle = window.setTimeout(() => set(false), STUCK_MS);
   }, SETTLE_MS);
 };
 

@@ -15,6 +15,7 @@ import { personJsonLd, professionalServiceJsonLd, websiteJsonLd } from "@/lib/se
 import ThemeScroll from "@/components/theme/ThemeScroll";
 import AmbientGlow from "@/components/theme/AmbientGlow";
 import CustomCursor from "@/components/CustomCursor";
+import QualityDebug from "@/components/QualityDebug";
 import { htmlLang, routing } from "@/i18n/routing";
 
 const geistSans = Geist({
@@ -95,6 +96,8 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <ThemeScroll />
           <AmbientGlow />
           <CustomCursor />
+          {/* só com ?debug=quality na URL */}
+          <QualityDebug />
           <Header />
           {/* Proteção contra scroll horizontal: overflow-x CLIP (não hidden) não
               cria contêiner de rolagem, então sticky e pins continuam valendo, e
