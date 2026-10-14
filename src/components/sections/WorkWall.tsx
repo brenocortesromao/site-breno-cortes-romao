@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import MediaSlot from "@/components/MediaSlot";
 import ExperienceBadge, { type ExperienceLabels } from "./ExperienceBadge";
+import { isTouchScrolling } from "@/lib/mobile";
 
 export type WallItem = {
   src?: string;
@@ -148,11 +149,22 @@ export default function WorkWall({ items, labels }: { items: WallItem[]; labels:
     let last = 0;
     let lastScroll = 0;
     let boost = 0;
+    let frozen = false;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       if (dt <= 0) return;
+      // celular: congela enquanto a página rola (só o compositor trabalha);
+      // ao voltar, o impulso recomeça da posição atual
+      if (isTouchScrolling()) {
+        frozen = true;
+        return;
+      }
+      if (frozen) {
+        frozen = false;
+        lastScroll = window.scrollY;
+      }
       // impulso proporcional à velocidade do scroll; sobe rápido e volta com ease
       const sy = window.scrollY;
       const target = Math.min(Math.abs(sy - lastScroll) / dt / SCROLL_REF, BOOST_MAX);

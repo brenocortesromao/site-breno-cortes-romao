@@ -6,7 +6,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import CloudBackdrop from "@/components/graphics/CloudBackdrop";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
+import { playOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -69,18 +70,23 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // celular (modo curado): sem scrub; cada frase acende uma vez ao aparecer
+        const mobile = isMobileUI();
+        const stops: (() => void)[] = [];
         gsap.utils.toArray<HTMLElement>("[data-diag-item]").forEach((item) => {
-          gsap.fromTo(
+          const tw = gsap.fromTo(
             item,
             { opacity: 0.18, x: -12 },
             {
               opacity: 1,
               x: 0,
               ease: "none",
-              scrollTrigger: { trigger: item, start: "top 80%", end: "top 55%", scrub: scrubFor(0.6) },
+              scrollTrigger: mobile ? undefined : { trigger: item, start: "top 80%", end: "top 55%", scrub: 0.6 },
             },
           );
+          if (mobile) stops.push(playOnce(tw, item, { start: "top 80%", duration: 0.7 }));
         });
+        return () => stops.forEach((stop) => stop());
       });
     },
     { scope: root },
@@ -206,7 +212,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
                         lit
                           ? "border-foreground bg-foreground text-background"
                           : "border-silver/60 text-transparent group-hover:border-foreground group-hover:text-foreground/40 group-focus-visible:text-foreground/40"
-                      } ${!interacted && !lit ? "animate-[ringPulse_2.4s_ease-in-out_infinite] motion-reduce:animate-none" : ""}`}
+                      } ${!interacted && !lit ? "css-loop animate-[ringPulse_2.4s_ease-in-out_infinite] motion-reduce:animate-none" : ""}`}
                       style={!interacted && !lit ? { animationDelay: `${i * 0.18}s` } : undefined}
                     >
                       <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">

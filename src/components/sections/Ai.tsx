@@ -4,10 +4,10 @@ import { Fragment, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { revealOnce } from "@/lib/reveal";
+import { playOnce, revealOnce } from "@/lib/reveal";
 import { DecodeLetters, decode, hideLetters, shine, showLetters } from "@/components/decode";
 import OceanBackdrop from "@/components/graphics/OceanBackdrop";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -87,12 +87,16 @@ export default function Ai({ copy }: { copy: AiCopy }) {
           },
         });
 
+        // celular (modo curado): sem scrub; cada frase acende uma vez ao aparecer
+        const mobile = isMobileUI();
+        const aiStops: (() => void)[] = [];
         gsap.utils.toArray<HTMLElement>("[data-ai-line]").forEach((line) => {
-          gsap.fromTo(
+          const tw = gsap.fromTo(
             line,
             { opacity: 0.14 },
-            { opacity: 1, ease: "none", scrollTrigger: { trigger: line, start: "top 80%", end: "top 52%", scrub: scrubFor(0.6) } },
+            { opacity: 1, ease: "none", scrollTrigger: mobile ? undefined : { trigger: line, start: "top 80%", end: "top 52%", scrub: 0.6 } },
           );
+          if (mobile) aiStops.push(playOnce(tw, line, { start: "top 75%", duration: 0.8 }));
         });
 
         ScrollTrigger.create({
@@ -104,6 +108,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
 
         return () => {
           stopReveal();
+          aiStops.forEach((stop) => stop());
           gsap.ticker.remove(tick);
           stopDecode?.();
           setTyped(null);
@@ -131,7 +136,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
             <p className="opacity-0 [grid-area:1/1]">{copy.prompt}</p>
             <p aria-hidden="true" className="[grid-area:1/1]">
               {typed === null ? copy.prompt : chars.slice(0, typed).join("")}
-              <span className="ml-0.5 inline-block h-[1.05em] w-[0.5ch] translate-y-[0.18em] bg-foreground animate-[caretBlink_1.05s_steps(1)_infinite] motion-reduce:hidden" />
+              <span className="ml-0.5 inline-block h-[1.05em] w-[0.5ch] translate-y-[0.18em] bg-foreground css-loop animate-[caretBlink_1.05s_steps(1)_infinite] motion-reduce:hidden" />
             </p>
           </div>
           {/* barra da caixa (decorativa): anexar e enviar */}

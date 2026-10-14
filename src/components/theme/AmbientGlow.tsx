@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -14,6 +15,8 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
  * ThemeScroll — então o brilho entra e sai junto com a transição de cor.
  * Movimento: os focos derivam devagar conforme o scroll da página (só
  * transform: barato, sem repintar o gradiente). Reduced motion: parado.
+ * Celular (modo curado): sem deriva presa ao scroll; o brilho entra e sai com
+ * a troca de tema numa transição CSS de 0,5 s.
  */
 export default function AmbientGlow() {
   const a = useRef<HTMLDivElement>(null);
@@ -22,6 +25,7 @@ export default function AmbientGlow() {
   useGSAP(() => {
     const mm = gsap.matchMedia();
     mm.add("(prefers-reduced-motion: no-preference)", () => {
+      if (isMobileUI()) return;
       ScrollTrigger.create({
         start: 0,
         end: "max",
@@ -37,7 +41,7 @@ export default function AmbientGlow() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 overflow-hidden"
+      className="pointer-events-none fixed inset-0 overflow-hidden mobile:transition-opacity mobile:duration-500"
       style={{ opacity: "var(--glow)" }}
     >
       <div

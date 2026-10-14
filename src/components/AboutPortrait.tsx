@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import TiltCard from "./TiltCard";
 import { revealOnce } from "@/lib/reveal";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -67,15 +68,17 @@ export default function AboutPortrait({
       const ln = line.current!;
 
       // parallax interno: a imagem fica para trás em relação à moldura
-      gsap.fromTo(
-        drift.current!,
-        { yPercent: -6 },
-        {
-          yPercent: 6, // 6% de 116% ≈ 7% do quadro, dentro da sobra de 8%
-          ease: "none",
-          scrollTrigger: { trigger: frame.current!, start: "top bottom", end: "bottom top", scrub: true },
-        },
-      );
+      // (celular, modo curado: sem efeito preso ao scroll)
+      if (!isMobileUI())
+        gsap.fromTo(
+          drift.current!,
+          { yPercent: -6 },
+          {
+            yPercent: 6, // 6% de 116% ≈ 7% do quadro, dentro da sobra de 8%
+            ease: "none",
+            scrollTrigger: { trigger: frame.current!, start: "top bottom", end: "bottom top", scrub: true },
+          },
+        );
 
       // x: linha (%); gray: preto e branco (1..0); pop: contraste extra (0..1); scale
       const s = { x: -8, gray: 1, pop: 0, scale: 1.06, line: 1 };

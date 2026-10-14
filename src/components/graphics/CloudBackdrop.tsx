@@ -8,6 +8,8 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { fadeWhileActive } from "@/lib/reveal";
+import { isMobileUI } from "@/lib/mobile";
 import { usePreloadBeforeSection } from "@/lib/preload";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -111,17 +113,22 @@ export default function CloudBackdrop() {
         });
         // entra em fade com a seção; sai em fade DEPOIS de as nuvens se abrirem
         // (fim do progresso) e antes do off-white seguinte
-        gsap.fromTo(
-          layer.current,
-          { opacity: 0 },
-          { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 85%", end: "top 25%", scrub: true, refreshPriority: -1 } },
-        );
-        gsap.to(layer.current, {
-          opacity: 0,
-          ease: "none",
-          immediateRender: false,
-          scrollTrigger: { trigger: section, start: "bottom 70%", end: "bottom 30%", scrub: true, refreshPriority: -1 },
-        });
+        if (isMobileUI()) {
+          // celular: fade curto enquanto a seção está na tela (sem scrub)
+          fadeWhileActive(layer.current!, section, "top 55%", "bottom 50%");
+        } else {
+          gsap.fromTo(
+            layer.current,
+            { opacity: 0 },
+            { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 85%", end: "top 25%", scrub: true, refreshPriority: -1 } },
+          );
+          gsap.to(layer.current, {
+            opacity: 0,
+            ease: "none",
+            immediateRender: false,
+            scrollTrigger: { trigger: section, start: "bottom 70%", end: "bottom 30%", scrub: true, refreshPriority: -1 },
+          });
+        }
       });
     },
     { scope: root, dependencies: [scene], revertOnUpdate: true },
@@ -138,7 +145,8 @@ export default function CloudBackdrop() {
             <ResilientBoundary key={generation} name="nuvens" onGiveUp={handleFail}>
               {(onLost) =>
                 near &&
-                !gaveUp && (
+                !gaveUp &&
+                tier !== "none" && (
                   <CloudScene
                     progressRef={progress}
                     pointerRef={pointer}

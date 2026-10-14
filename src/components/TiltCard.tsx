@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties, type ReactNode, type Ref } from "react";
+import { isTouchScrolling, onScrollingChange } from "@/lib/mobile";
 
 /**
  * "Cartão de vidro" (CSS 3D, sem WebGL): com o mouse sobre o cartão, ele
@@ -102,7 +103,8 @@ export default function TiltCard({
     /**
      * Toque: o scroll só é lido com o cartão perto da tela e no máximo uma vez
      * por quadro (ler a posição a cada evento de scroll forçava layout no meio
-     * da rolagem). Devolve a limpeza.
+     * da rolagem). Modo celular curado: nada durante o arrasto; quando a
+     * rolagem para, o reflexo desliza até a posição nova. Devolve a limpeza.
      */
     const onScrollNear = (fn: () => void) => {
       let pending = 0;
@@ -112,8 +114,9 @@ export default function TiltCard({
         fn();
       };
       const onScroll = () => {
-        if (near && !pending) pending = requestAnimationFrame(run);
+        if (near && !pending && !isTouchScrolling()) pending = requestAnimationFrame(run);
       };
+      const offScrolling = onScrollingChange((scrolling) => !scrolling && onScroll());
       const io = new IntersectionObserver(
         ([e]) => {
           near = e.isIntersecting;
@@ -124,6 +127,7 @@ export default function TiltCard({
       io.observe(el);
       window.addEventListener("scroll", onScroll, { passive: true });
       return () => {
+        offScrolling();
         io.disconnect();
         cancelAnimationFrame(pending);
         window.removeEventListener("scroll", onScroll);

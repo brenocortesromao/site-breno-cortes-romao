@@ -9,7 +9,8 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
-import { scrubFor } from "@/lib/mobile";
+import { fadeWhileActive } from "@/lib/reveal";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -126,7 +127,8 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   // toque: terreno 3D na versão leve; a foto fica só como reserva (sem WebGL2,
   // prefers-reduced-motion, nível "low" ou perda de contexto repetida).
   // Desktop: sem mudança (3D sempre que houver WebGL2).
-  const scene = env?.webgl === true && (!env.coarse || (!env.reduced && tier !== "low"));
+  // celular: o monitor de qualidade pode mandar a cena para a foto ("none")
+  const scene = env?.webgl === true && tier !== "none" && (!env.coarse || (!env.reduced && tier !== "low"));
   const mountScene = scene && near;
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- espelha a montagem da cena para o monitor de qualidade
@@ -148,7 +150,8 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
           refreshPriority: -1,
           onUpdate: (self) => (progress.current = self.progress),
         });
-        if (!scene && zoom.current)
+        // celular: a foto não acompanha o scroll; tem uma deriva lenta em CSS (.poster-drift)
+        if (!scene && zoom.current && !isMobileUI())
           gsap.fromTo(
             zoom.current,
             { scale: 1, yPercent: 0 },
@@ -156,22 +159,27 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
               scale: 1.5,
               yPercent: -4,
               ease: "none",
-              scrollTrigger: { trigger: trecho, start: "top top", end: "bottom 40%", scrub: scrubFor(0.8), refreshPriority: -1 },
+              scrollTrigger: { trigger: trecho, start: "top top", end: "bottom 40%", scrub: 0.8, refreshPriority: -1 },
             },
           );
         // entra em fade quando o trecho chega e sai em fade no fim de "O que muda"
-        gsap.fromTo(
-          layer.current,
-          { opacity: 0 },
-          { opacity: 1, ease: "none", scrollTrigger: { trigger: trecho, start: "top bottom", end: "top 30%", scrub: true, refreshPriority: -1 } },
-        );
-        gsap.to(layer.current, {
-          opacity: 0,
-          ease: "none",
-          immediateRender: false,
-          // recalculado DEPOIS do pin dos pilares (que muda a altura do trecho)
-          scrollTrigger: { trigger: trecho, start: "bottom 95%", end: "bottom 35%", scrub: true, refreshPriority: -1 },
-        });
+        if (isMobileUI()) {
+          // celular: fade curto enquanto a seção está na tela (sem scrub)
+          fadeWhileActive(layer.current!, trecho, "top 65%", "bottom 65%");
+        } else {
+          gsap.fromTo(
+            layer.current,
+            { opacity: 0 },
+            { opacity: 1, ease: "none", scrollTrigger: { trigger: trecho, start: "top bottom", end: "top 30%", scrub: true, refreshPriority: -1 } },
+          );
+          gsap.to(layer.current, {
+            opacity: 0,
+            ease: "none",
+            immediateRender: false,
+            // recalculado DEPOIS do pin dos pilares (que muda a altura do trecho)
+            scrollTrigger: { trigger: trecho, start: "bottom 95%", end: "bottom 35%", scrub: true, refreshPriority: -1 },
+          });
+        }
       });
     },
     { scope: root, dependencies: [env, scene], revertOnUpdate: true },
@@ -202,7 +210,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
             </div>
           ) : (
             env && (
-              <div ref={zoom} className="absolute inset-0 will-change-transform" style={{ transformOrigin: PEAK }}>
+              <div ref={zoom} className="poster-drift absolute inset-0 will-change-transform" style={{ transformOrigin: PEAK }}>
                 <div className="absolute inset-0 opacity-[0.24]">
                   <Image
                     src="/fundo/montanhas.webp"

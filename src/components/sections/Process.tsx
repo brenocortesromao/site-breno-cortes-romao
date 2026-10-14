@@ -10,7 +10,8 @@ import LiquidDrop from "@/components/graphics/LiquidDrop";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { webglSupport } from "@/lib/webgl";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
+import { playOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -75,15 +76,21 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         // a linha sólida termina no ponto 06: completa quando ele acende
         const lastDot = list.current?.lastElementChild?.querySelector("[data-step-dot]");
-        gsap.fromTo(
+        // celular (modo curado): sem scrub; a mesma coreografia toca uma vez ao aparecer
+        const mobile = isMobileUI();
+        const stops: (() => void)[] = [];
+        const line = gsap.fromTo(
           "[data-process-line]",
           { scaleY: 0 },
           {
             scaleY: 1,
             ease: "none",
-            scrollTrigger: { trigger: list.current, start: "top 60%", endTrigger: lastDot, end: "center 50%", scrub: scrubFor(0.6) },
+            scrollTrigger: mobile
+              ? undefined
+              : { trigger: list.current, start: "top 60%", endTrigger: lastDot, end: "center 50%", scrub: 0.6 },
           },
         );
+        if (mobile) stops.push(playOnce(line, list.current!, { start: "top 75%", duration: 2.4, ease: "power1.inOut" }));
         // etapa atual para a gota: a etapa cujo topo passou do meio da tela
         gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step, i) => {
           ScrollTrigger.create({
@@ -95,11 +102,13 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
           });
         });
         gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step) => {
-          gsap
-            .timeline({ scrollTrigger: { trigger: step, start: "top 62%", end: "top 48%", scrub: scrubFor(0.5) } })
+          const tl = gsap
+            .timeline({ scrollTrigger: mobile ? undefined : { trigger: step, start: "top 62%", end: "top 48%", scrub: 0.5 } })
             .fromTo(step.querySelector("[data-step-dot]"), { scale: 0.4, backgroundColor: "transparent" }, { scale: 1, backgroundColor: "var(--fg)", ease: "none" }, 0)
             .fromTo(step.querySelector("[data-step-body]"), { opacity: 0.25, x: 10 }, { opacity: 1, x: 0, ease: "none" }, 0);
+          if (mobile) stops.push(playOnce(tl, step, { start: "top 80%", duration: 0.7 }));
         });
+        return () => stops.forEach((stop) => stop());
       });
     },
     { scope: root },

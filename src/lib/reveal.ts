@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { isMobileUI } from "./mobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -47,6 +48,8 @@ function marginFor(start: string) {
  *   rápida), chama `finish`: estado final direto, sem animação.
  * O estado inicial invisível deve ser aplicado (gsap.set) logo antes desta
  * chamada, no mesmo efeito. Retorna a limpeza.
+ * Celular (modo curado), com início "top X%": só o IntersectionObserver, que
+ * dispara na hora (sem ScrollTrigger: nada calculado a cada quadro da rolagem).
  */
 export function revealOnce({
   trigger,
@@ -78,16 +81,63 @@ export function revealOnce({
     if (trigger.getBoundingClientRect().bottom <= 0) finish();
     else play();
   };
+  const ioOnly = isMobileUI() && /^top \d/.test(start);
   const io = new IntersectionObserver(
     ([e]) => {
       window.clearTimeout(timer);
-      if (e.isIntersecting) timer = window.setTimeout(run, delay);
+      if (!e.isIntersecting) return;
+      if (ioOnly) run();
+      else timer = window.setTimeout(run, delay);
     },
     { rootMargin: marginFor(start) },
   );
   io.observe(trigger);
-  ref.st = ScrollTrigger.create({ trigger, start, once: true, refreshPriority: -1, onEnter: run });
-  if (done) ref.st.kill();
-  else if (trigger.getBoundingClientRect().bottom <= 0) run();
+  if (!ioOnly) {
+    ref.st = ScrollTrigger.create({ trigger, start, once: true, refreshPriority: -1, onEnter: run });
+    if (done) ref.st.kill();
+  }
+  if (!done && trigger.getBoundingClientRect().bottom <= 0) run();
   return stop;
+}
+
+/**
+ * Celular (modo curado): a coreografia que no desktop é presa ao scroll
+ * (scrub) vira uma entrada única ao aparecer, com a MESMA animação: a
+ * timeline/tween (criada sem scrollTrigger) toca do início ao fim uma vez.
+ * Retorna a limpeza.
+ */
+export function playOnce(
+  anim: gsap.core.Animation,
+  trigger: Element,
+  { start = "top 80%", duration = 0.9, ease = "power2.out" }: { start?: string; duration?: number; ease?: string } = {},
+) {
+  anim.pause(0);
+  return revealOnce({
+    trigger,
+    start,
+    play: () => {
+      gsap.to(anim, { progress: 1, duration, ease });
+    },
+    finish: () => {
+      anim.progress(1);
+    },
+  });
+}
+
+/**
+ * Celular (modo curado): camada de fundo que no desktop entra e sai em fade
+ * preso ao scroll; aqui ela aparece/some com uma transição curta (0,5 s)
+ * enquanto a seção está entre `start` e `end` (os meios dos fades do desktop).
+ */
+export function fadeWhileActive(layer: Element, trigger: Element, start: string, end: string) {
+  gsap.set(layer, { opacity: 0 });
+  return ScrollTrigger.create({
+    trigger,
+    start,
+    end,
+    refreshPriority: -1,
+    onToggle: (self) => {
+      gsap.to(layer, { opacity: self.isActive ? 1 : 0, duration: 0.5, ease: "power1.out", overwrite: true });
+    },
+  });
 }

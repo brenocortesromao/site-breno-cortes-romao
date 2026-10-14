@@ -5,9 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import BlurRevealTitle from "@/components/BlurRevealTitle";
-import { getTier } from "@/lib/quality";
 import { revealOnce } from "@/lib/reveal";
-import { isMobileUI, scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -24,14 +22,11 @@ export type PillarsCopy = {
  * trocam com o scroll — título sobe por máscara, texto cruza, índice e barra
  * de progresso acompanham. O modo é ligado por `data-mode="pin"` no <section>
  * (classes `group-data-[mode=pin]:*`).
- * Celular (até 767px), sem reduced motion e fora do nível "low": a mesma
- * troca, adaptada à tela em pé (`data-mode="pin-m"`): o título da seção rola
- * antes e só o palco dos pilares fica fixo (~60% da tela por pilar), tudo
- * centralizado (índice, barra de 120px, título numa linha, texto até 32ch).
- * Celular: ~60% da tela por pilar e scrub sem atraso (acompanha o dedo).
- * Celular fraco (nível "low"/"none") ou reduced motion (`data-mode="stack-m"`):
- * empilhados, cada pilar entra uma vez ao aparecer (linha se desenhando,
- * índice, título subindo pela máscara, texto); com reduced motion, só fade.
+ * Celular (toque ou até 767px; modo curado, `data-mode="stack-m"`): sem pin
+ * e sem scrub. Empilhados, cada pilar entra uma vez ao aparecer (linha se
+ * desenhando, índice, título subindo pela máscara, texto); com reduced
+ * motion, só fade. (As classes `group-data-[mode=pin-m]` do palco fixo antigo
+ * do celular ficaram sem uso.)
  * Desktop com reduced motion / sem JS: empilhados, sem animação.
  */
 export default function Pillars({ copy }: { copy: PillarsCopy }) {
@@ -43,7 +38,8 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+      // celular (toque ou até 767px): modo curado, sempre empilhados (stack-m)
+      mm.add("(min-width: 768px) and (pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
         const section = root.current!;
         section.dataset.mode = "pin";
 
@@ -58,10 +54,9 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
           scrollTrigger: {
             trigger: stage.current,
             start: "top top",
-            // celular/tablet de toque: no máximo ~0,6 tela por pilar
-            end: `+=${(n - 1) * (isMobileUI() ? 60 : 100)}%`,
+            end: `+=${(n - 1) * 100}%`,
             pin: true,
-            scrub: scrubFor(0.8),
+            scrub: 0.8,
             anticipatePin: 1,
           },
         });
@@ -79,63 +74,15 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
         };
       });
 
-      mm.add("(max-width: 767.98px)", () => {
+      mm.add("(max-width: 767.98px), (pointer: coarse)", () => {
         const section = root.current!;
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const tier = getTier();
         const titles = gsap.utils.toArray<HTMLElement>("[data-pillar-title]");
         const texts = gsap.utils.toArray<HTMLElement>("[data-pillar-text]");
         const indexes = gsap.utils.toArray<HTMLElement>("[data-pillar-index]");
 
-        if (!reduced && tier !== "low" && tier !== "none") {
-          // barra de endereço do celular: ScrollTrigger.config({ ignoreMobileResize }) global (SmoothScroll)
-          section.dataset.mode = "pin-m";
-          // palco preso acima de tudo o que vem depois ("O que muda" é z-10, depois no DOM)
-          section.style.zIndex = "20";
-          // altura do palco em px, medida a cada refresh (não muda com a barra de endereço)
-          const box = pinBox.current!;
-          const fitBox = () => {
-            box.style.height = `${window.innerHeight}px`;
-          };
-          fitBox();
-          ScrollTrigger.addEventListener("refreshInit", fitBox);
-          gsap.set(titles.slice(1), { yPercent: 110 });
-          gsap.set([...texts.slice(1), ...indexes.slice(1)], { autoAlpha: 0, y: 24 });
-          const tl = gsap.timeline({
-            defaults: { ease: "power2.inOut", duration: 1 },
-            scrollTrigger: {
-              trigger: pinBox.current,
-              start: "top top",
-              end: `+=${(n - 1) * 60}%`, // ~0,6 tela por pilar
-              pin: true,
-              pinType: "fixed",
-              // o pai (palco) é flex: sem isto o GSAP desliga o espaço do pin e
-              // "O que muda" subiria por cima dos pilares
-              pinSpacing: true,
-              invalidateOnRefresh: true,
-              // calculado antes dos gatilhos das seções de baixo (que dependem do espaço do pin)
-              refreshPriority: 1,
-              scrub: scrubFor(0.8),
-              anticipatePin: 1,
-            },
-          });
-          tl.fromTo("[data-pillar-progress-m]", { scaleX: 1 / n }, { scaleX: 1, ease: "none", duration: n - 1 }, 0);
-          for (let i = 1; i < n; i++) {
-            const at = i - 1 + 0.15;
-            tl.to(titles[i - 1], { yPercent: -110, duration: 0.7 }, at)
-              .to(titles[i], { yPercent: 0, duration: 0.7 }, at)
-              .to([texts[i - 1], indexes[i - 1]], { autoAlpha: 0, y: -24, duration: 0.5 }, at)
-              .to([texts[i], indexes[i]], { autoAlpha: 1, y: 0, duration: 0.5 }, at + 0.2);
-          }
-          return () => {
-            ScrollTrigger.removeEventListener("refreshInit", fitBox);
-            box.style.height = "";
-            section.style.zIndex = "";
-            delete section.dataset.mode;
-          };
-        }
-
-        // plano B: empilhados, cada pilar entra uma vez ao aparecer
+        // celular (modo curado): empilhados, cada pilar entra uma vez ao aparecer
+        // (linha se desenhando, índice, título subindo pela máscara, texto)
         section.dataset.mode = "stack-m";
         const stops = gsap.utils.toArray<HTMLElement>("[data-pillar]").map((li, i) => {
           const line = li.querySelector("[data-pillar-line]");

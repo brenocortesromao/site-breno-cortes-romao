@@ -5,7 +5,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import SprayTitle from "@/components/SprayTitle";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
+import { playOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -24,17 +25,22 @@ export default function Touchpoints({ copy }: { copy: TouchpointsCopy }) {
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // celular (modo curado): sem scrub; cada linha sobe pela máscara uma vez ao aparecer
+        const mobile = isMobileUI();
+        const stops: (() => void)[] = [];
         gsap.utils.toArray<HTMLElement>("[data-tp-line]").forEach((line) => {
-          gsap.fromTo(
+          const tw = gsap.fromTo(
             line,
             { yPercent: 110 },
             {
               yPercent: 0,
               ease: "none",
-              scrollTrigger: { trigger: line.parentElement, start: "top 92%", end: "top 70%", scrub: scrubFor(0.6) },
+              scrollTrigger: mobile ? undefined : { trigger: line.parentElement, start: "top 92%", end: "top 70%", scrub: 0.6 },
             },
           );
+          if (mobile) stops.push(playOnce(tw, line.parentElement!, { start: "top 90%", duration: 0.8, ease: "power3.out" }));
         });
+        return () => stops.forEach((stop) => stop());
       });
       // toque (sem hover): o item que passa pelo meio da tela acende, como no
       // hover do desktop (avança e os demais recuam em contraste)

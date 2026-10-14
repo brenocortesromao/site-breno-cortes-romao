@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { liveTheme, THEME_ROLES, TEXT_ROLES, type ThemeName } from "./themes";
+import { isMobileUI, MOBILE_QUERY } from "@/lib/mobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,6 +39,10 @@ function palette(theme: ThemeName): Palette {
  * Refaz tudo quando o conjunto de seções com `data-theme` muda (remontagem por
  * HMR, conteúdo que chega depois): gatilhos presos a seções que saíram da
  * página recalculavam posições erradas e as seções claras ficavam pretas.
+ * Celular (modo curado, MOBILE_QUERY): nada preso ao scroll. Um
+ * IntersectionObserver vê a seção que cruza o meio da tela e troca o tema de
+ * uma vez; o fundo do <html>/<body> faz a transição em CSS (0,5 s,
+ * html.theme-fade) e as cores de texto trocam no meio dela (buildMobile).
  */
 export default function ThemeScroll() {
   // O layout persiste entre páginas: refaz as transições a cada navegação.
@@ -62,6 +67,10 @@ export default function ThemeScroll() {
       current = [...document.querySelectorAll<HTMLElement>("[data-theme]")];
       if (!current.length) return;
       root.classList.add("theme-js");
+      if (isMobileUI()) {
+        disposeLive = buildMobile(root, current);
+        return;
+      }
       ctx = gsap.context(() => {
         disposeLive = buildTransitions(root, current);
       });
@@ -71,11 +80,13 @@ export default function ThemeScroll() {
 
     // celular ↔ desktop: as janelas claro/escuro são outras (ver buildTransitions)
     const mq = window.matchMedia(MOBILE);
+    const mqCurated = window.matchMedia(MOBILE_QUERY);
     const onMq = () => {
       teardown();
       setup();
     };
     mq.addEventListener("change", onMq);
+    mqCurated.addEventListener("change", onMq);
 
     // só refaz se as seções realmente mudaram (mesmos nós = nada a fazer)
     let raf = 0;
@@ -93,6 +104,7 @@ export default function ThemeScroll() {
 
     return () => {
       mq.removeEventListener("change", onMq);
+      mqCurated.removeEventListener("change", onMq);
       mo.disconnect();
       cancelAnimationFrame(raf);
       teardown();
@@ -100,6 +112,54 @@ export default function ThemeScroll() {
   }, [pathname]);
 
   return null;
+}
+
+/**
+ * Celular (modo curado): troca de tema por IntersectionObserver, sem cálculo
+ * por quadro. A seção que cruza o meio da tela define o tema; fundo, linhas e
+ * brilho vão para o <html> na hora (o fundo faz a transição CSS de 0,5 s) e o
+ * texto troca 250 ms depois, no meio da transição (contraste, como o
+ * textEase do desktop).
+ */
+function buildMobile(root: HTMLElement, sections: HTMLElement[]) {
+  const palettes = new Map<ThemeName, Palette>();
+  const pal = (t: ThemeName) => {
+    if (!palettes.has(t)) palettes.set(t, palette(t));
+    return palettes.get(t)!;
+  };
+  const textRoles = THEME_ROLES.filter((r) => TEXT_ROLES.has(r));
+  const otherRoles = THEME_ROLES.filter((r) => !TEXT_ROLES.has(r));
+  let theme: ThemeName | null = null;
+  let timer = 0;
+  const apply = (next: ThemeName, instant = false) => {
+    if (next === theme) return;
+    theme = next;
+    const p = pal(next);
+    liveTheme.clear();
+    THEME_ROLES.forEach((role) => liveTheme.set(role, p[role]));
+    const write = (roles: Role[]) => roles.forEach((role) => root.style.setProperty(`--${role}`, p[role]));
+    window.clearTimeout(timer);
+    write(otherRoles);
+    if (instant) write(textRoles);
+    else timer = window.setTimeout(() => write(textRoles), 250);
+  };
+  apply("dark", true);
+  root.classList.add("theme-fade");
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) apply(((e.target as HTMLElement).dataset.theme as ThemeName) ?? "dark");
+      });
+    },
+    { rootMargin: "-50% 0px -50% 0px" },
+  );
+  sections.forEach((s) => io.observe(s));
+  return () => {
+    io.disconnect();
+    window.clearTimeout(timer);
+    root.classList.remove("theme-fade");
+    liveTheme.clear();
+  };
 }
 
 /** Topo na página pelo layout (soma de offsetTop): ignora os transforms das animações de entrada. */

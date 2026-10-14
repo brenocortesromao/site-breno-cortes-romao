@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import gsap from "gsap";
+import { isMobileUI } from "@/lib/mobile";
 
 /**
  * Efeito de DECODIFICAÇÃO letra por letra (A distância, E a IA?): cada letra
@@ -128,6 +129,18 @@ export function shine(scope: HTMLElement) {
   const left = Math.min(...rects.map((r) => r.left));
   const right = Math.max(...rects.map((r) => r.right));
   const vw = window.innerWidth;
+  if (isMobileUI()) {
+    // celular (modo curado): sem background-attachment: fixed (ele obriga a
+    // página inteira a repintar a cada quadro de rolagem). O gradiente fica em
+    // cada letra, deslocado pela posição dela na tela: o mesmo desenho em
+    // coordenadas da tela, a mesma faixa atravessando todas as letras.
+    gsap.fromTo(
+      keys,
+      { backgroundPositionX: (i: number) => left - 120 - vw * 1.5 - rects[i].left, backgroundPositionY: (i: number) => -rects[i].top },
+      { backgroundPositionX: (i: number) => right + 120 - vw * 1.5 - rects[i].left, duration: 1.1, ease: "power2.inOut" },
+    );
+    return;
+  }
   // gradiente em coordenadas da tela (background-attachment: fixed, 300vw com
   // a faixa no meio): a faixa atravessa as letras e para fora delas
   gsap.fromTo(

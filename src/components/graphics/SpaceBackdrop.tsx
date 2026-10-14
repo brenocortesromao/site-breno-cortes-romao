@@ -8,6 +8,8 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { fadeWhileActive } from "@/lib/reveal";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -141,11 +143,16 @@ export default function SpaceBackdrop() {
             progress.current = self.progress;
           },
         });
-        gsap.fromTo(
-          layer.current,
-          { opacity: 0 },
-          { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 90%", end: "top 35%", scrub: true, refreshPriority: -1 } },
-        );
+        if (isMobileUI()) {
+          // celular: fade curto enquanto a seção está na tela (sem scrub)
+          fadeWhileActive(layer.current!, section, "top 63%", "bottom top");
+        } else {
+          gsap.fromTo(
+            layer.current,
+            { opacity: 0 },
+            { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 90%", end: "top 35%", scrub: true, refreshPriority: -1 } },
+          );
+        }
       });
     },
     { scope: root, dependencies: [scene], revertOnUpdate: true },
@@ -159,7 +166,7 @@ export default function SpaceBackdrop() {
         {/* erro ou perda de contexto: remonta; desiste (só o gradiente) se falhar de novo */}
         <ResilientBoundary name="espaço" onGiveUp={handleFail}>
           {(onLost) =>
-            near && (
+            near && tier !== "none" && (
               <SpaceScene
                 progressRef={progress}
                 pointerRef={pointer}

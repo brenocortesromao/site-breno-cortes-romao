@@ -6,7 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { shine } from "@/components/decode";
 import { protectTerms } from "@/components/Term";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
+import { playOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -59,14 +60,19 @@ export default function AboutStory({
 
         // trajetória: cada etapa acende (grafite → aceso) em sequência, por scrub,
         // e o traço até a próxima se desenha
+        // celular (modo curado): sem scrub; a sequência toca uma vez ao aparecer
+        const mobile = isMobileUI();
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: "[data-trajectory]", start: "top 85%", end: "bottom 45%", scrub: scrubFor(0.6) },
+          scrollTrigger: mobile ? undefined : { trigger: "[data-trajectory]", start: "top 85%", end: "bottom 45%", scrub: 0.6 },
         });
-        gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step, i) => {
+        const steps = gsap.utils.toArray<HTMLElement>("[data-step]");
+        steps.forEach((step, i) => {
           tl.fromTo(step, { opacity: 0.16 }, { opacity: 1, duration: 1, ease: "none" }, i * 0.8);
           const line = step.querySelector("[data-step-line]");
           if (line) tl.fromTo(line, { scale: 0 }, { scale: 1, duration: 0.8, ease: "none" }, i * 0.8 + 0.4);
         });
+        const trajectory = root.current?.querySelector("[data-trajectory]");
+        if (mobile && trajectory) return playOnce(tl, trajectory, { start: "top 80%", duration: 0.45 * steps.length + 0.5, ease: "none" });
       });
     },
     { scope: root },
@@ -75,7 +81,8 @@ export default function AboutStory({
   return (
     // "contents": os dois blocos entram direto na grade do Sobre
     <div ref={root} className="contents">
-      <div className="md:col-span-6 md:col-start-7">
+      {/* celular: degradê suave atrás do bloco de texto (leitura sobre a floresta mais clara) */}
+      <div className="md:col-span-6 md:col-start-7 mobile:relative mobile:before:pointer-events-none mobile:before:absolute mobile:before:-inset-x-6 mobile:before:-inset-y-10 mobile:before:-z-10 mobile:before:bg-[linear-gradient(to_bottom,transparent,color-mix(in_srgb,var(--bg)_68%,transparent)_14%,color-mix(in_srgb,var(--bg)_68%,transparent)_86%,transparent)] mobile:before:content-['']">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
         <Title
           id="sobre-title"
@@ -117,7 +124,7 @@ export default function AboutStory({
       </div>
 
       <div className="md:col-span-12">
-        <div data-trajectory className="md:mt-8">
+        <div data-trajectory className="md:mt-8 mobile:relative mobile:before:pointer-events-none mobile:before:absolute mobile:before:-inset-x-6 mobile:before:-inset-y-10 mobile:before:-z-10 mobile:before:bg-[linear-gradient(to_bottom,transparent,color-mix(in_srgb,var(--bg)_68%,transparent)_14%,color-mix(in_srgb,var(--bg)_68%,transparent)_86%,transparent)] mobile:before:content-['']">
           <Heading className="font-mono text-[11px] font-normal uppercase tracking-[0.28em] text-silver">
             {copy.timelineTitle}
           </Heading>

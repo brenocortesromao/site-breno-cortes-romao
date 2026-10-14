@@ -11,30 +11,28 @@ export const MOBILE_QUERY = "(pointer: coarse), (max-width: 767.98px)";
 
 export const isMobileUI = () => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches;
 
-/**
- * `scrub` do ScrollTrigger: no celular, `true` (a animação acompanha o dedo,
- * sem atraso de suavização); no desktop, o valor aprovado.
- */
-export const scrubFor = (desktop: number): number | true => (isMobileUI() ? true : desktop);
-
 /** DPR máximo das cenas 3D no celular. */
 export const MOBILE_MAX_DPR = 1.25;
 
-// ---------------------------------------------------------------- rolagem com o dedo
+// ---------------------------------------------------------------- rolagem ativa
 /**
- * true enquanto o dedo rola a página (do toque até a inércia nativa parar).
- * As cenas 3D congelam o quadro nesse intervalo (não renderizam, a imagem
- * continua na tela) e retomam ao parar. Só liga em dispositivo de toque.
+ * Modo celular curado: true enquanto a página rola (dedo arrastando ou
+ * inércia nativa: houve scroll nos últimos SETTLE_MS). As cenas 3D e os laços
+ * contínuos congelam o quadro nesse intervalo (não renderizam, a imagem
+ * continua na tela) e retomam ao parar: durante o arrasto, só o compositor
+ * trabalha. O <html> recebe data-scrolling (para pausar animações CSS).
+ * Só liga no celular (MOBILE_QUERY); no desktop é sempre false.
  */
 let touching = false;
 let scrolling = false;
 let idle = 0;
 const listeners = new Set<() => void>();
-const SETTLE_MS = 160;
+const SETTLE_MS = 120;
 
 const set = (v: boolean) => {
   if (v === scrolling) return;
   scrolling = v;
+  document.documentElement.toggleAttribute("data-scrolling", v);
   listeners.forEach((l) => l());
 };
 const settle = () => {
@@ -48,7 +46,7 @@ let bound = false;
 function bind() {
   if (bound || typeof window === "undefined") return;
   bound = true;
-  if (!window.matchMedia("(pointer: coarse)").matches) return;
+  if (!isMobileUI()) return;
   const opts = { passive: true, capture: true } as const;
   window.addEventListener("touchstart", () => (touching = true), opts);
   const end = () => {
@@ -60,19 +58,30 @@ function bind() {
   window.addEventListener(
     "scroll",
     () => {
-      if (touching || scrolling) {
-        set(true);
-        settle();
-      }
+      set(true);
+      settle();
     },
     { passive: true },
   );
 }
 
+/** Liga a detecção de rolagem (chamada uma vez no início, pelo SmoothScroll). */
+export const watchScrolling = bind;
+
 /** Leitura direta (para laços de render próprios, fora do React). */
 export function isTouchScrolling() {
   bind();
   return scrolling;
+}
+
+/** Aviso quando a rolagem começa/para (laços fora do React, ex.: tweens em loop). */
+export function onScrollingChange(cb: (scrolling: boolean) => void) {
+  bind();
+  const l = () => cb(scrolling);
+  listeners.add(l);
+  return () => {
+    listeners.delete(l);
+  };
 }
 
 /** Versão reativa (para o `frameloop` das cenas R3F). */
@@ -86,6 +95,41 @@ export function useTouchScrolling() {
     () => scrolling,
     () => false,
   );
+}
+
+// ---------------------------------------------------------------- taxa da tela
+/**
+ * Taxa real da tela (Hz): mediana dos intervalos de requestAnimationFrame com
+ * a página parada, medida uma vez no início (~1 s; recomeça se houver
+ * rolagem). Muitos Android têm 90/120 Hz: o monitor de qualidade usa limites
+ * relativos a ela no celular. Até medir, 60.
+ */
+let hz = 60;
+let hzStarted = false;
+export function displayHz() {
+  if (!hzStarted && typeof window !== "undefined") {
+    hzStarted = true;
+    const run = () => {
+      const gaps: number[] = [];
+      let last = 0;
+      const loop = (t: number) => {
+        if (scrolling) gaps.length = 0; // página rolando: recomeça
+        else if (last) gaps.push(t - last);
+        last = t;
+        if (gaps.length < 60) {
+          requestAnimationFrame(loop);
+          return;
+        }
+        const sorted = gaps.sort((x, y) => x - y);
+        const med = sorted[Math.floor(sorted.length / 2)];
+        if (med > 0) hz = Math.min(144, Math.max(30, Math.round(1000 / med)));
+      };
+      requestAnimationFrame(loop);
+    };
+    if (document.readyState === "complete") run();
+    else window.addEventListener("load", run, { once: true });
+  }
+  return hz;
 }
 
 // ---------------------------------------------------------------- redimensionamento

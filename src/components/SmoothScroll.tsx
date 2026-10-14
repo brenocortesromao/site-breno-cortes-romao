@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { isMobileUI } from "@/lib/mobile";
+import { isMobileUI, watchScrolling } from "@/lib/mobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,7 +16,7 @@ if (typeof window !== "undefined" && isMobileUI()) ScrollTrigger.config({ ignore
  * Scroll suave com inércia (Lenis) dirigido pelo ticker do GSAP, para que o
  * ScrollTrigger e o Lenis leiam a mesma posição no mesmo quadro.
  * - prefers-reduced-motion: não inicializa (scroll nativo).
- * - Toque (pointer: coarse): o Lenis NÃO é criado. Mesmo com syncTouch: false
+ * - Celular (toque ou até 767px, modo curado): o Lenis NÃO é criado. Mesmo com syncTouch: false
  *   ele registra touchstart/touchmove não passivos na janela, e o navegador
  *   passa a esperar o JavaScript a cada movimento do dedo. Sem ele, a rolagem
  *   é 100% nativa; links "#secao" deslizam pelo scroll suave nativo.
@@ -90,7 +90,8 @@ export default function SmoothScroll() {
   useEffect(() => {
     const stopStart = startPosition();
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return stopStart;
-    if (window.matchMedia("(pointer: coarse)").matches) {
+    if (isMobileUI()) {
+      watchScrolling(); // rolagem ativa: cenas e laços contínuos congelam o quadro
       // âncoras da mesma página: continuam deslizando (antes era o Lenis)
       const onClick = (e: MouseEvent) => {
         const a = (e.target as Element | null)?.closest?.("a[href*='#']") as HTMLAnchorElement | null;

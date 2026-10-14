@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { stableResizeObserver } from "@/lib/mobile";
+import { isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
 
 /**
  * Perguntas frequentes: um "?" gigante feito de caracteres em Geist Mono
@@ -380,6 +380,11 @@ export default function FaqAscii({ text }: { text: string }) {
       raf = 0;
       const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016);
       last = now;
+      // celular: congela o quadro enquanto a página rola
+      if (!reduced && isTouchScrolling()) {
+        if (visible && !document.hidden) raf = requestAnimationFrame(frame);
+        return;
+      }
       clock += dt;
       if (!reduced) step(dt);
       draw();

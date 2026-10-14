@@ -11,6 +11,48 @@
 }
 
 /*
+ * Modo celular curado (toque ou até 767px; ver src/lib/mobile.ts):
+ * - troca de tema: o fundo faz a transição em CSS (0,5 s) quando o
+ *   ThemeScroll troca as cores (html.theme-fade), sem cálculo por quadro;
+ * - pôster dos fundos 3D (foto/SVG): deriva lenta em CSS (só transform);
+ * - enquanto a página rola (html[data-scrolling]), as animações CSS ficam
+ *   pausadas no quadro atual: durante o arrasto, só o compositor trabalha.
+ */
+@keyframes posterDrift {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(-1.5%, -2%, 0);
+  }
+}
+@media (pointer: coarse), (max-width: 767.98px) {
+  html.theme-fade,
+  html.theme-fade body {
+    transition: background-color 0.5s ease;
+  }
+  .poster-drift {
+    animation: posterDrift 28s ease-in-out infinite alternate;
+  }
+  /* rolando: as animações CSS em loop congelam no quadro atual (cursores,
+     pulsos, moldura cromada, grão, deriva do pôster) e seguem quando a
+     rolagem para. Seletores por classe: trocar o atributo no <html> só
+     recalcula o estilo desses elementos (um seletor universal recalcularia a
+     página inteira bem no começo do arrasto). Loops novos: classe .css-loop. */
+  html[data-scrolling] :is(.animate-pulse, .animate-ping, .poster-drift, .css-loop),
+  html[data-scrolling] .faq-grain::before,
+  html[data-scrolling] .chrome-frame::before,
+  html[data-scrolling] .chrome-frame::after {
+    animation-play-state: paused !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .poster-drift {
+    animation: none;
+  }
+}
+
+/*
  * TEMAS
  * 1) Paletas fixas, uma por tema (--{tema}-{papel}).
  * 2) Variáveis "vivas" (--bg, --fg, ...) no <html>: todo o site usa só estas.
@@ -476,4 +518,14 @@ html.custom-cursor * {
   background-position: calc(-150vw - 200px) 0;
   -webkit-background-clip: text;
   background-clip: text;
+}
+/* Celular (modo curado): sem attachment fixed (repintava a página inteira a
+   cada quadro de rolagem). O gradiente fica em cada letra, no tamanho da tela,
+   e shine() (components/decode.tsx) desloca cada uma pela posição dela. Em
+   repouso a faixa fica fora da letra (à esquerda), como no desktop. */
+@media (pointer: coarse), (max-width: 767.98px) {
+  .text-shine-fixed {
+    background-attachment: scroll;
+    background-size: 300vw 100lvh;
+  }
 }

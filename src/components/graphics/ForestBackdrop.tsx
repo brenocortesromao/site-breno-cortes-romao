@@ -8,6 +8,8 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { fadeWhileActive } from "@/lib/reveal";
+import { isMobileUI } from "@/lib/mobile";
 import { prefetchGltf } from "@/lib/gltf";
 import { usePreloadBeforeSection } from "@/lib/preload";
 
@@ -19,6 +21,8 @@ type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
 
 /** Opacidade da cena (o texto do Sobre fica por cima). */
 const OPACITY = 0.5;
+/** Celular: a cena ~35% mais clara (o urso aparecia escuro demais na tela pequena). */
+const MOBILE_OPACITY = OPACITY * 1.35;
 
 /**
  * Fundo 3D do Sobre: descida aérea sobre uma floresta nevada cortada por um
@@ -101,17 +105,22 @@ export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
           },
         });
         // entra e sai em fade com a seção
-        gsap.fromTo(
-          layer.current,
-          { opacity: 0 },
-          { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 90%", end: "top 35%", scrub: true, refreshPriority: -1 } },
-        );
-        gsap.to(layer.current, {
-          opacity: 0,
-          ease: "none",
-          immediateRender: false,
-          scrollTrigger: { trigger: section, start: "bottom 60%", end: "bottom 10%", scrub: true, refreshPriority: -1 },
-        });
+        if (isMobileUI()) {
+          // celular: fade curto enquanto a seção está na tela (sem scrub)
+          fadeWhileActive(layer.current!, section, "top 63%", "bottom 35%");
+        } else {
+          gsap.fromTo(
+            layer.current,
+            { opacity: 0 },
+            { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 90%", end: "top 35%", scrub: true, refreshPriority: -1 } },
+          );
+          gsap.to(layer.current, {
+            opacity: 0,
+            ease: "none",
+            immediateRender: false,
+            scrollTrigger: { trigger: section, start: "bottom 60%", end: "bottom 10%", scrub: true, refreshPriority: -1 },
+          });
+        }
       });
     },
     { scope: root, dependencies: [scene], revertOnUpdate: true },
@@ -123,11 +132,11 @@ export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
     <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={layer} className="absolute inset-0">
-          <div className="absolute inset-0" style={{ opacity: OPACITY }}>
+          <div className="absolute inset-0" style={{ opacity: isMobileUI() ? MOBILE_OPACITY : OPACITY }}>
             {/* erro ou perda de contexto: remonta; desiste (só o gradiente) se falhar de novo */}
             <ResilientBoundary name="floresta" onGiveUp={handleFail}>
               {(onLost) =>
-                near && (
+                near && tier !== "none" && (
                   <AerialScene
                     progressRef={progress}
                     pointerRef={pointer}
@@ -142,9 +151,11 @@ export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
               }
             </ResilientBoundary>
           </div>
-          {/* vinheta, degradês de entrada/saída e o degradê escuro atrás do texto (direita) */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,var(--bg)_100%)]" />
-          <div className="absolute inset-0 bg-background/35 md:bg-transparent md:bg-gradient-to-l md:from-background/80 md:via-background/45 md:via-40% md:to-transparent md:to-65%" />
+          {/* vinheta, degradês de entrada/saída e o degradê escuro atrás do texto (direita).
+              Celular: vinheta mais aberta e camada escura geral menor; a leitura vem do
+              degradê atrás de cada bloco de texto (AboutStory), com o urso visível entre eles */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,var(--bg)_100%)] mobile:bg-[radial-gradient(ellipse_at_center,transparent_55%,var(--bg)_100%)]" />
+          <div className="absolute inset-0 bg-background/35 mobile:bg-background/10 md:bg-transparent md:bg-gradient-to-l md:from-background/80 md:via-background/45 md:via-40% md:to-transparent md:to-65%" />
           <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background to-transparent" />
         </div>

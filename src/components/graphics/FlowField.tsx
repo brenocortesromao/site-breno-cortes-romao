@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { stableResizeObserver } from "@/lib/mobile";
+import { isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
 
 /** Comportamento das correntes em cada etapa (ver `stages`). */
 export type FlowStage = {
@@ -266,6 +266,7 @@ export default function FlowField({
     const tick = (_time: number, deltaTime: number) => {
       const dt = Math.min(deltaTime / 1000, 0.05);
       if (dt <= 0) return;
+      if (isTouchScrolling()) return; // celular: congela o quadro enquanto a página rola
       step(dt);
       draw();
     };

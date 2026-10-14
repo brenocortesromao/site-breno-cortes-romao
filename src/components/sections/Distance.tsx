@@ -4,11 +4,11 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { revealOnce } from "@/lib/reveal";
+import { playOnce, revealOnce } from "@/lib/reveal";
 import type { DistanceCharts } from "@/content/charts";
 import { DecodeLetters, decode, hideLetters, shine, showLetters } from "@/components/decode";
 import FlowField, { type FlowStage } from "@/components/graphics/FlowField";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
 
 /**
  * Fundo em fluxo (FlowField), uma etapa por bloco: 1) correntes bem separadas
@@ -74,11 +74,19 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
         const q = (id: string) => section.querySelector(`#${id}`);
         const fig = (s: string) => section.querySelector(`[data-chart="${s}"]`);
         const ease = "none";
-        const scrubbed = (s: string) =>
-          gsap.timeline({
+        // celular (modo curado): sem scrub; cada gráfico toca a mesma animação uma vez ao aparecer
+        const mobile = isMobileUI();
+        const once: [gsap.core.Timeline, string][] = [];
+        const scrubbed = (s: string) => {
+          const tl = gsap.timeline({
             defaults: { ease },
-            scrollTrigger: { trigger: fig(s), start: "top bottom", end: "center center", scrub: scrubFor(0.5), invalidateOnRefresh: true },
+            scrollTrigger: mobile
+              ? undefined
+              : { trigger: fig(s), start: "top bottom", end: "center center", scrub: 0.5, invalidateOnRefresh: true },
           });
+          if (mobile) once.push([tl, s]);
+          return tl;
+        };
 
         // ---------- A: eixos, curvas desenhadas, área da distância ----------
         prepDraw(q("ga-curva-negocio"));
@@ -119,6 +127,7 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
 
         // ---------- frases: decodificação ao entrar na tela, uma vez ----------
         const cleanups: (() => void)[] = [];
+        once.forEach(([tl, s]) => cleanups.push(playOnce(tl, fig(s)!, { start: "top 75%", duration: 2.2, ease: "power1.inOut" })));
         section.querySelectorAll<HTMLElement>("[data-decode]").forEach((phrase) => {
           hideLetters(phrase);
           cleanups.push(

@@ -8,6 +8,8 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { fadeWhileActive } from "@/lib/reveal";
+import { isMobileUI, isTouchScrolling, onScrollingChange } from "@/lib/mobile";
 import { usePreloadBeforeSection } from "@/lib/preload";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -110,22 +112,30 @@ export default function OceanBackdrop() {
           refreshPriority: -1,
           onUpdate: (self) => {
             progress.current = self.progress;
-            setDepth(self.progress);
+            // celular: nada no DOM durante o arrasto (aplica quando a rolagem para)
+            if (!isTouchScrolling()) setDepth(self.progress);
           },
         });
+        const offScrolling = onScrollingChange((scrolling) => !scrolling && setDepth(progress.current));
         // entra em fade com a seção; sai em fade no fim (antes do off-white
         // de "Poucas parcerias"), depois de a câmera chegar ao recife
-        gsap.fromTo(
-          layer.current,
-          { opacity: 0 },
-          { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 90%", end: "top 35%", scrub: true, refreshPriority: -1 } },
-        );
-        gsap.to(layer.current, {
-          opacity: 0,
-          ease: "none",
-          immediateRender: false,
-          scrollTrigger: { trigger: section, start: "bottom 75%", end: "bottom 25%", scrub: true, refreshPriority: -1 },
-        });
+        if (isMobileUI()) {
+          // celular: fade curto enquanto a seção está na tela (sem scrub)
+          fadeWhileActive(layer.current!, section, "top 63%", "bottom 50%");
+        } else {
+          gsap.fromTo(
+            layer.current,
+            { opacity: 0 },
+            { opacity: 1, ease: "none", scrollTrigger: { trigger: section, start: "top 90%", end: "top 35%", scrub: true, refreshPriority: -1 } },
+          );
+          gsap.to(layer.current, {
+            opacity: 0,
+            ease: "none",
+            immediateRender: false,
+            scrollTrigger: { trigger: section, start: "bottom 75%", end: "bottom 25%", scrub: true, refreshPriority: -1 },
+          });
+        }
+        return offScrolling;
       });
     },
     { scope: root, dependencies: [scene, setDepth], revertOnUpdate: true },
@@ -141,7 +151,7 @@ export default function OceanBackdrop() {
             {/* erro ou perda de contexto: remonta; desiste (sem oceano) se falhar de novo */}
             <ResilientBoundary name="oceano" onGiveUp={handleFail}>
               {(onLost) =>
-                near && (
+                near && tier !== "none" && (
                   <OceanScene
                     progressRef={progress}
                     pointerRef={pointer}

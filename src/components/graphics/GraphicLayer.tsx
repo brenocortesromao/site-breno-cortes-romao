@@ -8,6 +8,7 @@ import LiquidContours from "./LiquidContours";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -72,10 +73,18 @@ export default function GraphicLayer({
   }, [near]);
   const handleFail = useCallback(() => setMode((m) => (m ? { ...m, liquid: false } : m)), []);
   const tier = useSceneTier("curvas", outer, !!mode?.liquid && near);
+  /** Celular: rolagem lenta manda as curvas para o SVG estático (lib/quality). */
+  const poster = tier === "none";
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reflete a desmontagem do canvas
+    if (poster) setLiquidReady(false);
+  }, [poster]);
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
     mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // celular: sem parallax preso ao scroll; deriva lenta em CSS (.poster-drift)
+      if (isMobileUI()) return;
       gsap.fromTo(
         layer.current,
         { yPercent: -4 },
@@ -95,7 +104,7 @@ export default function GraphicLayer({
 
   return (
     <div ref={outer} aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      <div ref={layer} className="absolute inset-x-0 -inset-y-[8%]">
+      <div ref={layer} className="poster-drift absolute inset-x-0 -inset-y-[8%]">
         {variant === "grid" ? (
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--graphic)_1px,transparent_1px),linear-gradient(to_bottom,var(--graphic)_1px,transparent_1px)] bg-[size:80px_80px]" />
         ) : (
@@ -115,7 +124,7 @@ export default function GraphicLayer({
                 {/* falha ou perda de contexto: remonta; só fica no SVG se falhar de novo */}
                 <ResilientBoundary name="curvas líquidas" onGiveUp={handleFail}>
                   {(onLost) =>
-                    near && (
+                    near && !poster && (
                       <LiquidContours
                         seed={variant === "contours-a" ? 1 : 2}
                         light={mode.light || tier === "low"}

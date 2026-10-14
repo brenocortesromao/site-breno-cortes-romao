@@ -2,6 +2,8 @@
 // rolando do topo ao fim com arrastos de dedo (Input.dispatchTouchEvent). Mede os quadros (rAF) por seção e conta,
 // DURANTE a rolagem, os refresh do ScrollTrigger (mudanças nos pin-spacers) e os contextos WebGL criados.
 // ADDRBAR=1 simula a barra de endereço do Chrome aparecendo e sumindo (innerHeight 844 ↔ 788) a cada 3 arrastos.
+// TRACE=1 grava um trace do Chrome e mede o thread principal SÓ enquanto o dedo arrasta: tempo ocupado e
+// tarefas acima de 8,3 ms (um quadro a 120 Hz) e de 16,7 ms, por seção (meta: só o compositor trabalha).
 // Uso: npx next start -p 3100 e depois  node scripts/perf-mobile.mjs [url] [rótulo]
 import { chromium } from "playwright";
 
@@ -35,6 +37,9 @@ await ctx.addInitScript(() => {
 });
 const page = await ctx.newPage();
 const cdp = await ctx.newCDPSession(page);
+// decisões do monitor de qualidade (ex.: cena que caiu para o pôster)
+const quality = [];
+page.on("console", (m) => m.text().startsWith("[qualidade]") && quality.push(m.text()));
 await page.goto(url, { waitUntil: "load" });
 await page.waitForTimeout(3000);
 const info = await page.evaluate(() => {
@@ -92,16 +97,23 @@ if (process.env.PROFILE) {
   await cdp.send("Profiler.setSamplingInterval", { interval: 200 });
   await cdp.send("Profiler.start");
 }
+const trace = [];
+if (process.env.TRACE) {
+  cdp.on("Tracing.dataCollected", (e) => trace.push(...e.value));
+  await cdp.send("Tracing.start", { categories: "toplevel,blink.user_timing,devtools.timeline,cc,benchmark", transferMode: "ReportEvents" });
+}
 const drag = async (dist) => {
   const x = 30;
   const y0 = H - 120;
   const steps = Math.round(dist / 28);
+  if (process.env.TRACE) await page.evaluate(() => performance.mark("arrasto-ini:" + window.__sec));
   await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y: y0 }] });
   for (let i = 1; i <= steps; i++) {
     await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y0 - i * 28 }] });
     await page.waitForTimeout(16);
   }
   await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  if (process.env.TRACE) await page.evaluate(() => performance.mark("arrasto-fim"));
 };
 
 let y = 0;
@@ -129,6 +141,106 @@ for (;;) {
   prev = y;
 }
 await page.waitForTimeout(800);
+if (process.env.TRACE) {
+  const done = new Promise((r) => cdp.once("Tracing.tracingComplete", r));
+  await cdp.send("Tracing.end");
+  await done;
+  // marcas de início/fim de cada arrasto (no thread principal do renderizador)
+  const marks = trace.filter((e) => e.cat?.includes("blink.user_timing") && /^arrasto-/.test(e.name)).sort((a, b) => a.ts - b.ts);
+  const main = marks[0] && { pid: marks[0].pid, tid: marks[0].tid };
+  const windows = [];
+  for (let i = 0; i < marks.length; i++) {
+    if (!marks[i].name.startsWith("arrasto-ini:")) continue;
+    const end = marks.slice(i + 1).find((m) => m.name === "arrasto-fim");
+    if (end) windows.push({ sec: marks[i].name.split(":")[1], a: marks[i].ts, b: end.ts });
+  }
+  const tasks = trace.filter((e) => main && e.pid === main.pid && e.tid === main.tid && e.ph === "X" && (e.name === "RunTask" || e.name === "ThreadControllerImpl::RunTask") && e.dur);
+  const per = new Map();
+  for (const w of windows) {
+    const r = per.get(w.sec) ?? { ms: 0, busy: 0, over8: 0, over16: 0, n: 0 };
+    r.ms += (w.b - w.a) / 1000;
+    for (const t of tasks) {
+      const a = Math.max(t.ts, w.a);
+      const b = Math.min(t.ts + t.dur, w.b);
+      if (b <= a) continue;
+      r.busy += (b - a) / 1000;
+      r.n++;
+      if (t.dur > 8333) r.over8++;
+      if (t.dur > 16667) r.over16++;
+    }
+    per.set(w.sec, r);
+  }
+  console.log(`
+Thread principal DURANTE o arrasto (CPU ${cpu}x; meta 120 Hz = 8,3 ms por quadro):`);
+  console.log("seção".padEnd(20), "arrasto ms".padStart(10), "ocupado".padStart(8), ">8,3ms".padStart(7), ">16,7ms".padStart(8));
+  let T = { ms: 0, busy: 0, over8: 0, over16: 0 };
+  for (const [sec, r] of per) {
+    T = { ms: T.ms + r.ms, busy: T.busy + r.busy, over8: T.over8 + r.over8, over16: T.over16 + r.over16 };
+    console.log(sec.padEnd(20), r.ms.toFixed(0).padStart(10), `${((100 * r.busy) / r.ms).toFixed(0)}%`.padStart(8), String(r.over8).padStart(7), String(r.over16).padStart(8));
+  }
+  // quadros do COMPOSITOR durante o arrasto (o que o dedo sente): PipelineReporter
+  // apresentado (inteiro ou só a parte do compositor, que já move a rolagem) ou descartado
+  const frames = new Map();
+  for (const e of trace) {
+    if (e.name !== "PipelineReporter" || e.ph !== "b") continue;
+    const fr = e.args?.frame_reporter ?? e.args?.chrome_frame_reporter;
+    const state = fr?.state;
+    if (!state || /NO_UPDATE/.test(state)) continue;
+    const w = windows.find((w) => e.ts >= w.a && e.ts <= w.b);
+    if (!w) continue;
+    const r = frames.get(w.sec) ?? { all: 0, partial: 0, dropped: 0 };
+    if (/DROPPED/.test(state)) r.dropped++;
+    else if (/PARTIAL/.test(state)) r.partial++;
+    else r.all++;
+    frames.set(w.sec, r);
+  }
+  if (frames.size) {
+    console.log("\nQuadros do compositor durante o arrasto (apresentados inteiros / só compositor / descartados):");
+    let F = { all: 0, partial: 0, dropped: 0 };
+    for (const [sec, r] of frames) {
+      F = { all: F.all + r.all, partial: F.partial + r.partial, dropped: F.dropped + r.dropped };
+      const n = r.all + r.partial + r.dropped;
+      console.log(`  ${sec.padEnd(20)} ${String(r.all).padStart(5)} ${String(r.partial).padStart(5)} ${String(r.dropped).padStart(5)}  descartados ${((100 * r.dropped) / n).toFixed(1)}%`);
+    }
+    const n = F.all + F.partial + F.dropped;
+    console.log(`  ${"TOTAL".padEnd(20)} ${String(F.all).padStart(5)} ${String(F.partial).padStart(5)} ${String(F.dropped).padStart(5)}  descartados ${((100 * F.dropped) / n).toFixed(1)}%`);
+  }
+  // o que o thread principal fez durante os arrastos (eventos aninhados, tempo total por tipo)
+  const kinds = new Map();
+  const inDrag = (t) => windows.some((w) => t.ts < w.b && t.ts + t.dur > w.a);
+  for (const e of trace) {
+    if (!main || e.pid !== main.pid || e.tid !== main.tid || e.ph !== "X" || !e.dur || e.name === "RunTask" || e.name === "ThreadControllerImpl::RunTask") continue;
+    if (!inDrag(e)) continue;
+    const k = e.name === "FunctionCall" || e.name === "EvaluateScript" ? `${e.name} ${(e.args?.data?.url || "").split("/").pop()}:${e.args?.data?.functionName || ""}` : e.name;
+    kinds.set(k, (kinds.get(k) ?? 0) + e.dur / 1000);
+  }
+  // pinturas durante o arrasto por elemento (backendNodeId do trace)
+  const paints = new Map();
+  for (const e of trace) {
+    if (!main || e.pid !== main.pid || e.tid !== main.tid || e.name !== "Paint" || !e.dur || !inDrag(e)) continue;
+    const id = e.args?.data?.nodeId;
+    const r = paints.get(id) ?? { ms: 0, n: 0 };
+    r.ms += e.dur / 1000;
+    r.n++;
+    paints.set(id, r);
+  }
+  const topPaints = [...paints].sort((x, y) => y[1].ms - x[1].ms).slice(0, 8);
+  console.log("  pinturas durante o arrasto (ms, vezes, elemento):");
+  for (const [id, r] of topPaints) {
+    let desc = String(id);
+    try {
+      const { node } = await cdp.send("DOM.describeNode", { backendNodeId: id });
+      const attrs = Object.fromEntries((node.attributes ?? []).reduce((acc, v, i, arr) => (i % 2 ? acc : [...acc, [v, arr[i + 1]]]), []));
+      desc = `<${node.nodeName.toLowerCase()}${attrs.id ? "#" + attrs.id : ""} class="${(attrs.class ?? "").slice(0, 90)}">`;
+    } catch {
+      /* nó já removido */
+    }
+    console.log(`    ${r.ms.toFixed(0).padStart(6)} ms ${String(r.n).padStart(5)}x  ${desc}`);
+  }
+  const top = [...kinds].sort((x, y) => y[1] - x[1]).slice(0, 14);
+  console.log("  tipos de trabalho (ms, aninhados): " + top.map(([k, v]) => `${k} ${v.toFixed(0)}`).join(" | "));
+  console.log("TOTAL".padEnd(20), T.ms.toFixed(0).padStart(10), `${((100 * T.busy) / T.ms).toFixed(0)}%`.padStart(8), String(T.over8).padStart(7), String(T.over16).padStart(8));
+}
 if (process.env.PROFILE) {
   // PROFILE=1: funções com mais tempo próprio durante a rolagem (amostragem da CPU)
   const { profile } = await cdp.send("Profiler.stop");
@@ -205,5 +317,6 @@ if (process.env.WHY) {
 }
 console.log(`TOTAL: ${all} quadros, ${allSlow} acima de 33 ms (${((100 * allSlow) / all).toFixed(1)}%)`);
 console.log(`Refresh do ScrollTrigger durante a rolagem (mudanças em pin-spacer): ${data.refresh.length}${data.refresh.length ? " em " + [...new Set(data.refresh.map(([, sec]) => sec))].join(", ") : ""}`);
+if (quality.length) console.log("Monitor de qualidade:\n  " + quality.join("\n  "));
 console.log(`Contextos WebGL criados durante a rolagem: ${data.gl.length}; máximo vivo ao mesmo tempo: ${data.maxCtx}`);
 await browser.close();

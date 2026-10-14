@@ -4,7 +4,7 @@ import { useCallback, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { revealOnce } from "@/lib/reveal";
+import { playOnce, revealOnce } from "@/lib/reveal";
 import MediaSlot from "./MediaSlot";
 import PortraitReveal from "./PortraitReveal";
 import TiltCard from "./TiltCard";
@@ -13,7 +13,7 @@ import Signature from "./Signature";
 import type { SignatureData } from "@/content/signature";
 import DraftBadge from "./theme/DraftBadge";
 import { protectTerms } from "@/components/Term";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -72,7 +72,9 @@ export default function Manifesto({
         // frase: letra por letra, do desfocado ao nítido, com o scroll (sem
         // movimento nem escala). will-change só enquanto o trecho está ativo.
         const letters = gsap.utils.toArray<HTMLElement>("[data-ch]", phrase.current!);
-        gsap.fromTo(
+        // celular (modo curado): sem scrub; a frase se revela uma vez ao aparecer
+        const mobile = isMobileUI();
+        const phraseTween = gsap.fromTo(
           letters,
           { opacity: 0, filter: "blur(10px)" },
           {
@@ -83,15 +85,18 @@ export default function Manifesto({
             stagger: 0.035,
             // nítida no fim (já com o atraso do scrub): tira o filtro (blur 0) para não pesar
             onComplete: () => gsap.set(letters, { clearProps: "filter" }),
-            scrollTrigger: {
-              trigger: phrase.current,
-              start: "top 80%",
-              end: "bottom 40%",
-              scrub: scrubFor(0.6),
-              onToggle: (self) => gsap.set(letters, { willChange: self.isActive ? "filter, opacity" : "auto" }),
-            },
+            scrollTrigger: mobile
+              ? undefined
+              : {
+                  trigger: phrase.current,
+                  start: "top 80%",
+                  end: "bottom 40%",
+                  scrub: 0.6,
+                  onToggle: (self) => gsap.set(letters, { willChange: self.isActive ? "filter, opacity" : "auto" }),
+                },
           },
         );
+        const phraseStop = mobile ? playOnce(phraseTween, phrase.current!, { start: "top 80%", duration: 2.2, ease: "none" }) : null;
 
         // Assinatura: caneta contínua. Cada traço começa escondido (dashoffset =
         // comprimento E opacidade 0, senão a ponta redonda deixa um ponto solto)
@@ -171,6 +176,7 @@ export default function Manifesto({
 
         return () => {
           stopFollow();
+          phraseStop?.();
           playSignature.current = null;
         };
       });

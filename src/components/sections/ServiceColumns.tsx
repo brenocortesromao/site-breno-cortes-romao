@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { revealOnce } from "@/lib/reveal";
+import { isTouchScrolling } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -72,6 +73,7 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
         const jobs = new Map<HTMLElement, Job>();
         let clock = 0;
         const tick = (_t: number, deltaTime: number) => {
+          if (isTouchScrolling()) return; // celular: congela enquanto a página rola
           clock += deltaTime / 1000;
           jobs.forEach((job, item) => {
             const t = clock - job.start;
@@ -363,7 +365,7 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
               className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.28em] text-[#8A8A8A] lg:tracking-[0.08em] xl:tracking-[0.28em]"
             >
               {String(c + 1).padStart(2, "0")} / {col.title}
-              <span aria-hidden="true" className="animate-[caretBlink_1s_steps(1)_infinite] motion-reduce:animate-none">
+              <span aria-hidden="true" className="css-loop animate-[caretBlink_1s_steps(1)_infinite] motion-reduce:animate-none">
                 _
               </span>
             </h3>

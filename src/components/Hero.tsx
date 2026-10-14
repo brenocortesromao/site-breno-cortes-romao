@@ -11,7 +11,7 @@ import { protectTerms } from "@/components/Term";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
-import { isMobileUI, scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -101,6 +101,10 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
       const mm = gsap.matchMedia();
 
       mm.add("(prefers-reduced-motion: no-preference)", (context) => {
+        // celular (modo curado): sem pin e sem scrub. A entrada da tipografia
+        // fica só no CSS (sem pin, nada reinsere a seção no DOM) e a hero rola
+        // normalmente; a bola segue viva.
+        if (isMobileUI()) return;
         // a entrada da tipografia é CSS (globals.css: heroReveal/heroFade), para
         // aparecer na primeira pintura, sem esperar a hidratação. ANTES do pin,
         // o GSAP assume de onde a animação CSS estava (mesmos valores, tempos e
@@ -150,7 +154,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
               end: "+=100%",
               pin: true,
               pinSpacing: false,
-              scrub: scrubFor(1),
+              scrub: 1,
               anticipatePin: 1,
             },
           })

@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { Logo } from "@/content/media";
 import { revealOnce } from "@/lib/reveal";
+import { onScrollingChange } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -115,13 +116,22 @@ export default function LogoMarquee({
             });
           });
         }
+        // celular: as fileiras param enquanto a página rola e seguem ao parar
+        let held = false;
+        const sync = () => tweens.forEach((t) => (visible.isActive && !held ? t.play() : t.pause()));
         const visible = ScrollTrigger.create({
           trigger: el,
           start: "top bottom",
           end: "bottom top",
-          onToggle: (self) => tweens.forEach((t) => (self.isActive ? t.play() : t.pause())),
+          onToggle: () => sync(),
         });
         if (visible.isActive) tweens.forEach((t) => t.play());
+        off.push(
+          onScrollingChange((scrolling) => {
+            held = scrolling;
+            sync();
+          }),
+        );
         // linha de fecho: fade com leve subida, uma vez
         const noteEl = el.querySelector("[data-logo-note]")!;
         gsap.set(noteEl, { autoAlpha: 0, y: 16 });

@@ -4,7 +4,8 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { scrubFor } from "@/lib/mobile";
+import { isMobileUI } from "@/lib/mobile";
+import { playOnce } from "@/lib/reveal";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -32,6 +33,9 @@ export default function Changes({ copy }: { copy: ChangesCopy }) {
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const section = root.current!;
         section.dataset.mode = "flip";
+        // celular (modo curado): sem scrub; cada linha troca uma vez ao aparecer
+        const mobile = isMobileUI();
+        const stops: (() => void)[] = [];
         gsap.utils.toArray<HTMLElement>("[data-change-row]").forEach((row) => {
           const q = (sel: string) => row.querySelector<HTMLElement>(sel)!;
           const tabBefore = q("[data-tab-before]");
@@ -39,10 +43,10 @@ export default function Changes({ copy }: { copy: ChangesCopy }) {
           // posição/largura do sublinhado sob cada rótulo (recalculadas no refresh)
           const under = (el: HTMLElement) => ({ x: el.offsetLeft, width: el.offsetWidth });
 
-          gsap
+          const tl = gsap
             .timeline({
               defaults: { ease: "power2.inOut" },
-              scrollTrigger: { trigger: row, start: "top 62%", end: "top 38%", scrub: scrubFor(0.6), invalidateOnRefresh: true },
+              scrollTrigger: mobile ? undefined : { trigger: row, start: "top 62%", end: "top 38%", scrub: 0.6, invalidateOnRefresh: true },
             })
             // frases: "antes" (grafite) sai por cima; "depois" (branco + brilho) entra por baixo
             .fromTo(q("[data-before]"), { yPercent: 0, opacity: 1 }, { yPercent: -110, opacity: 0, ease: "power2.in", duration: 0.5 }, 0)
@@ -54,8 +58,10 @@ export default function Changes({ copy }: { copy: ChangesCopy }) {
             .fromTo(q("[data-tab-after-on]"), { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.4)
             // seta: leve impulso para a direita no momento da troca
             .to(q("[data-tab-arrow]"), { keyframes: [{ x: 7, duration: 0.18, ease: "power2.out" }, { x: 2, duration: 0.25, ease: "power2.inOut" }] }, 0.32);
+          if (mobile) stops.push(playOnce(tl, row, { start: "top 65%", duration: 0.9, ease: "none" }));
         });
         return () => {
+          stops.forEach((stop) => stop());
           delete section.dataset.mode;
         };
       });
