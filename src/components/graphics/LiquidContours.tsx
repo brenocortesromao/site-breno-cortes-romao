@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import { enableParallelCompile, programReady } from "@/lib/warmup";
 import { liveTheme } from "@/components/theme/themes";
-import { isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
+import { motionScale, stableResizeObserver } from "@/lib/mobile";
+import { posterCapture, publishPoster } from "@/lib/posters";
+import type { SceneLink } from "./SceneSwap";
 
 /**
  * Curvas de nível LÍQUIDAS em tempo real (WebGL2, sem bibliotecas).
@@ -21,6 +23,9 @@ import { isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
  *   ThemeScroll em memória (liveTheme: sem recálculo de estilo).
  * Quem decide se este componente é usado (WebGL2 + sem reduced motion) é o
  * GraphicLayer; o fallback é o SVG estático.
+ * Celular (`link`, ver SceneSwap): começa sempre no mesmo instante (o 1º
+ * quadro é o do pôster, lib/posters), desenha 2 quadros assim que fica pronto
+ * (mesmo fora da tela) e só então avisa; desacelera até parar na rolagem.
  */
 
 const MAX_RIPPLES = 8;
@@ -155,6 +160,7 @@ export default function LiquidContours({
   maxDpr = 2,
   onReady,
   onFail,
+  link,
 }: {
   seed?: number;
   /** Versão leve (mobile): menos linhas, 2 oitavas, resolução menor. */
@@ -163,6 +169,8 @@ export default function LiquidContours({
   maxDpr?: number;
   onReady?: () => void;
   onFail?: () => void;
+  /** Celular: troca pôster ↔ curvas (SceneSwap). */
+  link?: SceneLink;
 }) {
   const host = useRef<HTMLDivElement>(null);
 
@@ -172,9 +180,20 @@ export default function LiquidContours({
     // Canvas novo a cada montagem: no Strict Mode (dev) o efeito roda 2x e um
     // canvas reaproveitado devolveria o contexto já perdido pela limpeza.
     const el = document.createElement("canvas");
-    el.className = "absolute inset-0 h-full w-full";
+    // captura do pôster: tamanho fixo, ancorado embaixo à esquerda (como o desenho)
+    const capture = posterCapture();
+    if (capture?.w && capture.h) {
+      el.className = "absolute bottom-0 left-0";
+      el.style.width = `${capture.w}px`;
+      el.style.height = `${capture.h}px`;
+    } else el.className = "absolute inset-0 h-full w-full";
     box.appendChild(el);
-    const gl = el.getContext("webgl2", { premultipliedAlpha: true, antialias: false, alpha: true });
+    const gl = el.getContext("webgl2", {
+      premultipliedAlpha: true,
+      antialias: false,
+      alpha: true,
+      preserveDrawingBuffer: !!capture,
+    });
     if (!gl) {
       el.remove();
       onFail?.();
@@ -312,20 +331,34 @@ export default function LiquidContours({
       let raf = 0;
       let last = performance.now();
       let acc = 0;
-      let time = Math.random() * 100;
+      // celular: sempre o mesmo instante inicial (o 1º quadro é o do pôster)
+      let time = link ? 20 + seed * 10 : Math.random() * 100;
       let colorTick = 0;
       let colorRaw = readGraphicRaw();
       let color = parseGraphicColor(colorRaw);
       let ready = false;
       const id = Symbol("contours");
 
+      const draw = () => {
+        gl.uniform2f(uRes, el.width, el.height);
+        gl.uniform1f(uTime, time);
+        // captura: só a cobertura das linhas (o pôster é uma máscara pintada com --graphic)
+        if (capture) gl.uniform4f(uColor, 1, 1, 1, 1);
+        else gl.uniform4f(uColor, color[0], color[1], color[2], color[3] * 0.8); // mais suave que o token
+        gl.uniform4fv(uRipples, ripples);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      };
+
       const frame = (now: number) => {
         raf = requestAnimationFrame(frame);
         const dt = Math.min((now - last) / 1000, 0.1);
         last = now;
-        // celular: congela o quadro enquanto o dedo rola a página (lib/mobile)
-        if (isTouchScrolling()) return;
-        acc += dt;
+        // celular: desacelera até parar enquanto o dedo rola a página (lib/mobile)
+        const k = motionScale();
+        if (k === 0) return;
+        acc += dt * k;
         if (acc < 1 / 30) return; // ~30 fps: movimento lento não precisa de 60
         if (!isOwner(id)) return; // outra instância mais visível está desenhando
         time += acc / 3; // ~3x mais lento que o tempo real: calmo, quase hipnótico
@@ -345,18 +378,49 @@ export default function LiquidContours({
           }
         }
 
-        gl.uniform2f(uRes, el.width, el.height);
-        gl.uniform1f(uTime, time);
-        gl.uniform4f(uColor, color[0], color[1], color[2], color[3] * 0.8); // mais suave que o token
-        gl.uniform4fv(uRipples, ripples);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        draw();
         if (!ready) {
           ready = true;
           onReady?.();
         }
       };
+
+      // celular: 2 quadros já desenhados (mesmo fora da tela) antes de avisar;
+      // captura: publica o 1º e para
+      let primeRaf = 0;
+      let drawnFrames = 0;
+      if (link || capture) {
+        const prime = () => {
+          draw();
+          drawnFrames++;
+          if (capture) {
+            publishPoster(el);
+            return;
+          }
+          if (drawnFrames < 2) {
+            primeRaf = requestAnimationFrame(prime);
+            return;
+          }
+          setTimeout(() => {
+            if (!alive || !link) return;
+            ready = true;
+            onReady?.();
+            link.onDrawn();
+          }, 0);
+        };
+        primeRaf = requestAnimationFrame(prime);
+      }
+      if (link)
+        link.setSnapshot((into) => {
+          if (drawnFrames < 2) return false;
+          draw(); // o buffer do último quadro já foi apresentado: redesenha e copia
+          into.width = el.width;
+          into.height = el.height;
+          const ctx = into.getContext("2d");
+          if (!ctx) return false;
+          ctx.drawImage(el, 0, 0);
+          return true;
+        });
 
       const io = new IntersectionObserver(
         ([entry]) => {
@@ -366,7 +430,7 @@ export default function LiquidContours({
           else visibleShare.delete(id);
           if (visible === was) return;
           cancelAnimationFrame(raf);
-          if (visible) {
+          if (visible && !capture) {
             last = performance.now();
             raf = requestAnimationFrame(frame);
           }
@@ -377,6 +441,11 @@ export default function LiquidContours({
 
       return () => {
         cancelAnimationFrame(raf);
+        cancelAnimationFrame(primeRaf);
+        if (link) {
+          link.setSnapshot(null);
+          link.onGone();
+        }
         io.disconnect();
         visibleShare.delete(id);
         ro.disconnect();
@@ -412,7 +481,7 @@ export default function LiquidContours({
         programReady(gl, program).then(() => gl.getExtension("WEBGL_lose_context")?.loseContext());
       }
     };
-  }, [seed, light, maxDpr, onReady, onFail]);
+  }, [seed, light, maxDpr, onReady, onFail, link]);
 
   return <div ref={host} aria-hidden="true" className="absolute inset-0" />;
 }

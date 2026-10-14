@@ -9,7 +9,8 @@ import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { fadeWhileActive } from "@/lib/reveal";
-import { isMobileUI } from "@/lib/mobile";
+import { isMobileUI, useIsMobileUI } from "@/lib/mobile";
+import SceneSwap, { Poster, useSceneSwap } from "./SceneSwap";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -32,6 +33,7 @@ type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
  * - prefers-reduced-motion: quadro estático, sem warp e sem avanço da câmera.
  * A cena só existe com a seção a até ~1 tela e com vaga no orçamento de
  * contextos (useWebglSlot), e só renderiza com ela visível.
+ * Celular: pôster do 1º quadro enquanto carrega e troca invisível (SceneSwap).
  */
 export default function SpaceBackdrop() {
   const root = useRef<HTMLDivElement>(null);
@@ -41,7 +43,9 @@ export default function SpaceBackdrop() {
   const warp = useRef(0);
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  const near = useWebglSlot(root);
+  /** Celular: pôster ↔ cena sem a troca aparecer (sem reduced motion). */
+  const swap = useSceneSwap(root, useIsMobileUI() && env?.reduced === false);
+  const near = useWebglSlot(root, undefined, { name: "espaco", onRelease: swap.release });
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const webgl = webglSupport().webgl2;
@@ -161,25 +165,28 @@ export default function SpaceBackdrop() {
   if (!scene) return <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" />;
 
   return (
-    <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+    <div ref={root} aria-hidden="true" data-scene="espaco" className="pointer-events-none absolute inset-0 z-0">
       <div ref={layer} className="absolute inset-0">
-        {/* erro ou perda de contexto: remonta; desiste (só o gradiente) se falhar de novo */}
-        <ResilientBoundary name="espaço" onGiveUp={handleFail}>
-          {(onLost) =>
-            near && tier !== "none" && (
-              <SpaceScene
-                progressRef={progress}
-                pointerRef={pointer}
-                warpRef={warp}
-                active={active}
-                light={env.coarse || tier === "low"}
-                maxDpr={presetFor(tier).maxDpr}
-                reducedMotion={env.reduced}
-                onContextLost={onLost}
-              />
-            )
-          }
-        </ResilientBoundary>
+        <SceneSwap swap={swap} poster={(end) => <Poster name="espaco" end={end} />}>
+          {/* erro ou perda de contexto: remonta; desiste (só o gradiente) se falhar de novo */}
+          <ResilientBoundary name="espaço" onGiveUp={handleFail}>
+            {(onLost) =>
+              near && tier !== "none" && (
+                <SpaceScene
+                  progressRef={progress}
+                  pointerRef={pointer}
+                  warpRef={warp}
+                  active={active}
+                  light={env.coarse || tier === "low"}
+                  maxDpr={presetFor(tier).maxDpr}
+                  reducedMotion={env.reduced}
+                  onContextLost={onLost}
+                  link={swap.link}
+                />
+              )
+            }
+          </ResilientBoundary>
+        </SceneSwap>
         {/* legibilidade: degradê escuro sobre o lado do texto; bordas suaves */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/45 via-background/35 to-background/70 md:bg-gradient-to-r md:from-background/80 md:via-background/60 md:via-45% md:to-transparent md:to-75%" />
         <div className="absolute inset-x-0 top-0 h-1/5 bg-gradient-to-b from-background to-transparent" />

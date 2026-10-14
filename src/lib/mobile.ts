@@ -24,6 +24,7 @@ export const MOBILE_MAX_DPR = 1.25;
  * Só liga no celular (MOBILE_QUERY); no desktop é sempre false.
  * Garantia de retomada: com o dedo na tela e sem rolagem há STUCK_MS (dedo
  * parado, ou um touchend que não chegou à janela), as cenas voltam a animar.
+ * As cenas de fundo não congelam de uma vez: ver "freio das cenas" abaixo.
  */
 let touching = false;
 let scrolling = false;
@@ -36,6 +37,7 @@ const set = (v: boolean) => {
   if (v === scrolling) return;
   scrolling = v;
   document.documentElement.toggleAttribute("data-scrolling", v);
+  rampMotion(v);
   listeners.forEach((l) => l());
 };
 const settle = () => {
@@ -98,6 +100,76 @@ export function useTouchScrolling() {
       return () => listeners.delete(l);
     },
     () => scrolling,
+    () => false,
+  );
+}
+
+// ---------------------------------------------------------------- freio das cenas
+/**
+ * Celular: em vez de congelar de uma vez quando a rolagem começa, as cenas de
+ * fundo DESACELERAM até parar em RAMP_MS (o tempo delas é multiplicado por
+ * `motionScale()`, 1 → 0 com curva suave) e só então deixam de renderizar
+ * (`useMotionRunning()` = false: custo zero durante a rolagem). Ao parar a
+ * rolagem, retomam do mesmo jeito (0 → 1 em RAMP_MS). No desktop, a escala é
+ * sempre 1 e as cenas nunca param.
+ */
+const RAMP_MS = 300;
+let rampFrom = 1;
+let rampTo = 1;
+let rampAt = 0;
+let rampDur = 0;
+let rampTimer = 0;
+let motionRunning = true;
+const motionListeners = new Set<() => void>();
+const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+/** Escala do tempo das cenas (0 = paradas, 1 = normal). */
+export function motionScale() {
+  if (rampDur <= 0) return rampTo;
+  const t = Math.min(1, (performance.now() - rampAt) / rampDur);
+  return rampFrom + (rampTo - rampFrom) * easeInOut(t);
+}
+
+const setRunning = (v: boolean) => {
+  if (v === motionRunning) return;
+  motionRunning = v;
+  motionListeners.forEach((l) => l());
+};
+
+function rampMotion(scrollingNow: boolean) {
+  const from = motionScale();
+  rampFrom = from;
+  rampTo = scrollingNow ? 0 : 1;
+  rampAt = performance.now();
+  rampDur = RAMP_MS * Math.abs(rampTo - from);
+  window.clearTimeout(rampTimer);
+  // parando: renderiza até a escala chegar a 0; retomando: já renderiza
+  if (scrollingNow) rampTimer = window.setTimeout(() => setRunning(false), rampDur);
+  else setRunning(true);
+}
+
+/** Reativo (para o `frameloop` das cenas R3F): false só com a cena já parada pela rolagem. */
+export function useMotionRunning() {
+  return useSyncExternalStore(
+    (l) => {
+      bind();
+      motionListeners.add(l);
+      return () => motionListeners.delete(l);
+    },
+    () => motionRunning,
+    () => true,
+  );
+}
+
+/** Celular (MOBILE_QUERY), reativo; false no servidor. */
+export function useIsMobileUI() {
+  return useSyncExternalStore(
+    (l) => {
+      const mq = window.matchMedia(MOBILE_QUERY);
+      mq.addEventListener("change", l);
+      return () => mq.removeEventListener("change", l);
+    },
+    isMobileUI,
     () => false,
   );
 }

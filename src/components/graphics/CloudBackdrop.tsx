@@ -9,8 +9,9 @@ import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { fadeWhileActive } from "@/lib/reveal";
-import { isMobileUI } from "@/lib/mobile";
+import { isMobileUI, useIsMobileUI } from "@/lib/mobile";
 import { usePreloadBeforeSection } from "@/lib/preload";
+import SceneSwap, { Poster, useSceneSwap } from "./SceneSwap";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -28,6 +29,7 @@ type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
  * - Sem WebGL2: nada (fundo preto da seção); não há foto de fallback.
  * - prefers-reduced-motion: quadro estático. Toque: versão mais leve.
  * A cena só é montada com a seção a até ~1 tela e só renderiza com ela visível.
+ * Celular: pôster do 1º quadro enquanto carrega e troca invisível (SceneSwap).
  */
 export default function CloudBackdrop() {
   const root = useRef<HTMLDivElement>(null);
@@ -41,7 +43,9 @@ export default function CloudBackdrop() {
   const [slotMargin] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches ? "150% 0px" : "100% 0px",
   );
-  const near = useWebglSlot(root, slotMargin);
+  /** Celular: pôster ↔ cena sem a troca aparecer (sem reduced motion). */
+  const swap = useSceneSwap(root, useIsMobileUI() && env?.reduced === false);
+  const near = useWebglSlot(root, slotMargin, { name: "nuvens", onRelease: swap.release });
   // pré-carga quando "A distância" aparece: código da cena
   usePreloadBeforeSection(root, () => {
     if (webglSupport().webgl2) import("./clouds/CloudScene").catch(() => undefined);
@@ -137,28 +141,31 @@ export default function CloudBackdrop() {
   if (!scene) return <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" />;
 
   return (
-    <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+    <div ref={root} aria-hidden="true" data-scene="nuvens" className="pointer-events-none absolute inset-0 z-0">
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={layer} className="absolute inset-0">
           <div className="absolute inset-0 opacity-[0.34]">
-            {/* erro ou perda de contexto: remonta; desiste (sem nuvens) se falhar de novo */}
-            <ResilientBoundary key={generation} name="nuvens" onGiveUp={handleFail}>
-              {(onLost) =>
-                near &&
-                !gaveUp &&
-                tier !== "none" && (
-                  <CloudScene
-                    progressRef={progress}
-                    pointerRef={pointer}
-                    active={active}
-                    light={env.coarse || tier === "low"}
-                    maxDpr={presetFor(tier).maxDpr}
-                    reducedMotion={env.reduced}
-                    onContextLost={onLost}
-                  />
-                )
-              }
-            </ResilientBoundary>
+            <SceneSwap swap={swap} poster={(end) => <Poster name="nuvens" end={end} />}>
+              {/* erro ou perda de contexto: remonta; desiste (sem nuvens) se falhar de novo */}
+              <ResilientBoundary key={generation} name="nuvens" onGiveUp={handleFail}>
+                {(onLost) =>
+                  near &&
+                  !gaveUp &&
+                  tier !== "none" && (
+                    <CloudScene
+                      progressRef={progress}
+                      pointerRef={pointer}
+                      active={active}
+                      light={env.coarse || tier === "low"}
+                      maxDpr={presetFor(tier).maxDpr}
+                      reducedMotion={env.reduced}
+                      onContextLost={onLost}
+                      link={swap.link}
+                    />
+                  )
+                }
+              </ResilientBoundary>
+            </SceneSwap>
           </div>
           {/* vinheta e degradês para o fundo (entrada/saída sem corte, texto legível) */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--bg)_100%)]" />

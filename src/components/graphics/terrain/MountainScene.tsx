@@ -5,7 +5,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { BufferAttribute, BufferGeometry, Mesh, ShaderMaterial, Vector3 } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { getTerrain, SUN, terrainSize } from "./heightmap";
-import { useTouchScrolling } from "@/lib/mobile";
+import { motionScale, useMotionRunning } from "@/lib/mobile";
+import { FrameSignals, useSceneFrames } from "../frameSignals";
+import type { SceneLink } from "../SceneSwap";
 
 /**
  * Cordilheiras 3D procedurais (ver heightmap.ts), monocromáticas: rocha
@@ -128,12 +130,18 @@ function Terrain({
   const look = useMemo(() => new Vector3(), []);
   const tilt = useRef({ x: 0, y: 0 });
   const time = useRef(0);
+  /** Progresso mostrado: igual ao do scroll; no celular, segue o freio da rolagem. */
+  const shown = useRef(-1);
 
   useFrame(({ camera }, delta) => {
-    const dt = Math.min(delta, 0.05);
+    // celular: desacelera até parar quando a página rola, e retoma (lib/mobile)
+    const m = motionScale();
+    const dt = Math.min(delta, 0.05) * m;
     if (!still) time.current += dt;
     const t = time.current;
-    const p = smooth(Math.min(1, Math.max(0, progressRef.current ?? 0)));
+    const live = Math.min(1, Math.max(0, progressRef.current ?? 0));
+    shown.current = shown.current < 0 || m >= 1 ? live : shown.current + (live - shown.current) * m;
+    const p = smooth(shown.current);
     const [px, peak, pz] = data.peak;
     // drone: começa alto vendo várias cordilheiras, desce até perto do pico
     const k = 1 - Math.exp(-dt * 2);
@@ -165,6 +173,7 @@ export default function MountainScene({
   maxDpr = 2,
   reducedMotion,
   onContextLost,
+  link,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
@@ -175,19 +184,23 @@ export default function MountainScene({
   reducedMotion: boolean;
   /** Perda do contexto WebGL (o pai remonta a cena). */
   onContextLost?: () => void;
+  /** Celular: troca pôster ↔ cena (SceneSwap). */
+  link?: SceneLink;
 }) {
-  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
-  const scrolling = useTouchScrolling();
+  /** Celular: para (depois de desacelerar) enquanto o dedo rola a página (lib/mobile). */
+  const running = useMotionRunning();
+  const frames = useSceneFrames(link);
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
+      frameloop={frames.captured ? "never" : reducedMotion ? "demand" : (active && running) || frames.prime ? "always" : "never"}
       dpr={[1, Math.min(light ? 1 : 1.5, maxDpr)]}
       camera={{ position: [0, 26, 30], fov: 42, near: 0.1, far: 140 }}
-      gl={{ antialias: !light, alpha: true, powerPreference: "default" }}
+      gl={{ antialias: !light, alpha: true, powerPreference: "default", preserveDrawingBuffer: frames.preserve }}
     >
       <ContextLossWatcher onLost={onContextLost} />
+      <FrameSignals link={link} onPrimed={frames.onPrimed} onCaptured={frames.onCaptured} />
       <Terrain progressRef={progressRef} pointerRef={pointerRef} light={light} still={reducedMotion} />
     </Canvas>
   );

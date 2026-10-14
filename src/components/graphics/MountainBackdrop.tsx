@@ -10,7 +10,8 @@ import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { fadeWhileActive } from "@/lib/reveal";
-import { isMobileUI } from "@/lib/mobile";
+import { isMobileUI, useIsMobileUI } from "@/lib/mobile";
+import SceneSwap, { Poster, useSceneSwap } from "./SceneSwap";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -31,6 +32,7 @@ type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
  * - Sem WebGL: a foto de public/fundo/ (P&B) com zoom 1.0 → 1.5 no pico.
  * - Vinheta e degradê para o fundo; entra e sai em fade (sem corte).
  * - prefers-reduced-motion: quadro estático (sem deriva nem descida).
+ * - Celular: pôster do 1º quadro enquanto carrega e troca invisível (SceneSwap).
  */
 export default function MountainBackdrop({ alt }: { alt: string }) {
   const root = useRef<HTMLDivElement>(null);
@@ -42,7 +44,9 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
   /** A cena só existe com o trecho perto da tela e com vaga no orçamento de contextos. */
-  const near = useWebglSlot(root);
+  /** Celular: pôster ↔ cena sem a troca aparecer (sem reduced motion). */
+  const swap = useSceneSwap(root, useIsMobileUI() && env?.reduced === false);
+  const near = useWebglSlot(root, undefined, { name: "montanhas", onRelease: swap.release });
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -186,27 +190,30 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
   );
 
   return (
-    <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+    <div ref={root} aria-hidden="true" data-scene="montanhas" className="pointer-events-none absolute inset-0 z-0">
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={layer} className="absolute inset-0">
           {scene ? (
             <div className="absolute inset-0 opacity-[0.36]">
-              {/* erro ou perda de contexto: remonta; só cai na foto se falhar de novo */}
-              <ResilientBoundary name="montanhas" onGiveUp={handleFail}>
-                {(onLost) =>
-                  mountScene && (
-                    <MountainScene
-                      progressRef={progress}
-                      pointerRef={pointer}
-                      active={active}
-                      light={env.coarse || tier === "low"}
-                      maxDpr={env.coarse ? Math.min(1.5, presetFor(tier).maxDpr) : presetFor(tier).maxDpr}
-                      reducedMotion={env.reduced}
-                      onContextLost={onLost}
-                    />
-                  )
-                }
-              </ResilientBoundary>
+              <SceneSwap swap={swap} poster={(end) => <Poster name="montanhas" end={end} />}>
+                {/* erro ou perda de contexto: remonta; só cai na foto se falhar de novo */}
+                <ResilientBoundary name="montanhas" onGiveUp={handleFail}>
+                  {(onLost) =>
+                    mountScene && (
+                      <MountainScene
+                        progressRef={progress}
+                        pointerRef={pointer}
+                        active={active}
+                        light={env.coarse || tier === "low"}
+                        maxDpr={env.coarse ? Math.min(1.5, presetFor(tier).maxDpr) : presetFor(tier).maxDpr}
+                        reducedMotion={env.reduced}
+                        onContextLost={onLost}
+                        link={swap.link}
+                      />
+                    )
+                  }
+                </ResilientBoundary>
+              </SceneSwap>
             </div>
           ) : (
             env && (

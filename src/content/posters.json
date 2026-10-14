@@ -1,0 +1,32 @@
+{
+  "nuvens": {
+    "inicio": "/posters/nuvens-inicio.webp",
+    "fim": "/posters/nuvens-fim.webp"
+  },
+  "montanhas": {
+    "inicio": "/posters/montanhas-inicio.webp",
+    "fim": "/posters/montanhas-fim.webp"
+  },
+  "oceano": {
+    "inicio": "/posters/oceano-inicio.webp",
+    "fim": "/posters/oceano-fim.webp"
+  },
+  "floresta": {
+    "inicio": "/posters/floresta-inicio.webp",
+    "fim": "/posters/floresta-fim.webp"
+  },
+  "espaco": {
+    "inicio": "/posters/espaco-inicio.webp",
+    "fim": "/posters/espaco-fim.webp"
+  },
+  "curvas-a": {
+    "mask": "/posters/curvas-a.webp",
+    "w": 480,
+    "h": 2190
+  },
+  "curvas-b": {
+    "mask": "/posters/curvas-b.webp",
+    "w": 480,
+    "h": 950
+  }
+}

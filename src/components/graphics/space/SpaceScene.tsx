@@ -6,7 +6,9 @@ import type { PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { warmup } from "@/lib/warmup";
 import { SpaceWorld } from "./world";
-import { useTouchScrolling } from "@/lib/mobile";
+import { motionScale, useMotionRunning } from "@/lib/mobile";
+import { FrameSignals, useSceneFrames } from "../frameSignals";
+import type { SceneLink } from "../SceneSwap";
 
 /** Espaço do Contato (ver space/world.ts). Um canvas transparente: o gradiente da seção fica por trás. */
 function Space({
@@ -50,7 +52,8 @@ function Space({
       progressRef.current ?? 0,
       pointerRef.current ?? { x: 0, y: 0 },
       still ? 0 : (warpRef.current ?? 0),
-      Math.min(delta, 0.05),
+      // celular: desacelera até parar quando a página rola (lib/mobile)
+      Math.min(delta, 0.05) * motionScale(),
       still,
     );
   });
@@ -67,6 +70,7 @@ export default function SpaceScene({
   maxDpr,
   reducedMotion,
   onContextLost,
+  link,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
@@ -77,23 +81,29 @@ export default function SpaceScene({
   reducedMotion: boolean;
   /** Perda do contexto WebGL (o pai remonta a cena). */
   onContextLost?: () => void;
+  /** Celular: troca pôster ↔ cena (SceneSwap). */
+  link?: SceneLink;
 }) {
   /** Shaders prontos (compileAsync): antes disso, nenhum quadro é desenhado. */
   const [compiled, setCompiled] = useState(false);
   const handleCompiled = useCallback(() => setCompiled(true), []);
 
-  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
-  const scrolling = useTouchScrolling();
+  /** Celular: para (depois de desacelerar) enquanto o dedo rola a página (lib/mobile). */
+  const running = useMotionRunning();
+  const frames = useSceneFrames(link);
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
+      frameloop={
+        !compiled || frames.captured ? "never" : reducedMotion ? "demand" : (active && running) || frames.prime ? "always" : "never"
+      }
       dpr={[1, Math.min(maxDpr, 1.5)]}
       camera={{ fov: 45, near: 0.1, far: 200, position: [0, 0, 16] }}
-      gl={{ antialias: !light, alpha: true, powerPreference: "default" }}
+      gl={{ antialias: !light, alpha: true, powerPreference: "default", preserveDrawingBuffer: frames.preserve }}
     >
       <ContextLossWatcher onLost={onContextLost} />
+      <FrameSignals link={link} onPrimed={frames.onPrimed} onCaptured={frames.onCaptured} />
       <Space
         progressRef={progressRef}
         pointerRef={pointerRef}

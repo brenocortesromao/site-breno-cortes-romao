@@ -8,7 +8,9 @@ import LiquidContours from "./LiquidContours";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
-import { isMobileUI } from "@/lib/mobile";
+import { isMobileUI, useIsMobileUI } from "@/lib/mobile";
+import { maskPoster } from "@/lib/posters";
+import SceneSwap, { useSceneSwap } from "./SceneSwap";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -30,6 +32,29 @@ function maskOf(file: "contours-a" | "contours-b"): CSSProperties {
 }
 
 /**
+ * Pôster das curvas no celular: o 1º quadro do shader como máscara (lib/posters),
+ * pintado com a cor viva do tema e ancorado embaixo à esquerda, como o desenho
+ * do shader. Sem o pôster gerado, o SVG estático.
+ */
+function CurvesPoster({ name, variant }: { name: string; variant: "contours-a" | "contours-b" }) {
+  const m = maskPoster(name);
+  const style: CSSProperties = m
+    ? {
+        opacity: 0.8, // como o shader (cor do token a 80%)
+        maskImage: `url(${m.mask})`,
+        WebkitMaskImage: `url(${m.mask})`,
+        maskSize: `${m.w}px ${m.h}px`,
+        WebkitMaskSize: `${m.w}px ${m.h}px`,
+        maskPosition: "left bottom",
+        WebkitMaskPosition: "left bottom",
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+      }
+    : maskOf(variant);
+  return <div className="absolute inset-0 bg-graphic" style={style} />;
+}
+
+/**
  * Grafismo de fundo das seções claras, na cor do token --graphic.
  * - "contours-a" / "contours-b": curvas de nível.
  *   - Com WebGL2 e sem prefers-reduced-motion: LÍQUIDAS em tempo real
@@ -39,6 +64,8 @@ function maskOf(file: "contours-a" | "contours-b"): CSSProperties {
  *   A variante escolhe o desenho do SVG e a semente do shader.
  * - "grid": grade técnica em CSS puro.
  * Parallax sutil com o scroll na camada externa (só sem reduced motion).
+ * Celular: pôster do 1º quadro e troca invisível pelas curvas ao vivo
+ * (SceneSwap); a grade não pede vaga de contexto WebGL.
  * O pai precisa ser `relative overflow-hidden`.
  */
 export default function GraphicLayer({
@@ -50,9 +77,18 @@ export default function GraphicLayer({
 }) {
   const outer = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
-  /** O canvas só existe com a seção perto da tela e com vaga no orçamento de contextos. */
-  const near = useWebglSlot(outer);
   const [mode, setMode] = useState<{ liquid: boolean; light: boolean } | null>(null);
+  const mobile = useIsMobileUI();
+  const name = variant === "contours-a" ? "curvas-a" : "curvas-b";
+  /** Celular: pôster ↔ curvas sem a troca aparecer (só com as curvas líquidas). */
+  const swap = useSceneSwap(outer, mobile && variant !== "grid" && !!mode?.liquid);
+  /** O canvas só existe com a seção perto da tela e com vaga no orçamento de contextos. */
+  const near = useWebglSlot(outer, undefined, {
+    name: variant === "grid" ? undefined : name,
+    onRelease: swap.release,
+    // celular (1 contexto): a grade, que não usa WebGL, não ocupa a vaga
+    enabled: !(mobile && variant === "grid"),
+  });
   const [liquidReady, setLiquidReady] = useState(false);
 
   useEffect(() => {
@@ -103,10 +139,33 @@ export default function GraphicLayer({
   });
 
   return (
-    <div ref={outer} aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
+    <div
+      ref={outer}
+      aria-hidden="true"
+      data-scene={variant === "grid" ? undefined : name}
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
+    >
       <div ref={layer} className="poster-drift absolute inset-x-0 -inset-y-[8%]">
         {variant === "grid" ? (
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--graphic)_1px,transparent_1px),linear-gradient(to_bottom,var(--graphic)_1px,transparent_1px)] bg-[size:80px_80px]" />
+        ) : swap.enabled && mode?.liquid ? (
+          <SceneSwap swap={swap} poster={() => <CurvesPoster name={name} variant={variant} />}>
+            {/* falha ou perda de contexto: remonta; só fica no pôster se falhar de novo */}
+            <ResilientBoundary name="curvas líquidas" onGiveUp={handleFail}>
+              {(onLost) =>
+                near && !poster && (
+                  <LiquidContours
+                    seed={variant === "contours-a" ? 1 : 2}
+                    light={mode.light || tier === "low"}
+                    maxDpr={presetFor(tier).maxDpr}
+                    onReady={handleReady}
+                    onFail={onLost}
+                    link={swap.link}
+                  />
+                )
+              }
+            </ResilientBoundary>
+          </SceneSwap>
         ) : (
           <>
             <div

@@ -9,7 +9,8 @@ import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { fadeWhileActive } from "@/lib/reveal";
-import { isMobileUI } from "@/lib/mobile";
+import { isMobileUI, useIsMobileUI } from "@/lib/mobile";
+import SceneSwap, { Poster, useSceneSwap } from "./SceneSwap";
 import { prefetchGltf } from "@/lib/gltf";
 import { usePreloadBeforeSection } from "@/lib/preload";
 
@@ -37,6 +38,7 @@ const MOBILE_OPACITY = OPACITY * 1.35;
  * - prefers-reduced-motion: enquadramento final parado.
  * A cena e o modelo do urso só carregam com a seção a até ~1 tela e com vaga
  * no orçamento de contextos (useWebglSlot); só renderiza com ela visível.
+ * Celular: pôster do 1º quadro enquanto carrega e troca invisível (SceneSwap).
  */
 export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
   const root = useRef<HTMLDivElement>(null);
@@ -46,7 +48,9 @@ export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
   const pointer = useRef({ x: 0, y: 0 });
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  const near = useWebglSlot(root);
+  /** Celular: pôster ↔ cena sem a troca aparecer (sem reduced motion). */
+  const swap = useSceneSwap(root, useIsMobileUI() && env?.reduced === false);
+  const near = useWebglSlot(root, undefined, { name: "floresta", onRelease: swap.release });
   // pré-carga quando "Trabalhos" aparece: código da cena e o urso (bytes)
   usePreloadBeforeSection(root, () => {
     if (!webglSupport().webgl2) return;
@@ -129,27 +133,30 @@ export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
   if (!scene) return <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" />;
 
   return (
-    <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+    <div ref={root} aria-hidden="true" data-scene="floresta" className="pointer-events-none absolute inset-0 z-0">
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={layer} className="absolute inset-0">
           <div className="absolute inset-0" style={{ opacity: isMobileUI() ? MOBILE_OPACITY : OPACITY }}>
-            {/* erro ou perda de contexto: remonta; desiste (só o gradiente) se falhar de novo */}
-            <ResilientBoundary name="floresta" onGiveUp={handleFail}>
-              {(onLost) =>
-                near && tier !== "none" && (
-                  <AerialScene
-                    progressRef={progress}
-                    pointerRef={pointer}
-                    bearSrc={bearSrc}
-                    active={active}
-                    light={env.coarse || tier === "low"}
-                    maxDpr={presetFor(tier).maxDpr}
-                    reducedMotion={env.reduced}
-                    onContextLost={onLost}
-                  />
-                )
-              }
-            </ResilientBoundary>
+            <SceneSwap swap={swap} poster={(end) => <Poster name="floresta" end={end} />}>
+              {/* erro ou perda de contexto: remonta; desiste (só o gradiente) se falhar de novo */}
+              <ResilientBoundary name="floresta" onGiveUp={handleFail}>
+                {(onLost) =>
+                  near && tier !== "none" && (
+                    <AerialScene
+                      progressRef={progress}
+                      pointerRef={pointer}
+                      bearSrc={bearSrc}
+                      active={active}
+                      light={env.coarse || tier === "low"}
+                      maxDpr={presetFor(tier).maxDpr}
+                      reducedMotion={env.reduced}
+                      onContextLost={onLost}
+                      link={swap.link}
+                    />
+                  )
+                }
+              </ResilientBoundary>
+            </SceneSwap>
           </div>
           {/* vinheta, degradês de entrada/saída e o degradê escuro atrás do texto (direita).
               Celular: vinheta mais aberta e camada escura geral menor; a leitura vem do

@@ -9,7 +9,8 @@ import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { fadeWhileActive } from "@/lib/reveal";
-import { isMobileUI, isTouchScrolling, onScrollingChange } from "@/lib/mobile";
+import { isMobileUI, isTouchScrolling, onScrollingChange, useIsMobileUI } from "@/lib/mobile";
+import SceneSwap, { Poster, useSceneSwap } from "./SceneSwap";
 import { usePreloadBeforeSection } from "@/lib/preload";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -34,6 +35,7 @@ type Env = { webgl: boolean; reduced: boolean; coarse: boolean; mobile: boolean 
  * - prefers-reduced-motion: quadro estático, já no fundo, perto do recife.
  * A cena só existe com a seção a até ~1 tela e com vaga no orçamento de
  * contextos (useWebglSlot), e só renderiza com ela visível.
+ * Celular: pôster do 1º quadro enquanto carrega e troca invisível (SceneSwap).
  */
 export default function OceanBackdrop() {
   const root = useRef<HTMLDivElement>(null);
@@ -45,7 +47,9 @@ export default function OceanBackdrop() {
   const pointer = useRef({ x: 0, y: 0 });
   const [env, setEnv] = useState<Env | null>(null);
   const [active, setActive] = useState(false);
-  const near = useWebglSlot(root);
+  /** Celular: pôster ↔ cena sem a troca aparecer (sem reduced motion). */
+  const swap = useSceneSwap(root, useIsMobileUI() && env?.reduced === false);
+  const near = useWebglSlot(root, undefined, { name: "oceano", onRelease: swap.release });
   // pré-carga quando o "Sobre" aparece: código da cena, cardume e tubarões/tartaruga
   // (bytes, Meshopt em workers, texturas como ImageBitmap); na montagem já está tudo aqui
   usePreloadBeforeSection(root, () => {
@@ -144,28 +148,31 @@ export default function OceanBackdrop() {
   if (!scene) return <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" />;
 
   return (
-    <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+    <div ref={root} aria-hidden="true" data-scene="oceano" className="pointer-events-none absolute inset-0 z-0">
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={layer} className="absolute inset-0">
           <div ref={fade} className="absolute inset-0" style={{ opacity: env.reduced ? 0.52 : 0.4 }}>
-            {/* erro ou perda de contexto: remonta; desiste (sem oceano) se falhar de novo */}
-            <ResilientBoundary name="oceano" onGiveUp={handleFail}>
-              {(onLost) =>
-                near && tier !== "none" && (
-                  <OceanScene
-                    progressRef={progress}
-                    pointerRef={pointer}
-                    active={active}
-                    light={env.coarse || tier === "low"}
-                    mobile={env.mobile}
-                    few={tier === "low"}
-                    maxDpr={presetFor(tier).maxDpr}
-                    reducedMotion={env.reduced}
-                    onContextLost={onLost}
-                  />
-                )
-              }
-            </ResilientBoundary>
+            <SceneSwap swap={swap} poster={(end) => <Poster name="oceano" end={end} />}>
+              {/* erro ou perda de contexto: remonta; desiste (sem oceano) se falhar de novo */}
+              <ResilientBoundary name="oceano" onGiveUp={handleFail}>
+                {(onLost) =>
+                  near && tier !== "none" && (
+                    <OceanScene
+                      progressRef={progress}
+                      pointerRef={pointer}
+                      active={active}
+                      light={env.coarse || tier === "low"}
+                      mobile={env.mobile}
+                      few={tier === "low"}
+                      maxDpr={presetFor(tier).maxDpr}
+                      reducedMotion={env.reduced}
+                      onContextLost={onLost}
+                      link={swap.link}
+                    />
+                  )
+                }
+              </ResilientBoundary>
+            </SceneSwap>
           </div>
           {/* degradês só nas bordas, para a entrada/saída sem corte (sem vinheta sobre a
               cena: o escurecimento para a leitura fica atrás do texto, em Ai.tsx) */}

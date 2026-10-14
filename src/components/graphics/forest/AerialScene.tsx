@@ -1,13 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState, type RefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Group, Mesh, type PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { warmup } from "@/lib/warmup";
 import { AerialWorld } from "./aerial";
 import { CloseDof } from "./dof";
-import { useTouchScrolling } from "@/lib/mobile";
+import { motionScale, useMotionRunning } from "@/lib/mobile";
+import { FrameSignals, useSceneFrames } from "../frameSignals";
+import type { SceneLink } from "../SceneSwap";
+
+/** Celular: espera máxima pelo urso antes do 1º quadro (depois, desenha sem ele). */
+const WAIT_ALL_MS = 8000;
 
 /** Descida aérea do Sobre (ver forest/aerial.ts). */
 function Aerial({
@@ -16,6 +21,7 @@ function Aerial({
   bearSrc,
   light,
   still,
+  waitAll,
   onCompiled,
 }: {
   progressRef: RefObject<number>;
@@ -23,6 +29,8 @@ function Aerial({
   bearSrc?: string;
   light: boolean;
   still: boolean;
+  /** Celular (troca pelo pôster): o 1º quadro só sai com o urso já na cena (é o quadro do pôster). */
+  waitAll: boolean;
   onCompiled: () => void;
 }) {
   const [world] = useState(() => new AerialWorld(light));
@@ -30,10 +38,24 @@ function Aerial({
   const [dof] = useState(() => (light ? null : new CloseDof()));
   useEffect(() => () => dof?.dispose(), [dof]);
   const get = useThree((s) => s.get);
+  /** Partes prontas (mundo compilado, urso); avisa `onCompiled` uma vez. */
+  const parts = useRef({ world: false, bear: !waitAll || !bearSrc, sent: false });
   useEffect(() => {
     const { gl, scene, camera } = get();
     world.attach(scene, gl);
     let alive = true;
+    const check = () => {
+      const p = parts.current;
+      if (!alive || p.sent || !p.world || !p.bear) return;
+      p.sent = true;
+      onCompiled();
+      get().invalidate();
+    };
+    const bearDone = () => {
+      parts.current.bear = true;
+      check();
+    };
+    const wait = waitAll ? window.setTimeout(bearDone, WAIT_ALL_MS) : 0;
     // mundo montado em pedaços (sem travar a rolagem) e shaders compilados em
     // paralelo, tudo antes do 1º quadro
     world
@@ -41,8 +63,8 @@ function Aerial({
       .then(() => (alive ? Promise.all([warmup(gl, scene, camera), dof?.warm(gl, camera)]) : undefined))
       .then(() => {
         if (!alive) return;
-        onCompiled();
-        get().invalidate();
+        parts.current.world = true;
+        check();
       });
     // urso: só quando o modelo existe (os bytes já vieram na pré-carga). Entra
     // na cena só com os shaders (inclusive os da sombra) compilados e as
@@ -61,12 +83,14 @@ function Aerial({
           world.addBear(bear);
           get().invalidate();
         })
-        .catch((e) => console.warn("[urso] não carregou:", e));
+        .catch((e) => console.warn("[urso] não carregou:", e))
+        .finally(bearDone);
     return () => {
       alive = false;
+      window.clearTimeout(wait);
       world.dispose();
     };
-  }, [world, dof, get, onCompiled, bearSrc]);
+  }, [world, dof, get, onCompiled, bearSrc, waitAll]);
 
   // prioridade 1: este quadro renderiza a cena (e, no close, o desfoque do fundo)
   useFrame(({ camera, gl, scene, viewport }, delta) => {
@@ -76,7 +100,8 @@ function Aerial({
       viewport.dpr,
       progressRef.current ?? 0,
       pointerRef.current ?? { x: 0, y: 0 },
-      Math.min(delta, 0.05),
+      // celular: desacelera até parar quando a página rola (lib/mobile)
+      Math.min(delta, 0.05) * motionScale(),
       still,
     );
     gl.render(scene, camera);
@@ -95,6 +120,7 @@ export default function AerialScene({
   maxDpr,
   reducedMotion,
   onContextLost,
+  link,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
@@ -105,28 +131,35 @@ export default function AerialScene({
   reducedMotion: boolean;
   /** Perda do contexto WebGL (o pai remonta a cena). */
   onContextLost?: () => void;
+  /** Celular: troca pôster ↔ cena (SceneSwap). */
+  link?: SceneLink;
 }) {
   const [compiled, setCompiled] = useState(false);
   const handleCompiled = useCallback(() => setCompiled(true), []);
 
-  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
-  const scrolling = useTouchScrolling();
+  /** Celular: para (depois de desacelerar) enquanto o dedo rola a página (lib/mobile). */
+  const running = useMotionRunning();
+  const frames = useSceneFrames(link);
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
+      frameloop={
+        !compiled || frames.captured ? "never" : reducedMotion ? "demand" : (active && running) || frames.prime ? "always" : "never"
+      }
       dpr={[1, Math.min(maxDpr, light ? 1.5 : 1.5)]}
       camera={{ fov: 45, near: 0.5, far: 900, position: [0, 190, -150] }}
-      gl={{ antialias: !light, alpha: false, powerPreference: "default" }}
+      gl={{ antialias: !light, alpha: false, powerPreference: "default", preserveDrawingBuffer: frames.preserve }}
     >
       <ContextLossWatcher onLost={onContextLost} />
+      <FrameSignals link={link} onPrimed={frames.onPrimed} onCaptured={frames.onCaptured} />
       <Aerial
         progressRef={progressRef}
         pointerRef={pointerRef}
         bearSrc={bearSrc}
         light={light}
         still={reducedMotion}
+        waitAll={!!link}
         onCompiled={handleCompiled}
       />
     </Canvas>

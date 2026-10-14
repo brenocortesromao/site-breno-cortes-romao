@@ -18,7 +18,9 @@ import {
 } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { warmup } from "@/lib/warmup";
-import { useTouchScrolling } from "@/lib/mobile";
+import { motionScale, useMotionRunning } from "@/lib/mobile";
+import { FrameSignals, useSceneFrames } from "../frameSignals";
+import type { SceneLink } from "../SceneSwap";
 
 /**
  * Diagnóstico: voo de avião em primeira pessoa atravessando as nuvens
@@ -221,7 +223,8 @@ function Volume({ progressRef, pointerRef, still, steps }: { progressRef: RefObj
   const st = useRef({ time: 0, p: -1, tilt: new Vector2() });
 
   useFrame(({ gl }, delta) => {
-    const dt = Math.min(delta, 0.05);
+    // celular: desacelera até parar quando a página rola (lib/mobile)
+    const dt = Math.min(delta, 0.05) * motionScale();
     const s = st.current;
     if (!still) s.time += dt;
     const target = still ? 1 : clamp01(progressRef.current ?? 0);
@@ -445,7 +448,7 @@ function Sprites({ progressRef, still, count }: { progressRef: RefObject<number>
   const st = useRef({ time: 0, p: -1, tilt: new Vector2() });
 
   useFrame(({ gl }, delta) => {
-    const dt = Math.min(delta, 0.05);
+    const dt = Math.min(delta, 0.05) * motionScale();
     const s = st.current;
     if (!still) s.time += dt;
     const target = still ? 1 : clamp01(progressRef.current ?? 0);
@@ -517,6 +520,7 @@ export default function CloudScene({
   reducedMotion,
   maxDpr = 1.5,
   onContextLost,
+  link,
 }: {
   progressRef: RefObject<number>;
   pointerRef: RefObject<{ x: number; y: number }>;
@@ -528,24 +532,30 @@ export default function CloudScene({
   maxDpr?: number;
   /** Perda do contexto WebGL (o pai remonta a cena). */
   onContextLost?: () => void;
+  /** Celular: troca pôster ↔ cena (SceneSwap). */
+  link?: SceneLink;
 }) {
   const dpr = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, maxDpr, 1.5);
   const [ready, setReady] = useState(false);
   const handleReady = useCallback(() => setReady(true), []);
-  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
-  const scrolling = useTouchScrolling();
+  /** Celular: para (depois de desacelerar) enquanto o dedo rola a página (lib/mobile). */
+  const running = useMotionRunning();
+  const frames = useSceneFrames(link);
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
       // nenhum quadro antes do aquecimento (canvas transparente até lá)
-      frameloop={!ready ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
+      frameloop={
+        !ready || frames.captured ? "never" : reducedMotion ? "demand" : (active && running) || frames.prime ? "always" : "never"
+      }
       // raymarching em meia resolução (o CSS reescala); billboards na resolução da tela
       dpr={light ? dpr : dpr * 0.5}
       camera={{ fov: 50, near: 0.1, far: 80, position: [0, 2.45, 0] }}
-      gl={{ antialias: false, alpha: true, powerPreference: "default" }}
+      gl={{ antialias: false, alpha: true, powerPreference: "default", preserveDrawingBuffer: frames.preserve }}
     >
       <ContextLossWatcher onLost={onContextLost} />
+      <FrameSignals link={link} onPrimed={frames.onPrimed} onCaptured={frames.onCaptured} />
       {light ? (
         <Sprites progressRef={progressRef} still={reducedMotion} count={120} />
       ) : (

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore, type RefObject } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { webglSupport } from "./webgl";
+import { posterCapture } from "./posters";
 import { displayHz, isMobileUI, isTouchScrolling, MOBILE_MAX_DPR, onStableResize } from "./mobile";
 
 /**
@@ -46,7 +47,10 @@ import { displayHz, isMobileUI, isTouchScrolling, MOBILE_MAX_DPR, onStableResize
  * ORÇAMENTO: no máximo MAX_CONTEXTS contextos WebGL ao mesmo tempo (1 no celular). Cada cena
  * pede uma vaga com `useWebglSlot`; ganham as que estão mais perto da tela
  * (e, empatadas, as que ocupam mais área). Quem perde a vaga desmonta (o pai
- * mostra o fallback/pôster) e o contexto é liberado.
+ * mostra o fallback/pôster) e o contexto é liberado. Celular: a cena pede a
+ * vaga com ~1,5 tela de antecedência; a que está na tela fica com ela e, entre
+ * as de fora, ganha a que está na direção da rolagem e mais perto. Quem vai
+ * perder a vaga é avisado antes (`onRelease`: o SceneSwap copia o último quadro).
  */
 
 export type Tier = "none" | "low" | "medium" | "high";
@@ -297,7 +301,7 @@ export function qualityDebugInfo() {
 }
 
 // ---------------------------------------------------------------- orçamento de contextos
-type Slot = { el: Element; near: boolean };
+type Slot = { el: Element; near: boolean; name?: string; release: RefObject<(() => void) | undefined> };
 const slots = new Map<symbol, Slot>();
 let allowed = new Set<symbol>();
 let version = 0;
@@ -305,13 +309,25 @@ const slotListeners = new Set<() => void>();
 let pending = 0;
 /** Rolagem: reavalia no máximo a cada SCROLL_MS (não a cada quadro). */
 const SCROLL_MS = 120;
+/**
+ * Celular: a cena pede a vaga com ~1,5 tela de antecedência (compila e fica
+ * pronta antes de entrar na tela). Desktop: 1 tela, como antes.
+ */
+const MOBILE_MARGIN = "150% 0px";
+/** Direção da rolagem (1 descendo, -1 subindo), com folga contra tremidas. */
+let scrollDir = 1;
+let dirY = 0;
+const DIR_SLACK = 40;
 
 function recompute() {
   window.clearTimeout(pending);
   pending = 0;
   const vh = window.innerHeight;
-  const near = [...slots.entries()].filter(([, s]) => s.near);
+  const capture = posterCapture();
+  // modo de captura dos pôsteres: só a cena pedida concorre
+  const near = [...slots.entries()].filter(([, s]) => s.near && (!capture || s.name === capture.name));
   const max = maxContexts();
+  const mobile = isMobileUI();
   // até MAX_CONTEXTS cenas perto: todas ganham, sem medir nada (o caso comum)
   const ranked =
     near.length <= max
@@ -321,12 +337,20 @@ function recompute() {
             const r = s.el.getBoundingClientRect();
             const dist = r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0;
             const area = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0)) * r.width;
-            return { id, dist, area };
+            // celular: na tela > à frente na direção da rolagem > atrás
+            const ahead = r.top > vh ? scrollDir > 0 : scrollDir < 0;
+            const group = !mobile || dist === 0 ? 0 : ahead ? 1 : 2;
+            return { id, dist, area, group };
           })
-          .sort((a, b) => a.dist - b.dist || b.area - a.area);
+          .sort((a, b) => a.group - b.group || a.dist - b.dist || b.area - a.area);
   const next = new Set(ranked.slice(0, max).map((x) => x.id));
   const same = next.size === allowed.size && [...next].every((id) => allowed.has(id));
   if (same) return;
+  // quem perde a vaga é avisado ANTES de desmontar (o celular copia o último
+  // quadro para a troca pelo pôster não aparecer)
+  allowed.forEach((id) => {
+    if (!next.has(id)) slots.get(id)?.release.current?.();
+  });
   allowed = next;
   version++;
   slotListeners.forEach((l) => l());
@@ -338,11 +362,19 @@ function recompute() {
 const schedule = (delay = 0) => {
   if (!pending) pending = window.setTimeout(recompute, delay);
 };
-const onScroll = () => schedule(SCROLL_MS);
+const onScroll = () => {
+  const y = window.scrollY;
+  if (Math.abs(y - dirY) > DIR_SLACK) {
+    scrollDir = y > dirY ? 1 : -1;
+    dirY = y;
+  }
+  schedule(SCROLL_MS);
+};
 let scrollBound = false;
 function bindScroll() {
   if (scrollBound) return;
   scrollBound = true;
+  dirY = window.scrollY;
   window.addEventListener("scroll", onScroll, { passive: true });
   onStableResize(() => schedule());
 }
@@ -351,21 +383,35 @@ function bindScroll() {
  * Vaga de contexto WebGL para a cena dentro de `ref`: true quando a cena está
  * a até `margin` da tela E entre as MAX_CONTEXTS mais próximas: a cena monta
  * com true e desmonta com false (o contexto é liberado na desmontagem).
+ * `margin` padrão: 1 tela no desktop, 1,5 tela no celular. No celular, entre
+ * cenas fora da tela, ganha a que está na direção da rolagem e mais perto.
+ * Opções: `name` (identifica a cena no modo de captura dos pôsteres),
+ * `onRelease` (chamado logo antes de a cena perder a vaga) e `enabled`
+ * (false: a cena nunca pede vaga).
  */
-export function useWebglSlot(ref: RefObject<Element | null>, margin = "100% 0px") {
+export function useWebglSlot(
+  ref: RefObject<Element | null>,
+  margin?: string,
+  opts: { name?: string; onRelease?: () => void; enabled?: boolean } = {},
+) {
   const [id] = useState(() => Symbol("webgl"));
+  const release = useRef<(() => void) | undefined>(undefined);
+  useEffect(() => {
+    release.current = opts.onRelease;
+  });
+  const { name, enabled = true } = opts;
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || !enabled) return;
     bindScroll();
-    slots.set(id, { el, near: false });
+    slots.set(id, { el, near: false, name, release });
     const io = new IntersectionObserver(
       ([e]) => {
         const s = slots.get(id);
         if (s) s.near = e.isIntersecting;
         schedule();
       },
-      { rootMargin: margin },
+      { rootMargin: margin ?? (isMobileUI() ? MOBILE_MARGIN : "100% 0px") },
     );
     io.observe(el);
     return () => {
@@ -373,7 +419,7 @@ export function useWebglSlot(ref: RefObject<Element | null>, margin = "100% 0px"
       slots.delete(id);
       schedule();
     };
-  }, [ref, margin, id]);
+  }, [ref, margin, id, name, enabled]);
   useSyncExternalStore(
     (l) => {
       slotListeners.add(l);
