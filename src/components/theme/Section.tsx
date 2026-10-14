@@ -36,7 +36,7 @@ export default function Section({
       className={`relative z-10 ${fullScreen ? "min-h-svh" : ""} ${className}`}
     >
       <div
-        className={`mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12 ${innerClassName}`}
+        className={`mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12 ${innerClassName}`}
       >
         {children}
       </div>

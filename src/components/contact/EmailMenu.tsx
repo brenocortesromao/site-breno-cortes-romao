@@ -144,7 +144,7 @@ export default function EmailMenu({
           role="menu"
           aria-label={copy.label}
           onKeyDown={onMenuKey}
-          className={`absolute top-full z-50 mt-3 w-60 rounded-xl border border-silver/40 bg-surface/95 p-1.5 font-sans normal-case tracking-normal shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+          className={`absolute top-full z-50 mt-3 w-60 rounded-xl border border-silver/40 bg-surface/95 p-1.5 font-sans normal-case tracking-normal shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-md mobile:backdrop-blur-none ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >

@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import CloudBackdrop from "@/components/graphics/CloudBackdrop";
+import { scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -76,7 +77,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
               opacity: 1,
               x: 0,
               ease: "none",
-              scrollTrigger: { trigger: item, start: "top 80%", end: "top 55%", scrub: 0.6 },
+              scrollTrigger: { trigger: item, start: "top 80%", end: "top 55%", scrub: scrubFor(0.6) },
             },
           );
         });
@@ -156,7 +157,7 @@ export default function Diagnostic({ copy, ctaHref }: { copy: DiagnosticCopy; ct
       {/* fundo: camada absoluta atrás do conteúdo, fora da grid */}
       <CloudBackdrop />
       {/* conteúdo acima do fundo */}
-      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12">
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-4">
             <div className="md:sticky md:top-32">

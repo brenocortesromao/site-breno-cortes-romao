@@ -9,6 +9,7 @@ import { useGSAP } from "@gsap/react";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -155,7 +156,7 @@ export default function MountainBackdrop({ alt }: { alt: string }) {
               scale: 1.5,
               yPercent: -4,
               ease: "none",
-              scrollTrigger: { trigger: trecho, start: "top top", end: "bottom 40%", scrub: 0.8, refreshPriority: -1 },
+              scrollTrigger: { trigger: trecho, start: "top top", end: "bottom 40%", scrub: scrubFor(0.8), refreshPriority: -1 },
             },
           );
         // entra em fade quando o trecho chega e sai em fade no fim de "O que muda"

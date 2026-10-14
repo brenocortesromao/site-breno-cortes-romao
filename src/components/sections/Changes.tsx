@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -41,7 +42,7 @@ export default function Changes({ copy }: { copy: ChangesCopy }) {
           gsap
             .timeline({
               defaults: { ease: "power2.inOut" },
-              scrollTrigger: { trigger: row, start: "top 62%", end: "top 38%", scrub: 0.6, invalidateOnRefresh: true },
+              scrollTrigger: { trigger: row, start: "top 62%", end: "top 38%", scrub: scrubFor(0.6), invalidateOnRefresh: true },
             })
             // frases: "antes" (grafite) sai por cima; "depois" (branco + brilho) entra por baixo
             .fromTo(q("[data-before]"), { yPercent: 0, opacity: 1 }, { yPercent: -110, opacity: 0, ease: "power2.in", duration: 0.5 }, 0)
@@ -64,7 +65,7 @@ export default function Changes({ copy }: { copy: ChangesCopy }) {
 
   return (
     <section ref={root} id="o-que-muda" data-theme="gradient" aria-labelledby="o-que-muda-title" className="group relative z-10 min-h-svh">
-      <div className="m-sec mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
         <h2
           id="o-que-muda-title"

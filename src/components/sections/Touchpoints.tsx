@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import SprayTitle from "@/components/SprayTitle";
+import { scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -30,7 +31,7 @@ export default function Touchpoints({ copy }: { copy: TouchpointsCopy }) {
             {
               yPercent: 0,
               ease: "none",
-              scrollTrigger: { trigger: line.parentElement, start: "top 92%", end: "top 70%", scrub: 0.6 },
+              scrollTrigger: { trigger: line.parentElement, start: "top 92%", end: "top 70%", scrub: scrubFor(0.6) },
             },
           );
         });
@@ -65,7 +66,7 @@ export default function Touchpoints({ copy }: { copy: TouchpointsCopy }) {
 
   return (
     <section ref={root} id="onde-aparece" data-theme="dark" aria-labelledby="onde-aparece-title" className="relative z-10 min-h-svh">
-      <div className="m-sec mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
         <SprayTitle
           id="onde-aparece-title"

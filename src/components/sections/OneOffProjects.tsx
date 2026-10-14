@@ -20,7 +20,7 @@ export default async function OneOffProjects() {
 
   return (
     <section id="projetos-pontuais" data-theme="dark" aria-labelledby="projetos-pontuais-title" className="relative z-10">
-      <div className="m-sec m-rg40 mx-auto grid w-full max-w-[1600px] gap-y-12 px-6 py-[clamp(3.6rem,9.6vh,7.2rem)] md:px-12 lg:grid-cols-[2fr_3fr] lg:gap-x-16">
+      <div className="m-sec m-rg40 mx-auto grid w-full max-w-[1600px] gap-y-12 px-6 py-[clamp(3.6rem,9.6lvh,7.2rem)] md:px-12 lg:grid-cols-[2fr_3fr] lg:gap-x-16">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
           <BlurRevealTitle

@@ -30,6 +30,7 @@ import {
   type LiquidUniforms,
 } from "./hero/liquidMetal";
 import { createPlaceholderGeometry, SHAPE_RADIUS } from "./hero/shape";
+import { useTouchScrolling } from "@/lib/mobile";
 
 const CAMERA_FOV = 20;
 /** Diâmetro aparente da bola (raio + margem da ondulação). */
@@ -658,11 +659,13 @@ export default function HeroScene({
   const [compiled, setCompiled] = useState(false);
   const handleCompiled = useCallback(() => setCompiled(true), []);
 
+  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
+  const scrolling = useTouchScrolling();
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
+      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
       dpr={[1, Math.min(coarse ? 1.5 : 2, maxDpr)]}
       camera={{ position: [0, 0, 20], fov: CAMERA_FOV }}
       gl={{ antialias: true, alpha: true, powerPreference: "default" }}

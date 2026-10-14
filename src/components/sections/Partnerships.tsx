@@ -21,7 +21,7 @@ export default async function Partnerships() {
       className="relative z-10 overflow-hidden"
     >
       <GraphicLayer variant="contours-b" />
-      <div className="m-sec relative mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative mx-auto flex min-h-[80svh] w-full max-w-[1600px] flex-col justify-center px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
         <h2
           id="parcerias-title"

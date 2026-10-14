@@ -4,15 +4,22 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Celular: a barra de endereço aparecendo/sumindo muda só a altura da janela e
+// não deve recalcular os gatilhos no meio da rolagem (vale para o site todo).
+if (typeof window !== "undefined" && isMobileUI()) ScrollTrigger.config({ ignoreMobileResize: true });
 
 /**
  * Scroll suave com inércia (Lenis) dirigido pelo ticker do GSAP, para que o
  * ScrollTrigger e o Lenis leiam a mesma posição no mesmo quadro.
  * - prefers-reduced-motion: não inicializa (scroll nativo).
- * - Toque: o Lenis mantém o scroll nativo por padrão (syncTouch: false), o que
- *   é mais leve e mais previsível no celular.
+ * - Toque (pointer: coarse): o Lenis NÃO é criado. Mesmo com syncTouch: false
+ *   ele registra touchstart/touchmove não passivos na janela, e o navegador
+ *   passa a esperar o JavaScript a cada movimento do dedo. Sem ele, a rolagem
+ *   é 100% nativa; links "#secao" deslizam pelo scroll suave nativo.
  */
 let instance: Lenis | null = null;
 
@@ -83,11 +90,30 @@ export default function SmoothScroll() {
   useEffect(() => {
     const stopStart = startPosition();
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return stopStart;
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      // âncoras da mesma página: continuam deslizando (antes era o Lenis)
+      const onClick = (e: MouseEvent) => {
+        const a = (e.target as Element | null)?.closest?.("a[href*='#']") as HTMLAnchorElement | null;
+        if (!a || e.defaultPrevented || a.target === "_blank") return;
+        const url = new URL(a.href, window.location.href);
+        if (url.pathname !== window.location.pathname || !url.hash) return;
+        const el = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+        if (!el) return;
+        e.preventDefault();
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: "smooth" });
+      };
+      document.addEventListener("click", onClick);
+      return () => {
+        stopStart();
+        document.removeEventListener("click", onClick);
+      };
+    }
 
     const lenis = new Lenis({
       lerp: 0.085,
       wheelMultiplier: 0.9,
       anchors: true, // links "#secao" também deslizam
+      syncTouch: false, // toque: rolagem nativa, sem inércia própria
       autoRaf: false,
     });
 

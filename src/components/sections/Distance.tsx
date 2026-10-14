@@ -8,6 +8,7 @@ import { revealOnce } from "@/lib/reveal";
 import type { DistanceCharts } from "@/content/charts";
 import { DecodeLetters, decode, hideLetters, shine, showLetters } from "@/components/decode";
 import FlowField, { type FlowStage } from "@/components/graphics/FlowField";
+import { scrubFor } from "@/lib/mobile";
 
 /**
  * Fundo em fluxo (FlowField), uma etapa por bloco: 1) correntes bem separadas
@@ -76,7 +77,7 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
         const scrubbed = (s: string) =>
           gsap.timeline({
             defaults: { ease },
-            scrollTrigger: { trigger: fig(s), start: "top bottom", end: "center center", scrub: 0.5, invalidateOnRefresh: true },
+            scrollTrigger: { trigger: fig(s), start: "top bottom", end: "center center", scrub: scrubFor(0.5), invalidateOnRefresh: true },
           });
 
         // ---------- A: eixos, curvas desenhadas, área da distância ----------
@@ -146,12 +147,12 @@ export default function Distance({ copy, charts }: { copy: DistanceCopy; charts:
       className="relative z-10 overflow-x-clip"
     >
       <FlowField stagesSelector="[data-step]" stages={FLOW_STAGES} dimSelector="[data-step] h3, [data-chart]" />
-      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 pb-[clamp(6rem,16vh,12rem)] pt-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 pb-[clamp(6rem,16lvh,12rem)] pt-[clamp(6rem,16lvh,12rem)] md:px-12">
         <h2 id="distancia-title" className="font-mono text-[11px] font-normal uppercase tracking-[0.28em] text-silver m-center">
           {copy.eyebrow}
         </h2>
 
-        <div className="m-g16 mt-12 grid gap-[clamp(6rem,22vh,14rem)] md:mt-16">
+        <div className="m-g16 mt-12 grid gap-[clamp(6rem,22lvh,14rem)] md:mt-16">
           {copy.charts.map((chart, i) => {
             const step = STEPS[i];
             return (

@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { shine } from "@/components/decode";
 import { protectTerms } from "@/components/Term";
+import { scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -59,7 +60,7 @@ export default function AboutStory({
         // trajetória: cada etapa acende (grafite → aceso) em sequência, por scrub,
         // e o traço até a próxima se desenha
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: "[data-trajectory]", start: "top 85%", end: "bottom 45%", scrub: 0.6 },
+          scrollTrigger: { trigger: "[data-trajectory]", start: "top 85%", end: "bottom 45%", scrub: scrubFor(0.6) },
         });
         gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step, i) => {
           tl.fromTo(step, { opacity: 0.16 }, { opacity: 1, duration: 1, ease: "none" }, i * 0.8);

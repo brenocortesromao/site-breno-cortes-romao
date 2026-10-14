@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Celular (mesma regra de src/lib/mobile.ts): toque ou largura até 767px. */
+@custom-variant mobile {
+  @media (pointer: coarse) {
+    @slot;
+  }
+  @media (max-width: 767.98px) {
+    @slot;
+  }
+}
+
 /*
  * TEMAS
  * 1) Paletas fixas, uma por tema (--{tema}-{papel}).

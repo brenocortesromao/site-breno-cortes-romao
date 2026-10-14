@@ -7,6 +7,7 @@ import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { warmup } from "@/lib/warmup";
 import { AerialWorld } from "./aerial";
 import { CloseDof } from "./dof";
+import { useTouchScrolling } from "@/lib/mobile";
 
 /** Descida aérea do Sobre (ver forest/aerial.ts). */
 function Aerial({
@@ -108,11 +109,13 @@ export default function AerialScene({
   const [compiled, setCompiled] = useState(false);
   const handleCompiled = useCallback(() => setCompiled(true), []);
 
+  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
+  const scrolling = useTouchScrolling();
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
+      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
       dpr={[1, Math.min(maxDpr, light ? 1.5 : 1.5)]}
       camera={{ fov: 45, near: 0.5, far: 900, position: [0, 190, -150] }}
       gl={{ antialias: !light, alpha: false, powerPreference: "default" }}

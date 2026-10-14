@@ -20,7 +20,7 @@ export default async function Works() {
 
   return (
     <section id="trabalhos" data-theme="dark" aria-labelledby="trabalhos-title" className="relative z-10">
-      <div className="m-sec-t mx-auto w-full max-w-[1600px] px-6 pt-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec-t mx-auto w-full max-w-[1600px] px-6 pt-[clamp(6rem,16lvh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
         <h2
           id="trabalhos-title"
@@ -35,7 +35,7 @@ export default async function Works() {
         <LogoMarquee logos={logos} title={t("logos.title")} note={t("logos.more")} />
       </div>
 
-      <div className="m-sec-b mt-16 pb-[clamp(6rem,16vh,12rem)] md:mt-24">
+      <div className="m-sec-b mt-16 pb-[clamp(6rem,16lvh,12rem)] md:mt-24">
         <WorkWall
           items={
             found.length > 0

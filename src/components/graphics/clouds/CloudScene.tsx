@@ -18,6 +18,7 @@ import {
 } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { warmup } from "@/lib/warmup";
+import { useTouchScrolling } from "@/lib/mobile";
 
 /**
  * Diagnóstico: voo de avião em primeira pessoa atravessando as nuvens
@@ -531,12 +532,14 @@ export default function CloudScene({
   const dpr = Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, maxDpr, 1.5);
   const [ready, setReady] = useState(false);
   const handleReady = useCallback(() => setReady(true), []);
+  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
+  const scrolling = useTouchScrolling();
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
       // nenhum quadro antes do aquecimento (canvas transparente até lá)
-      frameloop={!ready ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
+      frameloop={!ready ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
       // raymarching em meia resolução (o CSS reescala); billboards na resolução da tela
       dpr={light ? dpr : dpr * 0.5}
       camera={{ fov: 50, near: 0.1, far: 80, position: [0, 2.45, 0] }}

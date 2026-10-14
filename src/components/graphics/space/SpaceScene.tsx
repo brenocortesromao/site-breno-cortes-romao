@@ -6,6 +6,7 @@ import type { PerspectiveCamera } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { warmup } from "@/lib/warmup";
 import { SpaceWorld } from "./world";
+import { useTouchScrolling } from "@/lib/mobile";
 
 /** Espaço do Contato (ver space/world.ts). Um canvas transparente: o gradiente da seção fica por trás. */
 function Space({
@@ -81,11 +82,13 @@ export default function SpaceScene({
   const [compiled, setCompiled] = useState(false);
   const handleCompiled = useCallback(() => setCompiled(true), []);
 
+  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
+  const scrolling = useTouchScrolling();
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
+      frameloop={!compiled ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
       dpr={[1, Math.min(maxDpr, 1.5)]}
       camera={{ fov: 45, near: 0.1, far: 200, position: [0, 0, 16] }}
       gl={{ antialias: !light, alpha: true, powerPreference: "default" }}

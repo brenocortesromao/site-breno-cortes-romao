@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { stableResizeObserver } from "@/lib/mobile";
 
 /**
  * Perguntas frequentes: um "?" gigante feito de caracteres em Geist Mono
@@ -485,7 +486,7 @@ export default function FaqAscii({ text }: { text: string }) {
 
     let lastW = 0;
     let lastH = 0;
-    const ro = new ResizeObserver(() => {
+    const ro = stableResizeObserver(() => {
       const r = wrap.getBoundingClientRect();
       if (Math.abs(r.width - lastW) < 1 && Math.abs(r.height - lastH) < 1) return;
       lastW = r.width;

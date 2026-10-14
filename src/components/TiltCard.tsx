@@ -99,6 +99,36 @@ export default function TiltCard({
     };
 
     const off: (() => void)[] = [];
+    /**
+     * Toque: o scroll só é lido com o cartão perto da tela e no máximo uma vez
+     * por quadro (ler a posição a cada evento de scroll forçava layout no meio
+     * da rolagem). Devolve a limpeza.
+     */
+    const onScrollNear = (fn: () => void) => {
+      let pending = 0;
+      let near = false;
+      const run = () => {
+        pending = 0;
+        fn();
+      };
+      const onScroll = () => {
+        if (near && !pending) pending = requestAnimationFrame(run);
+      };
+      const io = new IntersectionObserver(
+        ([e]) => {
+          near = e.isIntersecting;
+          if (near) onScroll();
+        },
+        { rootMargin: "50% 0px" },
+      );
+      io.observe(el);
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        io.disconnect();
+        cancelAnimationFrame(pending);
+        window.removeEventListener("scroll", onScroll);
+      };
+    };
     if (!touch) {
       const onMove = (e: PointerEvent) => {
         const r = el.getBoundingClientRect();
@@ -124,10 +154,9 @@ export default function TiltCard({
         target.y = Math.max(-1, Math.min(1, mid * 2));
         kick();
       };
-      window.addEventListener("scroll", onScroll, { passive: true });
+      off.push(onScrollNear(onScroll));
       onScroll();
       cur.y = target.y; // começa já na posição do scroll, sem deslizar do centro
-      off.push(() => window.removeEventListener("scroll", onScroll));
     } else {
       // toque: giroscópio se vier sem pedir permissão; senão, o scroll inclina
       let gyro = false;
@@ -149,12 +178,9 @@ export default function TiltCard({
         kick();
       };
       window.addEventListener("deviceorientation", onOrient);
-      window.addEventListener("scroll", onScroll, { passive: true });
+      off.push(onScrollNear(onScroll));
       onScroll();
-      off.push(() => {
-        window.removeEventListener("deviceorientation", onOrient);
-        window.removeEventListener("scroll", onScroll);
-      });
+      off.push(() => window.removeEventListener("deviceorientation", onOrient));
     }
 
     return () => {

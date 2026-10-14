@@ -8,6 +8,7 @@ import { warmup } from "@/lib/warmup";
 import { loadOceanModels } from "./models";
 import { loadOceanAnimals } from "./animals";
 import { OceanWorld } from "./world";
+import { useTouchScrolling } from "@/lib/mobile";
 
 /**
  * Oceano do fundo de "E a inteligência artificial?" (ver ocean/world.ts para a
@@ -109,12 +110,14 @@ export default function OceanScene({
 }) {
   const [ready, setReady] = useState(false);
   const handleReady = useCallback(() => setReady(true), []);
+  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
+  const scrolling = useTouchScrolling();
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
       // nenhum quadro antes do aquecimento (ver lib/warmup); o canvas fica vazio até lá
-      frameloop={!ready ? "never" : reducedMotion ? "demand" : active ? "always" : "never"}
+      frameloop={!ready ? "never" : reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
       // o fundo é suave e fica a ~40% de opacidade: resolução 1x basta
       dpr={Math.min(maxDpr, light ? 0.6 : 1)}
       camera={{ fov: 50, near: 0.1, far: 220, position: [0, 8, 14] }}

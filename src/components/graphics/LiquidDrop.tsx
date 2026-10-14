@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import { enableParallelCompile, programReady } from "@/lib/warmup";
+import { isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
 
 /**
  * Gota de metal líquido cromado (WebGL2, sem bibliotecas), para "Como funciona".
@@ -262,7 +263,7 @@ export default function LiquidDrop({
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       };
 
-      const ro = new ResizeObserver(() => {
+      const ro = stableResizeObserver(() => {
         resize();
         if (reduceMotion) draw();
       });
@@ -288,6 +289,8 @@ export default function LiquidDrop({
         raf = requestAnimationFrame(frame);
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
+        // celular: congela o quadro enquanto o dedo rola a página (lib/mobile)
+        if (isTouchScrolling()) return;
         const stage = Math.min(Math.max(stageRef.current ?? 0, 0), TARGETS.length - 1);
         if (stage !== lastStage) {
           // ao (re)entrar na Conversa, as duas gotas recomeçam afastadas

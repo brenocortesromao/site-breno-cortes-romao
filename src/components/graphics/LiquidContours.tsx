@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { enableParallelCompile, programReady } from "@/lib/warmup";
 import { liveTheme } from "@/components/theme/themes";
+import { isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
 
 /**
  * Curvas de nível LÍQUIDAS em tempo real (WebGL2, sem bibliotecas).
@@ -231,7 +232,7 @@ export default function LiquidContours({
         gl.viewport(0, 0, el.width, el.height);
       };
       resize();
-      const ro = new ResizeObserver(resize);
+      const ro = stableResizeObserver(resize);
       ro.observe(el);
 
       gl.uniform1f(uLevels, light ? 5 : 7.5); // poucas linhas, bem espaçadas
@@ -322,6 +323,8 @@ export default function LiquidContours({
         raf = requestAnimationFrame(frame);
         const dt = Math.min((now - last) / 1000, 0.1);
         last = now;
+        // celular: congela o quadro enquanto o dedo rola a página (lib/mobile)
+        if (isTouchScrolling()) return;
         acc += dt;
         if (acc < 1 / 30) return; // ~30 fps: movimento lento não precisa de 60
         if (!isOwner(id)) return; // outra instância mais visível está desenhando

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { stableResizeObserver } from "@/lib/mobile";
 
 /** Comportamento das correntes em cada etapa (ver `stages`). */
 export type FlowStage = {
@@ -252,7 +253,7 @@ export default function FlowField({
       for (let i = 0; i < 240; i++) step(1 / 30);
       ctx.clearRect(0, 0, W, H);
       draw();
-      const ro = new ResizeObserver(() => {
+      const ro = stableResizeObserver(() => {
         resize();
         ctx.clearRect(0, 0, W, H);
         draw();
@@ -283,7 +284,7 @@ export default function FlowField({
     });
     io.observe(section);
     document.addEventListener("visibilitychange", sync);
-    const ro = new ResizeObserver(() => {
+    const ro = stableResizeObserver(() => {
       resize();
       for (let i = 0; i < N; i++) if (x[i] > W) spawn(i, true);
     });

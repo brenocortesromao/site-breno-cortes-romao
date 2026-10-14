@@ -10,6 +10,7 @@ import LiquidDrop from "@/components/graphics/LiquidDrop";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
 import { webglSupport } from "@/lib/webgl";
+import { scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -80,7 +81,7 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
           {
             scaleY: 1,
             ease: "none",
-            scrollTrigger: { trigger: list.current, start: "top 60%", endTrigger: lastDot, end: "center 50%", scrub: 0.6 },
+            scrollTrigger: { trigger: list.current, start: "top 60%", endTrigger: lastDot, end: "center 50%", scrub: scrubFor(0.6) },
           },
         );
         // etapa atual para a gota: a etapa cujo topo passou do meio da tela
@@ -95,7 +96,7 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
         });
         gsap.utils.toArray<HTMLElement>("[data-step]").forEach((step) => {
           gsap
-            .timeline({ scrollTrigger: { trigger: step, start: "top 62%", end: "top 48%", scrub: 0.5 } })
+            .timeline({ scrollTrigger: { trigger: step, start: "top 62%", end: "top 48%", scrub: scrubFor(0.5) } })
             .fromTo(step.querySelector("[data-step-dot]"), { scale: 0.4, backgroundColor: "transparent" }, { scale: 1, backgroundColor: "var(--fg)", ease: "none" }, 0)
             .fromTo(step.querySelector("[data-step-body]"), { opacity: 0.25, x: 10 }, { opacity: 1, x: 0, ease: "none" }, 0);
         });
@@ -115,7 +116,7 @@ export default function Process({ copy }: { copy: ProcessCopy }) {
       className="relative z-10 min-h-svh overflow-clip"
     >
       <GraphicLayer variant="grid" />
-      <div className="m-sec relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12">
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-5 md:flex md:flex-col">
             <div>

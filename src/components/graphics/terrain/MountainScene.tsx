@@ -5,6 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { BufferAttribute, BufferGeometry, Mesh, ShaderMaterial, Vector3 } from "three";
 import ContextLossWatcher from "@/components/ContextLossWatcher";
 import { getTerrain, SUN, terrainSize } from "./heightmap";
+import { useTouchScrolling } from "@/lib/mobile";
 
 /**
  * Cordilheiras 3D procedurais (ver heightmap.ts), monocromáticas: rocha
@@ -175,11 +176,13 @@ export default function MountainScene({
   /** Perda do contexto WebGL (o pai remonta a cena). */
   onContextLost?: () => void;
 }) {
+  /** Celular: congela o quadro enquanto o dedo rola a página (lib/mobile). */
+  const scrolling = useTouchScrolling();
   return (
     <Canvas
       aria-hidden="true"
       className="!pointer-events-none"
-      frameloop={reducedMotion ? "demand" : active ? "always" : "never"}
+      frameloop={reducedMotion ? "demand" : active && !scrolling ? "always" : "never"}
       dpr={[1, Math.min(light ? 1 : 1.5, maxDpr)]}
       camera={{ position: [0, 26, 30], fov: 42, near: 0.1, far: 140 }}
       gl={{ antialias: !light, alpha: true, powerPreference: "default" }}

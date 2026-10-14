@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore, type RefObject } from "react";
 import { webglSupport } from "./webgl";
+import { isMobileUI, MOBILE_MAX_DPR, onStableResize } from "./mobile";
 
 /**
  * Qualidade adaptativa e orçamento de contextos WebGL (um ponto central para
@@ -25,7 +26,9 @@ import { webglSupport } from "./webgl";
  * nível; se cair de novo depois de subir, fica travada no nível menor (sem
  * oscilar). As cenas pedem o nível com `useSceneTier(nome, ref, montada)`.
  *
- * ORÇAMENTO: no máximo MAX_CONTEXTS contextos WebGL ao mesmo tempo. Cada cena
+ * CELULAR (lib/mobile.ts): DPR máximo 1,25 e 1 contexto WebGL por vez.
+ *
+ * ORÇAMENTO: no máximo MAX_CONTEXTS contextos WebGL ao mesmo tempo (1 no celular). Cada cena
  * pede uma vaga com `useWebglSlot`; ganham as que estão mais perto da tela
  * (e, empatadas, as que ocupam mais área). Quem perde a vaga desmonta (o pai
  * mostra o fallback/pôster) e o contexto é liberado.
@@ -34,6 +37,8 @@ import { webglSupport } from "./webgl";
 export type Tier = "none" | "low" | "medium" | "high";
 const ORDER: Tier[] = ["none", "low", "medium", "high"];
 export const MAX_CONTEXTS = 2;
+/** Contextos ao mesmo tempo: 2 no desktop, 1 no celular. */
+const maxContexts = () => (isMobileUI() ? 1 : MAX_CONTEXTS);
 
 export type Preset = { maxDpr: number; light: boolean };
 const PRESETS: Record<Tier, Preset> = {
@@ -69,7 +74,10 @@ export function getTier(): Tier {
   return current!;
 }
 
-export const presetFor = (tier: Tier) => PRESETS[tier];
+export const presetFor = (tier: Tier): Preset => {
+  const p = PRESETS[tier];
+  return isMobileUI() ? { ...p, maxDpr: Math.min(p.maxDpr, MOBILE_MAX_DPR) } : p;
+};
 
 /** Nível atual (reativo: muda se o monitor de FPS rebaixar). */
 export function useTier(): Tier {
@@ -230,9 +238,10 @@ function recompute() {
   pending = 0;
   const vh = window.innerHeight;
   const near = [...slots.entries()].filter(([, s]) => s.near);
+  const max = maxContexts();
   // até MAX_CONTEXTS cenas perto: todas ganham, sem medir nada (o caso comum)
   const ranked =
-    near.length <= MAX_CONTEXTS
+    near.length <= max
       ? near.map(([id]) => ({ id }))
       : near
           .map(([id, s]) => {
@@ -242,7 +251,7 @@ function recompute() {
             return { id, dist, area };
           })
           .sort((a, b) => a.dist - b.dist || b.area - a.area);
-  const next = new Set(ranked.slice(0, MAX_CONTEXTS).map((x) => x.id));
+  const next = new Set(ranked.slice(0, max).map((x) => x.id));
   const same = next.size === allowed.size && [...next].every((id) => allowed.has(id));
   if (same) return;
   allowed = next;
@@ -262,7 +271,7 @@ function bindScroll() {
   if (scrollBound) return;
   scrollBound = true;
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", () => schedule());
+  onStableResize(() => schedule());
 }
 
 /**

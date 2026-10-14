@@ -26,7 +26,7 @@ export default async function Faq() {
     <JsonLdScript data={faqJsonLd(items)} />
     <section id="perguntas" data-theme="dark" aria-labelledby="perguntas-title" className="relative z-10 min-h-svh">
       <div aria-hidden="true" className="faq-grain pointer-events-none absolute inset-0 overflow-hidden" />
-      <div className="m-sec m-rg40 relative mx-auto grid w-full max-w-[1600px] gap-12 px-6 py-[clamp(6rem,16vh,12rem)] md:grid-cols-12 md:gap-8 md:px-12">
+      <div className="m-sec m-rg40 relative mx-auto grid w-full max-w-[1600px] gap-12 px-6 py-[clamp(6rem,16lvh,12rem)] md:grid-cols-12 md:gap-8 md:px-12">
         <div className="md:col-span-4">
           <div className="md:sticky md:top-32">
             <h2

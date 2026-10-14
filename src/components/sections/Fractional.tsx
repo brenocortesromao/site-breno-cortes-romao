@@ -280,7 +280,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
       className="relative z-10 min-h-svh overflow-hidden"
     >
       <GraphicLayer variant="contours-a" />
-      <div className="m-sec relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">
           {protectTerms(copy.eyebrow)}
         </p>

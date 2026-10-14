@@ -31,7 +31,7 @@ export default async function About({ variant }: { variant: "summary" | "page" }
       <ForestBackdrop bearSrc={bearModel()} />
       <div
         className={`m-sec relative z-10 mx-auto grid w-full max-w-[1600px] gap-12 px-6 md:grid-cols-12 md:gap-8 md:px-12 ${
-          isPage ? "pb-[clamp(6rem,16vh,12rem)] pt-40" : "m-sec-t-forest py-[clamp(6rem,16vh,12rem)]"
+          isPage ? "pb-[clamp(6rem,16lvh,12rem)] pt-40" : "m-sec-t-forest py-[clamp(6rem,16lvh,12rem)]"
         }`}
       >
         {/* celular: retrato acima do rótulo e do nome, centralizado, com ~70% da largura */}

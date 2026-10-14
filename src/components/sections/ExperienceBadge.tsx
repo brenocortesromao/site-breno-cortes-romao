@@ -93,7 +93,7 @@ export default function ExperienceBadge({ labels }: { labels: ExperienceLabels }
         aria-hidden="true"
         className="absolute -inset-x-12 -inset-y-8 -z-10 bg-[radial-gradient(closest-side,rgba(0,0,0,0.6),rgba(0,0,0,0.25)_60%,transparent)] md:-inset-x-16 md:-inset-y-12"
       />
-      <p className="flex flex-col items-center rounded-[6px] border border-white/[0.08] bg-[rgba(10,10,10,0.45)] px-7 py-5 text-center shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-[14px] md:px-11 md:py-8">
+      <p className="flex flex-col items-center rounded-[6px] border border-white/[0.08] bg-[rgba(10,10,10,0.45)] px-7 py-5 text-center shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-[14px] mobile:bg-[rgba(10,10,10,0.8)] mobile:backdrop-blur-none md:px-11 md:py-8">
         <span className="sr-only">{labels.full}</span>
         <span aria-hidden="true" className="relative grid text-[48px] font-semibold leading-[0.95] tracking-[-0.04em] tabular-nums md:text-[clamp(56px,7vw,96px)]">
           {/* reserva a largura final: o cartão não muda de tamanho durante a contagem */}

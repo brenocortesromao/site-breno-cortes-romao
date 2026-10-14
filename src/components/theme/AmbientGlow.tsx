@@ -42,12 +42,12 @@ export default function AmbientGlow() {
     >
       <div
         ref={a}
-        className="absolute left-[-25vw] top-[-30vh] h-[110vh] w-[90vw] rounded-full will-change-transform"
+        className="absolute left-[-25vw] top-[-30lvh] h-[110lvh] w-[90vw] rounded-full will-change-transform"
         style={{ background: "radial-gradient(closest-side, rgba(205, 209, 216, 0.11), transparent)" }}
       />
       <div
         ref={b}
-        className="absolute bottom-[-35vh] right-[-20vw] h-[100vh] w-[80vw] rounded-full will-change-transform"
+        className="absolute bottom-[-35lvh] right-[-20vw] h-[100lvh] w-[80vw] rounded-full will-change-transform"
         style={{ background: "radial-gradient(closest-side, rgba(150, 155, 163, 0.09), transparent)" }}
       />
     </div>

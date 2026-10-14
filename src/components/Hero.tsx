@@ -11,13 +11,14 @@ import { protectTerms } from "@/components/Term";
 import ResilientBoundary from "@/components/ResilientBoundary";
 import { webglSupport } from "@/lib/webgl";
 import { presetFor, useSceneTier, useWebglSlot } from "@/lib/quality";
+import { isMobileUI, scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 // Three.js só é baixado no cliente e depois que a página já está visível.
 const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
 
-type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
+type Env = { webgl: boolean; reduced: boolean; coarse: boolean; mobile: boolean };
 
 export type HeroCopy = {
   /** Frase grande à esquerda da bola (acima dela no mobile). */
@@ -67,6 +68,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
       webgl: webglSupport().webgl,
       reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
       coarse: window.matchMedia("(pointer: coarse)").matches,
+      mobile: isMobileUI(),
     });
   }, []);
 
@@ -148,7 +150,7 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
               end: "+=100%",
               pin: true,
               pinSpacing: false,
-              scrub: 1,
+              scrub: scrubFor(1),
               anticipatePin: 1,
             },
           })
@@ -209,8 +211,9 @@ export default function Hero({ copy }: { copy: HeroCopy }) {
             }`}
           />
           {/* alvo de toque da bola: quem começa o toque nela arrasta/gira a bola
-              (sem rolar a página); fora do círculo, a rolagem segue normal */}
-          {showScene && <div className="absolute inset-[1.5%] touch-none rounded-full" />}
+              (sem rolar a página); fora do círculo, a rolagem segue normal.
+              Celular: sem alvo, qualquer toque na abertura rola a página. */}
+          {showScene && !env.mobile && <div className="absolute inset-[1.5%] touch-none rounded-full" />}
         </div>
 
         {/* Frase à direita (abaixo no mobile) */}

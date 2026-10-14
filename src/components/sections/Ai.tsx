@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { revealOnce } from "@/lib/reveal";
 import { DecodeLetters, decode, hideLetters, shine, showLetters } from "@/components/decode";
 import OceanBackdrop from "@/components/graphics/OceanBackdrop";
+import { scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -90,7 +91,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
           gsap.fromTo(
             line,
             { opacity: 0.14 },
-            { opacity: 1, ease: "none", scrollTrigger: { trigger: line, start: "top 80%", end: "top 52%", scrub: 0.6 } },
+            { opacity: 1, ease: "none", scrollTrigger: { trigger: line, start: "top 80%", end: "top 52%", scrub: scrubFor(0.6) } },
           );
         });
 
@@ -120,7 +121,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
     <section ref={root} id="ia" data-theme="dark" aria-labelledby="ia-title" className="relative z-10 min-h-svh overflow-clip">
       {/* oceano 3D fixo atrás do conteúdo (alto-mar → linha d'água → recife) */}
       <OceanBackdrop />
-      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16vh,12rem)] md:px-12">
+      <div className="m-sec relative z-10 mx-auto w-full max-w-[1600px] px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{copy.eyebrow}</p>
 
         {/* caixa de prompt (estilo chat de IA) */}
@@ -160,7 +161,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
           <DecodeLetters text={copy.title} />
         </h2>
 
-        <ul className="m-g40 mt-[clamp(5rem,14vh,10rem)] grid gap-6 md:gap-8">
+        <ul className="m-g40 mt-[clamp(5rem,14lvh,10rem)] grid gap-6 md:gap-8">
           {copy.lines.map((line) => (
             <li
               key={line}
@@ -172,7 +173,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
           ))}
         </ul>
 
-        <div className="mt-[clamp(5rem,14vh,10rem)] grid gap-12 md:grid-cols-12 md:gap-8">
+        <div className="mt-[clamp(5rem,14lvh,10rem)] grid gap-12 md:grid-cols-12 md:gap-8">
           {/* degradê escuro suave atrás do parágrafo: legível mesmo com um tubarão passando */}
           <p className="relative max-w-xl text-base leading-relaxed text-silver before:pointer-events-none before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(ellipse_at_center,var(--bg)_15%,transparent_70%)] before:opacity-65 max-md:before:-inset-x-4 max-md:before:-inset-y-5 max-md:before:opacity-50 md:col-span-6 md:col-start-7 md:text-lg">
             {copy.body}
@@ -181,7 +182,7 @@ export default function Ai({ copy }: { copy: AiCopy }) {
 
         <p
           ref={closing}
-          className="m-center mt-[clamp(5rem,14vh,10rem)] max-w-5xl text-[clamp(2rem,4.4vw,4.75rem)] font-semibold leading-[1.04] tracking-[-0.05em]"
+          className="m-center mt-[clamp(5rem,14lvh,10rem)] max-w-5xl text-[clamp(2rem,4.4vw,4.75rem)] font-semibold leading-[1.04] tracking-[-0.05em]"
         >
           {before}
           {at >= 0 &&

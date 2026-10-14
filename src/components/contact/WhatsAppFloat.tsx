@@ -15,14 +15,21 @@ export default function WhatsAppFloat({ href, label }: { href: string; label: st
   const [atContact, setAtContact] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setPast(window.scrollY > window.innerHeight * 0.8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    // "passou de ~80% da primeira tela": marcador invisível do topo da página
+    // até 80svh, observado (ler scrollY/innerHeight a cada evento de scroll
+    // forçava layout no meio da rolagem)
+    const mark = document.createElement("div");
+    mark.setAttribute("aria-hidden", "true");
+    mark.style.cssText = "position:absolute;top:0;left:0;width:1px;height:80svh;pointer-events:none;visibility:hidden";
+    document.body.prepend(mark);
+    const pastIo = new IntersectionObserver(([e]) => setPast(!e.isIntersecting && e.boundingClientRect.bottom <= 0));
+    pastIo.observe(mark);
     const contact = document.getElementById("contato");
     const io = contact ? new IntersectionObserver(([e]) => setAtContact(e.isIntersecting)) : null;
     if (contact) io!.observe(contact);
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      pastIo.disconnect();
+      mark.remove();
       io?.disconnect();
     };
   }, []);
@@ -36,7 +43,7 @@ export default function WhatsAppFloat({ href, label }: { href: string; label: st
       aria-label={label}
       tabIndex={show ? 0 : -1}
       aria-hidden={!show}
-      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 grid h-12 w-12 place-items-center rounded-full border border-silver/60 bg-background/70 text-silver backdrop-blur-md transition-[opacity,transform] duration-500 md:hidden ${
+      className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 grid h-12 w-12 place-items-center rounded-full border border-silver/60 bg-background/70 text-silver backdrop-blur-md mobile:bg-background/90 mobile:backdrop-blur-none transition-[opacity,transform] duration-500 md:hidden ${
         show ? "opacity-100" : "pointer-events-none translate-y-3 opacity-0"
       }`}
     >

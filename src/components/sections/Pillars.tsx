@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import BlurRevealTitle from "@/components/BlurRevealTitle";
 import { getTier } from "@/lib/quality";
 import { revealOnce } from "@/lib/reveal";
+import { isMobileUI, scrubFor } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -25,8 +26,9 @@ export type PillarsCopy = {
  * (classes `group-data-[mode=pin]:*`).
  * Celular (até 767px), sem reduced motion e fora do nível "low": a mesma
  * troca, adaptada à tela em pé (`data-mode="pin-m"`): o título da seção rola
- * antes e só o palco dos pilares fica fixo (~80% da tela por pilar), tudo
+ * antes e só o palco dos pilares fica fixo (~60% da tela por pilar), tudo
  * centralizado (índice, barra de 120px, título numa linha, texto até 32ch).
+ * Celular: ~60% da tela por pilar e scrub sem atraso (acompanha o dedo).
  * Celular fraco (nível "low"/"none") ou reduced motion (`data-mode="stack-m"`):
  * empilhados, cada pilar entra uma vez ao aparecer (linha se desenhando,
  * índice, título subindo pela máscara, texto); com reduced motion, só fade.
@@ -56,9 +58,10 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
           scrollTrigger: {
             trigger: stage.current,
             start: "top top",
-            end: `+=${(n - 1) * 100}%`,
+            // celular/tablet de toque: no máximo ~0,6 tela por pilar
+            end: `+=${(n - 1) * (isMobileUI() ? 60 : 100)}%`,
             pin: true,
-            scrub: 0.8,
+            scrub: scrubFor(0.8),
             anticipatePin: 1,
           },
         });
@@ -85,8 +88,7 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
         const indexes = gsap.utils.toArray<HTMLElement>("[data-pillar-index]");
 
         if (!reduced && tier !== "low" && tier !== "none") {
-          // barra de endereço do celular aparecendo/sumindo não recalcula o pin
-          ScrollTrigger.config({ ignoreMobileResize: true });
+          // barra de endereço do celular: ScrollTrigger.config({ ignoreMobileResize }) global (SmoothScroll)
           section.dataset.mode = "pin-m";
           // palco preso acima de tudo o que vem depois ("O que muda" é z-10, depois no DOM)
           section.style.zIndex = "20";
@@ -104,7 +106,7 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
             scrollTrigger: {
               trigger: pinBox.current,
               start: "top top",
-              end: `+=${(n - 1) * 80}%`,
+              end: `+=${(n - 1) * 60}%`, // ~0,6 tela por pilar
               pin: true,
               pinType: "fixed",
               // o pai (palco) é flex: sem isto o GSAP desliga o espaço do pin e
@@ -113,7 +115,7 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
               invalidateOnRefresh: true,
               // calculado antes dos gatilhos das seções de baixo (que dependem do espaço do pin)
               refreshPriority: 1,
-              scrub: 0.8,
+              scrub: scrubFor(0.8),
               anticipatePin: 1,
             },
           });
@@ -166,7 +168,7 @@ export default function Pillars({ copy }: { copy: PillarsCopy }) {
     <section ref={root} id="o-que-faco" data-theme="dark" aria-labelledby="o-que-faco-title" className="group relative z-10">
       <div
         ref={stage}
-        className="m-sec mx-auto flex w-full max-w-[1600px] flex-col px-6 py-[clamp(6rem,16vh,12rem)] md:px-12 group-data-[mode=pin]:h-svh group-data-[mode=pin]:py-[clamp(5rem,12vh,9rem)]"
+        className="m-sec mx-auto flex w-full max-w-[1600px] flex-col px-6 py-[clamp(6rem,16lvh,12rem)] md:px-12 group-data-[mode=pin]:h-svh group-data-[mode=pin]:py-[clamp(5rem,12lvh,9rem)]"
       >
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
