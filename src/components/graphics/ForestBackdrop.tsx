@@ -21,9 +21,9 @@ const AerialScene = dynamic(() => import("./forest/AerialScene"), { ssr: false }
 type Env = { webgl: boolean; reduced: boolean; coarse: boolean };
 
 /** Opacidade da cena (o texto do Sobre fica por cima). */
-const OPACITY = 0.5;
-/** Celular: a cena ~35% mais clara (o urso aparecia escuro demais na tela pequena). */
-const MOBILE_OPACITY = OPACITY * 1.35;
+const OPACITY = 0.85;
+/** Celular: cena na opacidade máxima (o urso aparecia escuro demais na tela pequena). */
+const MOBILE_OPACITY = 1;
 
 /**
  * Fundo 3D do Sobre: descida aérea sobre uma floresta nevada cortada por um
@@ -161,8 +161,8 @@ export default function ForestBackdrop({ bearSrc }: { bearSrc?: string }) {
           {/* vinheta, degradês de entrada/saída e o degradê escuro atrás do texto (direita).
               Celular: vinheta mais aberta e camada escura geral menor; a leitura vem do
               degradê atrás de cada bloco de texto (AboutStory), com o urso visível entre eles */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,var(--bg)_100%)] mobile:bg-[radial-gradient(ellipse_at_center,transparent_55%,var(--bg)_100%)]" />
-          <div className="absolute inset-0 bg-background/35 mobile:bg-background/10 md:bg-transparent md:bg-gradient-to-l md:from-background/80 md:via-background/45 md:via-40% md:to-transparent md:to-65%" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_60%,var(--bg)_100%)] mobile:bg-[radial-gradient(ellipse_at_center,transparent_70%,var(--bg)_100%)]" />
+          <div className="absolute inset-0 bg-background/35 mobile:bg-background/10 md:bg-transparent md:bg-gradient-to-l md:from-background/70 md:via-background/30 md:via-35% md:to-transparent md:to-55%" />
           <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background to-transparent" />
         </div>
