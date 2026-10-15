@@ -205,6 +205,11 @@ export default async function Home() {
               title: t("ai.title"),
               lines: t.raw("ai.lines") as AiCopy["lines"],
               body: t("ai.body"),
+              differentiation: {
+                line1: t("ai.differentiation.line1"),
+                line2: t("ai.differentiation.line2"),
+                text: t("ai.differentiation.text"),
+              },
               closing: t("ai.closing"),
               closingHighlight: t("ai.closingHighlight"),
               footnote: t("ai.footnote"),

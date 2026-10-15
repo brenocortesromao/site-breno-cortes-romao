@@ -19,6 +19,8 @@ export type AiCopy = {
   /** Frases grandes, uma por linha. */
   lines: string[];
   body: string;
+  /** Bloco "déficit de diferenciação": título em duas linhas e texto curto. */
+  differentiation: { line1: string; line2: string; text: string };
   closing: string;
   /** Trecho do fecho que recebe o reflexo prata. */
   closingHighlight: string;
@@ -182,6 +184,23 @@ export default function Ai({ copy }: { copy: AiCopy }) {
           {/* degradê escuro suave atrás do parágrafo: legível mesmo com um tubarão passando */}
           <p className="relative max-w-xl text-base leading-relaxed text-silver before:pointer-events-none before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(ellipse_at_center,var(--bg)_15%,transparent_70%)] before:opacity-65 max-md:before:-inset-x-4 max-md:before:-inset-y-5 max-md:before:opacity-50 md:col-span-6 md:col-start-7 md:text-lg">
             {copy.body}
+          </p>
+        </div>
+
+        {/* déficit de diferenciação: entra com o scroll como as frases (data-ai-line) */}
+        <div className="m-g40 mt-[clamp(5rem,14lvh,10rem)]">
+          <h3
+            data-ai-line
+            className="max-w-5xl text-[clamp(2.4rem,5.6vw,6rem)] font-semibold leading-[1.02] tracking-[-0.055em]"
+          >
+            <span className="block">{copy.differentiation.line1}</span>
+            <span className="block">{copy.differentiation.line2}</span>
+          </h3>
+          <p
+            data-ai-line
+            className="relative mt-8 max-w-xl text-base leading-relaxed text-silver before:pointer-events-none before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(ellipse_at_center,var(--bg)_15%,transparent_70%)] before:opacity-65 max-md:before:-inset-x-4 max-md:before:-inset-y-5 max-md:before:opacity-50 md:mt-10 md:text-lg"
+          >
+            {copy.differentiation.text}
           </p>
         </div>
 

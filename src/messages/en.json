@@ -107,6 +107,7 @@
       "“I don't know what story my brand tells.”",
       "“Clients don't get what we do the first time.”",
       "“Our competitors look more professional than us. And they aren't.”",
+      "“Our brand could belong to any of our competitors.”",
       "“Every piece of ours looks like it came from a different company.”",
       "“I have a designer and an agency. What's missing is someone deciding.”",
       "“Everything goes through me. Even the posts.”",
@@ -362,6 +363,11 @@
       "Never watched a brand win, or lose, people's trust."
     ],
     "body": "It creates a thousand options in seconds. But it doesn't know what your company can't say, or which of those thousand options will make someone choose you. I use AI every day: it researches, explores and speeds up the work. I learn from it, but I don't outsource judgment. Decisions come from my experience, my repertoire and everything I have lived, things no model can learn.",
+    "differentiation": {
+      "line1": "We are living through a differentiation deficit.",
+      "line2": "The risk now is looking the same.",
+      "text": "Same tools, same data, same references. When everyone optimizes the same way, brands start to look alike. Efficiency doesn't set anyone apart. Direction does."
+    },
     "closing": "With AI, everyone produces more. That's why what matters now is knowing what not to produce.",
     "closingHighlight": "what not to produce",
     "footnote": "AI is the most powerful tool that has ever existed. In the right hands."
