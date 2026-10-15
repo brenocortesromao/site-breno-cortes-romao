@@ -20,7 +20,7 @@ export type AiCopy = {
   lines: string[];
   body: string;
   /** Bloco "déficit de diferenciação": título em duas linhas e texto curto. */
-  differentiation: { line1: string; line2: string; text: string };
+  differentiation: { line1: string; text: string };
   closing: string;
   /** Trecho do fecho que recebe o reflexo prata. */
   closingHighlight: string;
@@ -194,7 +194,6 @@ export default function Ai({ copy }: { copy: AiCopy }) {
             className="max-w-5xl text-[clamp(2.4rem,5.6vw,6rem)] font-semibold leading-[1.02] tracking-[-0.055em]"
           >
             <span className="block">{copy.differentiation.line1}</span>
-            <span className="block">{copy.differentiation.line2}</span>
           </h3>
           <p
             data-ai-line

@@ -207,7 +207,6 @@ export default async function Home() {
               body: t("ai.body"),
               differentiation: {
                 line1: t("ai.differentiation.line1"),
-                line2: t("ai.differentiation.line2"),
                 text: t("ai.differentiation.text"),
               },
               closing: t("ai.closing"),
