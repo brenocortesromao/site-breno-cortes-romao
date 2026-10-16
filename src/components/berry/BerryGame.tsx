@@ -1360,7 +1360,7 @@ export default function BerryGame({ copy, locale, whatsappHref }: BerryConfig) {
       <canvas ref={canvas} className="block h-full w-full" aria-hidden="true" />
 
       {/* topo: progresso atÃ© o planeta (esquerda) e recorde/pontos (direita); o X do diÃ¡logo fica no canto direito */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex items-start justify-between gap-3 pl-[max(20px,env(safe-area-inset-left))] pr-[max(72px,calc(env(safe-area-inset-right)+64px))] pt-[max(20px,calc(env(safe-area-inset-top)+8px))]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex items-start justify-between gap-3 pl-5 pr-[72px] pt-5">
         <div
           className={`flex flex-col gap-1.5 font-mono text-[11px] tracking-[0.22em] text-[#8d8d8a] tabular-nums ${screen === "onboarding" ? "invisible" : ""}`}
         >

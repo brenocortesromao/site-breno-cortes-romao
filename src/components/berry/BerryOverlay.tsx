@@ -3,11 +3,12 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { freezeSite, unfreezeSite } from "@/lib/siteFreeze";
 import BerryGame from "./BerryGame";
+import styles from "./BerryOverlay.module.css";
 import type { BerryConfig } from "./copy";
 
 /**
- * Tela cheia por cima do site: diálogo modal escuro com botão X. Esc ou X
- * fecham. Enquanto aberto, o site fica congelado (lib/siteFreeze) e volta como
+ * Caixa (modal) por cima do site: o site continua visível atrás, escurecido (preto
+ * a 70%) e com blur leve. X, Esc ou clique fora fecham. Enquanto aberto, o site fica congelado (lib/siteFreeze) e volta como
  * estava, na mesma posição de rolagem. Foco preso dentro do diálogo.
  */
 export default function BerryOverlay({ config, onClose }: { config: BerryConfig; onClose: () => void }) {
@@ -69,25 +70,32 @@ export default function BerryOverlay({ config, onClose }: { config: BerryConfig;
   return (
     <div
       ref={root}
-      role="dialog"
-      aria-modal="true"
-      aria-label={config.copy.title}
       data-berry-overlay
-      className="fixed inset-0 z-[400] bg-[#070707] text-[#f2f2f0]"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose(); // clique fora da caixa
+      }}
+      className={`${styles.backdrop} fixed inset-0 z-[400] grid place-items-center bg-black/70 px-[max(0px,env(safe-area-inset-left))] backdrop-blur-[6px]`}
     >
       {/* o cursor do site some por trás; aqui vale o nativo */}
       <style>{`[data-berry-overlay],[data-berry-overlay] *{cursor:auto!important}[data-berry-overlay] button,[data-berry-overlay] a{cursor:pointer!important}`}</style>
-      <BerryGame {...config} />
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label={config.copy.close}
-        className="absolute right-[max(16px,env(safe-area-inset-right))] top-[max(12px,env(safe-area-inset-top))] z-20 grid h-11 w-11 place-items-center rounded-full border border-[#3a3a38] bg-[rgba(7,7,7,0.6)] text-[#f2f2f0] transition-colors hover:border-[#8d8d8a] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[3px] focus-visible:outline-[#f2f2f0]"
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={config.copy.title}
+        className={`${styles.box} relative h-[min(560px,86vh)] w-[min(960px,92vw)] overflow-hidden rounded-2xl border border-[#8d8d8a]/50 bg-[#070707] text-[#f2f2f0] shadow-[0_24px_80px_rgba(0,0,0,0.6)] max-sm:h-[calc(100dvh-24px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-sm:w-[calc(100vw-24px-env(safe-area-inset-left)-env(safe-area-inset-right))]`}
       >
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-          <path d="M5 5l14 14M19 5L5 19" />
-        </svg>
-      </button>
+        <BerryGame {...config} />
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={config.copy.close}
+          className="absolute right-3 top-3 z-20 grid h-11 w-11 place-items-center rounded-full border border-[#8d8d8a] bg-[rgba(7,7,7,0.75)] text-[#f2f2f0] transition-colors hover:border-[#f2f2f0] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[3px] focus-visible:outline-[#f2f2f0]"
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+            <path d="M5 5l14 14M19 5L5 19" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
