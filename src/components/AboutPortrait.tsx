@@ -6,7 +6,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import TiltCard from "./TiltCard";
 import { revealOnce } from "@/lib/reveal";
-import { isMobileUI } from "@/lib/mobile";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -23,8 +22,8 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
  *  3. "settle": escala 1.06 → 1.
  * Depois da entrada: o cartão de vidro da Mensagem (TiltCard: inclinação com o
  * mouse e reflexo); no toque, sem inclinação, o reflexo passa com o scroll.
- * Parallax: a imagem (maior que o quadro, 8% de sobra em cima e embaixo)
- * anda ~8% mais devagar que a moldura no scroll.
+ * A moldura tem a proporção da foto (806 x 1448) e a foto aparece inteira, sem
+ * corte (por isso não há parallax interno); no desktop, a altura fica limitada a 85vh.
  * Sem JS / prefers-reduced-motion: foto final, estática.
  */
 
@@ -45,7 +44,6 @@ export default function AboutPortrait({
 }) {
   const frame = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
-  const drift = useRef<HTMLDivElement>(null);
   const photo = useRef<HTMLDivElement>(null);
   const zoom = useRef<HTMLDivElement>(null);
   const line = useRef<HTMLDivElement>(null);
@@ -66,19 +64,6 @@ export default function AboutPortrait({
       const ph = photo.current!;
       const zm = zoom.current!;
       const ln = line.current!;
-
-      // parallax interno: a imagem fica para trás em relação à moldura
-      // (celular, modo curado: sem efeito preso ao scroll)
-      if (!isMobileUI())
-        gsap.fromTo(
-          drift.current!,
-          { yPercent: -6 },
-          {
-            yPercent: 6, // 6% de 116% ≈ 7% do quadro, dentro da sobra de 8%
-            ease: "none",
-            scrollTrigger: { trigger: frame.current!, start: "top bottom", end: "bottom top", scrub: true },
-          },
-        );
 
       // x: linha (%); gray: preto e branco (1..0); pop: contraste extra (0..1); scale
       const s = { x: -8, gray: 1, pop: 0, scale: 1.06, line: 1 };
@@ -129,6 +114,7 @@ export default function AboutPortrait({
   return (
     <TiltCard
       ref={frame}
+      className="md:max-w-[calc(85vh*806/1448)]"
       active={mode === "static" || revealed}
       touchMode="glare"
       overlay={
@@ -141,12 +127,12 @@ export default function AboutPortrait({
         </div>
       }
     >
-      <div ref={root} className="relative isolate aspect-[4/5] overflow-hidden border border-line bg-surface">
+      <div ref={root} className="relative isolate aspect-[806/1448] overflow-hidden border border-line bg-surface">
         {/* máscara e filtro no tamanho do quadro (alinhados à linha de luz);
             dentro, a imagem 16% mais alta que o quadro (a sobra cobre o
             parallax) e a camada da escala */}
         <div ref={photo} className="absolute inset-0">
-          <div ref={drift} className="absolute inset-x-0 -top-[8%] h-[116%]">
+          <div className="absolute inset-0">
             <div ref={zoom} className="absolute inset-0">
               <picture>
                 <source media="(min-width: 768px)" type="image/webp" srcSet="/retrato/breno-sobre.webp" />
@@ -155,8 +141,8 @@ export default function AboutPortrait({
                 <img
                   src="/retrato/breno-sobre-800.jpg"
                   alt={alt}
-                  width={800}
-                  height={1000}
+                  width={806}
+                  height={1448}
                   loading={priority ? "eager" : "lazy"}
                   fetchPriority={priority ? "high" : undefined}
                   decoding="async"
