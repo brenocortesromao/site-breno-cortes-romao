@@ -23,8 +23,10 @@ export default function BerryOverlay({ config, onClose }: { config: BerryConfig;
     const html = document.documentElement;
     const prev = html.style.overscrollBehavior;
     html.style.overscrollBehavior = "none";
+    html.classList.add("berry-open"); // cursor nativo de volta (ver o <style> abaixo)
     return () => {
       html.style.overscrollBehavior = prev;
+      html.classList.remove("berry-open");
       unfreezeSite();
     };
   }, []);
@@ -76,8 +78,8 @@ export default function BerryOverlay({ config, onClose }: { config: BerryConfig;
       }}
       className={`${styles.backdrop} fixed inset-0 z-[400] grid place-items-center bg-black/70 px-[max(0px,env(safe-area-inset-left))] backdrop-blur-[6px]`}
     >
-      {/* o cursor do site some por trás; aqui vale o nativo */}
-      <style>{`[data-berry-overlay],[data-berry-overlay] *{cursor:auto!important}[data-berry-overlay] button,[data-berry-overlay] a{cursor:pointer!important}`}</style>
+      {/* enquanto aberto: cursor personalizado escondido e nativo na página toda (seta; mão no X, botões e links) */}
+      <style>{`html.berry-open [data-custom-cursor]{display:none!important}html.berry-open,html.berry-open *,html.custom-cursor.berry-open,html.custom-cursor.berry-open *{cursor:default!important}html.custom-cursor.berry-open [data-berry-overlay] :is(button,a,[role=button]),html.custom-cursor.berry-open [data-berry-overlay] :is(button,a,[role=button]) *,html.berry-open [data-berry-overlay] :is(button,a,[role=button]){cursor:pointer!important}`}</style>
       <div
         role="dialog"
         aria-modal="true"

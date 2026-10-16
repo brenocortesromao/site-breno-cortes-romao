@@ -179,6 +179,7 @@ export default function CustomCursor() {
     <div
       ref={root}
       aria-hidden="true"
+      data-custom-cursor
       className="pointer-events-none fixed left-0 top-0 z-[300] mix-blend-difference transition-opacity duration-200"
       style={{ opacity: 0 }}
     >
