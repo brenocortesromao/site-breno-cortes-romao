@@ -2,7 +2,7 @@
 
 import { GamepadIcon } from "@/components/contact/icons";
 import { useBerry } from "./BerryProvider";
-import styles from "./BerryHeaderButton.module.css";
+import "./BerryHeaderButton.css";
 
 /** Ícone de controle no cabeçalho: abre o jogo do Berry (mesmo overlay do rodapé). */
 export default function BerryHeaderButton({
@@ -19,12 +19,12 @@ export default function BerryHeaderButton({
     <button
       type="button"
       aria-label={label}
-      className={`${className} ${styles.btn}`}
+      className={`${className} bh-btn`}
       onClick={(e) => open(e.currentTarget)}
       onPointerEnter={warm}
       onFocus={warm}
     >
-      <GamepadIcon className={`h-[18px] w-[18px] ${styles.icon}`} />
+      <GamepadIcon className={`h-[18px] w-[18px] bh-icon`} />
       <span aria-hidden="true" className={tipClassName}>
         {label}
       </span>

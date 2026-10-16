@@ -1,8 +1,8 @@
 /* Entrada da caixa: fade + leve subida (sem animação com movimento reduzido). */
-.backdrop {
+.bo-backdrop {
   animation: berry-fade 0.28s ease-out both;
 }
-.box {
+.bo-box {
   animation: berry-rise 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 @keyframes berry-fade {
@@ -14,7 +14,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .backdrop, .box {
+  .bo-backdrop, .bo-box {
     animation: none;
   }
 }

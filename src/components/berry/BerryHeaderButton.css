@@ -1,6 +1,6 @@
 /* Tremidinha curta do controle no hover (uma vez). */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .btn:hover .icon {
+  .bh-btn:hover .bh-icon {
     animation: berry-shake 0.45s ease-in-out 1;
   }
 }

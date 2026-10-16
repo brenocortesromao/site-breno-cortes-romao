@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { freezeSite, unfreezeSite } from "@/lib/siteFreeze";
 import BerryGame from "./BerryGame";
-import styles from "./BerryOverlay.module.css";
+import "./BerryOverlay.css";
 import type { BerryConfig } from "./copy";
 
 /**
@@ -76,7 +76,7 @@ export default function BerryOverlay({ config, onClose }: { config: BerryConfig;
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose(); // clique fora da caixa
       }}
-      className={`${styles.backdrop} fixed inset-0 z-[400] grid place-items-center bg-black/70 px-[max(0px,env(safe-area-inset-left))] backdrop-blur-[6px]`}
+      className={`bo-backdrop fixed inset-0 z-[400] grid place-items-center bg-black/70 px-[max(0px,env(safe-area-inset-left))] backdrop-blur-[6px]`}
     >
       {/* enquanto aberto: cursor personalizado escondido e nativo na página toda (seta; mão no X, botões e links) */}
       <style>{`html.berry-open [data-custom-cursor]{display:none!important}html.berry-open,html.berry-open *,html.custom-cursor.berry-open,html.custom-cursor.berry-open *{cursor:default!important}html.custom-cursor.berry-open [data-berry-overlay] :is(button,a,[role=button]),html.custom-cursor.berry-open [data-berry-overlay] :is(button,a,[role=button]) *,html.berry-open [data-berry-overlay] :is(button,a,[role=button]){cursor:pointer!important}`}</style>
@@ -84,7 +84,7 @@ export default function BerryOverlay({ config, onClose }: { config: BerryConfig;
         role="dialog"
         aria-modal="true"
         aria-label={config.copy.title}
-        className={`${styles.box} relative h-[min(560px,86vh)] w-[min(960px,92vw)] overflow-hidden rounded-2xl border border-[#8d8d8a]/50 bg-[#070707] text-[#f2f2f0] shadow-[0_24px_80px_rgba(0,0,0,0.6)] max-sm:h-[calc(100dvh-24px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-sm:w-[calc(100vw-24px-env(safe-area-inset-left)-env(safe-area-inset-right))]`}
+        className={`bo-box relative h-[min(560px,86vh)] w-[min(960px,92vw)] overflow-hidden rounded-2xl border border-[#8d8d8a]/50 bg-[#070707] text-[#f2f2f0] shadow-[0_24px_80px_rgba(0,0,0,0.6)] max-sm:h-[calc(100dvh-24px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-sm:w-[calc(100vw-24px-env(safe-area-inset-left)-env(safe-area-inset-right))]`}
       >
         <BerryGame {...config} />
         <button

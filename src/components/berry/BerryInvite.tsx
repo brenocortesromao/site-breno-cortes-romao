@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useBerry } from "./BerryProvider";
-import styles from "./BerryInvite.module.css";
+import "./BerryInvite.css";
 
 /**
  * Convite do Berry acima da linha do rodapé: miniatura flutuando com estrelinhas
@@ -34,7 +34,7 @@ export default function BerryInvite({ text, cta, ctaLabel }: { text: string; cta
       void el.offsetWidth;
     }
     i.style.animation = "";
-    i.classList.add(styles.hopping);
+    i.classList.add("bi-hopping");
     if (s) {
       s.style.animation = "";
       s.dataset.on = "true";
@@ -68,9 +68,9 @@ export default function BerryInvite({ text, cta, ctaLabel }: { text: string; cta
       }}
       className="relative z-10 flex cursor-pointer flex-col items-center justify-center gap-4 px-6 py-8 text-center md:flex-row md:gap-6"
     >
-      <span className={styles.float} aria-hidden="true">
+      <span className={"bi-float"} aria-hidden="true">
         {STARS.map((s, i) => (
-          <span key={i} className={styles.star} style={{ left: s.left, top: s.top, animationDelay: s.delay }} />
+          <span key={i} className={"bi-star"} style={{ left: s.left, top: s.top, animationDelay: s.delay }} />
         ))}
         {/* eslint-disable-next-line @next/next/no-img-element -- miniatura de 48 px, carregada só perto do rodapé */}
         <img
@@ -81,10 +81,10 @@ export default function BerryInvite({ text, cta, ctaLabel }: { text: string; cta
           height={48}
           loading="lazy"
           decoding="async"
-          className={styles.hop}
-          onAnimationEnd={(e) => e.currentTarget.classList.remove(styles.hopping)}
+          className={"bi-hop"}
+          onAnimationEnd={(e) => e.currentTarget.classList.remove("bi-hopping")}
         />
-        <span ref={spark} className={styles.spark} onAnimationEnd={(e) => delete e.currentTarget.dataset.on} />
+        <span ref={spark} className={"bi-spark"} onAnimationEnd={(e) => delete e.currentTarget.dataset.on} />
       </span>
       <p className="m-0 text-balance text-[15px] text-foreground/85 md:text-base">{text}</p>
       <button
