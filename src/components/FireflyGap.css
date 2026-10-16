@@ -1,0 +1,45 @@
+/* Faixa vazia entre a foto e o texto do Sobre (desktop). Largura da faixa:
+   da borda direita da foto (min da coluna e 85vh * 806/1448) até o início do texto
+   (coluna 7). cqw = largura útil da grade. */
+.ff-layer {
+  container-type: inline-size;
+  --pw: min(41.667cqw - 18.67px, calc(85vh * 806 / 1448));
+  --ts: calc(50cqw + 16px);
+  --bw: calc(var(--ts) - var(--pw));
+}
+.ff-fly {
+  position: absolute;
+  left: calc(var(--pw) + var(--bw) * var(--x));
+  top: var(--y);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffe7b0;
+  box-shadow: 0 0 6px 2px rgba(255, 205, 120, 0.55), 0 0 16px 6px rgba(255, 190, 90, 0.18);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation:
+    firefly-drift var(--d) ease-in-out infinite alternate,
+    firefly-blink var(--b) ease-in-out infinite;
+  animation-delay: var(--o), var(--o);
+}
+.ff-paused .ff-fly {
+  animation-play-state: paused;
+}
+@keyframes firefly-drift {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(calc(var(--bw) * 0.12), -22px); }
+  66% { transform: translate(calc(var(--bw) * -0.1), 14px); }
+  100% { transform: translate(calc(var(--bw) * 0.08), -34px); }
+}
+@keyframes firefly-blink {
+  0%, 100% { opacity: 0; }
+  35%, 55% { opacity: 0.8; }
+  75% { opacity: 0.15; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ff-fly {
+    animation: none;
+    opacity: 0.4;
+  }
+}

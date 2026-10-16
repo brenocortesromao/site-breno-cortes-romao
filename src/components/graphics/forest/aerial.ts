@@ -166,6 +166,30 @@ const CLOSE_AT = 0.7;
 const CLOSE_ANGLE = (40 * Math.PI) / 180;
 /** Distância final até a cabeça (m): cabeça e ombros com ~45% da altura da tela (fov 45°). */
 const CLOSE_DIST = 2.5;
+/**
+ * Telas largas (Sobre com a foto estreita à esquerda e o texto à direita): o urso
+ * fica na faixa vazia entre os dois, menor (cabeça e ombros cabem na faixa) e mais
+ * alto na tela, longe do texto e da foto. Posição vertical em fração da altura (do topo).
+ */
+const WIDE_DIST = 7.6;
+const WIDE_Y = 0.4;
+/**
+ * Fração da largura da tela onde fica a cabeça do urso: o meio da faixa vazia do Sobre
+ * (entre a borda direita da foto e o início do texto, coluna 7), recuado ~0,09 da altura
+ * para o corpo inteiro (o urso olha para a esquerda) caber na faixa. Mesmas medidas do
+ * layout do Sobre (grade de 12 colunas, máx. 1600 px, margens de 48 px; foto limitada a
+ * 85vh * 806/1448); ver também FireflyGap.module.css.
+ */
+function gapHeadFrac() {
+  if (typeof window === "undefined") return 0.4;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const wc = Math.min(vw, 1600) - 96;
+  const photoW = Math.min(wc * 0.41667 - 18.67, vh * 0.473);
+  const textStart = wc * 0.5 + 16;
+  const left = (vw - Math.min(vw, 1600)) / 2 + 48;
+  return (left + (photoW + textStart) / 2 - 0.09 * vh) / vw;
+}
 /** Cabeça estimada (antes do modelo carregar): à frente e no alto do corpo. */
 const HEAD_GUESS = ROCK.clone().addScaledVector(TO_FALL, 0.9).add(new Vector3(0, 0.95, 0));
 /** Giro máximo da cabeça para a câmera (rad), para a máscara não deformar o pescoço. */
@@ -1478,7 +1502,8 @@ ${BEAR_HEAD_GLSL}`)
     const a = easeInOut(t);
     const angle = Math.PI / 2 + (CLOSE_ANGLE - Math.PI / 2) * a;
     // em pé (celular) a tela é estreita: um pouco mais longe, para a cabeça caber parada e virada
-    const dist = 13 + ((camera.aspect < 1 ? 3 : CLOSE_DIST) - 13) * a;
+    const wide = camera.aspect > 1.2;
+    const dist = 13 + ((camera.aspect < 1 ? 3 : wide ? WIDE_DIST : CLOSE_DIST) - 13) * a;
     const { dir, arc, right, look } = this.closeV;
     const head = this.updateFrameHead();
     dir.copy(TO_FALL).multiplyScalar(Math.cos(angle)).addScaledVector(SIDE, Math.sin(angle));
@@ -1487,9 +1512,9 @@ ${BEAR_HEAD_GLSL}`)
     this.camT.lerp(arc, w);
     // olhar: cabeça e ombros, deslocado para pôr o urso à esquerda em telas largas
     const half = Math.tan((camera.fov * Math.PI) / 360) * dist;
-    const side = camera.aspect > 1.2 ? 0.42 * half * camera.aspect : 0;
+    const side = wide ? (1 - 2 * gapHeadFrac()) * half * camera.aspect : 0;
     right.crossVectors(UP, dir).normalize(); // direita de quem olha da câmera para o urso
-    look.copy(head).addScaledVector(UP, -0.22).addScaledVector(right, side);
+    look.copy(head).addScaledVector(UP, wide ? -(1 - 2 * WIDE_Y) * half : -0.22).addScaledVector(right, side);
     // longe do close, o olhar segue a descida; perto, a cabeça
     this.lookT.lerp(look, w);
   }

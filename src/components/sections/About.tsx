@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import AboutPortrait from "@/components/AboutPortrait";
+import FireflyGap from "@/components/FireflyGap";
 import AboutEducation from "@/components/AboutEducation";
 import schools from "../../../public/escolas/escolas.json";
 import AboutStory from "@/components/sections/AboutStory";
@@ -34,6 +35,8 @@ export default async function About({ variant }: { variant: "summary" | "page" }
           isPage ? "pb-[clamp(6rem,16lvh,12rem)] pt-40" : "m-sec-t-forest py-[clamp(6rem,16lvh,12rem)]"
         }`}
       >
+        {/* vaga-lumes na faixa entre a foto e o texto (desktop) */}
+        <FireflyGap />
         {/* celular: retrato acima do rótulo e do nome, centralizado, com ~70% da largura */}
         <div className="max-md:mx-auto max-md:w-[70%] md:col-span-5">
           {/* foto com entrada (linha de luz + cor florescendo), vidro e parallax */}
