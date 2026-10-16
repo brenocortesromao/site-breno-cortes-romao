@@ -1,4 +1,5 @@
 import EmailMenu, { type EmailMenuCopy } from "./EmailMenu";
+import BerryHeaderButton from "@/components/berry/BerryHeaderButton";
 import { MailIcon, WhatsAppIcon } from "./icons";
 
 const link =
@@ -10,17 +11,20 @@ const tip =
 /**
  * Ícones de contato do cabeçalho (depois do seletor PT/EN), em todas as
  * larguras: WhatsApp (mensagem pré-preenchida, nova aba) e e-mail (menu com
- * Gmail, app de e-mail e copiar; endereço montado no cliente, ver EmailMenu).
+ * Gmail, app de e-mail e copiar; endereço montado no cliente, ver EmailMenu) e o
+ * controle de videogame, que abre o jogo do Berry (easter egg).
  * Contorno fino ~18px, prata como o menu, brilho suave e dica no hover.
  */
 export default function HeaderContact({
   whatsappHref,
   whatsappLabel,
   email,
+  berryLabel,
 }: {
   whatsappHref: string;
   whatsappLabel: string;
   email: EmailMenuCopy;
+  berryLabel: string;
 }) {
   return (
     <ul className="flex items-center gap-1">
@@ -39,6 +43,9 @@ export default function HeaderContact({
             E-mail
           </span>
         </EmailMenu>
+      </li>
+      <li>
+        <BerryHeaderButton label={berryLabel} className={link} tipClassName={tip} />
       </li>
     </ul>
   );

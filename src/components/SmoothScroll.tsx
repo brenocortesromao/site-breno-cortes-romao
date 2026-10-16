@@ -36,6 +36,12 @@ export function scrollToY(y: number) {
   }
 }
 
+/** Trava/destrava a rolagem (jogo do Berry aberto): o Lenis para, a posição não muda. */
+export function lockScroll(locked: boolean) {
+  if (locked) instance?.stop();
+  else instance?.start();
+}
+
 /** Salto imediato (sem suavização), pelo Lenis quando ativo. */
 function jumpTo(y: number) {
   window.scrollTo(0, y);

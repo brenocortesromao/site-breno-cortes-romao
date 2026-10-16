@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { bearCredit } from "@/content/bear";
 import { sharkCredit, turtleCredit } from "@/content/oceanCredits";
+import BerryInvite from "@/components/berry/BerryInvite";
 import CreditsPopover from "./CreditsPopover";
 
 /** Rodapé de todas as páginas (montado no layout do idioma). */
@@ -15,6 +16,9 @@ export default async function Footer() {
   ] as const;
 
   return (
+    <>
+    {/* convite do Berry (easter egg), logo acima da linha do copyright */}
+    <BerryInvite text={t("berry.teaser")} cta={t("berry.help")} ctaLabel={t("berry.helpLabel")} />
     <footer className="relative z-10 border-t border-line">
       <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-6 py-6 font-mono text-[10px] uppercase tracking-[0.25em] text-silver md:flex-row md:justify-between md:px-12">
         <span className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
@@ -42,5 +46,6 @@ export default async function Footer() {
         <span>{t("footer.tagline")}</span>
       </div>
     </footer>
+    </>
   );
 }

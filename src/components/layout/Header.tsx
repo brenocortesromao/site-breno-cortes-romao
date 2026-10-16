@@ -60,6 +60,7 @@ export default async function Header() {
           <HeaderContact
             whatsappHref={whatsapp}
             whatsappLabel={t("contact.whatsappLabel")}
+            berryLabel={t("berry.play")}
             email={{
               label: t("contact.emailLabel"),
               subject: t("contact.emailSubject"),

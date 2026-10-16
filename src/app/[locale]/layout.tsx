@@ -16,6 +16,9 @@ import ThemeScroll from "@/components/theme/ThemeScroll";
 import AmbientGlow from "@/components/theme/AmbientGlow";
 import CustomCursor from "@/components/CustomCursor";
 import QualityDebug from "@/components/QualityDebug";
+import BerryProvider from "@/components/berry/BerryProvider";
+import { berryKeys, type BerryCopy } from "@/components/berry/copy";
+import { whatsappUrl } from "@/content/contact";
 import { htmlLang, routing } from "@/i18n/routing";
 
 const geistSans = Geist({
@@ -62,6 +65,8 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
   const site = await getTranslations({ locale, namespace: "site" });
   const meta = await getTranslations({ locale, namespace: "meta" });
   const oneOff = await getTranslations({ locale, namespace: "oneOff" });
+  const berry = await getTranslations({ locale, namespace: "berry" });
+  const berryCopy = Object.fromEntries(berryKeys.map((k) => [k, berry(k)])) as BerryCopy;
 
   return (
     <html
@@ -92,6 +97,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
         />
         <JsonLdScript data={websiteJsonLd({ locale, name: site("name"), description: meta("description") })} />
         <NextIntlClientProvider messages={null}>
+          <BerryProvider config={{ copy: berryCopy, locale, whatsappHref: whatsappUrl(berry("message")) }}>
           <SmoothScroll />
           <ThemeScroll />
           <AmbientGlow />
@@ -106,6 +112,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
             {children}
             <Footer />
           </div>
+          </BerryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

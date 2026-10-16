@@ -28,3 +28,15 @@ export function MailIcon({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+/** Controle de videogame em contorno (desenho próprio, genérico). */
+export function GamepadIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M7.4 7.4h9.2a4.6 4.6 0 0 1 4.5 3.7l.8 4.6a2.7 2.7 0 0 1-4.6 2.3l-2.2-2.6H8.9l-2.2 2.6a2.7 2.7 0 0 1-4.6-2.3l.8-4.6a4.6 4.6 0 0 1 4.5-3.7z" />
+      <path d="M8 10v3.6M6.2 11.8h3.6" />
+      <circle cx="15.3" cy="10.9" r=".55" />
+      <circle cx="17.5" cy="12.9" r=".55" />
+    </svg>
+  );
+}

@@ -1,0 +1,13 @@
+/* Tremidinha curta do controle no hover (uma vez). */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .btn:hover .icon {
+    animation: berry-shake 0.45s ease-in-out 1;
+  }
+}
+@keyframes berry-shake {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(-9deg); }
+  45% { transform: rotate(7deg); }
+  70% { transform: rotate(-4deg); }
+  100% { transform: rotate(0); }
+}
