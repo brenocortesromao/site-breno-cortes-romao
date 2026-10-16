@@ -379,7 +379,7 @@
     "cta": "Se a sua marca está pronta para acompanhar o seu crescimento, o próximo passo começa com uma conversa.",
     "button": "Quero conversar",
     "buttonLabel": "Quero conversar (abre o WhatsApp)",
-    "whatsappMessage": "Olá, Breno! Vi seu site e quero conversar sobre uma parceria para a minha marca."
+    "whatsappMessage": "Olá, Breno! Vi que você está com agenda aberta para novas parcerias e quero entender como funcionaria para a minha empresa."
   },
   "oneOff": {
     "eyebrow": "Sob demanda",
@@ -431,7 +431,7 @@
       }
     ],
     "button": "Falar sobre um projeto",
-    "whatsappMessage": "Oi Breno, tenho um projeto pontual e queria conversar.",
+    "whatsappMessage": "Olá, Breno! Tenho um projeto pontual e queria conversar sobre ele.",
     "buttonLabel": "Falar sobre um projeto (abre o WhatsApp)"
   },
   "faq": {
@@ -518,7 +518,7 @@
     "pending": "[PENDENTE]",
     "whatsapp": "WhatsApp",
     "whatsappLabel": "Conversar no WhatsApp",
-    "whatsappMessage": "Olá, Breno! Vi seu site e quero conversar sobre a marca da minha empresa.",
+    "whatsappMessage": "Olá, Breno! Vim pelo seu site e quero conversar sobre a marca da minha empresa.",
     "emailLabel": "Enviar e-mail",
     "emailSubject": "Conversa sobre a minha marca",
     "emailGmail": "Abrir no Gmail",

@@ -379,7 +379,7 @@
     "cta": "If your brand is ready to keep up with your growth, the next step starts with a conversation.",
     "button": "Let's talk",
     "buttonLabel": "Let's talk (opens WhatsApp)",
-    "whatsappMessage": "Hi Breno! I saw your website and would like to talk about a partnership for my brand."
+    "whatsappMessage": "Hi Breno! I saw you're booking new partnerships and I'd like to understand how it would work for my company."
   },
   "oneOff": {
     "eyebrow": "On demand",
@@ -431,7 +431,7 @@
       }
     ],
     "button": "Talk about a project",
-    "whatsappMessage": "Hi Breno, I have a one-off project and would like to talk.",
+    "whatsappMessage": "Hi Breno! I have a one-off project and would like to talk about it.",
     "buttonLabel": "Talk about a project (opens WhatsApp)"
   },
   "faq": {
@@ -518,7 +518,7 @@
     "pending": "[PENDING]",
     "whatsapp": "WhatsApp",
     "whatsappLabel": "Chat on WhatsApp",
-    "whatsappMessage": "Hi Breno! I saw your website and would like to talk about my company's brand.",
+    "whatsappMessage": "Hi Breno! I came from your website and would like to talk about my company's brand.",
     "emailLabel": "Send an email",
     "emailSubject": "About my brand",
     "emailGmail": "Open in Gmail",
