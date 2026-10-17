@@ -29,7 +29,6 @@ export type FractionalCopy = {
     /** Complemento abaixo do título (texto de apoio); em en é outro texto, não tradução. */
     lead: string;
     items: { prefix: string; value: number; suffix: string; tag: string; foot: string; caption: string }[];
-    support: string;
     source: string;
   };
 };
@@ -358,7 +357,6 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
               {protectTerms(copy.stats.source)}
             </span>
-            <span className="mt-8 block max-w-xl text-base leading-relaxed md:text-lg">{protectTerms(copy.stats.support)}</span>
           </figcaption>
         </figure>
 

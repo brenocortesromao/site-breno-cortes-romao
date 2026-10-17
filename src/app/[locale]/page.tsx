@@ -129,7 +129,6 @@ export default async function Home() {
                 title: t("fractional.stats.title"),
                 lead: t("fractional.stats.lead"),
                 items: t.raw("fractional.stats.items") as FractionalCopy["stats"]["items"],
-                support: t("fractional.stats.support"),
                 source: t("fractional.stats.source"),
               },
               compare: {
