@@ -25,7 +25,8 @@
     "language": "Idioma",
     "switchTo": "Ver o site em {language}",
     "about": "Sobre",
-    "ai": "IA"
+    "ai": "IA",
+    "onDemand": "Sob demanda"
   },
   "languages": {
     "pt": "Português",

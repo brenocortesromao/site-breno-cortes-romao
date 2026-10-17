@@ -15,6 +15,7 @@ const nav = [
   { key: "projects", hash: "trabalhos" },
   { key: "about", hash: "sobre" },
   { key: "ai", hash: "ia" },
+  { key: "onDemand", hash: "projetos-pontuais" },
   { key: "contact", hash: "contato" },
 ] as const;
 
