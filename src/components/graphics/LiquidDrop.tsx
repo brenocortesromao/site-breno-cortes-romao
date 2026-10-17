@@ -36,6 +36,7 @@ void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
 const FRAG = (steps: number) => /* glsl */ `#version 300 es
 precision highp float;
 uniform vec2 uRes;
+uniform float uPad;     // folga do canvas: ele tem uPad vezes o diâmetro da gota
 uniform float uTime;
 uniform float uAngle;
 uniform float uSep;
@@ -123,17 +124,28 @@ float env(vec3 r){
 }
 
 void main(){
-  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / min(uRes.x, uRes.y);
+  // a gota mantém o tamanho: o canvas é uPad vezes maior, o uv se compensa
+  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / (min(uRes.x, uRes.y) / uPad);
   vec3 ro = vec3(0.0, 0.0, 2.7);
   vec3 rd = normalize(vec3(uv * 0.95, -1.6));
-  float t = 0.0;
+  // esfera envolvente (acompanha a entrada profunda): raios que não a cruzam
+  // saem logo, então a folga do canvas quase não custa
+  float eo = 1.0 - uEmerge;
+  vec3 bc = vec3(0.0, -0.55 * eo * eo, -7.0 * eo);
+  vec3 oc = ro - bc;
+  float bb = dot(oc, rd);
+  float disc = bb * bb - (dot(oc, oc) - 1.5 * 1.5);
+  if (disc < 0.0) { outColor = vec4(0.0); return; }
+  float sq = sqrt(disc);
+  float t = max(-bb - sq, 0.0);
+  float tFar = -bb + sq;
   float hit = 0.0;
   for (int i = 0; i < ${steps}; i++) {
     vec3 p = ro + rd * t;
     float d = map(p);
     if (d < 0.0012) { hit = 1.0; break; }
     t += d * 0.8;
-    if (t > 12.0) break;
+    if (t > tFar) break;
   }
   if (hit < 0.5) { outColor = vec4(0.0); return; }
   vec3 p = ro + rd * t;
@@ -152,6 +164,10 @@ void main(){
 
 type Target = { sep: number; ripple: number; noise: number; spin: number; torus: number };
 /** Subida rápida que desacelera ao chegar (ease-out cúbico). */
+/** Folga do canvas (diâmetro da área de render / diâmetro da gota). */
+const PAD = 1.6;
+/** Teto suave: sobe linear e satura em max (sem parar de forma brusca). */
+const softCap = (v: number, max: number) => max * Math.tanh(v / max);
 const easeOut = (x: number) => 1 - (1 - x) ** 3;
 
 const TARGETS: Target[] = [
@@ -195,7 +211,9 @@ export default function LiquidDrop({
     if (!box) return;
     // canvas novo a cada montagem (Strict Mode: contexto anterior já foi perdido)
     const el = document.createElement("canvas");
-    el.className = "h-full w-full";
+    // canvas PAD vezes maior que a gota, centralizado, transparente e sem receber
+    // eventos (a gota continua do mesmo tamanho; a folga deixa a deformação passar)
+    el.style.cssText = `position:absolute;left:${(-(PAD - 1) / 2) * 100}%;top:${(-(PAD - 1) / 2) * 100}%;width:${PAD * 100}%;height:${PAD * 100}%;pointer-events:none`;
     box.appendChild(el);
     const gl = el.getContext("webgl2", { premultipliedAlpha: true, alpha: true, antialias: false });
     if (!gl) {
@@ -236,7 +254,7 @@ export default function LiquidDrop({
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
       const u = (n: string) => gl.getUniformLocation(program, n);
-      const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt"), pull: u("uPull"), stretch: u("uStretch"), wave: u("uWave") };
+      const U = { pad: u("uPad"), res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt"), pull: u("uPull"), stretch: u("uStretch"), wave: u("uWave") };
 
       const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5, maxDpr);
       const resize = () => {
@@ -273,6 +291,7 @@ export default function LiquidDrop({
 
       const draw = () => {
         gl.uniform2f(U.res, el.width, el.height);
+        gl.uniform1f(U.pad, PAD);
         gl.uniform1f(U.time, time);
         gl.uniform1f(U.angle, angle);
         gl.uniform1f(U.sep, s.sep);
@@ -281,9 +300,12 @@ export default function LiquidDrop({
         gl.uniform1f(U.torus, s.torus);
         gl.uniform1f(U.emerge, easeOut(emerge));
         gl.uniform2f(U.tilt, tilt.x, tilt.y);
-        gl.uniform2f(U.pull, pull.x, pull.y);
-        gl.uniform1f(U.stretch, stretch.v);
-        gl.uniform4f(U.wave, wave.x, wave.y, wave.t0, wave.amp);
+        // teto suave de cada efeito: somados ficam dentro da folga do canvas
+        const pm = Math.hypot(pull.x, pull.y);
+        const pk = pm > 1e-4 ? softCap(pm, 0.45) / pm : 0;
+        gl.uniform2f(U.pull, pull.x * pk, pull.y * pk);
+        gl.uniform1f(U.stretch, stretch.v > 0 ? softCap(stretch.v, 0.85) : stretch.v);
+        gl.uniform4f(U.wave, wave.x, wave.y, wave.t0, Math.min(wave.amp, 1));
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -401,8 +423,9 @@ export default function LiquidDrop({
       // onda: clique (mouse) ou toque na gota, a partir do ponto tocado
       const onClick = (ev: MouseEvent) => {
         const r = el.getBoundingClientRect();
-        const ux = (ev.clientX - (r.left + r.width / 2)) / Math.min(r.width, r.height);
-        const uy = -(ev.clientY - (r.top + r.height / 2)) / Math.min(r.width, r.height);
+        // uv no espaço do shader (o canvas é PAD vezes maior que a gota)
+        const ux = ((ev.clientX - (r.left + r.width / 2)) / Math.min(r.width, r.height)) * PAD;
+        const uy = (-(ev.clientY - (r.top + r.height / 2)) / Math.min(r.width, r.height)) * PAD;
         if (Math.hypot(ux, uy) > 0.5) return;
         Object.assign(wave, { x: ux * 1.6, y: uy * 1.6, t0: time, amp: 1 });
       };
@@ -464,5 +487,5 @@ export default function LiquidDrop({
     };
   }, [stageRef, light, maxDpr, reduceMotion, onLost]);
 
-  return <div ref={host} aria-hidden="true" className={className} />;
+  return <div ref={host} aria-hidden="true" className={`relative ${className}`} />;
 }
