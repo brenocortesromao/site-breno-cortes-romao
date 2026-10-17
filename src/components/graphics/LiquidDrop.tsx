@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import { enableParallelCompile, programReady } from "@/lib/warmup";
-import { isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
+import { isMobileUI, isTouchScrolling, stableResizeObserver } from "@/lib/mobile";
 
 /**
  * Gota de metal líquido cromado (WebGL2, sem bibliotecas), para "Como funciona".
@@ -44,6 +44,9 @@ uniform float uNoise;
 uniform float uTorus;
 uniform float uEmerge;
 uniform vec2 uTilt;
+uniform vec2 uPull;     // atração do cursor (direção * intensidade, espaço da tela)
+uniform float uStretch; // squash and stretch da rolagem (>0 estica na vertical)
+uniform vec4 uWave;     // onda do clique: xy do ponto, tempo de início, amplitude
 out vec4 outColor;
 
 mat3 rotY(float a){ float c=cos(a), s=sin(a); return mat3(c,0.,-s, 0.,1.,0., s,0.,c); }
@@ -79,7 +82,19 @@ float map(vec3 p){
   float e = 1.0 - uEmerge;
   p -= vec3(0.0, -0.55 * e * e, -7.0 * e);
   float b = 1.0 + 0.035 * sin(uTime * 1.25) + 0.012 * sin(uTime * 2.9 + 1.3);
-  return shape(p / b) * b;
+  // interações (tudo zerado em repouso): tremor, atração, esticar, onda
+  float age = uTime - uWave.z;
+  p.xy += uWave.w * 0.018 * sin(age * 55.0) * exp(-age * 7.0) * vec2(1.0, 0.8);
+  float pl = length(uPull);
+  if (pl > 0.001) { vec2 dn = uPull / pl; p.xy -= uPull * 0.5 * smoothstep(-0.15, 0.65, dot(p.xy, dn)); }
+  float st = clamp(uStretch, -0.5, 1.0);
+  p.y /= 1.0 + 0.4 * st;
+  p.xz *= 1.0 + 0.18 * st;
+  float d = shape(p / b) * b;
+  float rr = length(p.xy - uWave.xy);
+  float front = age * 1.6;
+  d -= uWave.w * 0.05 * sin(26.0 * (rr - front)) * exp(-(rr - front) * (rr - front) * 6.0) * exp(-age * 1.2);
+  return d * (1.0 - 0.3 * clamp(pl + abs(st) + uWave.w, 0.0, 1.0));
 }
 
 vec3 normalAt(vec3 p){
@@ -221,7 +236,7 @@ export default function LiquidDrop({
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
       const u = (n: string) => gl.getUniformLocation(program, n);
-      const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt") };
+      const U = { res: u("uRes"), time: u("uTime"), angle: u("uAngle"), sep: u("uSep"), ripple: u("uRipple"), noise: u("uNoise"), torus: u("uTorus"), emerge: u("uEmerge"), tilt: u("uTilt"), pull: u("uPull"), stretch: u("uStretch"), wave: u("uWave") };
 
       const dpr = Math.min(window.devicePixelRatio || 1, light ? 1 : 1.5, maxDpr);
       const resize = () => {
@@ -242,6 +257,14 @@ export default function LiquidDrop({
       let emerging = false;
       const tilt = { x: 0, y: 0 };
       const pointer = { x: 0, y: 0 };
+      // interações: molas amortecidas (atração, esticar) e onda do clique
+      const mobileUI = isMobileUI();
+      const pull = { x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0 };
+      const stretch = { v: 0, vel: 0 };
+      const wave = { x: 0, y: 0, t0: -100, amp: 0 };
+      let lastY = window.scrollY;
+      let vScroll = 0;
+      let frozen = false;
       /** Desfoque + opacidade do canvas acompanham a subida. */
       const styleEmerge = (e: number) => {
         el.style.filter = e >= 1 ? "" : `blur(${((1 - e) * 16).toFixed(2)}px)`;
@@ -258,6 +281,9 @@ export default function LiquidDrop({
         gl.uniform1f(U.torus, s.torus);
         gl.uniform1f(U.emerge, easeOut(emerge));
         gl.uniform2f(U.tilt, tilt.x, tilt.y);
+        gl.uniform2f(U.pull, pull.x, pull.y);
+        gl.uniform1f(U.stretch, stretch.v);
+        gl.uniform4f(U.wave, wave.x, wave.y, wave.t0, wave.amp);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -290,7 +316,10 @@ export default function LiquidDrop({
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
         // celular: congela o quadro enquanto o dedo rola a página (lib/mobile)
-        if (isTouchScrolling()) return;
+        if (isTouchScrolling()) {
+          frozen = true;
+          return;
+        }
         const stage = Math.min(Math.max(stageRef.current ?? 0, 0), TARGETS.length - 1);
         if (stage !== lastStage) {
           // ao (re)entrar na Conversa, as duas gotas recomeçam afastadas
@@ -305,6 +334,28 @@ export default function LiquidDrop({
         s.noise += (tgt.noise - s.noise) * k;
         s.spin += (tgt.spin - s.spin) * k;
         s.torus += (tgt.torus - s.torus) * (1 - Math.exp(-dt * 1.6));
+        // rolagem: no desktop a gota estica com a velocidade; no celular só depois
+        // que a rolagem para (impulso pelo deslocamento + balanço de gelatina)
+        const y = window.scrollY;
+        const dy = y - lastY;
+        lastY = y;
+        if (mobileUI) {
+          if (frozen) stretch.vel += Math.min(Math.abs(dy) / 900, 1) * 9;
+          vScroll = 0;
+        } else {
+          vScroll += (dy / Math.max(dt, 0.001) - vScroll) * (1 - Math.exp(-dt * 12));
+        }
+        frozen = false;
+        const sTarget = mobileUI ? 0 : Math.min(Math.abs(vScroll) / 2500, 1) * 0.8;
+        stretch.vel += (-70 * (stretch.v - sTarget) - 7 * stretch.vel) * dt;
+        stretch.v += stretch.vel * dt;
+        stretch.v = Math.max(-0.5, Math.min(1, stretch.v));
+        // atração do cursor: mola amortecida (balança ao voltar)
+        pull.vx += (-60 * (pull.x - pull.tx) - 6 * pull.vx) * dt;
+        pull.vy += (-60 * (pull.y - pull.ty) - 6 * pull.vy) * dt;
+        pull.x += pull.vx * dt;
+        pull.y += pull.vy * dt;
+        if (wave.amp > 0 && time - wave.t0 > 3.2) wave.amp = 0;
         angle += s.spin * dt;
         time += dt;
         if (emerging && emerge < 1) {
@@ -325,6 +376,37 @@ export default function LiquidDrop({
         pointer.y = Math.max(-1, Math.min(1, (ev.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
       };
       if (!light) window.addEventListener("pointermove", onPointer, { passive: true });
+      // atração: cursor a até ~250 px do centro puxa a superfície (ponteiro fino)
+      const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      const onPull = (ev: PointerEvent) => {
+        if (ev.pointerType !== "mouse") return;
+        const r = el.getBoundingClientRect();
+        const dx = ev.clientX - (r.left + r.width / 2);
+        const dy = ev.clientY - (r.top + r.height / 2);
+        const dist = Math.hypot(dx, dy);
+        const k = Math.max(0, 1 - dist / 250);
+        // intensidade proporcional à proximidade; some no centro (direção instável)
+        const m = dist > 1 ? (0.45 * k * Math.min(1, dist / 100)) / dist : 0;
+        pull.tx = dx * m;
+        pull.ty = -dy * m;
+      };
+      const onLeave = () => {
+        pull.tx = 0;
+        pull.ty = 0;
+      };
+      if (finePointer && !light) {
+        window.addEventListener("pointermove", onPull, { passive: true });
+        document.documentElement.addEventListener("pointerleave", onLeave);
+      }
+      // onda: clique (mouse) ou toque na gota, a partir do ponto tocado
+      const onClick = (ev: MouseEvent) => {
+        const r = el.getBoundingClientRect();
+        const ux = (ev.clientX - (r.left + r.width / 2)) / Math.min(r.width, r.height);
+        const uy = -(ev.clientY - (r.top + r.height / 2)) / Math.min(r.width, r.height);
+        if (Math.hypot(ux, uy) > 0.5) return;
+        Object.assign(wave, { x: ux * 1.6, y: uy * 1.6, t0: time, amp: 1 });
+      };
+      window.addEventListener("click", onClick, { passive: true });
       styleEmerge(0);
 
       const io = new IntersectionObserver(
@@ -349,6 +431,9 @@ export default function LiquidDrop({
       return () => {
         cancelAnimationFrame(raf);
         window.removeEventListener("pointermove", onPointer);
+        window.removeEventListener("pointermove", onPull);
+        window.removeEventListener("click", onClick);
+        document.documentElement.removeEventListener("pointerleave", onLeave);
         el.removeEventListener("webglcontextlost", handleLost);
         io.disconnect();
         ro.disconnect();
