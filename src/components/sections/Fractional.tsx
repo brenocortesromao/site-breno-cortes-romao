@@ -37,10 +37,8 @@ export type FractionalCopy = {
 /** Índice da coluna em destaque (Fractional). */
 const HIGHLIGHT = 2;
 
-/** Cartão da coluna em destaque: um pouco mais claro que o fundo (no preto;
- *  no off-white, um pouco mais escuro), borda prata fina e brilho suave. */
-const CARD =
-  "rounded-2xl border border-silver/45 bg-[color-mix(in_srgb,var(--fg)_6%,var(--bg))] shadow-[0_0_48px_-6px_color-mix(in_srgb,var(--fg)_16%,transparent)]";
+/** Cartão da coluna em destaque: vidro líquido (ver .glass-card em globals.css). */
+const CARD = "glass-card";
 
 /** Faixa de luz que passa uma vez pelo cartão no fim da entrada. */
 function CardShine() {
@@ -48,7 +46,7 @@ function CardShine() {
     <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
       <span
         data-fx-shine
-        className="absolute inset-y-0 left-0 w-2/3 opacity-0 bg-[linear-gradient(105deg,transparent_20%,color-mix(in_srgb,var(--fg)_16%,transparent)_50%,transparent_80%)]"
+        className="absolute inset-y-0 left-0 w-2/3 opacity-0 bg-[linear-gradient(115deg,transparent_30%,rgb(255_255_255/0.7)_50%,transparent_70%)]"
       />
     </span>
   );
@@ -207,6 +205,23 @@ function CriteriaCarousel({ columns, rows }: { columns: string[]; rows: Row[] })
 export default function Fractional({ copy }: { copy: FractionalCopy }) {
   const root = useRef<HTMLElement>(null);
   const board = useRef<HTMLDivElement>(null);
+  const glass = useRef<HTMLDivElement>(null);
+
+  // reflexo do cursor no vidro (CSS só o mostra em desktop com mouse)
+  const onGlassMove = (e: React.PointerEvent) => {
+    const el = glass.current;
+    if (!el || e.pointerType !== "mouse") return;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    const inside = x >= 0 && y >= 0 && x <= r.width && y <= r.height;
+    if (inside) {
+      el.style.setProperty("--mx", `${x}px`);
+      el.style.setProperty("--my", `${y}px`);
+      el.setAttribute("data-lit", "");
+    } else el.removeAttribute("data-lit");
+  };
+  const onGlassLeave = () => glass.current?.removeAttribute("data-lit");
 
   useGSAP(
     () => {
@@ -338,8 +353,8 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           {/* Desktop: tabela semântica; o cartão da coluna em destaque fica atrás
               dela (colunas: rótulos 22%, modelos 26% cada) */}
           {/* (no mobile a tabela fica só para leitores de tela: sr-only) */}
-          <div className="relative max-md:sr-only">
-            <div data-col={HIGHLIGHT} aria-hidden="true" className={`absolute -bottom-2 -top-3 left-[74%] w-[26%] ${CARD}`}>
+          <div className="relative max-md:sr-only" onPointerMove={onGlassMove} onPointerLeave={onGlassLeave}>
+            <div ref={glass} data-col={HIGHLIGHT} aria-hidden="true" className={`absolute -bottom-2 -top-3 left-[74%] w-[26%] ${CARD}`}>
               <CardShine />
             </div>
           <table className="relative w-full table-fixed border-collapse text-left">
@@ -358,7 +373,7 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
                   >
                     {c === HIGHLIGHT ? (
                       <>
-                        <span aria-hidden="true" className="mb-2 block font-mono text-[10px] font-normal uppercase tracking-[0.28em] text-silver">
+                        <span aria-hidden="true" className="glass-pill mb-2 font-mono text-[10px] font-normal uppercase tracking-[0.28em] text-silver">
                           {copy.compare.highlightLabel}
                         </span>
                         <span className="text-silver-gradient">{protectTerms(col)}</span>

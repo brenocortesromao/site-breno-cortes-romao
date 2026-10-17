@@ -529,3 +529,74 @@ html.custom-cursor * {
     background-size: 300vw 100lvh;
   }
 }
+
+/* Fractional: coluna em "vidro líquido" (comparativo, fundo claro). Desfoca as
+   curvas de nível atrás; borda com reflexo (gradiente mascarado), brilho interno
+   e sombra baixa. Fallback sem backdrop-filter: branco a 70%. */
+.glass-card {
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 0.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -10px 18px -12px rgb(0 0 0 / 0.12),
+    0 18px 40px -18px rgb(0 0 0 / 0.22);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-card {
+    background: rgb(255 255 255 / 0.4);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    backdrop-filter: blur(10px) saturate(1.15);
+  }
+  @media (min-width: 768px) {
+    .glass-card {
+      -webkit-backdrop-filter: blur(18px) saturate(1.15);
+      backdrop-filter: blur(18px) saturate(1.15);
+    }
+  }
+}
+.glass-card::before,
+.glass-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.35) 35%, rgb(255 255 255 / 0) 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* reflexo que acompanha o cursor: só desktop com mouse */
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 30%), rgb(255 255 255 / 0.55), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .glass-card[data-lit]::after {
+    opacity: 1;
+  }
+}
+.glass-pill {
+  position: relative;
+  display: block;
+  width: fit-content;
+  border-radius: 9999px;
+  padding: 0.3rem 0.7rem;
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 6px 14px -8px rgb(0 0 0 / 0.25);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-pill {
+    background: rgb(255 255 255 / 0.4);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}
