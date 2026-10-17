@@ -130,17 +130,21 @@
           "prefix": "+",
           "value": 313,
           "suffix": "%",
+          "tag": "[01] FRACTIONAL PROFESSIONALS · WORLDWIDE",
+          "foot": "2019 → 2026",
           "caption": "fractional professionals worldwide since 2019"
         },
         {
           "prefix": "",
           "value": 97,
           "suffix": "%",
+          "tag": "[02] FRACTIONAL ROLES · US",
+          "foot": "SMALL AND MID-SIZED COMPANIES",
           "caption": "of fractional roles in the US come from small and mid-sized companies"
         }
       ],
       "support": "And it's not just for multinationals. It's the model for companies that are growing and need senior leadership without growing the team.",
-      "source": "Source: Lightcast, The Rise of Fractional Leadership (2026)."
+      "source": "Source · Lightcast, The Rise of Fractional Leadership (2026)"
     },
     "compare": {
       "caption": "Comparison between agency, executive hire and fractional",

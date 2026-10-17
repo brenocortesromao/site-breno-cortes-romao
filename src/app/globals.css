@@ -695,3 +695,21 @@ html.custom-cursor * {
     transform: none;
   }
 }
+
+/* Cantos marcados dos painéis de dados (Fractional): 4 "L" de 10px nos cantos,
+   por cima da moldura de 1px. */
+.panel-ticks {
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  --t: var(--fg);
+  background:
+    linear-gradient(var(--t), var(--t)) top left / 10px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) top left / 1px 10px no-repeat,
+    linear-gradient(var(--t), var(--t)) top right / 10px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) top right / 1px 10px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom left / 10px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom left / 1px 10px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom right / 10px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom right / 1px 10px no-repeat;
+}

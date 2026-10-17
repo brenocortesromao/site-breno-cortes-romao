@@ -28,7 +28,7 @@ export type FractionalCopy = {
     title: string;
     /** Complemento abaixo do título (texto de apoio); em en é outro texto, não tradução. */
     lead: string;
-    items: { prefix: string; value: number; suffix: string; caption: string }[];
+    items: { prefix: string; value: number; suffix: string; tag: string; foot: string; caption: string }[];
     support: string;
     source: string;
   };
@@ -248,6 +248,8 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
             i * 0.25,
           );
         });
+        // barras de progresso enchem junto com a contagem
+        numbers.from("[data-bar]", { scaleX: 0, duration: 2, ease: "power3.out", stagger: 0.25 }, 0.25);
         numbers
           .set("[data-num-shine]", { opacity: 1 })
           .fromTo(
@@ -310,19 +312,21 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
           </p>
         </div>
 
-        {/* Dados verificados: dois números gigantes (empilhados no mobile) */}
-        <figure data-stats className="m-g40 mt-16 md:mt-24">
-          <h3 className="m-center text-[clamp(1.4rem,2.2vw,2.2rem)] font-semibold tracking-[-0.035em]">
+        {/* Dados verificados: painel de leitura, dois quadros com cantos marcados */}
+        <figure data-stats className="m-g40 mt-12 md:mt-16">
+          <h3 className="m-center text-[clamp(1rem,1.55vw,1.55rem)] font-semibold tracking-[-0.03em]">
             {protectTerms(copy.stats.title)}
           </h3>
-          <p className="m-center-p mt-3 max-w-2xl text-base leading-relaxed text-silver md:text-[17px]">
+          <p className="m-center-p mt-2 max-w-2xl text-sm leading-relaxed text-silver md:text-[12px]">
             {protectTerms(copy.stats.lead)}
           </p>
-          <div className="mt-8 grid gap-10 border-t border-line pt-8 md:grid-cols-2 md:gap-8">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 md:gap-6">
             {copy.stats.items.map((stat) => (
-              <div key={stat.caption} data-stat>
-                {/* número primeiro, legenda depois: mesma linha de base nos dois */}
-                <p className="relative w-fit text-[clamp(4.5rem,11vw,10rem)] max-md:mx-auto font-semibold leading-[0.9] tracking-[-0.06em] tabular-nums">
+              <div key={stat.caption} data-stat className="relative border border-line p-5 md:p-6">
+                <span aria-hidden="true" className="panel-ticks" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-silver">{stat.tag}</p>
+                {/* número, legenda e barra: o HTML já traz o valor final */}
+                <p className="relative mt-4 w-fit text-[clamp(2.25rem,5.5vw,5rem)] font-semibold leading-[0.9] tracking-[-0.06em] tabular-nums">
                   <span className="black-chrome">
                     {stat.prefix}
                     <span data-count={stat.value}>{stat.value}</span>
@@ -335,17 +339,26 @@ export default function Fractional({ copy }: { copy: FractionalCopy }) {
                     {stat.suffix}
                   </span>
                 </p>
-                <p className="m-center-p mt-3 max-w-sm text-sm leading-relaxed text-silver md:text-base">
-                  {protectTerms(stat.caption)}
-                </p>
+                <div aria-hidden="true" className="relative mt-4 flex h-3 items-center gap-2">
+                  <div className="h-[2px] flex-1 bg-line">
+                    <div
+                      data-bar
+                      className="h-full origin-left bg-foreground"
+                      style={{ width: `${Math.min(stat.value, 100)}%` }}
+                    />
+                  </div>
+                  {stat.value > 100 && <span className="font-mono text-[11px] leading-none text-foreground">+</span>}
+                </div>
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-silver">{stat.foot}</p>
+                <p className="mt-3 max-w-sm text-sm leading-relaxed text-silver">{protectTerms(stat.caption)}</p>
               </div>
             ))}
           </div>
-          <figcaption className="m-center-p mt-10 max-w-2xl">
-            <span className="block text-base leading-relaxed md:text-lg">{protectTerms(copy.stats.support)}</span>
-            <span className="mt-3 block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
+          <figcaption className="m-center-p mt-4 max-w-2xl">
+            <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-silver">
               {protectTerms(copy.stats.source)}
             </span>
+            <span className="mt-8 block max-w-xl text-base leading-relaxed md:text-lg">{protectTerms(copy.stats.support)}</span>
           </figcaption>
         </figure>
 

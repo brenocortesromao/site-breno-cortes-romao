@@ -130,12 +130,16 @@
           "prefix": "+",
           "value": 313,
           "suffix": "%",
+          "tag": "[01] PROFISSIONAIS FRACTIONAL · MUNDO",
+          "foot": "2019 → 2026",
           "caption": "profissionais fractional no mundo desde 2019"
         },
         {
           "prefix": "",
           "value": 97,
           "suffix": "%",
+          "tag": "[02] VAGAS FRACTIONAL · EUA",
+          "foot": "PEQUENAS E MÉDIAS EMPRESAS",
           "caption": "das vagas fractional nos EUA vêm de empresas pequenas e médias"
         }
       ],
