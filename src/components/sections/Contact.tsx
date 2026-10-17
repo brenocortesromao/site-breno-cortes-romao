@@ -4,9 +4,10 @@ import EmailMenu from "@/components/contact/EmailMenu";
 import MediaKitLink from "@/components/contact/MediaKitLink";
 import SpaceBackdrop from "@/components/graphics/SpaceBackdrop";
 import { protectTerms } from "@/components/Term";
+import GlassPointer from "@/components/contact/GlassPointer";
 
 const button =
-  "inline-flex h-full min-h-[4.5rem] items-center justify-between gap-6 max-md:justify-center max-md:text-center border px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors";
+  "inline-flex h-full min-h-[4.5rem] lg-btn items-center justify-between gap-6 max-md:justify-center max-md:text-center px-6 py-4 font-mono text-[11px] uppercase tracking-[0.24em] transition-colors";
 
 /**
  * Contato (§14). Botões: WhatsApp (principal, mensagem pré-preenchida), E-mail (menu com Gmail, app de e-mail e
@@ -28,7 +29,7 @@ export default async function Contact() {
         <p className="m-center-p m-g20 mt-12 max-w-xl text-base leading-relaxed text-silver md:text-lg">{protectTerms(t("text"))}</p>
 
         {/* WhatsApp (principal) na linha inteira; E-mail e Mídia kit lado a lado */}
-        <ul className="m-g40 mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2">
+        <ul id="contato-botoes" className="m-g40 mt-14 grid gap-4 md:max-w-4xl md:auto-rows-fr md:grid-cols-2">
           <li className="md:col-span-2">
             <a
               href={whatsappUrl(t("whatsappMessage"))}
@@ -36,7 +37,7 @@ export default async function Contact() {
               rel="noopener noreferrer"
               aria-label={t("whatsappLabel")}
               data-warp
-              className={`${button} w-full border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground`}
+              className={`${button} w-full lg-btn--primary text-[#0b0b0c]`}
             >
               {t("whatsapp")} <span aria-hidden="true">↗</span>
             </a>
@@ -53,13 +54,13 @@ export default async function Contact() {
               }}
               align="left"
               wrapClassName="h-full w-full"
-              className={`${button} w-full border-line hover:border-foreground`}
+              className={`${button} w-full lg-btn--dark`}
             >
               {t("email")} <span aria-hidden="true">→</span>
             </EmailMenu>
           </li>
           <li>
-            <MediaKitLink className={`${button} w-full border-line hover:border-foreground`}>
+            <MediaKitLink className={`${button} w-full lg-btn--dark`}>
               {t("mediaKit")}
               <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.4">
                 <path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M2.5 13.5h11" />
@@ -67,6 +68,7 @@ export default async function Contact() {
             </MediaKitLink>
           </li>
         </ul>
+        <GlassPointer rootId="contato-botoes" />
       </div>
     </section>
   );
