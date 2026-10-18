@@ -22,6 +22,7 @@ import { isTouchScrolling, onScrollingChange } from "@/lib/mobile";
  * `active={false}` desliga o efeito (ex.: durante a entrada da foto).
  * `touchMode="glare"`: no toque, sem inclinação; o reflexo atravessa a foto
  * acompanhando o scroll (retrato do Sobre).
+ * `maxDeg`: inclinação máxima (padrão MAX_DEG).
  */
 
 const MAX_DEG = 7;
@@ -36,6 +37,7 @@ export default function TiltCard({
   overlay,
   active = true,
   touchMode = "tilt",
+  maxDeg = MAX_DEG,
 }: {
   ref?: Ref<HTMLDivElement>;
   children: ReactNode;
@@ -50,6 +52,8 @@ export default function TiltCard({
   active?: boolean;
   /** Toque: "tilt" (inclina com scroll/giroscópio) ou "glare" (só o reflexo passa com o scroll). */
   touchMode?: "tilt" | "glare";
+  /** Inclinação máxima em graus (padrão 7). */
+  maxDeg?: number;
 }) {
   const card = useRef<HTMLDivElement>(null);
   const glare = useRef<HTMLDivElement>(null);
@@ -76,7 +80,7 @@ export default function TiltCard({
         shine.style.opacity = "0.7";
         return;
       }
-      el.style.transform = `rotateX(${(-cur.y * MAX_DEG).toFixed(3)}deg) rotateY(${(cur.x * MAX_DEG).toFixed(3)}deg)`;
+      el.style.transform = `rotateX(${(-cur.y * maxDeg).toFixed(3)}deg) rotateY(${(cur.x * maxDeg).toFixed(3)}deg)`;
       // o reflexo corre na direção oposta à inclinação, como luz fixa num vidro
       shine.style.backgroundPosition = `${50 - cur.x * 40}% ${50 - cur.y * 40}%`;
       const strength = Math.min(1, Math.hypot(cur.x, cur.y));
@@ -191,7 +195,7 @@ export default function TiltCard({
       cancelAnimationFrame(raf);
       off.forEach((fn) => fn());
     };
-  }, [active, touchMode]);
+  }, [active, touchMode, maxDeg]);
 
   return (
     <div ref={ref} className={`[perspective:1000px] ${className}`}>

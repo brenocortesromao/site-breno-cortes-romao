@@ -6,21 +6,29 @@
  *   inline-block vazio no início de cada palavra). Refaz no resize.
  * - Partículas (o mesmo ponto da esfera, modelScene.ts) começam espalhadas
  *   como poeira em volta e se juntam nas letras, palavra por palavra, da
- *   esquerda para a direita (~1,6 s no total). Quando a palavra se completa,
- *   `onWord(k)` (o texto real aparece) e as partículas dela somem em fade.
+ *   esquerda para a direita (~0,6 s no total). Quando a palavra se completa,
+ *   `onWord(k)` (o texto real aparece) e as partículas dela somem em fade;
+ *   com a última pronta, `onAssembled()` (sem esperar o fade).
+ * - Cor dos pontos: a do texto do tema vivo (--fg), como o título real: o
+ *   título pode se formar ainda durante a troca claro → escuro do scroll.
  * - Poeira extra flutua em volta; `drip()` faz parte dela escorrer para baixo
  *   em direção à esfera (some antes de chegar) e o resto apagar; ao terminar,
  *   `onDone()`.
  */
 
+import { liveTheme } from "@/components/theme/themes";
+
 const B = 5;
-/** Montagem de cada palavra (s), duração total buscada (s) e espalhamento dentro da palavra (s). */
-const WORD_S = 0.9;
-const TOTAL_S = 1.6;
-const SPREAD_S = 0.12;
+/**
+ * Montagem de cada palavra (s), início da última palavra + montagem (s) e
+ * espalhamento dentro da palavra (s): a última fica pronta em TOTAL_S + SPREAD_S.
+ */
+const WORD_S = 0.32;
+const TOTAL_S = 0.55;
+const SPREAD_S = 0.05;
 /** Fade das partículas da palavra pronta (s) e duração do escorrer (s). */
-const FADE_S = 0.45;
-const DRIP_S = 1.1;
+const FADE_S = 0.3;
+const DRIP_S = 0.8;
 /** Teto de partículas nas letras (o passo da amostra cresce até caber). */
 const MAX_LETTER = 1800;
 
@@ -31,12 +39,22 @@ type Opts = {
   /** Centro da esfera, em coordenadas da página (getBoundingClientRect). */
   sphere: () => { x: number; y: number };
   onWord: (k: number) => void;
-  /** Todas as palavras prontas e as partículas delas apagadas. */
+  /** Todas as palavras prontas (as partículas ainda apagando). */
   onAssembled: () => void;
   onDone: () => void;
 };
 
 const easeInOut = (q: number) => (q < 0.5 ? 4 * q * q * q : 1 - Math.pow(-2 * q + 2, 3) / 2);
+/** Cor do texto do tema vivo como "r,g,b" (hex do tema ou rgba interpolado). */
+function fgRgb() {
+  const v = (liveTheme.get("fg") || getComputedStyle(document.documentElement).getPropertyValue("--fg")).trim();
+  const m = v.match(/rgba?(([^)]+))/);
+  if (m) return m[1].split(",").slice(0, 3).map((x) => Math.round(parseFloat(x))).join(",");
+  const h = v.replace("#", "");
+  if (h.length === 6) return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(",");
+  return "228,232,242";
+}
+
 const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
 
 export function playTitleParticles(o: Opts) {
@@ -199,8 +217,9 @@ export function playTitleParticles(o: Opts) {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
+    const rgb = fgRgb();
     for (let b = 0; b < B; b++) {
-      ctx.fillStyle = `rgba(228,232,242,${(((b + 1) / B) * 0.85).toFixed(3)})`;
+      ctx.fillStyle = `rgba(${rgb},${(((b + 1) / B) * 0.85).toFixed(3)})`;
       const arr = buf[b], n = cnt[b] * 2;
       for (let k = 0; k < n; k += 2) ctx.fillRect(arr[k], arr[k + 1], 1.15, 1.15);
     }
@@ -210,7 +229,7 @@ export function playTitleParticles(o: Opts) {
         wordDone[k] = true;
         o.onWord(k);
       }
-    if (!assembled && t >= doneAt(W_N - 1) + FADE_S) {
+    if (!assembled && t >= doneAt(W_N - 1)) {
       assembled = true;
       o.onAssembled();
     }

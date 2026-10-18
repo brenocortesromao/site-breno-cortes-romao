@@ -787,32 +787,64 @@ html.custom-cursor * {
   }
 }
 
-/* Caixas: vidro leve e neutro (grafite quase transparente, sem tom azulado):
-   gradiente bem sutil, borda de 1px com brilho só em cima (inset), sombra
-   externa suave e desfoque baixo (as curvas do fundo aparecem por trás).
-   ::before = brilho que segue o mouse (--mx/--my).
-   Foco: a caixa sob o mouse clareia (fundo e borda) e as outras 5 caem para
-   0,55 de opacidade (o anel da esfera acende a fração dela, modelScene.ts). */
+/* Caixas: vidro líquido 3D (mesma linguagem do .glass-card e do .lg-btn).
+   - Espessura: luz forte na borda de cima e na lateral esquerda, sombra
+     interna sutil embaixo e à direita (inset em camadas) e borda de 1px em
+     gradiente, branca em cima e quase transparente embaixo (::after).
+   - Refração: com [data-lens] na seção (desktop em nível alto, Chromium), o
+     fundo atrás é deslocado perto das bordas pelo filtro SVG #fm-lens
+     (FractionalModel.tsx). Sem ele: desfoque com saturação.
+   - Reflexo: brilho especular que segue o mouse (::before, --mx/--my) e
+     faixa diagonal fixa no topo (camada de fundo).
+   - 3D: TiltCard inclina até 6° no hover; a caixa sobe 4px e a sombra
+     externa alonga. Sem inclinação no celular, nível baixo e reduced motion.
+   Foco: a caixa sob o mouse clareia e as outras 5 caem para 0,55 de
+   opacidade (o anel da esfera acende a fração dela, modelScene.ts). */
 .fm-card {
   position: relative;
   overflow: hidden;
   pointer-events: auto;
   padding: 18px 20px;
-  border-radius: 22px;
-  border: 1px solid rgb(255 255 255 / 0.08);
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.03));
+  border-radius: 24px;
+  background:
+    linear-gradient(115deg, transparent 18%, rgb(255 255 255 / 0.07) 30%, rgb(255 255 255 / 0.02) 38%, transparent 46%) top / 100% 46% no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.025));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.14),
-    0 18px 40px -26px rgb(0 0 0 / 0.7);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 1px 0 0 rgb(255 255 255 / 0.16),
+    inset 0 10px 18px -12px rgb(255 255 255 / 0.1),
+    inset -1px 0 0 rgb(0 0 0 / 0.35),
+    inset 0 -1px 0 rgb(0 0 0 / 0.4),
+    inset -10px -12px 22px -16px rgb(0 0 0 / 0.55),
+    0 16px 34px -22px rgb(0 0 0 / 0.75);
+  -webkit-backdrop-filter: blur(6px) saturate(1.4);
+  backdrop-filter: blur(6px) saturate(1.4);
+  /* chegada: 0,55 s (opacidade, desfoque e encaixe com quique) */
   transition:
-    opacity 0.5s ease,
-    filter 0.6s ease,
-    transform 0.85s cubic-bezier(0.2, 1.35, 0.32, 1),
+    opacity 0.55s ease,
+    filter 0.55s ease,
+    transform 0.55s cubic-bezier(0.2, 1.35, 0.32, 1),
     background-color 0.35s,
-    border-color 0.35s,
-    box-shadow 0.35s;
+    box-shadow 0.45s ease;
+}
+.fm[data-lens] .fm-card {
+  -webkit-backdrop-filter: url(#fm-lens);
+  backdrop-filter: url(#fm-lens);
+}
+.fm-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.14) 45%, rgb(255 255 255 / 0.04));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0.75;
+  transition: opacity 0.35s;
+  pointer-events: none;
 }
 .fm-card::before {
   content: "";
@@ -821,32 +853,40 @@ html.custom-cursor * {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s;
-  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgb(255 255 255 / 0.08), transparent 60%);
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.03) 40%, transparent 65%);
 }
-.fm-card:hover::before {
+.fm-card:hover::before,
+.fm-card:hover::after {
   opacity: 1;
 }
-/* estado escondido só com a cena armada no cliente (sem JS: visíveis) */
+/* estado escondido só com a cena armada no cliente (sem JS: visíveis); sem
+   ponteiro antes de chegar (nem inclinação nem reflexo numa caixa invisível) */
 .fm[data-armed] .fm-card {
   opacity: 0;
   transform: translateY(-16px) scale(0.92);
   filter: blur(10px);
+  pointer-events: none;
 }
 .fm[data-armed] .fm-card[data-show] {
   opacity: 1;
   transform: none;
   filter: none;
+  pointer-events: auto;
 }
 .fm-card:hover {
   background-color: rgb(255 255 255 / 0.035);
-  border-color: rgb(255 255 255 / 0.16);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    0 22px 46px -26px rgb(0 0 0 / 0.75);
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    inset 1px 0 0 rgb(255 255 255 / 0.24),
+    inset 0 10px 18px -12px rgb(255 255 255 / 0.14),
+    inset -1px 0 0 rgb(0 0 0 / 0.35),
+    inset 0 -1px 0 rgb(0 0 0 / 0.4),
+    inset -10px -12px 22px -16px rgb(0 0 0 / 0.55),
+    0 34px 60px -26px rgb(0 0 0 / 0.85);
 }
 .fm .fm-card:hover,
 .fm[data-armed] .fm-card[data-show]:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
 }
 /* foco: as outras caixas (já visíveis) apagam */
 .fm:not([data-armed]) .fm-row:has(.fm-card:hover) .fm-card:not(:hover),
@@ -906,7 +946,8 @@ html.custom-cursor * {
 }
 @media (prefers-reduced-motion: reduce) {
   .fm-card,
-  .fm-card::before {
+  .fm-card::before,
+  .fm-card::after {
     transition: none;
   }
   .fm .fm-card:hover {

@@ -2,14 +2,14 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import * as rootParams from "next/root-params";
 import { hasLocale } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { pageMetadata } from "@/lib/seo/metadata";
 import Hero from "@/components/Hero";
 import Manifesto from "@/components/Manifesto";
 import Distance, { type DistanceCopy } from "@/components/sections/Distance";
 import Diagnostic from "@/components/sections/Diagnostic";
-import Fractional, { type FractionalCopy } from "@/components/sections/Fractional";
+import Fractional from "@/components/sections/Fractional";
 import Pillars, { type PillarsCopy } from "@/components/sections/Pillars";
 import Changes, { type ChangesCopy } from "@/components/sections/Changes";
 import Process, { type ProcessCopy } from "@/components/sections/Process";
@@ -48,6 +48,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const t = await getTranslations();
+  // objetos inteiros de mensagens (t.raw só tipa chaves de texto)
+  const messages = await getMessages();
   const name = t("site.name");
   const diagnosticItems = t.raw("diagnostic.items") as string[];
 
@@ -125,8 +127,7 @@ export default async function Home() {
               badge: t("fractional.badge"),
               title: t("fractional.title"),
               titleMuted: t("fractional.titleMuted"),
-              strip: t.raw("fractional.strip") as FractionalCopy["strip"],
-              model: t.raw("fractional.model") as FractionalCopy["model"],
+              model: messages.fractional.model,
               note: t("fractional.note"),
             }}
           />

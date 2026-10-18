@@ -5,6 +5,7 @@ import { protectTerms } from "@/components/Term";
 import { getTier, presetFor, useSceneTier, type Tier } from "@/lib/quality";
 import { isMobileUI } from "@/lib/mobile";
 import { startModelScene, STACKED_QUERY } from "@/components/graphics/fractional/modelScene";
+import TiltCard from "@/components/TiltCard";
 import FractionalModelTitle, { type TitleMode } from "./FractionalModelTitle";
 
 export type FractionalModelCopy = {
@@ -23,6 +24,25 @@ export type FractionalModelCopy = {
 
 /** Caixas = frações do anel. */
 const SEGMENTS = 6;
+/** Inclinação máxima das caixas no hover (graus). */
+const TILT_DEG = 6;
+/** Navegadores que aplicam filtro SVG no backdrop-filter (refração das caixas). */
+const isChromium = () =>
+  (navigator as Navigator & { userAgentData?: { brands: { brand: string }[] } }).userAgentData?.brands.some((b) =>
+    /Chromium/.test(b.brand),
+  ) ?? false;
+
+/**
+ * Lente das caixas (refração nas bordas): o fundo atrás da caixa é deslocado
+ * por um mapa neutro no meio e em rampa perto das bordas (vermelho = x, azul =
+ * y; o miolo cinza não desloca), com um desfoque leve e saturação. Aplicado
+ * como backdrop-filter: url(#fm-lens) só com [data-lens] na seção.
+ */
+const LENS_MAP =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 170" preserveAspectRatio="none"><defs><linearGradient id="r" x2="1"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#f00"/></linearGradient><linearGradient id="b" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#00f"/></linearGradient><filter id="s"><feGaussianBlur stdDeviation="9"/></filter></defs><rect width="350" height="170" fill="url(#r)"/><rect width="350" height="170" fill="url(#b)" style="mix-blend-mode:screen"/><rect x="26" y="22" width="298" height="126" rx="18" fill="#808080" filter="url(#s)"/></svg>`,
+  );
 
 /** Partículas por nível (tela larga / coluna única ou toque). */
 function particlesFor(tier: Tier, compact: boolean) {
@@ -72,6 +92,8 @@ export default function FractionalModel({ copy, note }: { copy: FractionalModelC
             ? "light"
             : "particles";
         if (mode !== "particles") gate.current.open = true;
+        // refração das caixas: só desktop em nível alto, no Chromium
+        if (mode === "particles" && t === "high" && isChromium()) el.setAttribute("data-lens", "");
         setTitleMode(mode);
         setNear(true);
         io.disconnect();
@@ -113,6 +135,14 @@ export default function FractionalModel({ copy, note }: { copy: FractionalModelC
       className="fm relative z-10 overflow-hidden px-6 pb-[120px] pt-[104px] md:px-12"
     >
       <canvas ref={bg} aria-hidden="true" className="fm-bg-fade pointer-events-none absolute inset-0 h-full w-full" />
+      <svg aria-hidden="true" className="absolute h-0 w-0" focusable="false">
+        <filter id="fm-lens" x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+          <feImage href={LENS_MAP} x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="soft" />
+          <feDisplacementMap in="soft" in2="map" scale="22" xChannelSelector="R" yChannelSelector="B" result="lens" />
+          <feColorMatrix in="lens" type="saturate" values="1.4" />
+        </filter>
+      </svg>
       <div className="relative mx-auto flex max-w-[1240px] flex-col gap-10">
         <FractionalModelTitle
           eyebrow={copy.eyebrow}
@@ -132,18 +162,28 @@ export default function FractionalModel({ copy, note }: { copy: FractionalModelC
               <span className="mb-1 pl-1.5 font-mono text-[11px] uppercase tracking-[0.16em] fm-t3">{col.label}</span>
               {col.items.map((item, j) => {
                 const i = j * 2 + side; // chegada alternando esquerda e direita
+                // vidro líquido 3D: inclinação no hover (TiltCard) só no modo
+                // completo (desktop, nível médio/alto, sem reduced motion)
                 return (
-                  <article key={item.tag} data-i={i} className="fm-card">
-                    <div className="mb-1.5 flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#8A8A93]">
-                      <span>{item.tag}</span>
-                      {/* fração da caixa no anel, na ordem de chegada */}
-                      <span className="tabular-nums tracking-[0.08em]">
-                        {i + 1}/{SEGMENTS}
-                      </span>
-                    </div>
-                    <h3 className="mb-1 text-[17px] font-normal leading-[1.3] tracking-[-0.01em] text-[#EDEDEF]">{item.title}</h3>
-                    <p className="text-[14px] font-light leading-[1.55] text-[#B4B4BC]">{protectTerms(item.text)}</p>
-                  </article>
+                  <TiltCard
+                    key={item.tag}
+                    className="fm-tilt"
+                    maxDeg={TILT_DEG}
+                    active={titleMode === "particles"}
+                    shape={{ borderRadius: 24 }}
+                  >
+                    <article data-i={i} className="fm-card">
+                      <div className="mb-1.5 flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#8A8A93]">
+                        <span>{item.tag}</span>
+                        {/* fração da caixa no anel, na ordem de chegada */}
+                        <span className="tabular-nums tracking-[0.08em]">
+                          {i + 1}/{SEGMENTS}
+                        </span>
+                      </div>
+                      <h3 className="mb-1 text-[17px] font-normal leading-[1.3] tracking-[-0.01em] text-[#EDEDEF]">{item.title}</h3>
+                      <p className="text-[14px] font-light leading-[1.55] text-[#B4B4BC]">{protectTerms(item.text)}</p>
+                    </article>
+                  </TiltCard>
                 );
               })}
             </div>

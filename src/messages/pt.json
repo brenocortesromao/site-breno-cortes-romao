@@ -123,20 +123,6 @@
     "badge": "UM DOS PRIMEIROS FRACTIONAL BRAND & CREATIVE DIRECTORS DO BRASIL",
     "title": "O mesmo nível de um diretor de marca de grande empresa,",
     "titleMuted": "no ritmo do seu negócio.",
-    "strip": [
-      {
-        "label": "NÍVEL",
-        "text": "Sênior, como alguém da casa"
-      },
-      {
-        "label": "DEDICAÇÃO",
-        "text": "Alguns encontros por mês"
-      },
-      {
-        "label": "INVESTIMENTO",
-        "text": "Mensal, abaixo de um executivo em tempo integral"
-      }
-    ],
     "model": {
       "eyebrow": "O MODELO FRACTIONAL",
       "title": "O mercado mudou.",

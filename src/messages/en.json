@@ -123,20 +123,6 @@
     "badge": "ONE OF THE FIRST FRACTIONAL BRAND & CREATIVE DIRECTORS IN BRAZIL",
     "title": "The same level as a big company's brand director,",
     "titleMuted": "at the pace of your business.",
-    "strip": [
-      {
-        "label": "LEVEL",
-        "text": "Senior, like someone in-house"
-      },
-      {
-        "label": "DEDICATION",
-        "text": "A few meetings a month"
-      },
-      {
-        "label": "INVESTMENT",
-        "text": "Monthly, below a full-time executive"
-      }
-    ],
     "model": {
       "eyebrow": "THE FRACTIONAL MODEL",
       "title": "The market has changed.",

@@ -19,23 +19,32 @@ gsap.registerPlugin(useGSAP);
  */
 export type TitleMode = "pending" | "particles" | "light" | "static";
 
-/** Pausa entre a 1ª parte pronta e o brilho na parte em cinza (s) e duração do brilho (s). */
-const PAUSE_S = 0.25;
-const SWEEP_S = 1.4;
+/**
+ * Pausa entre a 1ª parte pronta e o brilho na parte em cinza (s) e duração do
+ * brilho (s): palavras prontas em ~0,6 s (titleParticles.ts) + 0,1 + 0,45 =
+ * título completo em 1,2 s.
+ */
+const PAUSE_S = 0.1;
+const SWEEP_S = 0.45;
+/** Modo leve: duração de cada palavra no BlurRevealTitle (s) e teto do título inteiro (s). */
+const LIGHT_WORD_S = 0.5;
+const TITLE_MAX_S = 1.2;
 
 /**
  * Cabeçalho da parte escura do Fractional: rótulo, título (texto real no HTML,
- * um span por palavra) e texto de apoio. No modo "particles", quando o título
- * chega ao meio da tela (uma vez por visita):
+ * um span por palavra) e texto de apoio. No modo "particles", quando a seção
+ * entra 20% na tela (junto com o início da esfera; uma vez por visita), em
+ * no máximo 1,2 s:
  * 1. partículas se juntam nas letras de "O mercado mudou.", palavra por
  *    palavra (graphics/fractional/titleParticles.ts); cada palavra pronta
- *    aparece de blur(8px) para nítida e as partículas dela somem;
- * 2. 250 ms depois, a parte em cinza entra com uma faixa de luz da esquerda
- *    para a direita (máscara + brilho em background-clip; a cor final não muda);
- * 3. parte da poeira que sobrou escorre para a esfera e some; ao terminar,
- *    `gate` libera a formação da esfera (modelScene.ts) e o canvas sai;
- * 4. o texto de apoio entra com fade e leve subida.
- * Se o título já passou da tela quando a seção chega, tudo aparece pronto.
+ *    aparece de blur(8px) para nítida e as partículas dela somem; com a
+ *    última pronta, `gate` libera a formação da esfera (modelScene.ts), que
+ *    começa enquanto o título termina;
+ * 2. 100 ms depois, a parte em cinza entra com uma faixa de luz da esquerda
+ *    para a direita (máscara + brilho em background-clip; a cor final não
+ *    muda) e, junto, o texto de apoio (fade e leve subida); a poeira que
+ *    sobrou começa a escorrer para a esfera e some; o canvas sai no fim.
+ * Se a seção já passou da tela quando chega a vez, tudo aparece pronto.
  */
 export default function FractionalModelTitle({
   eyebrow,
@@ -94,24 +103,26 @@ export default function FractionalModelTitle({
             const r = row.current?.getBoundingClientRect();
             return r ? { x: r.left + r.width / 2, y: r.top + r.height * 0.47 } : { x: 0, y: window.innerHeight };
           },
-          onWord: (k) => gsap.to(words[k], { opacity: 1, filter: "blur(0px)", duration: 0.5, ease: "power2.out", clearProps: "filter" }),
+          onWord: (k) => gsap.to(words[k], { opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power2.out", clearProps: "filter" }),
           onAssembled: () => {
+            g.open = true; // a esfera começa enquanto o título termina
             // parte em cinza: faixa de luz da esquerda para a direita (máscara
-            // revelando + brilho por background-clip; no fim, estilos limpos)
+            // revelando + brilho por background-clip; no fim, estilos limpos);
+            // o texto de apoio entra junto e a poeira começa a escorrer
             sweep = gsap
               .timeline({ delay: PAUSE_S })
               .set(muted, { opacity: 1, attr: { "data-sweep": "" } })
+              .call(() => handle?.drip())
               .fromTo(
                 muted,
                 { backgroundPosition: "100% 0", maskPosition: "100% 0", webkitMaskPosition: "100% 0" },
                 { backgroundPosition: "0% 0", maskPosition: "0% 0", webkitMaskPosition: "0% 0", duration: SWEEP_S, ease: "power2.inOut" },
               )
+              .to(support, { opacity: 1, y: 0, duration: SWEEP_S + 0.15, ease: "power3.out" }, "<")
               .call(() => {
                 muted.removeAttribute("data-sweep");
                 gsap.set(muted, { clearProps: "backgroundPosition,maskPosition,webkitMaskPosition" });
-                handle?.drip();
-              })
-              .to(support, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, "<");
+              }, [], `<${SWEEP_S}`);
           },
           onDone: () => {
             g.open = true;
@@ -131,9 +142,10 @@ export default function FractionalModelTitle({
           showAll(); // já passou da tela: sem animação
         }
       },
-      { rootMargin: "0px 0px -50% 0px" },
+      // seção 20% dentro da tela (mesmo ponto em que a esfera começa)
+      { rootMargin: "0px 0px -20% 0px" },
     );
-    io.observe(h2.current);
+    io.observe(head.current!.closest("section") ?? h2.current);
     return () => {
       io.disconnect();
       handle?.cancel();
@@ -143,25 +155,32 @@ export default function FractionalModelTitle({
     };
   }, [mode, gate, row]);
 
-  // modo leve: o texto de apoio entra depois do título
+  const words = title.split(" ");
+  // modo leve: título inteiro em até 1,2 s (BlurRevealTitle palavra por palavra)
+  const lightCount = words.length + titleMuted.split(" ").length;
+  const lightStagger = (TITLE_MAX_S - LIGHT_WORD_S) / Math.max(lightCount - 1, 1);
+
+  // modo leve: o texto de apoio entra junto com a parte em cinza (mesmo
+  // gatilho do título; atraso = palavras da 1ª parte)
   useGSAP(
     () => {
       if (mode !== "light") return;
       const support = head.current!.querySelector<HTMLElement>("[data-support]")!;
+      const title = head.current!.querySelector("h2")!;
       gsap.set(support, { opacity: 0, y: 12 });
       return revealOnce({
-        trigger: head.current!,
-        start: "top 60%",
-        play: () => gsap.to(support, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", delay: 0.9 }),
+        trigger: title,
+        start: "top 70%",
+        play: () =>
+          gsap.to(support, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", delay: words.length * lightStagger }),
         finish: () => gsap.set(support, { opacity: 1, y: 0 }),
       });
     },
-    { scope: head, dependencies: [mode] },
+    { scope: head, dependencies: [mode, words.length, lightStagger] },
   );
 
   const h2Class =
     "max-w-[900px] text-balance text-[clamp(36px,5vw,66px)] font-light leading-[1.03] tracking-[-0.04em] text-foreground";
-  const words = title.split(" ");
 
   return (
     <div ref={head} className="relative flex flex-col items-center gap-[22px] text-center">
@@ -181,7 +200,7 @@ export default function FractionalModelTitle({
           muted={titleMuted}
           mutedClassName="fm-t4"
           unit="word"
-          stagger={0.12}
+          stagger={lightStagger}
           start="top 70%"
         />
       ) : (

@@ -3,12 +3,13 @@
  * _privado/fractional-escuro-prototipo.html), em canvas 2D: não usa WebGL para
  * não disputar contexto com as cenas 3D do site.
  * - Esfera: partículas espalhadas se juntam com o scroll e formam a esfera
- *   (superfície por espiral de Fibonacci + 9% de núcleo). Fogem do mouse; com
+ *   (superfície por espiral de Fibonacci + 9% de núcleo): começa com a seção
+ *   20% dentro da tela e fica completa com o topo dela a ~50% da altura. Fogem do mouse; com
  *   o mouse sobre a esfera ela abre em gomos e o núcleo acende; no toque, abre
  *   e fecha. Anel de órbita com 6 frações, uma por caixa: acende quando a caixa
  *   aparece e brilha mais no hover dela.
- * - Caixas: no desktop chegam uma por vez (ordem de data-i) quando a esfera
- *   termina de se formar e somem se o usuário volta para cima; empilhadas
+ * - Caixas: no desktop chegam uma por vez (ordem de data-i, a cada 120 ms)
+ *   com a esfera 60% formada e somem se o usuário volta para cima; empilhadas
  *   (até 980px), cada uma aparece ao entrar na tela. O estado é o atributo
  *   data-show (a transição fica no CSS, .fm-card em globals.css).
  * - Fundo: curvas de nível (marching squares sobre ruído) se movendo devagar,
@@ -25,6 +26,12 @@ import { liveTheme } from "@/components/theme/themes";
 const SL = 10;
 const SEG = 6;
 const B = 5;
+/** Formação da esfera: topo da seção de 80% (seção 20% na tela) a 50% da altura da tela. */
+const FORM_FROM = 0.8;
+const FORM_TO = 0.5;
+/** Caixas: chegam com a esfera nesta fração formada, uma a cada CARD_STEP_MS. */
+const CARDS_AT = 0.6;
+const CARD_STEP_MS = 120;
 /** Coluna única (caixas empilhadas abaixo da esfera). */
 export const STACKED_QUERY = "(max-width: 980px)";
 
@@ -149,11 +156,11 @@ export function startModelScene(o: ModelSceneOptions): () => void {
       return;
     }
     setShow(k, true);
-    timer = window.setTimeout(step, 320);
+    timer = window.setTimeout(step, CARD_STEP_MS);
   };
   const syncCards = (prog: number) => {
     if (stacked()) return; // empilhadas: o observador abaixo cuida
-    if (prog > 0.82 && !timer && shownCount() === 0) step();
+    if (prog > CARDS_AT && !timer && shownCount() === 0) step();
     if (prog < 0.3 && shownCount()) {
       window.clearTimeout(timer);
       timer = 0;
@@ -195,15 +202,15 @@ export function startModelScene(o: ModelSceneOptions): () => void {
   const target = () => {
     if (reduce) return 1;
     if (!o.gate.open) return 0;
-    const r = row.getBoundingClientRect(), vh = window.innerHeight;
-    return Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.75)));
+    const top = section.getBoundingClientRect().top / window.innerHeight;
+    return Math.max(0, Math.min(1, (FORM_FROM - top) / (FORM_FROM - FORM_TO)));
   };
   const ease = (q: number) => (q < 0.5 ? 4 * q * q * q : 1 - Math.pow(-2 * q + 2, 3) / 2);
 
   const drawFx = () => {
     const [cx, cy, R] = center();
     if (!reduce) {
-      p += (target() - p) * 0.06;
+      p += (target() - p) * 0.09;
       memo.p = p;
       syncCards(p);
       open += ((hover || lock ? 1 : 0) - open) * 0.05;
