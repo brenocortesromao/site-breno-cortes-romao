@@ -333,12 +333,17 @@ body::before {
     display: none;
   }
 }
-/* item aceso pelo scanner: texto em gradiente cromado (prata → branco → prata) */
-.scan-on {
-  background-image: linear-gradient(100deg, #b9bcc0 0%, #ffffff 50%, #b9bcc0 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* foco por coluna (ServiceColumns): o título da coluna em foco fica claro e
+   as outras colunas caem para 0,4 (os itens acendem um por vez: data-active
+   ou :hover, no próprio item) */
+.oo-root [data-col] {
+  transition: opacity 0.4s ease;
+}
+.oo-root[data-focus] [data-col]:not([data-focus]) {
+  opacity: 0.4;
+}
+.oo-root [data-col][data-focus] [data-col-title] {
+  color: #eceae5;
 }
 
 /* Cursor do site (CustomCursor): esconde o nativo só quando ele está ativo

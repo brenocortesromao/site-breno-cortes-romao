@@ -405,7 +405,8 @@
     ],
     "button": "Talk about a project",
     "whatsappMessage": "Hi Breno! I have a one-off project and would like to talk about it.",
-    "buttonLabel": "Talk about a project (opens WhatsApp)"
+    "buttonLabel": "Talk about a project (opens WhatsApp)",
+    "note": "BILLED SEPARATELY FROM THE MONTHLY FEE. PARTNERS GET SPECIAL TERMS."
   },
   "faq": {
     "eyebrow": "Frequently asked questions",

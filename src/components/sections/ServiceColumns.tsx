@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useRef } from "react";
+import { Fragment, useEffect, useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -13,13 +13,48 @@ export type ServiceColumn = { title: string; items: string[] };
 
 /** Caracteres do scramble. */
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#/_*";
-/** Duração do scramble na entrada e no hover (s); intervalo entre trocas (s). */
+/** Duração do scramble na entrada (s); intervalo entre trocas de caractere (s). */
 const ENTER = 0.5;
-const HOVER = 0.25;
 const SWAP = 0.04;
+/** Destaque automático: troca de item a cada SCAN_EVERY s. */
+const SCAN_EVERY = 2;
 /** Escalonamento entre itens na entrada (s) e início dos itens na timeline (s). */
 const STAGGER = 0.05;
 const ITEMS_AT = 0.35;
+
+/**
+ * Palavra gigante atrás do painel (nome da categoria em foco). Estilo inline
+ * (não depende do CSS global): só contorno, enorme, invisível até o foco; o JS
+ * troca opacidade e posição (uma por vez).
+ */
+const WORD_STYLE: CSSProperties = {
+  position: "absolute",
+  left: "50%",
+  top: "50%",
+  transform: "translate(-50%, calc(-50% + 28px))",
+  whiteSpace: "nowrap",
+  fontSize: "clamp(160px, 17vw, 320px)",
+  fontWeight: 500,
+  lineHeight: 1,
+  letterSpacing: "-0.04em",
+  textTransform: "uppercase",
+  color: "transparent",
+  WebkitTextStroke: "1px rgb(255 255 255 / 0.08)",
+  opacity: 0,
+  transition: "opacity 0.6s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+};
+
+/**
+ * Painel das listas: preto sólido como o original, borda de 1px sutil, cantos
+ * discretos e uma linha fina de brilho no topo. Inline (não depende do CSS
+ * global): opaco, ele sempre cobre a palavra gigante que fica atrás dele.
+ */
+const PANEL_STYLE: CSSProperties = {
+  borderRadius: 4,
+  border: "1px solid rgb(255 255 255 / 0.08)",
+  background: "#0b0b0c",
+  boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.12)",
+};
 
 const randomGlyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
 
@@ -34,25 +69,80 @@ type Job = { letters: HTMLElement[]; glyphs: HTMLElement[]; start: number; dur: 
  *   cima para baixo, contadores contam de 00, e cada item se "decodifica"
  *   (caracteres aleatórios em mono que travam letra por letra, da esquerda para
  *   a direita), coluna por coluna;
- * - hover (só mouse): scramble rápido, cor clara, colchetes e barrinha acesa.
+ * - hover (só mouse): texto branco e barrinha acesa (espaço reservado).
  * Sem mudança de largura: cada letra real fica no lugar (invisível durante o
- * scramble) e o caractere aleatório é uma camada absoluta por cima; os
- * colchetes têm espaço reservado. O texto real de cada item está num span
+ * scramble) e o caractere aleatório é uma camada absoluta por cima. O texto real de cada item está num span
  * sr-only; as letras e os caracteres aleatórios são aria-hidden.
  * Destaque (só luz prateada, sem cor nova):
  * - moldura de 1px com uma faixa de luz percorrendo a borda (CSS .chrome-frame);
  * - grade de pontos que acende em volta do cursor (desktop) e uma onda de luz
  *   que atravessa a grade a cada ~6 s;
- * - scanner: a cada ~2,2 s um item de cada coluna acende (decode rápido, texto
- *   cromado, colchetes e barrinha), colunas defasadas 0 / 0,15 / 0,3 s, sem
- *   repetir o mesmo item seguido. No desktop pausa com o mouse sobre as colunas
- *   (vale o hover); no toque roda sempre, e tocar num item o acende.
+ * - destaque automático: 1 item aceso por vez no painel inteiro (texto branco
+ *   e barrinha, transição de 0,4 s); a cada 2 s passa para outro item
+ *   aleatório, sem repetir o anterior. No desktop pausa com o mouse sobre o
+ *   painel (só o item sob o mouse acende); no toque roda sempre, e tocar num
+ *   item o acende.
  * Tudo pausa com a seção fora da tela.
  * prefers-reduced-motion / sem JS: tudo visível, sem scramble, varredura, blink,
  * scanner nem onda; moldura estática.
+ * Painel preto sólido (PANEL_STYLE) com linha fina de brilho no topo.
+ * Foco por coluna (data-focus na raiz e na coluna): com o mouse sobre uma
+ * coluna (no celular, a coluna no meio da tela), ela fica com texto claro e as
+ * outras caem para 0,4; atrás do painel, o nome da categoria aparece enorme, só
+ * contorno (WORD_STYLE; a partir do tablet). Vale também com reduced motion
+ * (sem deslocamento).
  */
 export default function ServiceColumns({ columns, className = "" }: { columns: ServiceColumn[]; className?: string }) {
   const root = useRef<HTMLDivElement>(null);
+
+  // foco por coluna: hover (mouse) ou coluna no meio da tela (celular, empilhadas)
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const cols = [...el.querySelectorAll<HTMLElement>("[data-col]")];
+    const words = [...el.querySelectorAll<HTMLElement>("[data-word]")];
+    const grid = el.querySelector<HTMLElement>("[data-col-grid]");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // palavra gigante só a partir do tablet (no celular não cabe)
+    const wordsOn = window.matchMedia("(min-width: 768px)").matches;
+    if (still) words.forEach((w) => (w.style.transition = "opacity 0.3s ease"));
+    const focus = (c: number) => {
+      if (c < 0) delete el.dataset.focus;
+      else el.dataset.focus = String(c);
+      cols.forEach((col, i) => col.toggleAttribute("data-focus", i === c));
+      // só a palavra da coluna ativa: fade e leve subida (sem subida com reduced motion)
+      words.forEach((w, i) => {
+        const on = wordsOn && i === c;
+        w.style.opacity = on ? "1" : "0";
+        w.style.transform = on || still ? "translate(-50%, -50%)" : "translate(-50%, calc(-50% + 28px))";
+      });
+    };
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      const enters = cols.map((_, i) => () => focus(i));
+      const leave = () => focus(-1);
+      cols.forEach((col, i) => col.addEventListener("mouseenter", enters[i]));
+      grid?.addEventListener("mouseleave", leave);
+      return () => {
+        cols.forEach((col, i) => col.removeEventListener("mouseenter", enters[i]));
+        grid?.removeEventListener("mouseleave", leave);
+      };
+    }
+    if (!window.matchMedia("(max-width: 767.98px)").matches) return;
+    const inView = new Set<number>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          const i = cols.indexOf(e.target as HTMLElement);
+          if (e.isIntersecting) inView.add(i);
+          else inView.delete(i);
+        });
+        focus(inView.size ? Math.max(...inView) : -1);
+      },
+      { rootMargin: "-45% 0px -45% 0px" },
+    );
+    cols.forEach((col) => io.observe(col));
+    return () => io.disconnect();
+  }, [columns]);
 
   useGSAP(
     () => {
@@ -152,23 +242,11 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
         });
         tl.call(() => items.forEach((item, i) => scramble(item, i * STAGGER, ENTER)), [], ITEMS_AT);
 
-        // --- hover (só mouse) ---
         const off: (() => void)[] = [];
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-          items.forEach((item) => {
-            const enter = () => {
-              // só depois da entrada (antes dela as letras ainda estão escondidas)
-              if (tl.progress() === 1 && !jobs.has(item)) scramble(item, 0, HOVER);
-            };
-            item.addEventListener("mouseenter", enter);
-            off.push(() => item.removeEventListener("mouseenter", enter));
-          });
-        }
 
         // --- destaque: grade que reage, onda, scanner (pausam fora da tela) ---
         const frame = el.querySelector<HTMLElement>("[data-frame]")!;
         const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-        const cols = gsap.utils.toArray<HTMLElement>("[data-col]", el).map((c) => [...c.querySelectorAll<HTMLElement>("[data-col-item]")]);
 
         // pontos em volta do cursor (lerp suave via quickTo). As variáveis vão
         // direto na camada que as usa: gravadas na moldura, cada quadro
@@ -210,50 +288,51 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
           { v: 130, duration: 1.5, ease: "power1.inOut", onUpdate: () => waveLayer?.style.setProperty("--wx", `${wave.v}%`) },
         );
 
-        // scanner
-        let overCols = false;
-        const grid = el.querySelector<HTMLElement>("[data-col-grid]");
-        const enterCols = () => (overCols = true);
-        const leaveCols = () => (overCols = false);
-        if (finePointer && grid) {
-          grid.addEventListener("mouseenter", enterCols);
-          grid.addEventListener("mouseleave", leaveCols);
-          off.push(() => {
-            grid.removeEventListener("mouseenter", enterCols);
-            grid.removeEventListener("mouseleave", leaveCols);
-          });
-        }
-        const lastPick = cols.map(() => -1);
-        const timers: gsap.core.Tween[] = [];
-        const light = (item: HTMLElement) => {
-          item.dataset.active = "";
-          item.classList.add("scan-on");
-          if (!jobs.has(item)) scramble(item, 0, HOVER);
-          timers.push(
-            gsap.delayedCall(1.4, () => {
-              delete item.dataset.active;
-              item.classList.remove("scan-on");
-            }),
-          );
+        // destaque automático: 1 item aceso por vez no painel inteiro; a cada
+        // SCAN_EVERY s passa para outro item aleatório (qualquer coluna, sem
+        // repetir o anterior). O aceso é só texto branco + barrinha (CSS,
+        // data-active, transição de 0,4 s). Mouse sobre o painel: pausa e só o
+        // item sob o mouse acende (:hover); ao sair, volta.
+        let current: HTMLElement | null = null;
+        const setActive = (item: HTMLElement | null) => {
+          if (current && current !== item) delete current.dataset.active;
+          current = item;
+          if (item) item.dataset.active = "";
         };
+        let overPanel = false;
         let loop: gsap.core.Tween | null = null;
         const cycle = () => {
-          if (!(finePointer && overCols)) {
-            cols.forEach((list, c) => {
-              if (!list.length) return;
-              let i = Math.floor(Math.random() * list.length);
-              if (i === lastPick[c]) i = (i + 1 + Math.floor(Math.random() * (list.length - 1))) % list.length;
-              lastPick[c] = i;
-              timers.push(gsap.delayedCall(c * 0.15, () => light(list[i])));
-            });
+          if (!(finePointer && overPanel) && items.length > 1) {
+            const pool = items.filter((item) => item !== current);
+            setActive(pool[Math.floor(Math.random() * pool.length)]);
           }
-          loop = gsap.delayedCall(2.2, cycle);
+          loop = gsap.delayedCall(SCAN_EVERY, cycle);
         };
+        if (finePointer) {
+          const enterPanel = () => {
+            overPanel = true;
+            setActive(null);
+          };
+          const leavePanel = () => {
+            overPanel = false;
+            // volta logo (se a seção estiver na tela e a entrada já tiver terminado)
+            if (loop) {
+              loop.kill();
+              loop = gsap.delayedCall(0.4, cycle);
+            }
+          };
+          frame.addEventListener("mouseenter", enterPanel);
+          frame.addEventListener("mouseleave", leavePanel);
+          off.push(() => {
+            frame.removeEventListener("mouseenter", enterPanel);
+            frame.removeEventListener("mouseleave", leavePanel);
+          });
+        }
         // toque: tocar num item o acende
         const onTap = (e: PointerEvent) => {
           if (e.pointerType === "mouse" || tl.progress() < 1) return;
           const item = (e.target as Element).closest<HTMLElement>("[data-col-item]");
-          if (item) light(item);
+          if (item) setActive(item);
         };
         el.addEventListener("pointerdown", onTap);
         off.push(() => el.removeEventListener("pointerdown", onTap));
@@ -305,12 +384,8 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
           document.removeEventListener("visibilitychange", sync);
           wtl.kill();
           loop?.kill();
-          timers.forEach((t) => t.kill());
           gsap.killTweensOf(spot);
-          items.forEach((item) => {
-            delete item.dataset.active;
-            item.classList.remove("scan-on");
-          });
+          setActive(null);
         });
 
         return () => {
@@ -329,9 +404,17 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
   );
 
   return (
-    <div ref={root} className={`relative ${className}`}>
-      {/* moldura cromada viva (borda de 1px + faixa de luz: .chrome-frame) */}
-      <div data-frame className="chrome-frame relative rounded-[4px] border border-[rgba(255,255,255,0.08)] p-5 md:p-7">
+    <div ref={root} className={`oo-root relative ${className}`}>
+      {/* nome da categoria em foco, enorme e só contorno, atrás do painel */}
+      <div aria-hidden="true" className="max-md:hidden" style={{ position: "absolute", inset: 0, zIndex: -10, pointerEvents: "none" }}>
+        {columns.map((col, c) => (
+          <span key={col.title} data-word={c} style={WORD_STYLE}>
+            {col.title}
+          </span>
+        ))}
+      </div>
+      {/* painel preto + moldura cromada viva (faixa de luz na borda: .chrome-frame) */}
+      <div data-frame style={PANEL_STYLE} className="chrome-frame relative p-6 md:p-9 lg:p-7 xl:p-8 min-[85.375rem]:p-10">
         {/* grade de pontos (fade nas bordas), pontos acesos no cursor, onda e varredura */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
           <div className="absolute inset-0 bg-[radial-gradient(circle,#1E1E1E_1px,transparent_1.5px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,#000_45%,transparent_100%)]" />
@@ -357,12 +440,12 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
           />
         </div>
 
-      <div data-col-grid className="relative grid gap-10 md:grid-cols-3 md:gap-8">
+      <div data-col-grid className="relative grid gap-10 md:grid-cols-3 md:gap-8 lg:gap-6 xl:grid-cols-[auto_auto_auto] xl:justify-between min-[85.375rem]:gap-8">
         {columns.map((col, c) => (
           <div key={col.title} data-col>
             <h3
               data-col-title
-              className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.28em] text-[#8A8A8A] lg:tracking-[0.08em] xl:tracking-[0.28em]"
+              className="whitespace-nowrap font-mono text-[12px] uppercase tracking-[0.28em] text-[#B4B4B4] lg:tracking-[0.08em] xl:tracking-[0.28em]"
             >
               {String(c + 1).padStart(2, "0")} / {col.title}
               <span aria-hidden="true" className="css-loop animate-[caretBlink_1s_steps(1)_infinite] motion-reduce:animate-none">
@@ -381,21 +464,15 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
                 <li
                   key={item}
                   data-col-item
-                  className="group/item relative pl-5 text-[15px] leading-[2] text-[#9A9A9A] transition-colors duration-[250ms] hover:text-[#ECEAE5] data-[active]:text-[#ECEAE5]"
+                  className="group/item relative pl-5 text-[18px] leading-[2] text-[#B0B0B0] lg:text-[16px] xl:text-[17px] min-[85.375rem]:text-[18px] transition-colors duration-[400ms] hover:text-white data-[active]:text-white"
                 >
-                  {/* barrinha acesa à esquerda (hover) */}
+                  {/* barrinha à esquerda (hover / item aceso), com fade; o espaço dela
+                      (pl-5) fica sempre reservado, então o texto não se desloca */}
                   <span
                     aria-hidden="true"
-                    className="absolute left-0 top-[0.5lh] h-[1em] w-[2px] -translate-y-1/2 bg-[#ECEAE5] opacity-0 transition-opacity duration-[250ms] group-hover/item:opacity-100 group-data-[active]/item:opacity-100"
+                    className="absolute left-0 top-[0.5lh] h-[1em] w-[2px] -translate-y-1/2 bg-white opacity-0 transition-opacity duration-[400ms] group-hover/item:opacity-100 group-data-[active]/item:opacity-100"
                   />
                   <span className="sr-only">{item}</span>
-                  {/* colchetes de largura zero (não deslocam nem mudam a quebra): "[" no
-                      recuo à esquerda, "]" logo depois do texto */}
-                  <span aria-hidden="true" className="relative inline-block h-[1lh] w-0 align-top">
-                    <span className="absolute inset-y-0 right-[5px] flex items-center font-mono text-[11px] text-[#8A8A8A] opacity-0 transition-opacity duration-[250ms] group-hover/item:opacity-100 group-data-[active]/item:opacity-100">
-                      [
-                    </span>
-                  </span>
                   <span aria-hidden="true">
                     {item.split(" ").map((word, w, all) => (
                       <Fragment key={w}>
@@ -414,11 +491,6 @@ export default function ServiceColumns({ columns, className = "" }: { columns: S
                         {w < all.length - 1 ? " " : null}
                       </Fragment>
                     ))}
-                  </span>
-                  <span aria-hidden="true" className="relative inline-block h-[1lh] w-0 align-top">
-                    <span className="absolute inset-y-0 left-[5px] flex items-center font-mono text-[11px] text-[#8A8A8A] opacity-0 transition-opacity duration-[250ms] group-hover/item:opacity-100 group-data-[active]/item:opacity-100">
-                      ]
-                    </span>
                   </span>
                 </li>
               ))}

@@ -8,19 +8,21 @@ import ServiceColumns, { type ServiceColumn } from "./ServiceColumns";
  * Projetos pontuais (§12b) — preta e compacta (padding vertical ~60% do
  * padrão), entre "Poucas parcerias" e "Perguntas frequentes", para não
  * competir com a parceria.
- * Desktop (≥ 1024px): à esquerda (~40%) rótulo, título, texto e botão; à
- * direita (~60%) as 3 colunas de serviços (ServiceColumns). Abaixo disso: uma
+ * Desktop (≥ 1024px): à esquerda (~36%; ~1/3 a partir de 1280px) rótulo, título, texto e botão; à
+ * direita (~64%; ~2/3) as 3 colunas de serviços (ServiceColumns). Abaixo disso: uma
  * coluna, com as listas (lado a lado no tablet, empilhadas no celular) antes do
  * botão. Botão no estilo do "Quero conversar", para o WhatsApp
  * (mensagem pré-preenchida própria).
+ * Abaixo do botão, a nota de cobrança em mono.
  */
 export default async function OneOffProjects() {
   const t = await getTranslations("oneOff");
   const columns = t.raw("columns") as ServiceColumn[];
 
   return (
-    <section id="projetos-pontuais" data-theme="dark" aria-labelledby="projetos-pontuais-title" className="relative z-10">
-      <div className="m-sec m-rg40 mx-auto grid w-full max-w-[1600px] gap-y-12 px-6 py-[clamp(3.6rem,9.6lvh,7.2rem)] md:px-12 lg:grid-cols-[2fr_3fr] lg:gap-x-16">
+    // overflow-x-clip: a palavra gigante atrás do painel (ServiceColumns) passa da largura
+    <section id="projetos-pontuais" data-theme="dark" aria-labelledby="projetos-pontuais-title" className="relative z-10 overflow-x-clip">
+      <div className="m-sec m-rg40 mx-auto grid w-full max-w-[1600px] gap-y-12 px-6 py-[clamp(3.6rem,9.6lvh,7.2rem)] md:px-12 lg:grid-cols-[4fr_7fr] lg:gap-x-16 xl:grid-cols-[1fr_2fr]">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-silver m-center">{t("eyebrow")}</p>
           <BlurRevealTitle
@@ -45,6 +47,7 @@ export default async function OneOffProjects() {
               ↗
             </span>
           </ChromeButton>
+          <p className="m-center mt-5 font-mono text-[11px] uppercase leading-relaxed tracking-[0.14em] text-silver">{t("note")}</p>
         </div>
       </div>
     </section>

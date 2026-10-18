@@ -405,7 +405,8 @@
     ],
     "button": "Falar sobre um projeto",
     "whatsappMessage": "Olá, Breno! Tenho um projeto pontual e queria conversar sobre ele.",
-    "buttonLabel": "Falar sobre um projeto (abre o WhatsApp)"
+    "buttonLabel": "Falar sobre um projeto (abre o WhatsApp)",
+    "note": "COBRADOS À PARTE DA MENSALIDADE. PARCEIROS TÊM CONDIÇÃO ESPECIAL."
   },
   "faq": {
     "eyebrow": "Perguntas frequentes",
