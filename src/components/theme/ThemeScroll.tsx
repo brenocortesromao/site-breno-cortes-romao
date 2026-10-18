@@ -145,17 +145,33 @@ function buildMobile(root: HTMLElement, sections: HTMLElement[]) {
   };
   apply("dark", true);
   root.classList.add("theme-fade");
+  const themeOf = (el: Element) => ((el as HTMLElement).dataset.theme as ThemeName) ?? "dark";
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
-        if (e.isIntersecting) apply(((e.target as HTMLElement).dataset.theme as ThemeName) ?? "dark");
+        if (e.isIntersecting && !e.target.hasAttribute("data-theme-cut")) apply(themeOf(e.target));
       });
     },
     { rootMargin: "-50% 0px -50% 0px" },
   );
-  sections.forEach((s) => io.observe(s));
+  // seções com fundo próprio (data-theme-cut): trocam quando a borda de cima
+  // passa pela faixa do cabeçalho (8% da tela); voltando, assume a anterior
+  const cutIo = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) apply(themeOf(e.target));
+        else if (e.boundingClientRect.top > 0) {
+          const prev = sections[sections.indexOf(e.target as HTMLElement) - 1];
+          if (prev) apply(themeOf(prev));
+        }
+      });
+    },
+    { rootMargin: "0px 0px -92% 0px" },
+  );
+  sections.forEach((s) => (s.hasAttribute("data-theme-cut") ? cutIo : io).observe(s));
   return () => {
     io.disconnect();
+    cutIo.disconnect();
     window.clearTimeout(timer);
     root.classList.remove("theme-fade");
     liveTheme.clear();
@@ -234,10 +250,22 @@ function buildTransitions(root: HTMLElement, sections: HTMLElement[]) {
       t.p = self.progress;
       apply();
     };
-    const swapOnMobile = mobile && lightSwap && prevSection;
+    const cut = section.hasAttribute("data-theme-cut");
+    const swapOnMobile = mobile && lightSwap && prevSection && !cut;
     const firstText = swapOnMobile ? textEdge(section, "first") : null;
     const lastText = swapOnMobile ? textEdge(prevSection, "last") : null;
-    if (firstText && lastText) {
+    if (cut) {
+      // seção com fundo próprio (corte seco, data-theme-cut): as cores vivas só
+      // trocam quando a borda passa por baixo do cabeçalho (12% → topo)
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 12%",
+        end: "top top",
+        refreshPriority: -1,
+        onUpdate: sync,
+        onRefresh: sync,
+      });
+    } else if (firstText && lastText) {
       // celular, claro ↔ escuro: troca curta (~10vh de scroll) no respiro entre
       // as seções, enquanto o meio do vão (entre o último texto da anterior e o
       // primeiro da nova) passa pelo meio da tela (55% → 45%)

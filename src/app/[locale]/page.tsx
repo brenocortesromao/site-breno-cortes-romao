@@ -122,21 +122,11 @@ export default async function Home() {
         <Suspense>
           <Fractional
             copy={{
-              eyebrow: t("fractional.eyebrow"),
+              badge: t("fractional.badge"),
               title: t("fractional.title"),
-              text: t("fractional.text"),
-              stats: {
-                title: t("fractional.stats.title"),
-                lead: t("fractional.stats.lead"),
-                items: t.raw("fractional.stats.items") as FractionalCopy["stats"]["items"],
-                source: t("fractional.stats.source"),
-              },
-              compare: {
-                caption: t("fractional.compare.caption"),
-                highlightLabel: t("fractional.compare.highlightLabel"),
-                columns: t.raw("fractional.compare.columns") as string[],
-                rows: t.raw("fractional.compare.rows") as FractionalCopy["compare"]["rows"],
-              },
+              titleMuted: t("fractional.titleMuted"),
+              cards: t.raw("fractional.cards") as FractionalCopy["cards"],
+              model: t.raw("fractional.model") as FractionalCopy["model"],
               note: t("fractional.note"),
             }}
           />

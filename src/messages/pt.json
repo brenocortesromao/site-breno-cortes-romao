@@ -120,87 +120,71 @@
     "cta": "Vamos conversar"
   },
   "fractional": {
-    "eyebrow": "O que é fractional",
-    "title": "Liderança de marca sênior, na medida do seu momento.",
-    "text": "Um diretor de marca e criação experiente custa caro e, para muitas empresas, ainda não faz sentido em tempo integral. No modelo fractional, você tem essa liderança integrada ao seu time, participando das decisões todos os meses, com uma dedicação acordada, sem o custo de uma contratação executiva fixa.",
-    "stats": {
-      "title": "Lá fora, esse modelo já está crescendo rápido.",
-      "lead": "No Brasil, ele está só começando, e eu sou um dos primeiros a trazê-lo para cá.",
-      "items": [
-        {
-          "prefix": "+",
-          "value": 313,
-          "suffix": "%",
-          "tag": "[01] PROFISSIONAIS FRACTIONAL · MUNDO",
-          "foot": "2019 → 2026",
-          "caption": "profissionais fractional no mundo desde 2019"
-        },
-        {
-          "prefix": "",
-          "value": 97,
-          "suffix": "%",
-          "tag": "[02] VAGAS FRACTIONAL · EUA",
-          "foot": "PEQUENAS E MÉDIAS EMPRESAS",
-          "caption": "das vagas fractional nos EUA vêm de empresas pequenas e médias"
-        }
-      ],
-      "source": "Fonte: Lightcast, The Rise of Fractional Leadership (2026)."
-    },
-    "compare": {
-      "caption": "Comparativo entre agência, contratação executiva e fractional",
-      "highlightLabel": "O modelo",
+    "badge": "UM DOS PRIMEIROS FRACTIONAL BRAND & CREATIVE DIRECTORS DO BRASIL",
+    "title": "O mesmo nível de um diretor de marca de grande empresa,",
+    "titleMuted": "no ritmo do seu negócio.",
+    "cards": [
+      {
+        "title": "Um diretor sênior no seu time",
+        "text": "Participo das decisões de marca como alguém da casa, todos os meses."
+      },
+      {
+        "title": "Dedicação sob medida",
+        "text": "Alguns encontros por mês, sem contratação fixa e sem meses de recrutamento."
+      },
+      {
+        "title": "Investimento previsível",
+        "text": "Um valor mensal, bem abaixo de um executivo em tempo integral."
+      }
+    ],
+    "model": {
+      "eyebrow": "O MODELO FRACTIONAL",
+      "title": "O mercado mudou.",
+      "titleMuted": "A forma de dirigir uma marca também.",
+      "text": "Empresas que crescem rápido estão trazendo direção de marca sênior para dentro, sem esperar meses por uma contratação.",
+      "sphereLabel": "Partículas que se juntam e formam uma esfera de luz com um anel dividido em seis frações",
+      "cueHover": "PASSE O MOUSE NA ESFERA",
+      "cueTouch": "TOQUE NA ESFERA",
+      "now": "agora",
       "columns": [
-        "Agência",
-        "Contratação executiva",
-        "Fractional"
-      ],
-      "rows": [
         {
-          "label": "Visão do negócio",
-          "values": [
-            "De fora, um projeto por vez",
-            "De dentro, mas presa à rotina",
-            "Contínua, com o olhar de fora e o compromisso de dentro"
+          "label": "POR QUE O MODELO",
+          "items": [
+            {
+              "tag": "MERCADO",
+              "title": "O talento sênior mudou de formato.",
+              "text": "Diretores experientes escolhem trabalhar com poucas empresas ao mesmo tempo. Esse nível ficou ao seu alcance."
+            },
+            {
+              "tag": "REPERTÓRIO",
+              "title": "Repertório que um time interno não tem.",
+              "text": "Referências de vários mercados, com o compromisso de quem está dentro."
+            },
+            {
+              "tag": "DIREÇÃO",
+              "title": "O que faltava no meio.",
+              "text": "A agência entrega projeto. A contratação entrega cargo. O fractional entrega alguém decidindo, todo mês."
+            }
           ]
         },
         {
-          "label": "Quem decide a marca",
-          "values": [
-            "Você, entre uma entrega e outra",
-            "Um cargo fixo",
-            "Um diretor sênior, ao seu lado, todo mês"
-          ]
-        },
-        {
-          "label": "Investimento",
-          "values": [
-            "Variável a cada job",
-            "Salário, encargos e benefícios",
-            "Mensal e previsível, sem custo de contratação"
-          ]
-        },
-        {
-          "label": "Continuidade",
-          "values": [
-            "Termina na entrega",
-            "Depende de quem fica",
-            "Cresce a cada mês de parceria"
-          ]
-        },
-        {
-          "label": "Senioridade",
-          "values": [
-            "Varia conforme a equipe",
-            "Depende de quem você consegue atrair",
-            "Sênior desde o primeiro dia"
-          ]
-        },
-        {
-          "label": "Começo",
-          "values": [
-            "Novo briefing a cada projeto",
-            "Meses de recrutamento",
-            "Direto, a partir da primeira conversa"
+          "label": "POR QUE COMIGO",
+          "items": [
+            {
+              "tag": "SEU TIME",
+              "title": "Já tem agência ou time? Melhor ainda.",
+              "text": "Não substituo ninguém. Dou a direção que faz todos trabalharem pela mesma marca."
+            },
+            {
+              "tag": "CRIAÇÃO",
+              "title": "Quem pensa a estratégia também cria.",
+              "text": "Conceitos, identidade e campanhas saem das mesmas mãos que definiram a direção. Nada se perde no caminho."
+            },
+            {
+              "tag": "PRESENÇA",
+              "title": "Sua marca não entra numa fila.",
+              "text": "Trabalho com poucas empresas ao mesmo tempo. A sua tem espaço reservado na agenda e na cabeça, todo mês."
+            }
           ]
         }
       ]

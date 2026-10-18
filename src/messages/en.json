@@ -120,87 +120,71 @@
     "cta": "Let's talk"
   },
   "fractional": {
-    "eyebrow": "What fractional means",
-    "title": "Senior brand leadership, sized to where you are now.",
-    "text": "An experienced brand and creative director is expensive and, for many companies, still doesn't make sense full time. In the fractional model, you get that leadership embedded in your team, taking part in decisions every month, with an agreed commitment and without the cost of a permanent executive hire.",
-    "stats": {
-      "title": "A model growing fast around the world.",
-      "lead": "I was one of the first to bring it to Brazil, and I work with companies wherever they are.",
-      "items": [
-        {
-          "prefix": "+",
-          "value": 313,
-          "suffix": "%",
-          "tag": "[01] FRACTIONAL PROFESSIONALS · WORLDWIDE",
-          "foot": "2019 → 2026",
-          "caption": "fractional professionals worldwide since 2019"
-        },
-        {
-          "prefix": "",
-          "value": 97,
-          "suffix": "%",
-          "tag": "[02] FRACTIONAL ROLES · US",
-          "foot": "SMALL AND MID-SIZED COMPANIES",
-          "caption": "of fractional roles in the US come from small and mid-sized companies"
-        }
-      ],
-      "source": "Source · Lightcast, The Rise of Fractional Leadership (2026)"
-    },
-    "compare": {
-      "caption": "Comparison between agency, executive hire and fractional",
-      "highlightLabel": "The model",
+    "badge": "ONE OF THE FIRST FRACTIONAL BRAND & CREATIVE DIRECTORS IN BRAZIL",
+    "title": "The same level as a big company's brand director,",
+    "titleMuted": "at the pace of your business.",
+    "cards": [
+      {
+        "title": "A senior director on your team",
+        "text": "I take part in brand decisions like someone from inside, every month."
+      },
+      {
+        "title": "Tailored dedication",
+        "text": "A few meetings a month, no fixed hire and no months of recruiting."
+      },
+      {
+        "title": "Predictable investment",
+        "text": "A monthly fee, well below a full-time executive."
+      }
+    ],
+    "model": {
+      "eyebrow": "THE FRACTIONAL MODEL",
+      "title": "The market has changed.",
+      "titleMuted": "So has the way to lead a brand.",
+      "text": "Fast-growing companies are bringing senior brand leadership in-house, without waiting months for a hire.",
+      "sphereLabel": "Particles that come together into a sphere of light, with a ring split into six fractions",
+      "cueHover": "HOVER OVER THE SPHERE",
+      "cueTouch": "TAP THE SPHERE",
+      "now": "now",
       "columns": [
-        "Agency",
-        "Executive hire",
-        "Fractional"
-      ],
-      "rows": [
         {
-          "label": "View of the business",
-          "values": [
-            "From the outside, one project at a time",
-            "From the inside, but stuck in the routine",
-            "Continuous, with an outside eye and an inside commitment"
+          "label": "WHY THE MODEL",
+          "items": [
+            {
+              "tag": "MARKET",
+              "title": "Senior talent has changed shape.",
+              "text": "Experienced directors are choosing to work with a few companies at a time. That level is now within your reach."
+            },
+            {
+              "tag": "REPERTOIRE",
+              "title": "A repertoire an in-house team doesn't have.",
+              "text": "References from many markets, with the commitment of someone on the inside."
+            },
+            {
+              "tag": "DIRECTION",
+              "title": "What was missing in between.",
+              "text": "An agency delivers a project. A hire delivers a position. Fractional delivers someone deciding, every month."
+            }
           ]
         },
         {
-          "label": "Who decides the brand",
-          "values": [
-            "You, between one delivery and the next",
-            "A fixed position",
-            "A senior director by your side, every month"
-          ]
-        },
-        {
-          "label": "Investment",
-          "values": [
-            "Varies with every job",
-            "Salary, taxes and benefits",
-            "Monthly and predictable, with no hiring cost"
-          ]
-        },
-        {
-          "label": "Continuity",
-          "values": [
-            "Ends at delivery",
-            "Depends on who stays",
-            "Grows with every month of partnership"
-          ]
-        },
-        {
-          "label": "Seniority",
-          "values": [
-            "Varies with the team",
-            "Depends on who you can attract",
-            "Senior from day one"
-          ]
-        },
-        {
-          "label": "Getting started",
-          "values": [
-            "A new brief for every project",
-            "Months of recruiting",
-            "Straight away, from the first conversation"
+          "label": "WHY WITH ME",
+          "items": [
+            {
+              "tag": "YOUR TEAM",
+              "title": "Already have an agency or a team? Even better.",
+              "text": "I don't replace anyone. I give the direction that makes everyone work for the same brand."
+            },
+            {
+              "tag": "CREATION",
+              "title": "The one who shapes the strategy also creates.",
+              "text": "Concepts, identity and campaigns come from the same hands that set the direction. Nothing gets lost along the way."
+            },
+            {
+              "tag": "PRESENCE",
+              "title": "Your brand doesn't wait in line.",
+              "text": "I work with a few companies at a time. Yours has reserved space in my schedule and in my head, every month."
+            }
           ]
         }
       ]
