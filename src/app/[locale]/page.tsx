@@ -125,7 +125,7 @@ export default async function Home() {
               badge: t("fractional.badge"),
               title: t("fractional.title"),
               titleMuted: t("fractional.titleMuted"),
-              cards: t.raw("fractional.cards") as FractionalCopy["cards"],
+              strip: t.raw("fractional.strip") as FractionalCopy["strip"],
               model: t.raw("fractional.model") as FractionalCopy["model"],
               note: t("fractional.note"),
             }}

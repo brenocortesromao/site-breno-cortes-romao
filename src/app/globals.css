@@ -708,10 +708,17 @@ html.custom-cursor * {
 }
 
 /* Fractional, parte escura ("O modelo fractional", FractionalModel.tsx).
-   Fundo próprio #08090B (corte seco com a parte clara); embaixo, desce para o
-   preto do site (seção seguinte). */
-.fm {
-  background: linear-gradient(180deg, #08090b calc(100% - 200px), var(--dark-bg));
+   Fundo e textos do cabeçalho seguem o tema vivo (troca do ThemeScroll). Os
+   cinzas são misturas de --fg com --bg: no escuro dão os tons do protótipo
+   (#A3A3AB, #8A8A93, #7C7C85) e acompanham a troca claro → escuro. */
+.fm-t2 {
+  color: color-mix(in srgb, var(--fg) 66%, var(--bg));
+}
+.fm-t3 {
+  color: color-mix(in srgb, var(--fg) 56%, var(--bg));
+}
+.fm-t4 {
+  color: color-mix(in srgb, var(--fg) 50%, var(--bg));
 }
 .fm-row {
   position: relative;
@@ -765,7 +772,7 @@ html.custom-cursor * {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ededef;
+  background: var(--fg);
   animation: fractional-blink 2.4s ease-in-out infinite;
 }
 .fm-cue-touch {
@@ -780,52 +787,32 @@ html.custom-cursor * {
   }
 }
 
-/* Caixas: vidro escuro grosso (referência _privado/referencia-caixas-vidro.png).
-   Fundo azulado com gradiente de cima para baixo; volume na borda com inset
-   shadows em camadas (luz forte em cima e nas laterais, suave embaixo); borda de
-   1px em gradiente branco que some no meio (::after); sombra externa longa;
-   ::before = brilho que segue o mouse (--mx/--my). */
+/* Caixas: vidro leve e neutro (grafite quase transparente, sem tom azulado):
+   gradiente bem sutil, borda de 1px com brilho só em cima (inset), sombra
+   externa suave e desfoque baixo (as curvas do fundo aparecem por trás).
+   ::before = brilho que segue o mouse (--mx/--my).
+   Foco: a caixa sob o mouse clareia (fundo e borda) e as outras 5 caem para
+   0,55 de opacidade (o anel da esfera acende a fração dela, modelScene.ts). */
 .fm-card {
   position: relative;
   overflow: hidden;
   pointer-events: auto;
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  gap: 14px;
-  padding: 16px 18px 18px 16px;
-  border-radius: 28px;
-  background: linear-gradient(180deg, rgb(30 38 54 / 0.6) 0%, rgb(20 26 38 / 0.55) 45%, rgb(11 14 21 / 0.62) 100%);
+  padding: 18px 20px;
+  border-radius: 22px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.03));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.3),
-    inset 0 2px 8px -2px rgb(255 255 255 / 0.1),
-    inset 1px 0 0 rgb(255 255 255 / 0.12),
-    inset -1px 0 0 rgb(255 255 255 / 0.12),
-    inset 0 -1px 0 rgb(255 255 255 / 0.05),
-    inset 0 -14px 24px -14px rgb(0 0 0 / 0.45),
-    0 30px 60px -24px rgb(0 0 0 / 0.95),
-    0 60px 120px -40px rgb(0 0 0 / 0.85);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
-  backdrop-filter: blur(18px) saturate(1.4);
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 18px 40px -26px rgb(0 0 0 / 0.7);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   transition:
     opacity 0.5s ease,
     filter 0.6s ease,
     transform 0.85s cubic-bezier(0.2, 1.35, 0.32, 1),
+    background-color 0.35s,
+    border-color 0.35s,
     box-shadow 0.35s;
-}
-.fm-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.1) 38%, rgb(255 255 255 / 0) 55%, rgb(255 255 255 / 0.1));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0.8;
-  transition: opacity 0.35s;
-  pointer-events: none;
 }
 .fm-card::before {
   content: "";
@@ -836,8 +823,7 @@ html.custom-cursor * {
   transition: opacity 0.4s;
   background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgb(255 255 255 / 0.08), transparent 60%);
 }
-.fm-card:hover::before,
-.fm-card:hover::after {
+.fm-card:hover::before {
   opacity: 1;
 }
 /* estado escondido só com a cena armada no cliente (sem JS: visíveis) */
@@ -852,51 +838,48 @@ html.custom-cursor * {
   filter: none;
 }
 .fm-card:hover {
+  background-color: rgb(255 255 255 / 0.035);
+  border-color: rgb(255 255 255 / 0.16);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.4),
-    inset 0 2px 8px -2px rgb(255 255 255 / 0.14),
-    inset 1px 0 0 rgb(255 255 255 / 0.18),
-    inset -1px 0 0 rgb(255 255 255 / 0.18),
-    inset 0 -1px 0 rgb(255 255 255 / 0.07),
-    inset 0 -14px 24px -14px rgb(0 0 0 / 0.45),
-    0 36px 70px -24px rgb(0 0 0 / 0.95),
-    0 70px 130px -40px rgb(0 0 0 / 0.85);
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 22px 46px -26px rgb(0 0 0 / 0.75);
 }
 .fm .fm-card:hover,
 .fm[data-armed] .fm-card[data-show]:hover {
   transform: translateY(-3px);
 }
-/* quadradinho do ícone: a mesma receita em miniatura, com brilho prateado em volta */
-.fm-ic {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 13px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(180deg, rgb(44 52 70 / 0.75), rgb(18 22 32 / 0.8));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.38),
-    inset 1px 0 0 rgb(255 255 255 / 0.14),
-    inset -1px 0 0 rgb(255 255 255 / 0.14),
-    inset 0 -1px 0 rgb(255 255 255 / 0.05),
-    inset 0 -6px 10px -6px rgb(0 0 0 / 0.5),
-    0 0 4px rgb(220 226 240 / 0.18),
-    0 0 18px rgb(220 226 240 / 0.2),
-    0 8px 16px -6px rgb(0 0 0 / 0.8);
+/* foco: as outras caixas (já visíveis) apagam */
+.fm:not([data-armed]) .fm-row:has(.fm-card:hover) .fm-card:not(:hover),
+.fm[data-armed] .fm-row:has(.fm-card:hover) .fm-card[data-show]:not(:hover) {
+  opacity: 0.55;
 }
-.fm-ic::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 55%, rgb(255 255 255 / 0.12));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
+/* título da parte escura (FractionalModelTitle): a parte em cinza entra com
+   uma faixa de luz da esquerda para a direita. Só durante a entrada
+   ([data-sweep]): máscara revelando + brilho por background-clip; a cor final
+   (color) não muda. As posições (300% → 0%) são animadas pelo GSAP. */
+.fm-sweep[data-sweep] {
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(90deg, currentColor 0 40%, #fff 46%, currentColor 52% 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-mask-image: linear-gradient(90deg, #000 0 47%, transparent 55% 100%);
+  mask-image: linear-gradient(90deg, #000 0 47%, transparent 55% 100%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-box-decoration-break: slice;
+  box-decoration-break: slice;
+}
+
+/* emenda entre as partes clara e escura: as curvas de cada lado somem perto
+   da divisa (sem linha reta onde um desenho termina e o outro começa) */
+.fx-fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 260px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 260px), transparent);
+}
+.fm-bg-fade {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 260px);
+  mask-image: linear-gradient(to bottom, transparent, #000 260px);
 }
 @media (max-width: 980px) {
   .fm-row {
@@ -923,8 +906,7 @@ html.custom-cursor * {
 }
 @media (prefers-reduced-motion: reduce) {
   .fm-card,
-  .fm-card::before,
-  .fm-card::after {
+  .fm-card::before {
     transition: none;
   }
   .fm .fm-card:hover {

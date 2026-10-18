@@ -26,6 +26,9 @@ const TOTAL = 2;
  * Estado inicial antes da hidratação: `.js-motion [data-blur-reveal] [data-ch]`
  * (globals.css); o JS assume com estilo inline.
  * Uso: <BlurRevealTitle id="..." className="..." text={copy.title} />
+ * Opcional: `unit="word"` anima palavra por palavra (cada palavra é a unidade
+ * com data-ch); `muted` + `mutedClassName` acrescentam um trecho final com
+ * classe própria (ex.: a parte em cinza de um título), que entra na sequência.
  */
 export default function BlurRevealTitle({
   text,
@@ -34,6 +37,9 @@ export default function BlurRevealTitle({
   as: Tag = "h2",
   start = "top 80%",
   stagger: fixedStagger,
+  unit = "char",
+  muted,
+  mutedClassName,
 }: {
   text: string;
   id?: string;
@@ -43,6 +49,11 @@ export default function BlurRevealTitle({
   start?: string;
   /** Intervalo fixo entre letras (s). Sem ele, ajusta entre 35 e 40 ms para ~2 s no total. */
   stagger?: number;
+  /** Unidade animada: letra (padrão) ou palavra. */
+  unit?: "char" | "word";
+  /** Trecho final com classe própria (mutedClassName), depois de `text`. */
+  muted?: string;
+  mutedClassName?: string;
 }) {
   const root = useRef<HTMLHeadingElement>(null);
 
@@ -76,14 +87,17 @@ export default function BlurRevealTitle({
         });
       });
     },
-    { scope: root, dependencies: [text, start, fixedStagger] },
+    { scope: root, dependencies: [text, muted, unit, start, fixedStagger] },
   );
 
-  const words = text.split(" ");
-  return (
-    <Tag ref={root} id={id} className={className} aria-label={text} translate="no" data-blur-reveal>
-      {words.map((word, w) => (
-        <Fragment key={w}>
+  const renderWords = (words: string[]) =>
+    words.map((word, w) => (
+      <Fragment key={w}>
+        {unit === "word" ? (
+          <span aria-hidden="true" className="inline-block whitespace-nowrap" data-ch>
+            {word}
+          </span>
+        ) : (
           <span aria-hidden="true" className="inline-block whitespace-nowrap">
             {Array.from(word).map((ch, i) => (
               <span key={i} aria-hidden="true" data-ch>
@@ -91,9 +105,21 @@ export default function BlurRevealTitle({
               </span>
             ))}
           </span>
-          {w < words.length - 1 ? " " : null}
-        </Fragment>
-      ))}
+        )}
+        {w < words.length - 1 ? " " : null}
+      </Fragment>
+    ));
+  return (
+    <Tag ref={root} id={id} className={className} aria-label={muted ? `${text} ${muted}` : text} translate="no" data-blur-reveal>
+      {renderWords(text.split(" "))}
+      {muted ? (
+        <>
+          {" "}
+          <span aria-hidden="true" className={mutedClassName}>
+            {renderWords(muted.split(" "))}
+          </span>
+        </>
+      ) : null}
     </Tag>
   );
 }

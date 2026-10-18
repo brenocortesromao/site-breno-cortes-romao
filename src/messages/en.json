@@ -123,18 +123,18 @@
     "badge": "ONE OF THE FIRST FRACTIONAL BRAND & CREATIVE DIRECTORS IN BRAZIL",
     "title": "The same level as a big company's brand director,",
     "titleMuted": "at the pace of your business.",
-    "cards": [
+    "strip": [
       {
-        "title": "A senior director on your team",
-        "text": "I take part in brand decisions like someone from inside, every month."
+        "label": "LEVEL",
+        "text": "Senior, like someone in-house"
       },
       {
-        "title": "Tailored dedication",
-        "text": "A few meetings a month, no fixed hire and no months of recruiting."
+        "label": "DEDICATION",
+        "text": "A few meetings a month"
       },
       {
-        "title": "Predictable investment",
-        "text": "A monthly fee, well below a full-time executive."
+        "label": "INVESTMENT",
+        "text": "Monthly, below a full-time executive"
       }
     ],
     "model": {
@@ -145,7 +145,6 @@
       "sphereLabel": "Particles that come together into a sphere of light, with a ring split into six fractions",
       "cueHover": "HOVER OVER THE SPHERE",
       "cueTouch": "TAP THE SPHERE",
-      "now": "now",
       "columns": [
         {
           "label": "WHY THE MODEL",

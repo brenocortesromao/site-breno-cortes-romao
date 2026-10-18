@@ -12,11 +12,15 @@
  *   (até 980px), cada uma aparece ao entrar na tela. O estado é o atributo
  *   data-show (a transição fica no CSS, .fm-card em globals.css).
  * - Fundo: curvas de nível (marching squares sobre ruído) se movendo devagar,
- *   uma linha mais marcada.
+ *   uma linha mais marcada. A cor vem do papel "graphic" do tema vivo (como
+ *   as curvas da parte clara): escuras no claro, brancas no escuro, mudando
+ *   junto com a troca de tema do scroll.
  * - Pausa fora da tela (IntersectionObserver, sem requestAnimationFrame).
  * - reduced motion: um quadro parado (esfera formada, anel aceso, caixas
  *   visíveis), redesenhado só quando o tamanho muda.
  */
+
+import { liveTheme } from "@/components/theme/themes";
 
 const SL = 10;
 const SEG = 6;
@@ -38,6 +42,8 @@ export type ModelSceneOptions = {
   reduce: boolean;
   /** Progresso da formação, guardado entre remontagens (troca de nível). */
   memo: { p: number };
+  /** Formação liberada (fechado: a esfera espera a entrada do título). */
+  gate: { open: boolean };
 };
 
 export function startModelScene(o: ModelSceneOptions): () => void {
@@ -188,6 +194,7 @@ export function startModelScene(o: ModelSceneOptions): () => void {
   let p = reduce ? 1 : memo.p, open = 0, rot = 0, tilt = 0.32, t = 0;
   const target = () => {
     if (reduce) return 1;
+    if (!o.gate.open) return 0;
     const r = row.getBoundingClientRect(), vh = window.innerHeight;
     return Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.75)));
   };
@@ -325,7 +332,22 @@ export function startModelScene(o: ModelSceneOptions): () => void {
   const LV: number[] = [];
   for (let l = 0.24; l < 0.78; l += 0.055) LV.push(l);
   let grid = new Float32Array(0);
+  /**
+   * Cor das curvas pelo tema vivo. No escuro ("graphic" branco a 6%) as
+   * linhas ficam como no protótipo (5% e 12%); no claro (grafite a 11%), na
+   * mesma proporção, perto das curvas da parte clara.
+   */
+  let lineKey = "";
+  const lineColors = () => {
+    const g = (liveTheme.get("graphic") || getComputedStyle(document.documentElement).getPropertyValue("--graphic")).trim();
+    const m = g.match(/rgba?\(([^)]+)\)/);
+    const [r, gg, b, a = "1"] = m ? m[1].split(",").map((x) => x.trim()) : ["255", "255", "255", "0.06"];
+    const k = parseFloat(a) / 0.06;
+    lineKey = g;
+    return [`rgba(${r},${gg},${b},${(0.05 * k).toFixed(3)})`, `rgba(${r},${gg},${b},${(0.12 * k).toFixed(3)})`];
+  };
   const drawBg = (time: number) => {
+    const [thin, marked] = lineColors();
     const cols = Math.ceil(BW / CELL) + 1, rows = Math.ceil(BH / CELL) + 1;
     if (grid.length !== cols * rows) grid = new Float32Array(cols * rows);
     const sc = 0.0026 * CELL, z = time * 0.035;
@@ -361,7 +383,7 @@ export function startModelScene(o: ModelSceneOptions): () => void {
             case 10: seg(Lf, T); seg(Bt, Rr); break;
           }
         }
-      bx.strokeStyle = li === 4 ? "rgba(255,255,255,.12)" : "rgba(255,255,255,.05)";
+      bx.strokeStyle = li === 4 ? marked : thin;
       bx.lineWidth = 1;
       bx.stroke();
     }
@@ -399,9 +421,21 @@ export function startModelScene(o: ModelSceneOptions): () => void {
   sizeBg();
 
   let io: IntersectionObserver | null = null;
+  // reduced motion: sem laço; as curvas só são redesenhadas quando a cor do
+  // tema muda (troca de tema presa ao scroll)
+  let themeRaf = 0;
+  const onScroll = () => {
+    if (themeRaf) return;
+    themeRaf = requestAnimationFrame(() => {
+      themeRaf = 0;
+      const g = (liveTheme.get("graphic") || "").trim();
+      if (g && g !== lineKey) drawBg(0);
+    });
+  };
   if (reduce) {
     cards.forEach((_, k) => setShow(k, true));
     still();
+    window.addEventListener("scroll", onScroll, { passive: true });
   } else {
     row.addEventListener("pointermove", onRowMove);
     row.addEventListener("pointerleave", onRowLeave);
@@ -423,6 +457,8 @@ export function startModelScene(o: ModelSceneOptions): () => void {
 
   return () => {
     cancelAnimationFrame(raf);
+    cancelAnimationFrame(themeRaf);
+    window.removeEventListener("scroll", onScroll);
     window.clearTimeout(timer);
     window.clearTimeout(rs);
     io?.disconnect();

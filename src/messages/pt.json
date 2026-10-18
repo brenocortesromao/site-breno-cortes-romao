@@ -123,18 +123,18 @@
     "badge": "UM DOS PRIMEIROS FRACTIONAL BRAND & CREATIVE DIRECTORS DO BRASIL",
     "title": "O mesmo nível de um diretor de marca de grande empresa,",
     "titleMuted": "no ritmo do seu negócio.",
-    "cards": [
+    "strip": [
       {
-        "title": "Um diretor sênior no seu time",
-        "text": "Participo das decisões de marca como alguém da casa, todos os meses."
+        "label": "NÍVEL",
+        "text": "Sênior, como alguém da casa"
       },
       {
-        "title": "Dedicação sob medida",
-        "text": "Alguns encontros por mês, sem contratação fixa e sem meses de recrutamento."
+        "label": "DEDICAÇÃO",
+        "text": "Alguns encontros por mês"
       },
       {
-        "title": "Investimento previsível",
-        "text": "Um valor mensal, bem abaixo de um executivo em tempo integral."
+        "label": "INVESTIMENTO",
+        "text": "Mensal, abaixo de um executivo em tempo integral"
       }
     ],
     "model": {
@@ -145,7 +145,6 @@
       "sphereLabel": "Partículas que se juntam e formam uma esfera de luz com um anel dividido em seis frações",
       "cueHover": "PASSE O MOUSE NA ESFERA",
       "cueTouch": "TOQUE NA ESFERA",
-      "now": "agora",
       "columns": [
         {
           "label": "POR QUE O MODELO",
