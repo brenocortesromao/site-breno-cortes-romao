@@ -531,6 +531,7 @@
     "emailCopied": "Copied ✓"
   },
   "footer": {
+    "secondRole": "Creative Technologist",
     "rights": "© {year} {name}. All rights reserved.",
     "tagline": "Brand strategy · Creative direction · Execution",
     "credits3d": "3D credits",

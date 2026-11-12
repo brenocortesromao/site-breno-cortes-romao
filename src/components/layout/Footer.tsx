@@ -3,6 +3,7 @@ import { bearCredit } from "@/content/bear";
 import { sharkCredit, turtleCredit } from "@/content/oceanCredits";
 import BerryInvite from "@/components/berry/BerryInvite";
 import CreditsPopover from "./CreditsPopover";
+import { protectTerms } from "@/components/Term";
 
 /** Rodapé de todas as páginas (montado no layout do idioma). */
 export default async function Footer() {
@@ -20,7 +21,12 @@ export default async function Footer() {
     {/* convite do Berry (easter egg), logo acima da linha do copyright */}
     <BerryInvite text={t("berry.teaser")} cta={t("berry.help")} ctaLabel={t("berry.helpLabel")} />
     <footer className="relative z-10 border-t border-line">
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-6 py-6 font-mono text-[10px] uppercase tracking-[0.25em] text-silver md:flex-row md:justify-between md:px-12">
+      {/* função (site.role) e, logo abaixo, menor e em cinza, a segunda função */}
+      <div className="mx-auto max-w-[1600px] px-6 pt-6 font-mono uppercase md:px-12">
+        <p className="text-[10px] tracking-[0.25em] text-foreground">{protectTerms(t("site.role"))}</p>
+        <p className="mt-1.5 text-[9px] tracking-[0.25em] text-silver">{protectTerms(t("footer.secondRole"))}</p>
+      </div>
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-6 pb-6 pt-4 font-mono text-[10px] uppercase tracking-[0.25em] text-silver md:flex-row md:justify-between md:px-12">
         <span className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
           <span>{t("footer.rights", { year: 2026, name })}</span>
           {/* créditos dos modelos 3D (CC BY 4.0 exige atribuição), um por linha no popover */}

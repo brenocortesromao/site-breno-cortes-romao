@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSceneTier } from "@/lib/quality";
+import { isMobileUI } from "@/lib/mobile";
 
 /**
  * Fundo da seção Tecnologia: camuflagem em tons de preto que se deforma devagar
  * (ruído quantizado em 4 tons, canvas em baixa resolução ampliado com suavização)
  * e, dentro das manchas mais claras, código descendo em colunas, bem apagado.
  * Bordas de cima e de baixo somem em gradiente para a transição de fundo entre
- * seções continuar suave. Celular / prefers-reduced-motion: camuflagem parada,
- * sem código. Pausa fora da tela.
+ * seções continuar suave. Pausa fora da tela.
+ * Como as outras animações: só monta a ~1 tela de distância; celular (regra
+ * do site, lib/mobile.ts), nível baixo (lib/quality.ts, que também pode
+ * rebaixar pelo FPS) e prefers-reduced-motion: camuflagem parada, sem código.
  */
 const TONES = [
   [10, 11, 13],
@@ -43,8 +47,28 @@ const level = (n: number) => (n < 0.42 ? 0 : n < 0.52 ? 1 : n < 0.62 ? 2 : 3);
 export default function CodeCamo() {
   const camoRef = useRef<HTMLCanvasElement>(null);
   const codeRef = useRef<HTMLCanvasElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  const tier = useSceneTier("camuflagem tecnologia", rootRef, near);
+
+  // só monta perto da tela (~1 tela de antecedência), como as outras cenas
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        setNear(true);
+        io.disconnect();
+      },
+      { rootMargin: "100% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
+    if (!near) return;
     const camo = camoRef.current, code = codeRef.current;
     if (!camo || !code) return;
     const host = camo.parentElement as HTMLElement;
@@ -53,8 +77,9 @@ export default function CodeCamo() {
     if (!cctx || !kctx) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const small = window.matchMedia("(max-width: 767px)").matches || (navigator.hardwareConcurrency || 8) <= 4;
-    const animate = !reduce && !small;
+    const animate = !reduce && !isMobileUI() && tier !== "low" && tier !== "none";
+    // nível rebaixado no meio da sessão: o código some (a camuflagem fica parada)
+    kctx.clearRect(0, 0, code.width, code.height);
 
     let W = 0, H = 0, cw = 0, ch = 0, cols = 0, rows = 0;
     let img: ImageData | null = null;
@@ -129,11 +154,11 @@ export default function CodeCamo() {
     if (animate) raf = requestAnimationFrame(loop);
 
     return () => { cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); };
-  }, []);
+  }, [near, tier]);
 
   const fade = "linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%)";
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" style={{ WebkitMaskImage: fade, maskImage: fade }}>
+    <div ref={rootRef} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" style={{ WebkitMaskImage: fade, maskImage: fade }}>
       <canvas ref={camoRef} className="absolute inset-0 h-full w-full" style={{ imageRendering: "auto", filter: "blur(2px)" }} />
       <canvas ref={codeRef} className="absolute inset-0 h-full w-full" />
       <div
