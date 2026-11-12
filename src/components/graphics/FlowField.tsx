@@ -312,8 +312,15 @@ export default function FlowField({
 
   // coordenadas da grade nos cantos (decorativas), no estilo de "TEMPO →"
   const corner = "absolute font-mono text-[10px] uppercase tracking-[0.2em] text-[#5A5A5A]";
+  // máscara no contêiner da seção inteira: só os primeiros 240px da seção
+  // esmaecem (a grade entra sem linha reta vindo da seção anterior); depois,
+  // a grade fixa (sticky) fica igual
   return (
-    <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+    <div
+      ref={root}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 [mask-image:linear-gradient(to_bottom,transparent,#000_240px)]"
+    >
       <div className="sticky top-0 h-svh overflow-hidden">
         {/* grade técnica: linhas de 1px a 3%, células de 80px */}
         <div className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:80px_80px]" />

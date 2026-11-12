@@ -14,6 +14,7 @@ import Pillars, { type PillarsCopy } from "@/components/sections/Pillars";
 import Changes, { type ChangesCopy } from "@/components/sections/Changes";
 import Process, { type ProcessCopy } from "@/components/sections/Process";
 import Works from "@/components/sections/Works";
+import Technology from "@/components/sections/Technology";
 import MountainBackdrop from "@/components/graphics/MountainBackdrop";
 import Touchpoints from "@/components/sections/Touchpoints";
 import About from "@/components/sections/About";
@@ -87,6 +88,12 @@ export default async function Home() {
               draft: "",
             }}
           />
+        </Suspense>
+
+        {/* Tecnologia (escura, como a Mensagem): a troca para o brilho do
+            "gradient" de A distância é a do ThemeScroll, presa ao scroll */}
+        <Suspense>
+          <Technology />
         </Suspense>
 
         <Suspense>

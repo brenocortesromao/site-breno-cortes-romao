@@ -26,7 +26,8 @@
     "switchTo": "View the site in {language}",
     "about": "About",
     "ai": "AI",
-    "onDemand": "On demand"
+    "onDemand": "On demand",
+    "technology": "Technology"
   },
   "languages": {
     "pt": "Português",
@@ -280,6 +281,35 @@
       "Launches",
       "Directing designers and suppliers"
     ]
+  },
+  "technology": {
+    "eyebrow": "Creative Technologist",
+    "title": "From concept to code.",
+    "titleMuted": "Your brand lives in digital too.",
+    "text": "A brand doesn't end at the logo. It lives in the websites, platforms and tools your customers use every day. I design and build them, so the digital experience matches the level of the brand.",
+    "demoLabel": "Animation: code characters form, in sequence, a sphere, mountains, Machu Picchu, the Great Wall of China, Petra, the Colosseum, Chichen Itza, the Taj Mahal, Christ the Redeemer, a Spartan helmet and the code symbol.",
+    "items": [
+      {
+        "title": "Websites and landing pages",
+        "text": "Experiences that translate the brand, from concept to launch."
+      },
+      {
+        "title": "Custom platforms",
+        "text": "Systems, dashboards and portals built around how the company works."
+      },
+      {
+        "title": "Automations and AI agents",
+        "text": "Processes that run on their own and free the team for what matters."
+      },
+      {
+        "title": "3D and interactive experiences",
+        "text": "Scenes, games and interactions that make the brand memorable."
+      }
+    ],
+    "note": "This site was designed and built by me.",
+    "button": "Talk about a digital project",
+    "buttonLabel": "Talk about a digital project (opens WhatsApp)",
+    "whatsappMessage": "Hi Breno! I saw the technology section on your website and I'd like to talk about a digital project."
   },
   "works": {
     "eyebrow": "Work",

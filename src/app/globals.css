@@ -980,3 +980,20 @@ html.custom-cursor * {
     linear-gradient(var(--t), var(--t)) bottom right / 10px 1px no-repeat,
     linear-gradient(var(--t), var(--t)) bottom right / 1px 10px no-repeat;
 }
+
+/* Tecnologia (sections/Technology.tsx): cards com entrada em cascata só com
+   [data-armed] (posto no cliente, TechFx). */
+.tech[data-armed] .tech-card {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.tech[data-armed] .tech-card[data-show] {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .tech .tech-card:hover,
+  .tech[data-armed] .tech-card[data-show]:hover {
+    transform: translateY(-4px);
+  }
+}

@@ -26,7 +26,8 @@
     "switchTo": "Ver o site em {language}",
     "about": "Sobre",
     "ai": "IA",
-    "onDemand": "Sob demanda"
+    "onDemand": "Sob demanda",
+    "technology": "Tecnologia"
   },
   "languages": {
     "pt": "Português",
@@ -280,6 +281,35 @@
       "Lançamentos",
       "Direção de designers e fornecedores"
     ]
+  },
+  "technology": {
+    "eyebrow": "Creative Technologist",
+    "title": "Do conceito ao código.",
+    "titleMuted": "A marca também vive no digital.",
+    "text": "A marca não termina no logo. Ela vive em sites, plataformas e ferramentas que o seu cliente usa todos os dias. Eu desenho e construo essas peças, para que a experiência digital tenha o mesmo nível da marca.",
+    "demoLabel": "Animação: caracteres de código formam, em sequência, uma esfera, montanhas, Machu Picchu, a Grande Muralha da China, Petra, o Coliseu, Chichén Itzá, o Taj Mahal, o Cristo Redentor, um elmo espartano e o símbolo de código.",
+    "items": [
+      {
+        "title": "Sites e landing pages",
+        "text": "Experiências que traduzem a marca, do conceito ao ar."
+      },
+      {
+        "title": "Plataformas sob medida",
+        "text": "Sistemas, dashboards e portais feitos para o jeito como a empresa trabalha."
+      },
+      {
+        "title": "Automações e agentes de IA",
+        "text": "Processos que rodam sozinhos e liberam o time para o que importa."
+      },
+      {
+        "title": "Experiências 3D e interativas",
+        "text": "Cenas, jogos e interações que fazem a marca ser lembrada."
+      }
+    ],
+    "note": "Este site foi desenhado e programado por mim.",
+    "button": "Falar sobre um projeto digital",
+    "buttonLabel": "Falar sobre um projeto digital (abre o WhatsApp)",
+    "whatsappMessage": "Olá, Breno! Vi a parte de tecnologia no seu site e quero conversar sobre um projeto digital."
   },
   "works": {
     "eyebrow": "Trabalhos",

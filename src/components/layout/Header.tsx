@@ -10,6 +10,7 @@ import { whatsappUrl } from "@/content/contact";
 
 const nav = [
   { key: "manifesto", hash: "manifesto" },
+  { key: "technology", hash: "tecnologia" },
   { key: "fractional", hash: "fractional" },
   { key: "services", hash: "o-que-faco" },
   { key: "projects", hash: "trabalhos" },
